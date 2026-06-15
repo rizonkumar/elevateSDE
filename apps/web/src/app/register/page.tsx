@@ -65,8 +65,9 @@ export default function RegisterPage() {
     } catch (err) {
       const axiosError = err as AxiosErrorResponse;
       addToast(
-        axiosError.response?.data?.message || 'Failed to create account. Email may already be registered.',
-        'error'
+        axiosError.response?.data?.message ||
+          'Failed to create account. Email may already be registered.',
+        'error',
       );
     } finally {
       setLoading(false);
@@ -82,7 +83,10 @@ export default function RegisterPage() {
         className="w-full max-w-sm card bg-[var(--color-surface)] border border-[var(--color-border-subtle)] p-8 rounded-[var(--radius-lg)] shadow-lg"
       >
         <div className="text-center mb-8">
-          <Link href="/" className="text-xl font-bold tracking-tight text-[var(--color-text-primary)] select-none">
+          <Link
+            href="/"
+            className="text-xl font-bold tracking-tight text-[var(--color-text-primary)] select-none"
+          >
             Elevate<span className="text-[var(--color-accent)]">SDE</span>
           </Link>
           <h2 className="text-lg font-semibold text-[var(--color-text-primary)] mt-4">
@@ -97,7 +101,9 @@ export default function RegisterPage() {
           <button
             type="button"
             className={`relative flex-1 py-1.5 text-xs font-semibold tracking-wider uppercase transition-colors duration-200 z-10 cursor-pointer ${
-              role === 'USER' ? 'text-[var(--color-text-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
+              role === 'USER'
+                ? 'text-[var(--color-text-primary)]'
+                : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
             }`}
             onClick={() => setRole('USER')}
           >
@@ -113,7 +119,9 @@ export default function RegisterPage() {
           <button
             type="button"
             className={`relative flex-1 py-1.5 text-xs font-semibold tracking-wider uppercase transition-colors duration-200 z-10 cursor-pointer ${
-              role === 'TENANT_ADMIN' ? 'text-[var(--color-text-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
+              role === 'TENANT_ADMIN'
+                ? 'text-[var(--color-text-primary)]'
+                : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
             }`}
             onClick={() => setRole('TENANT_ADMIN')}
           >
@@ -178,16 +186,31 @@ export default function RegisterPage() {
             )}
           </AnimatePresence>
 
-          <Button type="submit" disabled={loading} className="w-full py-2.5 font-medium cursor-pointer mt-2">
+          <Button
+            type="submit"
+            disabled={loading}
+            className="w-full py-2.5 font-medium cursor-pointer mt-2"
+          >
             {loading ? 'Creating account...' : 'Create Account'}
           </Button>
         </form>
 
-        <div className="text-center mt-6 text-xs text-[var(--color-text-muted)]">
-          Already have an account?{' '}
-          <Link href="/login" className="text-[var(--color-accent)] font-medium hover:underline">
-            Sign In
-          </Link>
+        <div className="text-center mt-6 flex flex-col gap-2.5 text-xs text-[var(--color-text-muted)]">
+          <div>
+            Already have an account?{' '}
+            <Link href="/login" className="text-[var(--color-accent)] font-medium hover:underline">
+              Sign In
+            </Link>
+          </div>
+          <div className="border-t border-[var(--color-border-subtle)] pt-3 mt-1">
+            Are you a system administrator?{' '}
+            <a
+              href="/admin/login"
+              className="text-[var(--color-accent)] font-semibold hover:underline"
+            >
+              Sign in to Admin Console
+            </a>
+          </div>
         </div>
       </motion.div>
     </div>

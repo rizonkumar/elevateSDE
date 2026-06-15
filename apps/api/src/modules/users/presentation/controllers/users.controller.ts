@@ -1,4 +1,13 @@
-import { Controller, Get, Patch, Param, Body, UseGuards, Req, ForbiddenException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Patch,
+  Param,
+  Body,
+  UseGuards,
+  Req,
+  ForbiddenException,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { UsersService } from '../../application/users.service';
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
@@ -32,7 +41,11 @@ export class UsersController {
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Update user role (Admin only)' })
-  @ApiResponse({ status: 200, type: UserResponseDto, description: 'User role successfully updated.' })
+  @ApiResponse({
+    status: 200,
+    type: UserResponseDto,
+    description: 'User role successfully updated.',
+  })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   async updateRole(
     @Param('id') id: string,

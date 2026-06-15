@@ -32,6 +32,7 @@ model User {
   updatedAt    DateTime  @updatedAt
   tenant       Tenant?   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   refreshTokens RefreshToken[]
+  auditLogs    AuditLog[]
 }
 
 model RefreshToken {
@@ -41,4 +42,22 @@ model RefreshToken {
   expiresAt DateTime
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  action    String
+  metadata  Json?
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model FeatureFlag {
+  id                String   @id @default(uuid())
+  flagKey           String   @unique
+  isEnabled         Boolean  @default(false)
+  percentageRollout Int      @default(100)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }

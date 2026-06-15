@@ -62,37 +62,39 @@ export default [
     },
     plugins: {
       '@typescript-eslint': typescript,
-      'import': importPlugin,
+      import: importPlugin,
     },
     rules: {
       // TypeScript rules
       ...typescript.configs.recommended.rules,
-      '@typescript-eslint/no-unused-vars': ['error', {
-        argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_',
-      }],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+        },
+      ],
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-non-null-assertion': 'warn',
-      '@typescript-eslint/consistent-type-imports': ['error', {
-        prefer: 'type-imports',
-        fixStyle: 'inline-type-imports',
-      }],
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        {
+          prefer: 'type-imports',
+          fixStyle: 'inline-type-imports',
+        },
+      ],
 
       // Import rules
-      'import/order': ['error', {
-        groups: [
-          'builtin',
-          'external',
-          'internal',
-          ['parent', 'sibling'],
-          'index',
-          'type',
-        ],
-        'newlines-between': 'always',
-        alphabetize: { order: 'asc', caseInsensitive: true },
-      }],
+      'import/order': [
+        'error',
+        {
+          groups: ['builtin', 'external', 'internal', ['parent', 'sibling'], 'index', 'type'],
+          'newlines-between': 'always',
+          alphabetize: { order: 'asc', caseInsensitive: true },
+        },
+      ],
       'import/no-duplicates': 'error',
     },
   },
@@ -101,7 +103,7 @@ export default [
   {
     files: ['**/*.tsx', '**/*.jsx'],
     plugins: {
-      'react': react,
+      react: react,
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
     },
@@ -118,15 +120,21 @@ export default [
       'react/jsx-uses-react': 'off',
       'react/jsx-no-target-blank': 'error',
       'react/self-closing-comp': 'error',
-      'react/jsx-curly-brace-presence': ['error', {
-        props: 'never',
-        children: 'never',
-      }],
+      'react/jsx-curly-brace-presence': [
+        'error',
+        {
+          props: 'never',
+          children: 'never',
+        },
+      ],
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
-      'react-refresh/only-export-components': ['warn', {
-        allowConstantExport: true,
-      }],
+      'react-refresh/only-export-components': [
+        'warn',
+        {
+          allowConstantExport: true,
+        },
+      ],
     },
   },
 
@@ -175,13 +183,7 @@ export default [
     },
     "project": ["./tsconfig.json"]
   },
-  "plugins": [
-    "@typescript-eslint",
-    "react",
-    "react-hooks",
-    "import",
-    "jsx-a11y"
-  ],
+  "plugins": ["@typescript-eslint", "react", "react-hooks", "import", "jsx-a11y"],
   "settings": {
     "react": {
       "version": "detect"
@@ -194,14 +196,20 @@ export default [
   },
   "rules": {
     // TypeScript
-    "@typescript-eslint/no-unused-vars": ["error", {
-      "argsIgnorePattern": "^_",
-      "varsIgnorePattern": "^_"
-    }],
-    "@typescript-eslint/consistent-type-imports": ["error", {
-      "prefer": "type-imports",
-      "fixStyle": "inline-type-imports"
-    }],
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
+      }
+    ],
+    "@typescript-eslint/consistent-type-imports": [
+      "error",
+      {
+        "prefer": "type-imports",
+        "fixStyle": "inline-type-imports"
+      }
+    ],
     "@typescript-eslint/no-explicit-any": "warn",
     "@typescript-eslint/no-floating-promises": "error",
     "@typescript-eslint/await-thenable": "error",
@@ -212,11 +220,14 @@ export default [
     "react/self-closing-comp": "error",
 
     // Imports
-    "import/order": ["error", {
-      "groups": ["builtin", "external", "internal", "parent", "sibling", "index", "type"],
-      "newlines-between": "always",
-      "alphabetize": { "order": "asc" }
-    }],
+    "import/order": [
+      "error",
+      {
+        "groups": ["builtin", "external", "internal", "parent", "sibling", "index", "type"],
+        "newlines-between": "always",
+        "alphabetize": { "order": "asc" }
+      }
+    ],
     "import/no-duplicates": "error",
     "import/no-unresolved": "error",
 
@@ -234,13 +245,7 @@ export default [
       }
     }
   ],
-  "ignorePatterns": [
-    "node_modules",
-    "dist",
-    "build",
-    ".next",
-    "coverage"
-  ]
+  "ignorePatterns": ["node_modules", "dist", "build", ".next", "coverage"]
 }
 ```
 
@@ -324,13 +329,8 @@ npx husky init
 // package.json
 {
   "lint-staged": {
-    "*.{ts,tsx}": [
-      "eslint --fix --max-warnings 0",
-      "prettier --write"
-    ],
-    "*.{json,md,css,scss}": [
-      "prettier --write"
-    ]
+    "*.{ts,tsx}": ["eslint --fix --max-warnings 0", "prettier --write"],
+    "*.{json,md,css,scss}": ["prettier --write"]
   }
 }
 ```
@@ -356,17 +356,17 @@ module.exports = {
       2,
       'always',
       [
-        'feat',     // New feature
-        'fix',      // Bug fix
-        'docs',     // Documentation
-        'style',    // Formatting
+        'feat', // New feature
+        'fix', // Bug fix
+        'docs', // Documentation
+        'style', // Formatting
         'refactor', // Code restructuring
-        'perf',     // Performance
-        'test',     // Tests
-        'build',    // Build system
-        'ci',       // CI configuration
-        'chore',    // Maintenance
-        'revert',   // Revert changes
+        'perf', // Performance
+        'test', // Tests
+        'build', // Build system
+        'ci', // CI configuration
+        'chore', // Maintenance
+        'revert', // Revert changes
       ],
     ],
     'subject-case': [2, 'always', 'lower-case'],
@@ -396,12 +396,7 @@ module.exports = {
   "[json]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "eslint.validate": [
-    "javascript",
-    "javascriptreact",
-    "typescript",
-    "typescriptreact"
-  ],
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
   "typescript.preferences.importModuleSpecifier": "relative",
   "typescript.suggest.autoImports": true
 }
@@ -424,20 +419,19 @@ module.exports = {
 ```javascript
 // .eslintrc.js (Next.js)
 module.exports = {
-  extends: [
-    'next/core-web-vitals',
-    'plugin:@typescript-eslint/recommended',
-    'prettier',
-  ],
+  extends: ['next/core-web-vitals', 'plugin:@typescript-eslint/recommended', 'prettier'],
   parser: '@typescript-eslint/parser',
   plugins: ['@typescript-eslint'],
   rules: {
     '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     '@typescript-eslint/consistent-type-imports': 'error',
-    'import/order': ['error', {
-      groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
-      'newlines-between': 'always',
-    }],
+    'import/order': [
+      'error',
+      {
+        groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+        'newlines-between': 'always',
+      },
+    ],
   },
 };
 ```
@@ -464,7 +458,7 @@ export default [
     },
     plugins: {
       '@typescript-eslint': typescript,
-      'n': nodePlugin,
+      n: nodePlugin,
     },
     rules: {
       ...typescript.configs.recommended.rules,

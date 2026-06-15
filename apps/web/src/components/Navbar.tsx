@@ -47,20 +47,36 @@ export function Navbar() {
   return (
     <header className="border-b border-[var(--color-border-subtle)] bg-[var(--color-bg)] transition-colors duration-200">
       <div className="max-w-[var(--page-max-width)] mx-auto px-[var(--page-padding-x)] h-16 flex items-center justify-between">
-        <Link href="/" className="text-xl font-bold tracking-tight text-[var(--color-text-primary)] hover:opacity-85">
+        <Link
+          href="/"
+          className="text-xl font-bold tracking-tight text-[var(--color-text-primary)] hover:opacity-85"
+        >
           Elevate<span className="text-[var(--color-accent)]">SDE</span>
         </Link>
         <nav className="flex items-center gap-6">
           {isAuthenticated ? (
             <>
-              <Link href="/dashboard" className="text-sm font-medium text-[var(--color-text-primary)] hover:text-[var(--color-accent)]">
+              <Link
+                href="/dashboard"
+                className="text-sm font-medium text-[var(--color-text-primary)] hover:text-[var(--color-accent)]"
+              >
                 Dashboard
               </Link>
+              {user?.role === 'ADMIN' && (
+                <a
+                  href="/admin"
+                  className="text-sm font-medium text-[var(--color-accent)] hover:underline"
+                >
+                  Admin Console
+                </a>
+              )}
               <div className="flex items-center gap-4">
                 <span className="text-xs px-2 py-0.5 rounded-full border border-[var(--color-border-subtle)] bg-[var(--color-badge-bg)] text-[var(--color-text-muted)] select-none">
                   {user?.role}
                 </span>
-                <span className="text-sm text-[var(--color-text-muted)] hidden sm:inline">{user?.email}</span>
+                <span className="text-sm text-[var(--color-text-muted)] hidden sm:inline">
+                  {user?.email}
+                </span>
                 <button onClick={handleLogout} className="btn-ghost text-xs cursor-pointer">
                   Log out
                 </button>
@@ -68,6 +84,12 @@ export function Navbar() {
             </>
           ) : (
             <>
+              <a
+                href="/admin/login"
+                className="text-xs px-2 py-1 border border-zinc-700 text-zinc-500 rounded uppercase tracking-wider hover:text-[var(--color-accent)] transition"
+              >
+                Admin
+              </a>
               <Link href="/login" className="btn-ghost text-sm">
                 Log In
               </Link>
