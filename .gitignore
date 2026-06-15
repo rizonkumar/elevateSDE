@@ -43,9 +43,11 @@ Thumbs.db
 *.sln
 *.sw?
 
-# Testing
+# Testing and Tooling
 coverage/
 /test-results/
 /playwright-report/
 /blob-report/
 /playwright/.cache
+.eslintcache
+
