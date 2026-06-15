@@ -75,42 +75,42 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)] px-4 py-12 transition-colors duration-200">
+    <div className="min-h-screen flex items-center justify-center bg-(--color-bg) px-4 py-12 transition-colors duration-200">
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: 'easeOut' }}
-        className="w-full max-w-sm card bg-[var(--color-surface)] border border-[var(--color-border-subtle)] p-8 rounded-[var(--radius-lg)] shadow-lg"
+        className="w-full max-w-sm card bg-(--color-surface) border border-(--color-border-subtle) p-8 rounded-lg shadow-lg"
       >
         <div className="text-center mb-8">
           <Link
             href="/"
-            className="text-xl font-bold tracking-tight text-[var(--color-text-primary)] select-none"
+            className="text-xl font-bold tracking-tight text-(--color-text-primary) select-none"
           >
-            Elevate<span className="text-[var(--color-accent)]">SDE</span>
+            Elevate<span className="text-(--color-accent)">SDE</span>
           </Link>
-          <h2 className="text-lg font-semibold text-[var(--color-text-primary)] mt-4">
+          <h2 className="text-lg font-semibold text-(--color-text-primary) mt-4">
             Create your account
           </h2>
-          <p className="text-xs text-[var(--color-text-muted)] mt-1.5">
+          <p className="text-xs text-(--color-text-muted) mt-1.5">
             Start preparing with enterprise-grade AI mock interviews
           </p>
         </div>
 
-        <div className="relative flex p-1 bg-[var(--color-tab-bg)] border border-[var(--color-border-subtle)] rounded-full mb-6 select-none">
+        <div className="relative flex p-1 bg-(--color-tab-bg) border border-(--color-border-subtle) rounded-full mb-6 select-none">
           <button
             type="button"
             className={`relative flex-1 py-1.5 text-xs font-semibold tracking-wider uppercase transition-colors duration-200 z-10 cursor-pointer ${
               role === 'USER'
-                ? 'text-[var(--color-text-primary)]'
-                : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
+                ? 'text-(--color-text-primary)'
+                : 'text-(--color-text-muted) hover:text-(--color-text-primary)'
             }`}
             onClick={() => setRole('USER')}
           >
             {role === 'USER' && (
               <motion.div
                 layoutId="active-tab"
-                className="absolute inset-0 bg-[var(--color-tab-active)] border border-[var(--color-border-subtle)] rounded-full shadow-sm animate-fade-in"
+                className="absolute inset-0 bg-(--color-tab-active) border border-(--color-border-subtle) rounded-full shadow-sm animate-fade-in"
                 transition={{ type: 'spring', stiffness: 380, damping: 30 }}
               />
             )}
@@ -120,15 +120,15 @@ export default function RegisterPage() {
             type="button"
             className={`relative flex-1 py-1.5 text-xs font-semibold tracking-wider uppercase transition-colors duration-200 z-10 cursor-pointer ${
               role === 'TENANT_ADMIN'
-                ? 'text-[var(--color-text-primary)]'
-                : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
+                ? 'text-(--color-text-primary)'
+                : 'text-(--color-text-muted) hover:text-(--color-text-primary)'
             }`}
             onClick={() => setRole('TENANT_ADMIN')}
           >
             {role === 'TENANT_ADMIN' && (
               <motion.div
                 layoutId="active-tab"
-                className="absolute inset-0 bg-[var(--color-tab-active)] border border-[var(--color-border-subtle)] rounded-full shadow-sm animate-fade-in"
+                className="absolute inset-0 bg-(--color-tab-active) border border-(--color-border-subtle) rounded-full shadow-sm animate-fade-in"
                 transition={{ type: 'spring', stiffness: 380, damping: 30 }}
               />
             )}
@@ -146,7 +146,7 @@ export default function RegisterPage() {
             disabled={loading}
             required
             autoComplete="email"
-            icon={<Mail className="w-4 h-4 text-[var(--color-text-muted)]" />}
+            icon={<Mail className="w-4 h-4 text-(--color-text-muted)" />}
           />
 
           <Input
@@ -158,7 +158,7 @@ export default function RegisterPage() {
             disabled={loading}
             required
             autoComplete="new-password"
-            icon={<Lock className="w-4 h-4 text-[var(--color-text-muted)]" />}
+            icon={<Lock className="w-4 h-4 text-(--color-text-muted)" />}
           />
 
           <AnimatePresence initial={false}>
@@ -179,7 +179,7 @@ export default function RegisterPage() {
                     onChange={(e) => setCompanyName(e.target.value)}
                     disabled={loading}
                     required
-                    icon={<Building2 className="w-4 h-4 text-[var(--color-text-muted)]" />}
+                    icon={<Building2 className="w-4 h-4 text-(--color-text-muted)" />}
                   />
                 </div>
               </motion.div>
@@ -195,18 +195,18 @@ export default function RegisterPage() {
           </Button>
         </form>
 
-        <div className="text-center mt-6 flex flex-col gap-2.5 text-xs text-[var(--color-text-muted)]">
+        <div className="text-center mt-6 flex flex-col gap-2.5 text-xs text-(--color-text-muted)">
           <div>
             Already have an account?{' '}
-            <Link href="/login" className="text-[var(--color-accent)] font-medium hover:underline">
+            <Link href="/login" className="text-(--color-accent) font-medium hover:underline">
               Sign In
             </Link>
           </div>
-          <div className="border-t border-[var(--color-border-subtle)] pt-3 mt-1">
+          <div className="border-t border-(--color-border-subtle) pt-3 mt-1">
             Are you a system administrator?{' '}
             <a
               href="/admin/login"
-              className="text-[var(--color-accent)] font-semibold hover:underline"
+              className="text-(--color-accent) font-semibold hover:underline"
             >
               Sign in to Admin Console
             </a>

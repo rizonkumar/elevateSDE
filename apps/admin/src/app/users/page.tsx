@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { AdminLayout } from '../../components/AdminLayout';
+import { Badge, type BadgeVariant, Select } from '../../components/ui';
 import { api } from '../../lib/api';
 import { useToastStore } from '../../store/toast.store';
 import { useAuthStore } from '../../store/auth.store';
@@ -13,6 +14,22 @@ interface AxiosErrorResponse {
       message?: string;
     };
   };
+}
+
+const ROLE_OPTIONS = [
+  { value: 'USER', label: 'User' },
+  { value: 'TENANT_ADMIN', label: 'Tenant Admin' },
+  { value: 'ADMIN', label: 'Admin' },
+];
+
+function roleLabel(role: string): string {
+  return ROLE_OPTIONS.find((option) => option.value === role)?.label ?? role;
+}
+
+function roleVariant(role: string): BadgeVariant {
+  if (role === 'ADMIN') return 'danger';
+  if (role === 'TENANT_ADMIN') return 'warning';
+  return 'neutral';
 }
 
 export default function UsersPage() {
@@ -56,8 +73,6 @@ export default function UsersPage() {
     }
   };
 
-  const roles = ['USER', 'TENANT_ADMIN', 'ADMIN'];
-
   return (
     <AdminLayout>
       {loading ? (
@@ -68,7 +83,16 @@ export default function UsersPage() {
         </div>
       ) : (
         <div className="flex flex-col gap-6">
-          <div className="overflow-x-auto rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] shadow-sm">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm text-[var(--color-text-muted)]">
+              Manage roles across all system accounts.
+            </p>
+            <span className="text-xs font-semibold text-[var(--color-text-muted)] px-2.5 py-1 rounded-full border border-[var(--color-border-subtle)] bg-[var(--color-badge-bg)]">
+              {users.length} users
+            </span>
+          </div>
+
+          <div className="hidden md:block overflow-visible rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] shadow-sm">
             <table className="w-full border-collapse text-left text-sm">
               <thead>
                 <tr className="border-b border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)] text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">
@@ -81,50 +105,61 @@ export default function UsersPage() {
               </thead>
               <tbody className="divide-y divide-[var(--color-border-subtle)]">
                 {users.map((user) => (
-                  <tr
-                    key={user.id}
-                    className="hover:bg-[var(--color-bg-soft)]/50 transition-colors"
-                  >
+                  <tr key={user.id} className="hover:bg-[var(--color-bg-soft)]/50 transition-colors">
                     <td className="px-6 py-4 font-mono text-xs text-[var(--color-text-muted)]">
-                      {user.id}
+                      <span className="block max-w-[200px] truncate" title={user.id}>
+                        {user.id}
+                      </span>
                     </td>
                     <td className="px-6 py-4 font-semibold text-[var(--color-text-primary)]">
                       {user.email}
                     </td>
                     <td className="px-6 py-4 font-mono text-xs text-[var(--color-text-muted)]">
-                      {user.tenantId || 'B2C Account'}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider ${
-                          user.role === 'ADMIN'
-                            ? 'bg-rose-50/50 text-rose-700 border border-rose-500/20 dark:bg-rose-950/20 dark:text-rose-300'
-                            : user.role === 'TENANT_ADMIN'
-                              ? 'bg-amber-50/50 text-amber-700 border border-amber-500/20 dark:bg-amber-950/20 dark:text-amber-300'
-                              : 'bg-zinc-50/50 text-zinc-700 border border-zinc-500/20 dark:bg-zinc-800/20 dark:text-zinc-300'
-                        }`}
-                      >
-                        {user.role}
+                      <span className="block max-w-[180px] truncate" title={user.tenantId || 'B2C Account'}>
+                        {user.tenantId || 'B2C Account'}
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <select
+                      <Badge variant={roleVariant(user.role)}>{roleLabel(user.role)}</Badge>
+                    </td>
+                    <td className="px-6 py-4">
+                      <Select
                         value={user.role}
+                        options={ROLE_OPTIONS}
                         disabled={updatingId === user.id || currentUser?.id === user.id}
-                        onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                        className="text-xs bg-[var(--color-bg)] border border-[var(--color-border-subtle)] rounded-lg px-2.5 py-1.5 font-medium focus:ring-1 focus:ring-[var(--color-accent)] focus:outline-none transition disabled:opacity-50 cursor-pointer"
-                      >
-                        {roles.map((r) => (
-                          <option key={r} value={r}>
-                            {r}
-                          </option>
-                        ))}
-                      </select>
+                        onChange={(role) => handleRoleChange(user.id, role)}
+                      />
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+          </div>
+
+          <div className="md:hidden flex flex-col gap-4">
+            {users.map((user) => (
+              <div
+                key={user.id}
+                className="rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] shadow-sm p-4 flex flex-col gap-3"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <span className="font-semibold text-[var(--color-text-primary)] break-all">
+                    {user.email}
+                  </span>
+                  <Badge variant={roleVariant(user.role)}>{roleLabel(user.role)}</Badge>
+                </div>
+                <div className="text-xs text-[var(--color-text-muted)] font-mono break-all">
+                  {user.tenantId || 'B2C Account'}
+                </div>
+                <Select
+                  value={user.role}
+                  options={ROLE_OPTIONS}
+                  disabled={updatingId === user.id || currentUser?.id === user.id}
+                  onChange={(role) => handleRoleChange(user.id, role)}
+                  className="w-full"
+                />
+              </div>
+            ))}
           </div>
         </div>
       )}

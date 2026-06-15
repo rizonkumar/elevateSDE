@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { AdminLayout } from '../../components/AdminLayout';
+import { Badge, type BadgeVariant } from '../../components/ui';
 import { api } from '../../lib/api';
 import { useToastStore } from '../../store/toast.store';
 import { TenantDto } from '@elevatesde/shared-types';
@@ -12,6 +13,12 @@ interface AxiosErrorResponse {
       message?: string;
     };
   };
+}
+
+function planVariant(plan: string): BadgeVariant {
+  if (plan === 'ENTERPRISE') return 'accent';
+  if (plan === 'PRO' || plan === 'TEAM') return 'success';
+  return 'neutral';
 }
 
 export default function TenantsPage() {
@@ -44,64 +51,87 @@ export default function TenantsPage() {
         </div>
       ) : (
         <div className="flex flex-col gap-6">
-          <div className="overflow-x-auto rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] shadow-sm">
-            <table className="w-full border-collapse text-left text-sm">
-              <thead>
-                <tr className="border-b border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)] text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">
-                  <th className="px-6 py-4">Tenant ID</th>
-                  <th className="px-6 py-4">Organization Name</th>
-                  <th className="px-6 py-4">Stripe Customer ID</th>
-                  <th className="px-6 py-4">Subscription Plan</th>
-                  <th className="px-6 py-4">Registration Date</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--color-border-subtle)]">
-                {tenants.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="px-6 py-8 text-center text-xs text-[var(--color-text-muted)]"
-                    >
-                      No corporate workspaces registered yet.
-                    </td>
-                  </tr>
-                ) : (
-                  tenants.map((tenant) => (
-                    <tr
-                      key={tenant.id}
-                      className="hover:bg-[var(--color-bg-soft)]/50 transition-colors"
-                    >
-                      <td className="px-6 py-4 font-mono text-xs text-[var(--color-text-muted)]">
-                        {tenant.id}
-                      </td>
-                      <td className="px-6 py-4 font-semibold text-[var(--color-text-primary)]">
-                        {tenant.name}
-                      </td>
-                      <td className="px-6 py-4 font-mono text-xs text-[var(--color-text-muted)]">
-                        {tenant.stripeCustomerId || 'None'}
-                      </td>
-                      <td className="px-6 py-4">
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider ${
-                            tenant.subscriptionPlan === 'ENTERPRISE'
-                              ? 'bg-sky-50/50 text-sky-700 border border-sky-500/20 dark:bg-sky-950/20 dark:text-sky-300'
-                              : tenant.subscriptionPlan === 'PRO'
-                                ? 'bg-emerald-50/50 text-emerald-700 border border-emerald-500/20 dark:bg-emerald-950/20 dark:text-emerald-300'
-                                : 'bg-zinc-50/50 text-zinc-700 border border-zinc-500/20 dark:bg-zinc-800/20 dark:text-zinc-300'
-                          }`}
-                        >
-                          {tenant.subscriptionPlan}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-xs text-[var(--color-text-muted)] font-mono">
-                        {new Date(tenant.createdAt).toLocaleString()}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm text-[var(--color-text-muted)]">
+              Corporate workspaces purchasing seats on the platform.
+            </p>
+            <span className="text-xs font-semibold text-[var(--color-text-muted)] px-2.5 py-1 rounded-full border border-[var(--color-border-subtle)] bg-[var(--color-badge-bg)]">
+              {tenants.length} tenants
+            </span>
           </div>
+
+          {tenants.length === 0 ? (
+            <div className="rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] shadow-sm px-6 py-12 text-center text-sm text-[var(--color-text-muted)]">
+              No corporate workspaces registered yet.
+            </div>
+          ) : (
+            <>
+              <div className="hidden md:block overflow-x-auto rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] shadow-sm">
+                <table className="w-full border-collapse text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)] text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">
+                      <th className="px-6 py-4">Tenant ID</th>
+                      <th className="px-6 py-4">Organization Name</th>
+                      <th className="px-6 py-4">Stripe Customer ID</th>
+                      <th className="px-6 py-4">Subscription Plan</th>
+                      <th className="px-6 py-4">Registration Date</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[var(--color-border-subtle)]">
+                    {tenants.map((tenant) => (
+                      <tr
+                        key={tenant.id}
+                        className="hover:bg-[var(--color-bg-soft)]/50 transition-colors"
+                      >
+                        <td className="px-6 py-4 font-mono text-xs text-[var(--color-text-muted)]">
+                          <span className="block max-w-[200px] truncate" title={tenant.id}>
+                            {tenant.id}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 font-semibold text-[var(--color-text-primary)]">
+                          {tenant.name}
+                        </td>
+                        <td className="px-6 py-4 font-mono text-xs text-[var(--color-text-muted)]">
+                          {tenant.stripeCustomerId || 'None'}
+                        </td>
+                        <td className="px-6 py-4">
+                          <Badge variant={planVariant(tenant.subscriptionPlan)}>
+                            {tenant.subscriptionPlan}
+                          </Badge>
+                        </td>
+                        <td className="px-6 py-4 text-xs text-[var(--color-text-muted)] font-mono">
+                          {new Date(tenant.createdAt).toLocaleString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="md:hidden flex flex-col gap-4">
+                {tenants.map((tenant) => (
+                  <div
+                    key={tenant.id}
+                    className="rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] shadow-sm p-4 flex flex-col gap-3"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <span className="font-semibold text-[var(--color-text-primary)]">
+                        {tenant.name}
+                      </span>
+                      <Badge variant={planVariant(tenant.subscriptionPlan)}>
+                        {tenant.subscriptionPlan}
+                      </Badge>
+                    </div>
+                    <div className="flex flex-col gap-1 text-xs text-[var(--color-text-muted)] font-mono">
+                      <span className="break-all">ID: {tenant.id}</span>
+                      <span>Stripe: {tenant.stripeCustomerId || 'None'}</span>
+                      <span>{new Date(tenant.createdAt).toLocaleString()}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       )}
     </AdminLayout>
