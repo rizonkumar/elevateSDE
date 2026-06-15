@@ -14,11 +14,12 @@ This platform is built as a SaaS product, supporting individual users as well as
 
 - **Core:** Next.js 16.2.9 (App Router, Turbopack)
 - **Architecture:** React Server Components (RSC), Suspense, Error Boundaries, Optimistic Updates
-- **Styling & UI:** Tailwind CSS, Shadcn UI
-- **State Management:** Zustand (Client State), TanStack Query / React Query (Server State)
-- **Forms & Validation:** React Hook Form, Zod
+- **Styling & UI:** Tailwind CSS (v4) with custom, in-house components in `packages/ui` (no Shadcn). Theme is driven by CSS custom properties with light/dark modes; no gradients or glassmorphism.
+- **Icons & Charts:** `lucide-react` for icons, `recharts` for data visualisation (e.g. seat gauges, performance charts).
+- **State Management:** Zustand (Client State), TanStack Query / React Query (Server State — planned)
+- **Forms & Validation:** React Hook Form, Zod (planned)
 - **Data Fetching & Real-time:** Axios, Socket.io Client
-- **Performance:** TanStack Virtual (Infinite scrolling for leaderboards/discussions)
+- **Performance:** TanStack Virtual (Infinite scrolling for leaderboards/discussions — planned)
 - **Testing:** Playwright (E2E), Jest + React Testing Library (Unit)
 
 ### Backend
@@ -51,9 +52,9 @@ This platform is built as a SaaS product, supporting individual users as well as
 ```text
 elevatesde/
 ├── apps/
-│   ├── web/                 (Next.js 16.2.9 Frontend)
-│   ├── api/                 (NestJS Backend)
-│   └── admin/               (Internal Super-Admin Dashboard)
+│   ├── web/                 (Next.js 16.2.9 Frontend — Candidate Portal, port 3001)
+│   ├── api/                 (NestJS Backend — Core API, port 4400)
+│   └── admin/               (Internal Super-Admin Dashboard, internal port 3002, served at /admin)
 │
 ├── packages/
 │   ├── shared-types/        (TypeScript Interfaces used across apps)
@@ -66,6 +67,50 @@ elevatesde/
 └── package.json
 
 ```
+
+---
+
+## Application Topology & Routing
+
+The platform exposes a **single public origin** to users; the admin backoffice is a separate deployable that sits behind the same origin.
+
+```text
+                 ┌──────────────────────────────────────────────┐
+   Browser  ───▶ │  Web app  (apps/web)        :3001            │
+                 │  • /            Candidate portal              │
+                 │  • /dashboard   Candidate dashboard          │
+                 │  • /dashboard/org  Organization (TENANT_ADMIN)│
+                 │  • /admin/:path*  ── rewrite ──┐             │
+                 └────────────────────────────────┼─────────────┘
+                                                   ▼
+                 ┌──────────────────────────────────────────────┐
+                 │  Admin app (apps/admin)     :3002 (internal)  │
+                 │  • basePath: '/admin'                         │
+                 │  • Super-Admin backoffice (ADMIN only)        │
+                 └──────────────────────────────────────────────┘
+                                   │  Axios (Bearer JWT)
+                                   ▼
+                 ┌──────────────────────────────────────────────┐
+                 │  API (apps/api, NestJS)     :4400             │
+                 │  • Global prefix /api, URI versioning /v1     │
+                 │  • PostgreSQL :5432 · Redis :6379             │
+                 └──────────────────────────────────────────────┘
+```
+
+- **Single entry point:** users only ever visit the web origin (`http://localhost:3001`). The candidate portal and dashboards are served directly; `/admin/*` is transparently forwarded to the admin app.
+- **Why two apps:** the Super-Admin backoffice is an independently deployable application with its own auth/middleware and a hard security boundary. It runs on its own internal port (`3002`) with `basePath: '/admin'`.
+- **Dev proxy:** `apps/web/next.config.ts` rewrites `/admin/:path*` → `http://localhost:3002/admin/:path*`. In production a reverse proxy (NGINX) performs the equivalent routing under one domain.
+- **Local ports:** web `3001`, admin (internal) `3002`, API `4400` (configurable via `PORT`), PostgreSQL `5432`, Redis `6379`. Clients read the API URL from `NEXT_PUBLIC_API_URL`.
+
+### Dashboard Surfaces
+
+| Surface | Route (via web origin) | Access |
+| --- | --- | --- |
+| Candidate dashboard | `/dashboard` | Any authenticated user |
+| Organization dashboard | `/dashboard/org` | `TENANT_ADMIN` |
+| Super-Admin backoffice | `/admin` | `ADMIN` |
+
+The backoffice consumes live `/api/v1/admin/*` endpoints; the candidate and organization dashboards are currently backed by typed client-side Zustand stores until their domain models (mock interviews, assessments, seats, invitations) are implemented.
 
 ---
 

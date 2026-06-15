@@ -12,6 +12,8 @@ import {
   LogOut,
   Sun,
   Moon,
+  Menu,
+  X,
 } from 'lucide-react';
 import { useAuthStore } from '../store/auth.store';
 import { useToastStore } from '../store/toast.store';
@@ -26,13 +28,20 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const { user, clearAuth } = useAuthStore();
   const addToast = useToastStore((state) => state.addToast);
   const [theme, setTheme] = React.useState<'light' | 'dark'>('dark');
+  const [sidebarOpen, setSidebarOpen] = React.useState(false);
+  const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
+    setMounted(true);
     const docTheme = document.documentElement.getAttribute('data-theme') as 'light' | 'dark' | null;
     if (docTheme) {
       setTheme(docTheme);
     }
   }, []);
+
+  React.useEffect(() => {
+    setSidebarOpen(false);
+  }, [pathname]);
 
   const toggleTheme = () => {
     const nextTheme = theme === 'light' ? 'dark' : 'light';
@@ -57,7 +66,19 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
   return (
     <div className="min-h-screen flex bg-[var(--color-bg)] text-[var(--color-text-primary)] transition-colors duration-200">
-      <aside className="w-64 border-r border-[var(--color-border-subtle)] bg-[var(--color-surface)] flex flex-col shrink-0">
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+          aria-hidden="true"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 w-64 border-r border-[var(--color-border-subtle)] bg-[var(--color-surface)] flex flex-col shrink-0 transform transition-transform duration-200 lg:static lg:translate-x-0 ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
         <div className="h-16 px-6 border-b border-[var(--color-border-subtle)] flex items-center justify-between shrink-0">
           <div className="font-bold tracking-tight text-lg">
             Elevate<span className="text-[var(--color-accent)]">SDE</span>
@@ -65,6 +86,13 @@ export function AdminLayout({ children }: AdminLayoutProps) {
               Admin
             </span>
           </div>
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="p-1.5 rounded-md hover:bg-[var(--color-badge-bg)] text-[var(--color-text-muted)] cursor-pointer lg:hidden"
+            aria-label="Close navigation"
+          >
+            <X className="w-4 h-4 shrink-0" />
+          </button>
         </div>
 
         <nav className="flex-1 px-4 py-6 flex flex-col gap-1.5 overflow-y-auto">
@@ -92,7 +120,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           <div className="flex items-center justify-between px-2">
             <div className="flex flex-col min-w-0">
               <span className="text-xs font-semibold truncate leading-4">
-                {user?.email || 'Administrator'}
+                {mounted ? user?.email || 'Administrator' : 'Administrator'}
               </span>
               <span className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider font-mono">
                 System Admin
@@ -101,6 +129,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             <button
               onClick={toggleTheme}
               className="p-1.5 rounded-md hover:bg-[var(--color-badge-bg)] text-[var(--color-text-muted)] cursor-pointer"
+              aria-label="Toggle theme"
             >
               {theme === 'light' ? (
                 <Moon className="w-4 h-4 shrink-0" />
@@ -119,14 +148,21 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         </div>
       </aside>
 
-      <main className="flex-1 flex flex-col overflow-y-auto">
-        <header className="h-16 px-8 border-b border-[var(--color-border-subtle)] bg-[var(--color-surface)] flex items-center justify-between shrink-0">
+      <main className="flex-1 flex flex-col overflow-y-auto min-w-0">
+        <header className="h-16 px-4 sm:px-8 border-b border-[var(--color-border-subtle)] bg-[var(--color-surface)] flex items-center gap-3 shrink-0">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-1.5 rounded-md hover:bg-[var(--color-badge-bg)] text-[var(--color-text-muted)] cursor-pointer lg:hidden"
+            aria-label="Open navigation"
+          >
+            <Menu className="w-5 h-5 shrink-0" />
+          </button>
           <h1 className="text-base font-semibold tracking-tight">
             {navItems.find((item) => item.href === pathname)?.name || 'Backoffice'}
           </h1>
         </header>
 
-        <div className="flex-1 p-8 bg-[var(--color-bg-soft)]">{children}</div>
+        <div className="flex-1 p-4 sm:p-8 bg-[var(--color-bg-soft)]">{children}</div>
       </main>
     </div>
   );
