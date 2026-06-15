@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@source "../../packages/ui/src/**/*.tsx";
+@source "../../../../packages/ui/src/**/*.tsx";
 
 :root {
   --color-bg: #ffffff;
@@ -337,4 +337,8 @@ a:hover {
   font-size: 0.8rem;
   font-weight: 500;
   color: var(--color-text-muted);
+}
+
+.input-with-icon {
+  padding-left: 2.5rem !important;
 }
