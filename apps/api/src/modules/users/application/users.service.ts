@@ -20,7 +20,12 @@ export class UsersService {
     return this.usersRepository.findByEmail(email);
   }
 
-  async create(data: { email: string; passwordHash: string; role: UserRole; tenantId?: string }): Promise<User> {
+  async create(data: {
+    email: string;
+    passwordHash: string;
+    role: UserRole;
+    tenantId?: string;
+  }): Promise<User> {
     const id = randomUUID();
     const user = User.create(id, data.email, data.passwordHash, data.role, data.tenantId || null);
     return this.usersRepository.save(user);
@@ -30,5 +35,9 @@ export class UsersService {
     const user = await this.findById(id);
     const updatedUser = user.changeRole(role);
     return this.usersRepository.save(updatedUser);
+  }
+
+  async findAll(): Promise<User[]> {
+    return this.usersRepository.findAll();
   }
 }

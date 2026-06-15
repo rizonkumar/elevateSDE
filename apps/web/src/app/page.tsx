@@ -13,11 +13,11 @@ export default function Home() {
           <div className="hero">
             <div>
               <div className="hero-kicker">Enterprise AI Interview Preparation Platform</div>
-              <h1 className="h1">
-                Elevate your Software Engineering Career
-              </h1>
+              <h1 className="h1">Elevate your Software Engineering Career</h1>
               <p className="text-lg leading-relaxed text-[var(--color-text-muted)] max-w-2xl mt-4">
-                Practice timed assessments, attend real-time AI-driven mock interviews, and receive personalized learning paths. Designed for both individual developers and B2B engineering teams.
+                Practice timed assessments, attend real-time AI-driven mock interviews, and receive
+                personalized learning paths. Designed for both individual developers and B2B
+                engineering teams.
               </p>
               <div className="hero-actions mt-8">
                 <Link href="/register" className="btn-primary">
@@ -77,7 +77,9 @@ export default function Home() {
               </div>
               <div className="card-body mt-2">
                 <p>
-                  Submit your responses via text or audio. The engine leverages vector embeddings and LangChain to calculate your score and raise customized, domain-specific follow-ups.
+                  Submit your responses via text or audio. The engine leverages vector embeddings
+                  and LangChain to calculate your score and raise customized, domain-specific
+                  follow-ups.
                 </p>
               </div>
             </div>
@@ -89,7 +91,9 @@ export default function Home() {
               </div>
               <div className="card-body mt-2">
                 <p>
-                  Seamlessly register corporate domains and grant employee accounts isolated workspace partitions. Control team progress dashboard summaries and seats allotment.
+                  Seamlessly register corporate domains and grant employee accounts isolated
+                  workspace partitions. Control team progress dashboard summaries and seats
+                  allotment.
                 </p>
               </div>
             </div>
@@ -101,8 +105,12 @@ export default function Home() {
         <div className="max-w-[var(--page-max-width)] mx-auto px-[var(--page-padding-x)] flex flex-col md:flex-row items-center justify-between text-xs text-[var(--color-text-muted)] gap-4">
           <div>&copy; 2026 ElevateSDE. All rights reserved.</div>
           <div className="flex gap-6">
-            <a href="#" className="hover:text-[var(--color-accent)]">Privacy Policy</a>
-            <a href="#" className="hover:text-[var(--color-accent)]">Terms of Service</a>
+            <a href="#" className="hover:text-[var(--color-accent)]">
+              Privacy Policy
+            </a>
+            <a href="#" className="hover:text-[var(--color-accent)]">
+              Terms of Service
+            </a>
           </div>
         </div>
       </footer>

@@ -5,6 +5,8 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
+    "dev:all": "turbo run dev --filter=@elevatesde/api --filter=@elevatesde/web --filter=@elevatesde/admin",
+    "dev:clients": "turbo run dev --filter=@elevatesde/web --filter=@elevatesde/admin",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "type-check": "turbo run type-check"

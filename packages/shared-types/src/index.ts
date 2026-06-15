@@ -11,6 +11,8 @@ export interface TenantDto {
   name: string;
   stripeCustomerId: string | null;
   subscriptionPlan: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface RegisterDto {
@@ -24,4 +26,27 @@ export interface AuthResponseDto {
   accessToken: string;
   refreshToken: string;
   user: UserDto;
+}
+
+export interface AuditLogDto {
+  id: string;
+  userId: string | null;
+  action: string;
+  metadata: Record<string, any> | null;
+  createdAt: string;
+}
+
+export interface FeatureFlagDto {
+  id: string;
+  flagKey: string;
+  isEnabled: boolean;
+  percentageRollout: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminStatsDto {
+  totalUsers: number;
+  totalTenants: number;
+  activeFeatureFlagsCount: number;
 }

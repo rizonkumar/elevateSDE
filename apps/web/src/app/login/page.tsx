@@ -49,7 +49,7 @@ export default function LoginPage() {
       const axiosError = err as AxiosErrorResponse;
       addToast(
         axiosError.response?.data?.message || 'Failed to sign in. Please verify your credentials.',
-        'error'
+        'error',
       );
     } finally {
       setLoading(false);
@@ -65,7 +65,10 @@ export default function LoginPage() {
         className="w-full max-w-sm card bg-[var(--color-surface)] border border-[var(--color-border-subtle)] p-8 rounded-[var(--radius-lg)] shadow-lg"
       >
         <div className="text-center mb-8">
-          <Link href="/" className="text-xl font-bold tracking-tight text-[var(--color-text-primary)] select-none">
+          <Link
+            href="/"
+            className="text-xl font-bold tracking-tight text-[var(--color-text-primary)] select-none"
+          >
             Elevate<span className="text-[var(--color-accent)]">SDE</span>
           </Link>
           <h2 className="text-lg font-semibold text-[var(--color-text-primary)] mt-4">
@@ -101,16 +104,34 @@ export default function LoginPage() {
             icon={<Lock className="w-4 h-4 text-[var(--color-text-muted)]" />}
           />
 
-          <Button type="submit" disabled={loading} className="w-full py-2.5 font-medium cursor-pointer">
+          <Button
+            type="submit"
+            disabled={loading}
+            className="w-full py-2.5 font-medium cursor-pointer"
+          >
             {loading ? 'Signing in...' : 'Sign In'}
           </Button>
         </form>
 
-        <div className="text-center mt-6 text-xs text-[var(--color-text-muted)]">
-          Don&apos;t have an account?{' '}
-          <Link href="/register" className="text-[var(--color-accent)] font-medium hover:underline">
-            Create account
-          </Link>
+        <div className="text-center mt-6 flex flex-col gap-2.5 text-xs text-[var(--color-text-muted)]">
+          <div>
+            Don&apos;t have an account?{' '}
+            <Link
+              href="/register"
+              className="text-[var(--color-accent)] font-medium hover:underline"
+            >
+              Create account
+            </Link>
+          </div>
+          <div className="border-t border-[var(--color-border-subtle)] pt-3 mt-1">
+            Are you a system administrator?{' '}
+            <a
+              href="/admin/login"
+              className="text-[var(--color-accent)] font-semibold hover:underline"
+            >
+              Sign in to Admin Console
+            </a>
+          </div>
         </div>
       </motion.div>
     </div>

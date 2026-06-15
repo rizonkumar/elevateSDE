@@ -39,7 +39,7 @@ export class AuthService {
       tenantId = tenant.id;
     }
 
-    const role = dto.companyName ? UserRole.TENANT_ADMIN : (dto.role || UserRole.USER);
+    const role = dto.companyName ? UserRole.TENANT_ADMIN : dto.role || UserRole.USER;
 
     const user = await this.usersService.create({
       email: dto.email,

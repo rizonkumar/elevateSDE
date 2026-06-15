@@ -1,21 +1,22 @@
-import type { Metadata } from "next";
-import { Inter, Outfit } from "next/font/google";
-import "./globals.css";
-import { ToastContainer } from "../components/ToastContainer";
+import type { Metadata } from 'next';
+import { Inter, Outfit } from 'next/font/google';
+import './globals.css';
+import { ToastContainer } from '../components/ToastContainer';
 
 const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
+  variable: '--font-inter',
+  subsets: ['latin'],
 });
 
 const outfit = Outfit({
-  variable: "--font-outfit",
-  subsets: ["latin"],
+  variable: '--font-outfit',
+  subsets: ['latin'],
 });
 
 export const metadata: Metadata = {
-  title: "ElevateSDE - Enterprise AI Interview Prep Platform",
-  description: "Elevate your software engineering career with timed assessments, AI mock interviews, and tailored learning paths.",
+  title: 'ElevateSDE - Enterprise AI Interview Prep Platform',
+  description:
+    'Elevate your software engineering career with timed assessments, AI mock interviews, and tailored learning paths.',
 };
 
 export default function RootLayout({

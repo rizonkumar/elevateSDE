@@ -47,18 +47,22 @@ export default function DashboardPage() {
               <div className="hero-kicker">Welcome back</div>
               <h1 className="h1">{user?.email}</h1>
               <p className="text-base text-[var(--color-text-muted)] mt-1">
-                Role: <span className="text-[var(--color-text-primary)] font-semibold">{user?.role}</span>
+                Role:{' '}
+                <span className="text-[var(--color-text-primary)] font-semibold">{user?.role}</span>
               </p>
               {user?.tenantId && (
                 <p className="text-sm text-[var(--color-text-muted)]">
-                  Tenant Workspace: <span className="text-[var(--color-text-primary)] font-mono">{user.tenantId}</span>
+                  Tenant Workspace:{' '}
+                  <span className="text-[var(--color-text-primary)] font-mono">
+                    {user.tenantId}
+                  </span>
                 </p>
               )}
               <p className="text-xs text-[var(--color-text-muted)] mt-2">
                 Member since {formattedDate}
               </p>
             </div>
-            
+
             <aside className="hero-meta border-l border-[var(--color-border-subtle)] pl-6 md:pl-8">
               <div className="hero-meta-row">
                 <span className="hero-chip">Active Session</span>
@@ -98,7 +102,8 @@ export default function DashboardPage() {
               </div>
               <div className="card-body mt-2">
                 <p>
-                  Practice designing a rate limiter or real-time notification engine. Submit responses and receive instant feedback.
+                  Practice designing a rate limiter or real-time notification engine. Submit
+                  responses and receive instant feedback.
                 </p>
               </div>
             </div>
@@ -110,7 +115,8 @@ export default function DashboardPage() {
               </div>
               <div className="card-body mt-2">
                 <p>
-                  Solve 3 standard algorithmic challenges in 60 minutes with isolated test case execution environment.
+                  Solve 3 standard algorithmic challenges in 60 minutes with isolated test case
+                  execution environment.
                 </p>
               </div>
             </div>
