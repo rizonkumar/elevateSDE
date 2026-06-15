@@ -52,7 +52,7 @@ elevatesde/
 │
 ├── packages/
 │   ├── shared-types/        (TypeScript Interfaces used across apps)
-│   ├── ui/                  (Shared Shadcn/Tailwind components)
+│   ├── ui/                  (Shared custom Tailwind components)
 │   ├── eslint-config/       (Standardized linting)
 │   ├── ts-config/           (Standardized TypeScript rules)
 │   └── logger/              (Custom Winston + OpenTelemetry wrapper)
@@ -73,23 +73,27 @@ Instead of grouping by framework features (controllers/services), the API is str
 ```text
 apps/api/src/modules/users/
 ├── domain/
-│   ├── entities/            (Core business objects)
-│   ├── interfaces/          (Repository & Service contracts)
-│   └── events/              (e.g., UserRegisteredEvent)
+│   ├── entities/            (Core business entities with private constructors & factories)
+│   │   └── user.ts
+│   └── interfaces/          (Abstract repository contracts)
+│       └── users-repository.interface.ts
 │
 ├── application/
-│   ├── dtos/                (Input validation via Zod/Class-Validator)
-│   ├── use-cases/           (Specific business actions)
-│   └── mappers/             (Entity to Response translations)
+│   └── users.service.ts     (Application services/orchestration)
 │
 ├── infrastructure/
-│   ├── prisma/              (Database schemas)
-│   └── repositories/        (Prisma concrete implementations)
+│   ├── mappers/             (Translates between database rows and domain entities)
+│   │   └── user.mapper.ts
+│   └── repositories/        (Prisma concrete database implementations)
+│       └── users.repository.ts
 │
 └── presentation/
-    ├── controllers/         (API v1, v2 endpoints)
-    └── responses/           (Standardized HTTP responses)
-
+    ├── controllers/         (API endpoints)
+    │   └── users.controller.ts
+    ├── mappers/             (Translates between domain entities and response DTOs)
+    │   └── user-presentation.mapper.ts
+    └── dtos/                (Request/Response validation DTOs)
+        └── user-response.dto.ts
 ```
 
 ### API Versioning & Documentation
