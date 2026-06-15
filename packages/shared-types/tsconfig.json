@@ -1,0 +1,7 @@
+{
+  "extends": "@elevatesde/ts-config/base.json",
+  "compilerOptions": {
+    "rootDir": "."
+  },
+  "include": ["src/**/*.ts"]
+}

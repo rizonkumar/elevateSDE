@@ -1,0 +1,11 @@
+{
+  "extends": "@elevatesde/ts-config/node.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "declaration": true,
+    "removeComments": true,
+    "sourceMap": true,
+    "baseUrl": "./",
+    "incremental": true
+  }
+}

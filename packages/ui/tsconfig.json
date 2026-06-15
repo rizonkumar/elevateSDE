@@ -1,0 +1,7 @@
+{
+  "extends": "@elevatesde/ts-config/nextjs.json",
+  "compilerOptions": {
+    "rootDir": "."
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
+}
