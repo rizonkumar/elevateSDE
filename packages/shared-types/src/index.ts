@@ -9,6 +9,19 @@ export interface UserDto {
 export interface TenantDto {
   id: string;
   name: string;
-  stripeCustomerId: string;
+  stripeCustomerId: string | null;
   subscriptionPlan: string;
+}
+
+export interface RegisterDto {
+  email: string;
+  passwordHash: string;
+  role: string;
+  tenantId?: string;
+}
+
+export interface AuthResponseDto {
+  accessToken: string;
+  refreshToken: string;
+  user: UserDto;
 }
