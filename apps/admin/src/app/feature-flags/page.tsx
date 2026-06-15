@@ -2,11 +2,12 @@
 
 import * as React from 'react';
 import { AdminLayout } from '../../components/AdminLayout';
+import { Badge, RangeSlider, Toggle } from '../../components/ui';
 import { api } from '../../lib/api';
 import { useToastStore } from '../../store/toast.store';
 import { Button, Input } from '@elevatesde/ui';
 import { FeatureFlagDto } from '@elevatesde/shared-types';
-import { Plus, ToggleLeft, ToggleRight, Percent, Settings } from 'lucide-react';
+import { Plus, Percent, Settings } from 'lucide-react';
 
 interface AxiosErrorResponse {
   response?: {
@@ -112,9 +113,9 @@ export default function FeatureFlagsPage() {
           </span>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-          <div className="lg:col-span-2 flex flex-col gap-6">
-            <div className="overflow-x-auto rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] shadow-sm">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
+          <div className="lg:col-span-2 flex flex-col gap-4">
+            <div className="hidden md:block overflow-x-auto rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] shadow-sm">
               <table className="w-full border-collapse text-left text-sm">
                 <thead>
                   <tr className="border-b border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)] text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">
@@ -144,38 +145,30 @@ export default function FeatureFlagsPage() {
                           {flag.flagKey}
                         </td>
                         <td className="px-6 py-4">
-                          <button
-                            disabled={updatingId === flag.id}
-                            onClick={() => handleToggle(flag.id, flag.isEnabled)}
-                            className="focus:outline-none transition disabled:opacity-50 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-left cursor-pointer"
-                          >
-                            {flag.isEnabled ? (
-                              <>
-                                <ToggleRight className="w-6 h-6 text-emerald-500 shrink-0" />
-                                <span className="text-emerald-600 dark:text-emerald-400">
-                                  Active
-                                </span>
-                              </>
-                            ) : (
-                              <>
-                                <ToggleLeft className="w-6 h-6 text-zinc-500 shrink-0" />
-                                <span className="text-zinc-500">Disabled</span>
-                              </>
-                            )}
-                          </button>
+                          <div className="flex items-center gap-3">
+                            <Toggle
+                              checked={flag.isEnabled}
+                              disabled={updatingId === flag.id}
+                              label={`Toggle ${flag.flagKey}`}
+                              onChange={() => handleToggle(flag.id, flag.isEnabled)}
+                            />
+                            <Badge
+                              variant={flag.isEnabled ? 'success' : 'neutral'}
+                              className="justify-center min-w-[92px]"
+                            >
+                              {flag.isEnabled ? 'Active' : 'Disabled'}
+                            </Badge>
+                          </div>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="range"
-                              min="0"
-                              max="100"
+                          <div className="flex items-center gap-3">
+                            <RangeSlider
                               value={flag.percentageRollout}
                               disabled={updatingId === flag.id}
-                              onChange={(e) => handleRolloutChange(flag.id, Number(e.target.value))}
-                              className="w-24 accent-[var(--color-accent)] cursor-pointer"
+                              onCommit={(value) => handleRolloutChange(flag.id, value)}
+                              className="w-32"
                             />
-                            <span className="font-mono text-xs font-semibold text-[var(--color-text-primary)] w-8 text-right">
+                            <span className="font-mono text-xs font-semibold text-[var(--color-text-primary)] w-9 text-right">
                               {flag.percentageRollout}%
                             </span>
                           </div>
@@ -188,6 +181,49 @@ export default function FeatureFlagsPage() {
                   )}
                 </tbody>
               </table>
+            </div>
+
+            <div className="md:hidden flex flex-col gap-4">
+              {flags.length === 0 ? (
+                <div className="rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] shadow-sm px-6 py-10 text-center text-xs text-[var(--color-text-muted)]">
+                  No feature flags defined yet.
+                </div>
+              ) : (
+                flags.map((flag) => (
+                  <div
+                    key={flag.id}
+                    className="rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] shadow-sm p-4 flex flex-col gap-3"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="font-mono text-xs font-bold text-[var(--color-text-primary)] break-all">
+                        {flag.flagKey}
+                      </span>
+                      <Badge variant={flag.isEnabled ? 'success' : 'neutral'}>
+                        {flag.isEnabled ? 'Active' : 'Disabled'}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between gap-3">
+                      <Toggle
+                        checked={flag.isEnabled}
+                        disabled={updatingId === flag.id}
+                        label={`Toggle ${flag.flagKey}`}
+                        onChange={() => handleToggle(flag.id, flag.isEnabled)}
+                      />
+                      <div className="flex items-center gap-3 flex-1 justify-end">
+                        <RangeSlider
+                          value={flag.percentageRollout}
+                          disabled={updatingId === flag.id}
+                          onCommit={(value) => handleRolloutChange(flag.id, value)}
+                          className="w-32"
+                        />
+                        <span className="font-mono text-xs font-semibold text-[var(--color-text-primary)] w-9 text-right">
+                          {flag.percentageRollout}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
@@ -213,18 +249,12 @@ export default function FeatureFlagsPage() {
                 <span className="text-xs font-semibold text-[var(--color-text-primary)]">
                   Enabled by Default
                 </span>
-                <button
-                  type="button"
-                  onClick={() => setNewIsEnabled(!newIsEnabled)}
+                <Toggle
+                  checked={newIsEnabled}
                   disabled={creating}
-                  className="focus:outline-none cursor-pointer"
-                >
-                  {newIsEnabled ? (
-                    <ToggleRight className="w-6 h-6 text-emerald-500 shrink-0" />
-                  ) : (
-                    <ToggleLeft className="w-6 h-6 text-zinc-500 shrink-0" />
-                  )}
-                </button>
+                  label="Enabled by default"
+                  onChange={setNewIsEnabled}
+                />
               </div>
 
               <div className="flex flex-col gap-2">
@@ -238,14 +268,11 @@ export default function FeatureFlagsPage() {
                 </div>
                 <div className="flex items-center gap-3">
                   <Percent className="w-4 h-4 text-[var(--color-text-muted)] shrink-0" />
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
+                  <RangeSlider
                     value={newRollout}
-                    onChange={(e) => setNewRollout(Number(e.target.value))}
+                    onChange={setNewRollout}
                     disabled={creating}
-                    className="flex-1 accent-[var(--color-accent)] cursor-pointer"
+                    className="flex-1"
                   />
                 </div>
               </div>

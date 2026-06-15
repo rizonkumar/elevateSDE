@@ -107,13 +107,17 @@ export default function UsersPage() {
                 {users.map((user) => (
                   <tr key={user.id} className="hover:bg-[var(--color-bg-soft)]/50 transition-colors">
                     <td className="px-6 py-4 font-mono text-xs text-[var(--color-text-muted)]">
-                      {user.id}
+                      <span className="block max-w-[200px] truncate" title={user.id}>
+                        {user.id}
+                      </span>
                     </td>
                     <td className="px-6 py-4 font-semibold text-[var(--color-text-primary)]">
                       {user.email}
                     </td>
                     <td className="px-6 py-4 font-mono text-xs text-[var(--color-text-muted)]">
-                      {user.tenantId || 'B2C Account'}
+                      <span className="block max-w-[180px] truncate" title={user.tenantId || 'B2C Account'}>
+                        {user.tenantId || 'B2C Account'}
+                      </span>
                     </td>
                     <td className="px-6 py-4">
                       <Badge variant={roleVariant(user.role)}>{roleLabel(user.role)}</Badge>
