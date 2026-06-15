@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { IUsersRepository } from '../domain/interfaces/users-repository.interface';
-import { User } from '../domain/entities/user.entity';
+import { User } from '../domain/entities/user';
 import { UserRole } from '@prisma/client';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class UsersService {
@@ -15,16 +16,19 @@ export class UsersService {
     return user;
   }
 
-  async findByEmail(email: string): Promise<(User & { passwordHash: string }) | null> {
+  async findByEmail(email: string): Promise<User | null> {
     return this.usersRepository.findByEmail(email);
   }
 
   async create(data: { email: string; passwordHash: string; role: UserRole; tenantId?: string }): Promise<User> {
-    return this.usersRepository.create(data);
+    const id = randomUUID();
+    const user = User.create(id, data.email, data.passwordHash, data.role, data.tenantId || null);
+    return this.usersRepository.save(user);
   }
 
   async updateRole(id: string, role: UserRole): Promise<User> {
-    await this.findById(id);
-    return this.usersRepository.updateRole(id, role);
+    const user = await this.findById(id);
+    const updatedUser = user.changeRole(role);
+    return this.usersRepository.save(updatedUser);
   }
 }

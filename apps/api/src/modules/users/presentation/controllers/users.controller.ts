@@ -5,7 +5,9 @@ import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../auth/guards/roles.guard';
 import { Roles } from '../../../auth/decorators/roles.decorator';
 import { UserRole } from '@prisma/client';
-import { User } from '../../domain/entities/user.entity';
+import { User } from '../../domain/entities/user';
+import { UserResponseDto } from '../dtos/user-response.dto';
+import { UserPresentationMapper } from '../mappers/user-presentation.mapper';
 
 interface RequestWithUser {
   user: User;
@@ -20,26 +22,27 @@ export class UsersController {
 
   @Get('me')
   @ApiOperation({ summary: 'Get current logged in user profile' })
-  @ApiResponse({ status: 200, description: 'Return current user details.' })
+  @ApiResponse({ status: 200, type: UserResponseDto, description: 'Return current user details.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  getMe(@Req() req: RequestWithUser): User {
-    return req.user;
+  getMe(@Req() req: RequestWithUser): UserResponseDto {
+    return UserPresentationMapper.toResponse(req.user);
   }
 
   @Patch(':id/role')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Update user role (Admin only)' })
-  @ApiResponse({ status: 200, description: 'User role successfully updated.' })
+  @ApiResponse({ status: 200, type: UserResponseDto, description: 'User role successfully updated.' })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
-  updateRole(
+  async updateRole(
     @Param('id') id: string,
     @Body('role') role: UserRole,
     @Req() req: RequestWithUser,
-  ): Promise<User> {
-    if (req.user.id === id) {
+  ): Promise<UserResponseDto> {
+    if (req.user.getId() === id) {
       throw new ForbiddenException('You cannot change your own role');
     }
-    return this.usersService.updateRole(id, role);
+    const updatedUser = await this.usersService.updateRole(id, role);
+    return UserPresentationMapper.toResponse(updatedUser);
   }
 }

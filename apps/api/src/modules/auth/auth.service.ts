@@ -7,6 +7,9 @@ import { LoginDto } from './dtos/login.dto';
 import { AuthResponseDto } from '@elevatesde/shared-types';
 import * as bcrypt from 'bcrypt';
 import { UserRole } from '@prisma/client';
+import { User } from '../users/domain/entities/user';
+import { UserMapper } from '../users/infrastructure/mappers/user.mapper';
+import { UserPresentationMapper } from '../users/presentation/mappers/user-presentation.mapper';
 
 @Injectable()
 export class AuthService {
@@ -54,18 +57,12 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const isMatch = await bcrypt.compare(dto.password, user.passwordHash);
+    const isMatch = await bcrypt.compare(dto.password, user.getPasswordHash());
     if (!isMatch) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    return this.generateTokens({
-      id: user.id,
-      tenantId: user.tenantId,
-      email: user.email,
-      role: user.role,
-      createdAt: user.createdAt,
-    });
+    return this.generateTokens(user);
   }
 
   async refresh(token: string): Promise<AuthResponseDto> {
@@ -83,14 +80,8 @@ export class AuthService {
 
     await this.prisma.refreshToken.delete({ where: { id: record.id } });
 
-    const user = record.user;
-    return this.generateTokens({
-      id: user.id,
-      tenantId: user.tenantId,
-      email: user.email,
-      role: user.role,
-      createdAt: user.createdAt.toISOString(),
-    });
+    const user = UserMapper.toDomain(record.user);
+    return this.generateTokens(user);
   }
 
   async logout(token: string): Promise<void> {
@@ -102,14 +93,8 @@ export class AuthService {
     }
   }
 
-  private async generateTokens(user: {
-    id: string;
-    tenantId: string | null;
-    email: string;
-    role: string;
-    createdAt: string;
-  }): Promise<AuthResponseDto> {
-    const payload = { sub: user.id, email: user.email };
+  private async generateTokens(user: User): Promise<AuthResponseDto> {
+    const payload = { sub: user.getId(), email: user.getEmail() };
     const accessToken = await this.jwtService.signAsync(payload, {
       expiresIn: '15m',
     });
@@ -123,7 +108,7 @@ export class AuthService {
 
     await this.prisma.refreshToken.create({
       data: {
-        userId: user.id,
+        userId: user.getId(),
         token: refreshTokenString,
         expiresAt,
       },
@@ -132,7 +117,7 @@ export class AuthService {
     return {
       accessToken,
       refreshToken: refreshTokenString,
-      user,
+      user: UserPresentationMapper.toResponse(user),
     };
   }
 }
