@@ -3,8 +3,9 @@
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Mail, Lock } from 'lucide-react';
+import { Mail, Lock, ShieldCheck } from 'lucide-react';
 import { Button, Input } from '@elevatesde/ui';
+import { AdminAuthLayout } from '../../components/AdminAuthLayout';
 import { useAuthStore } from '../../store/auth.store';
 import { useToastStore } from '../../store/toast.store';
 import { api } from '../../lib/api';
@@ -62,21 +63,26 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)] px-4 transition-colors duration-200">
+    <AdminAuthLayout>
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: 'easeOut' }}
-        className="w-full max-w-sm card bg-[var(--color-surface)] border border-[var(--color-border-subtle)] p-8 rounded-[var(--radius-lg)] shadow-lg"
+        className="w-full"
       >
-        <div className="text-center mb-8">
-          <div className="text-xl font-bold tracking-tight text-[var(--color-text-primary)] select-none">
-            Elevate<span className="text-[var(--color-accent)]">SDE</span>
-            <span className="ml-1.5 text-xs px-2 py-0.5 rounded border border-zinc-700 text-zinc-500 uppercase tracking-widest font-mono">
+        <div className="mb-8">
+          <span className="lg:hidden flex items-center justify-center w-12 h-12 rounded-full bg-[var(--color-accent-soft)] text-[var(--color-accent)] mb-4">
+            <ShieldCheck className="w-6 h-6" />
+          </span>
+          <div className="lg:hidden flex items-center gap-2 select-none mb-4">
+            <span className="text-lg font-bold tracking-tight text-[var(--color-text-primary)]">
+              Elevate<span className="text-[var(--color-accent)]">SDE</span>
+            </span>
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-[var(--color-badge-bg)] border border-[var(--color-border-subtle)] text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-muted)]">
               Admin
             </span>
           </div>
-          <h2 className="text-lg font-semibold text-[var(--color-text-primary)] mt-4">
+          <h2 className="text-xl font-semibold text-[var(--color-text-primary)]">
             Sign in to Admin Console
           </h2>
           <p className="text-xs text-[var(--color-text-muted)] mt-1.5">
@@ -84,7 +90,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <Input
             type="email"
             label="Email Address"
@@ -94,6 +100,7 @@ export default function LoginPage() {
             disabled={loading}
             required
             autoComplete="email"
+            className="bg-[var(--color-surface)]"
             icon={<Mail className="w-4 h-4 text-[var(--color-text-muted)]" />}
           />
 
@@ -106,18 +113,29 @@ export default function LoginPage() {
             disabled={loading}
             required
             autoComplete="current-password"
+            className="bg-[var(--color-surface)]"
             icon={<Lock className="w-4 h-4 text-[var(--color-text-muted)]" />}
           />
 
           <Button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 font-medium cursor-pointer"
+            className="w-full py-2.5 font-medium cursor-pointer mt-1"
           >
             {loading ? 'Authenticating...' : 'Sign In'}
           </Button>
         </form>
+
+        <div className="border-t border-[var(--color-border-subtle)] mt-6 pt-4 text-center text-xs text-[var(--color-text-muted)]">
+          Not an administrator?{' '}
+          <a
+            href="/login"
+            className="font-semibold text-[var(--color-text-primary)] underline underline-offset-4 decoration-[var(--color-border-subtle)] hover:decoration-[var(--color-text-primary)] transition-colors"
+          >
+            Back to candidate sign in
+          </a>
+        </div>
       </motion.div>
-    </div>
+    </AdminAuthLayout>
   );
 }

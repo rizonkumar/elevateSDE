@@ -50,3 +50,19 @@ export interface AdminStatsDto {
   totalTenants: number;
   activeFeatureFlagsCount: number;
 }
+
+export type JobApplicationStatus = 'APPLIED' | 'OA' | 'INTERVIEW' | 'OFFER' | 'REJECTED';
+
+export interface JobApplicationDto {
+  id: string;
+  userId: string;
+  company: string;
+  role: string;
+  status: JobApplicationStatus;
+  salaryRange: string | null;
+  jobDescriptionUrl: string | null;
+  interviewDate: string | null;
+  boardPosition: number;
+  createdAt: string;
+  updatedAt: string;
+}

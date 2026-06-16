@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Mail, Lock } from 'lucide-react';
 import { Button, Input } from '@elevatesde/ui';
+import { AuthLayout } from '../../components/AuthLayout';
+import { RoleGuide } from '../../components/RoleGuide';
 import { useAuthStore } from '../../store/auth.store';
 import { useToastStore } from '../../store/toast.store';
 import { api } from '../../lib/api';
@@ -57,21 +59,21 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)] px-4 transition-colors duration-200">
+    <AuthLayout>
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: 'easeOut' }}
-        className="w-full max-w-sm card bg-[var(--color-surface)] border border-[var(--color-border-subtle)] p-8 rounded-[var(--radius-lg)] shadow-lg"
+        className="w-full"
       >
-        <div className="text-center mb-8">
+        <div className="text-center lg:text-left mb-8">
           <Link
             href="/"
-            className="text-xl font-bold tracking-tight text-[var(--color-text-primary)] select-none"
+            className="lg:hidden text-xl font-bold tracking-tight text-[var(--color-text-primary)] select-none"
           >
             Elevate<span className="text-[var(--color-accent)]">SDE</span>
           </Link>
-          <h2 className="text-lg font-semibold text-[var(--color-text-primary)] mt-4">
+          <h2 className="text-xl font-semibold text-[var(--color-text-primary)] mt-4 lg:mt-0">
             Sign in to your account
           </h2>
           <p className="text-xs text-[var(--color-text-muted)] mt-1.5">
@@ -132,8 +134,11 @@ export default function LoginPage() {
               Sign in to Admin Console
             </a>
           </div>
+          <div className="lg:hidden">
+            <RoleGuide />
+          </div>
         </div>
       </motion.div>
-    </div>
+    </AuthLayout>
   );
 }

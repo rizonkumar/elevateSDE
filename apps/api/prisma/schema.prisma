@@ -12,6 +12,14 @@ enum UserRole {
   ADMIN
 }
 
+enum JobApplicationStatus {
+  APPLIED
+  OA
+  INTERVIEW
+  OFFER
+  REJECTED
+}
+
 model Tenant {
   id               String   @id @default(uuid())
   name             String
@@ -33,6 +41,7 @@ model User {
   tenant       Tenant?   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   refreshTokens RefreshToken[]
   auditLogs    AuditLog[]
+  jobApplications JobApplication[]
 }
 
 model RefreshToken {
@@ -60,4 +69,21 @@ model FeatureFlag {
   percentageRollout Int      @default(100)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+}
+
+model JobApplication {
+  id                String               @id @default(uuid())
+  userId            String
+  company           String
+  role              String
+  status            JobApplicationStatus @default(APPLIED)
+  salaryRange       String?
+  jobDescriptionUrl String?
+  interviewDate     DateTime?
+  boardPosition     Int                  @default(0)
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  user              User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
 }
