@@ -3,7 +3,17 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Sun, Moon, Menu, X, LayoutDashboard, Building2, Shield, LogOut } from 'lucide-react';
+import {
+  Sun,
+  Moon,
+  Menu,
+  X,
+  LayoutDashboard,
+  Building2,
+  Shield,
+  LogOut,
+  Briefcase,
+} from 'lucide-react';
 import { useAuthStore } from '../store/auth.store';
 import { api } from '../lib/api';
 
@@ -66,7 +76,10 @@ export function Navbar({ wide = false }: NavbarProps) {
   const showAuth = mounted && isAuthenticated;
   const containerClass = wide ? 'max-w-[1400px]' : 'max-w-[var(--page-max-width)]';
 
-  const navLinks: NavLink[] = [{ href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard }];
+  const navLinks: NavLink[] = [
+    { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/dashboard/job-tracker', label: 'Job Tracker', icon: Briefcase },
+  ];
   if (user?.role === 'TENANT_ADMIN') {
     navLinks.push({ href: '/dashboard/org', label: 'Organization', icon: Building2 });
   }

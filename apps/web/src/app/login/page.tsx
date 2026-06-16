@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Mail, Lock } from 'lucide-react';
 import { Button, Input } from '@elevatesde/ui';
+import { RoleGuide } from '../../components/RoleGuide';
 import { useAuthStore } from '../../store/auth.store';
 import { useToastStore } from '../../store/toast.store';
 import { api } from '../../lib/api';

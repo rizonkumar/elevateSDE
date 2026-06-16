@@ -107,16 +107,17 @@ The platform exposes a **single public origin** to users; the admin backoffice i
 | Surface | Route (via web origin) | Access |
 | --- | --- | --- |
 | Candidate dashboard | `/dashboard` | Any authenticated user |
+| Job tracker | `/dashboard/job-tracker` | Any authenticated user |
 | Organization dashboard | `/dashboard/org` | `TENANT_ADMIN` |
 | Super-Admin backoffice | `/admin` | `ADMIN` |
 
-The backoffice consumes live `/api/v1/admin/*` endpoints; the candidate and organization dashboards are currently backed by typed client-side Zustand stores until their domain models (mock interviews, assessments, seats, invitations) are implemented.
+The backoffice consumes live `/api/v1/admin/*` endpoints and the job tracker consumes live, user-scoped `/api/v1/job-applications` endpoints. The remaining candidate and organization dashboard surfaces are currently backed by typed client-side Zustand stores until their domain models (mock interviews, assessments, seats, invitations) are implemented.
 
 ---
 
 ## Domain-Driven Design (DDD) Backend Architecture
 
-Instead of grouping by framework features (controllers/services), the API is structured by business domains.
+Instead of grouping by framework features (controllers/services), the API is structured by business domains. Current domain modules include `users`, `auth`, `audit-log`, `feature-flag`, `admin`, and `job-application` (the candidate job tracker), each following the layered template below.
 
 ### Example: Users Domain
 
@@ -177,7 +178,7 @@ apps/api/src/modules/users/
 
 - `DiscussionPost`: `id`, `userId`, `title`, `content`, `upvotes`
 - `DiscussionComment`: `id`, `postId`, `userId`, `content`
-- `JobApplication`: `id`, `userId`, `company`, `role`, `status` (APPLIED, OA, INTERVIEW, OFFER)
+- `JobApplication`: `id`, `userId`, `company`, `role`, `status` (`JobApplicationStatus` enum: APPLIED, OA, INTERVIEW, OFFER, REJECTED), `salaryRange`, `jobDescriptionUrl`, `interviewDate`, `boardPosition` (Kanban ordering), `createdAt`, `updatedAt`
 
 ---
 
