@@ -1,6 +1,11 @@
 @import "tailwindcss";
 @source "../../../../packages/ui/src/**/*.tsx";
 
+@theme inline {
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-display: var(--font-outfit), system-ui, sans-serif;
+}
+
 :root {
   --color-bg: #ffffff;
   --color-bg-soft: #f8fafc;

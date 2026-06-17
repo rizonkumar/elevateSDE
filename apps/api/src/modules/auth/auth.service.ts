@@ -46,6 +46,8 @@ export class AuthService {
       passwordHash,
       role,
       tenantId,
+      firstName: dto.firstName,
+      lastName: dto.lastName,
     });
 
     return this.generateTokens(user);

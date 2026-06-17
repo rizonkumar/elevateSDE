@@ -17,7 +17,6 @@ import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { Plus } from 'lucide-react';
 import { Button } from '@elevatesde/ui';
 import type { JobApplicationDto, JobApplicationStatus } from '@elevatesde/shared-types';
-import { Navbar } from '@/components/Navbar';
 import { useJobTrackerStore, type JobApplicationInput } from '@/store/job-tracker.store';
 import { JobColumn } from './_components/JobColumn';
 import { JobCardView } from './_components/JobCard';
@@ -127,9 +126,8 @@ export default function JobTrackerPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--color-bg)] text-[var(--color-text-primary)]">
-      <Navbar wide />
-      <main className="flex-1 w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+    <>
+      <main className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
         <motion.header
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -193,6 +191,6 @@ export default function JobTrackerPage() {
         onClose={closeModal}
         onSubmit={handleSubmit}
       />
-    </div>
+    </>
   );
 }

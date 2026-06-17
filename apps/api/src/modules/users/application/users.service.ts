@@ -25,9 +25,19 @@ export class UsersService {
     passwordHash: string;
     role: UserRole;
     tenantId?: string;
+    firstName?: string;
+    lastName?: string;
   }): Promise<User> {
     const id = randomUUID();
-    const user = User.create(id, data.email, data.passwordHash, data.role, data.tenantId || null);
+    const user = User.create(
+      id,
+      data.email,
+      data.passwordHash,
+      data.role,
+      data.tenantId || null,
+      data.firstName ?? null,
+      data.lastName ?? null,
+    );
     return this.usersRepository.save(user);
   }
 

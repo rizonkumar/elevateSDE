@@ -12,6 +12,16 @@ export class RegisterDto {
   @MinLength(8)
   password!: string;
 
+  @ApiPropertyOptional({ example: 'Ada' })
+  @IsString()
+  @IsOptional()
+  firstName?: string;
+
+  @ApiPropertyOptional({ example: 'Lovelace' })
+  @IsString()
+  @IsOptional()
+  lastName?: string;
+
   @ApiPropertyOptional({ example: 'Elevate B2B Inc.' })
   @IsString()
   @IsOptional()

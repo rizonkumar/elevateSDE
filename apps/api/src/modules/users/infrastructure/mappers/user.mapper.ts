@@ -10,6 +10,8 @@ export class UserMapper {
       prismaUser.role,
       prismaUser.tenantId,
       prismaUser.createdAt,
+      prismaUser.firstName,
+      prismaUser.lastName,
     );
   }
 
@@ -20,6 +22,8 @@ export class UserMapper {
       email: user.getEmail(),
       passwordHash: user.getPasswordHash(),
       role: user.getRole(),
+      firstName: user.getFirstName(),
+      lastName: user.getLastName(),
     };
   }
 }

@@ -12,6 +12,12 @@ export class UserResponseDto implements UserDto {
   @ApiPropertyOptional({ example: 'uuid-tenant-string', nullable: true })
   tenantId!: string | null;
 
+  @ApiPropertyOptional({ example: 'Ada', nullable: true })
+  firstName!: string | null;
+
+  @ApiPropertyOptional({ example: 'Lovelace', nullable: true })
+  lastName!: string | null;
+
   @ApiProperty({ enum: UserRole })
   role!: string;
 

@@ -4,7 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Lock, Building2 } from 'lucide-react';
+import { Mail, Lock, Building2, User } from 'lucide-react';
 import { Button, Input } from '@elevatesde/ui';
 import { AuthLayout } from '../../components/AuthLayout';
 import { RoleGuide } from '../../components/RoleGuide';
@@ -27,6 +27,8 @@ export default function RegisterPage() {
   const addToast = useToastStore((state) => state.addToast);
 
   const [role, setRole] = React.useState<'USER' | 'TENANT_ADMIN'>('USER');
+  const [firstName, setFirstName] = React.useState('');
+  const [lastName, setLastName] = React.useState('');
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [companyName, setCompanyName] = React.useState('');
@@ -50,11 +52,19 @@ export default function RegisterPage() {
         password?: string;
         role: string;
         companyName?: string;
+        firstName?: string;
+        lastName?: string;
       } = {
         email,
         password,
         role,
       };
+      if (firstName.trim()) {
+        payload.firstName = firstName.trim();
+      }
+      if (lastName.trim()) {
+        payload.lastName = lastName.trim();
+      }
       if (role === 'TENANT_ADMIN') {
         payload.companyName = companyName;
       }
@@ -139,6 +149,29 @@ export default function RegisterPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Input
+              type="text"
+              label="First Name"
+              placeholder="Ada"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              disabled={loading}
+              autoComplete="given-name"
+              icon={<User className="w-4 h-4 text-(--color-text-muted)" />}
+            />
+            <Input
+              type="text"
+              label="Last Name"
+              placeholder="Lovelace"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              disabled={loading}
+              autoComplete="family-name"
+              icon={<User className="w-4 h-4 text-(--color-text-muted)" />}
+            />
+          </div>
+
           <Input
             type="email"
             label="Email Address"

@@ -11,7 +11,6 @@ import {
   Gauge,
   ListChecks,
 } from 'lucide-react';
-import { Navbar } from '@/components/Navbar';
 import { useResumeStore } from '@/store/resume.store';
 import { ResumeDropzone } from './_components/ResumeDropzone';
 import { AnalysisOverview } from './_components/AnalysisOverview';
@@ -36,9 +35,7 @@ export default function ResumeAnalyzerPage() {
   const hasHistory = analyses.length > 1;
 
   return (
-    <div className="min-h-screen flex flex-col bg-(--color-bg) text-(--color-text-primary) transition-colors duration-200">
-      <Navbar wide />
-      <main className="flex-1 w-full max-w-300 mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+    <div className="w-full max-w-300 mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
         <motion.header
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -167,7 +164,6 @@ export default function ResumeAnalyzerPage() {
         )}
 
         {mounted && <UpcomingFeatures />}
-      </main>
     </div>
   );
 }

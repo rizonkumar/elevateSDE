@@ -2,6 +2,8 @@ export interface UserDto {
   id: string;
   tenantId: string | null;
   email: string;
+  firstName: string | null;
+  lastName: string | null;
   role: string;
   createdAt: string;
 }
@@ -20,6 +22,8 @@ export interface RegisterDto {
   passwordHash: string;
   role: string;
   tenantId?: string;
+  firstName?: string;
+  lastName?: string;
 }
 
 export interface AuthResponseDto {
