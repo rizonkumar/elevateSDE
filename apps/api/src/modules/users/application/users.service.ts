@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { IUsersRepository } from '../domain/interfaces/users-repository.interface';
 import { User } from '../domain/entities/user';
 import { UserRole } from '@prisma/client';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 
 @Injectable()
 export class UsersService {
@@ -25,9 +25,19 @@ export class UsersService {
     passwordHash: string;
     role: UserRole;
     tenantId?: string;
+    firstName?: string;
+    lastName?: string;
   }): Promise<User> {
     const id = randomUUID();
-    const user = User.create(id, data.email, data.passwordHash, data.role, data.tenantId || null);
+    const user = User.create(
+      id,
+      data.email,
+      data.passwordHash,
+      data.role,
+      data.tenantId || null,
+      data.firstName ?? null,
+      data.lastName ?? null,
+    );
     return this.usersRepository.save(user);
   }
 

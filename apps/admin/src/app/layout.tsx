@@ -44,7 +44,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-full flex flex-col bg-[var(--color-bg)] text-[var(--color-text-primary)]">
+      <body className="min-h-full flex flex-col bg-(--color-bg) text-(--color-text-primary)">
         <ToastContainer />
         {children}
       </body>

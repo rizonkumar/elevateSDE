@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { IFeatureFlagRepository } from '../domain/interfaces/feature-flag-repository.interface';
 import { FeatureFlag } from '../domain/entities/feature-flag';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 
 @Injectable()
 export class FeatureFlagService {
@@ -47,7 +47,7 @@ export class FeatureFlagService {
 
   async evaluate(flagKey: string, userId: string): Promise<boolean> {
     const flag = await this.featureFlagRepository.findByKey(flagKey);
-    if (!flag || !flag.getIsEnabled()) {
+    if (!flag?.getIsEnabled()) {
       return false;
     }
     const rollout = flag.getPercentageRollout();
@@ -64,11 +64,9 @@ export class FeatureFlagService {
 
   private hashCode(str: string): number {
     let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = (hash << 5) - hash + char;
-      hash |= 0;
+    for (const char of str) {
+      hash = (hash * 31 + (char.codePointAt(0) ?? 0)) % 2_147_483_647;
     }
-    return Math.abs(hash);
+    return hash;
   }
 }

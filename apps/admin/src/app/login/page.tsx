@@ -29,7 +29,7 @@ export default function LoginPage() {
   const [password, setPassword] = React.useState('');
   const [loading, setLoading] = React.useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     if (!email || !password) {
       addToast('Please fill in all fields.', 'error');

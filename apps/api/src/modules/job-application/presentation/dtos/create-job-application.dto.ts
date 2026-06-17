@@ -22,7 +22,7 @@ export class CreateJobApplicationDto {
   salaryRange?: string;
 
   @ApiPropertyOptional({ example: 'https://jobs.example.com/posting/123', nullable: true })
-  @IsUrl()
+  @IsUrl({ require_tld: false })
   @IsOptional()
   jobDescriptionUrl?: string;
 

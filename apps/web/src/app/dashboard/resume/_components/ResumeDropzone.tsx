@@ -5,10 +5,10 @@ import { UploadCloud, FileText, Loader2, RefreshCw } from 'lucide-react';
 import { ACCEPTED_RESUME_TYPES } from '@/lib/resume-parser';
 
 interface ResumeDropzoneProps {
-  onFile: (file: File) => void;
-  isAnalyzing: boolean;
-  fileName?: string | null;
-  variant?: 'full' | 'compact';
+  readonly onFile: (file: File) => void;
+  readonly isAnalyzing: boolean;
+  readonly fileName?: string | null;
+  readonly variant?: 'full' | 'compact';
 }
 
 const acceptAttr = ACCEPTED_RESUME_TYPES.flatMap((type) => [type.mime, type.extension]).join(',');
@@ -61,7 +61,7 @@ export function ResumeDropzone({
     return (
       <div
         {...dropHandlers}
-        className={`flex items-center gap-3 rounded-(--radius-lg) border border-dashed px-4 py-3 transition-colors ${
+        className={`flex items-center gap-3 rounded-lg border border-dashed px-4 py-3 transition-colors ${
           dragging
             ? 'border-(--color-accent) bg-(--color-accent-soft)'
             : 'border-(--color-border-subtle)'
@@ -97,19 +97,12 @@ export function ResumeDropzone({
   }
 
   return (
-    <div
-      role="button"
-      tabIndex={0}
+    <button
+      type="button"
       aria-disabled={isAnalyzing}
       onClick={open}
-      onKeyDown={(event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          open();
-        }
-      }}
       {...dropHandlers}
-      className={`flex flex-col items-center justify-center gap-4 rounded-(--radius-lg) border-2 border-dashed px-6 py-14 text-center transition-colors ${
+      className={`flex w-full flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed px-6 py-14 text-center transition-colors ${
         isAnalyzing ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'
       } ${
         dragging
@@ -133,6 +126,6 @@ export function ResumeDropzone({
         </p>
       </div>
       {input}
-    </div>
+    </button>
   );
 }

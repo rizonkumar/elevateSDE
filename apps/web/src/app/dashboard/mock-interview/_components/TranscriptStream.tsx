@@ -5,7 +5,7 @@ import { Bot, User } from 'lucide-react';
 import type { TranscriptEntry } from '@elevatesde/shared-types';
 
 interface TranscriptStreamProps {
-  transcript: TranscriptEntry[];
+  readonly transcript: readonly TranscriptEntry[];
 }
 
 export function TranscriptStream({ transcript }: TranscriptStreamProps) {
@@ -40,7 +40,7 @@ export function TranscriptStream({ transcript }: TranscriptStreamProps) {
                 <Icon className="h-4 w-4" />
               </span>
               <div
-                className={`max-w-[80%] rounded-(--radius-lg) px-3.5 py-2.5 text-sm leading-relaxed ${
+                className={`max-w-[80%] rounded-lg px-3.5 py-2.5 text-sm leading-relaxed ${
                   isAi
                     ? 'bg-(--color-bg-soft) text-(--color-text-primary)'
                     : 'bg-(--color-accent-soft) text-(--color-text-primary)'

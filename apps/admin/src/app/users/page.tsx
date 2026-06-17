@@ -77,25 +77,25 @@ export default function UsersPage() {
     <AdminLayout>
       {loading ? (
         <div className="flex items-center justify-center min-h-[300px]">
-          <span className="text-sm text-[var(--color-text-muted)] animate-pulse">
+          <span className="text-sm text-(--color-text-muted) animate-pulse">
             Retrieving account records...
           </span>
         </div>
       ) : (
         <div className="flex flex-col gap-6">
           <div className="flex items-center justify-between gap-3">
-            <p className="text-sm text-[var(--color-text-muted)]">
+            <p className="text-sm text-(--color-text-muted)">
               Manage roles across all system accounts.
             </p>
-            <span className="text-xs font-semibold text-[var(--color-text-muted)] px-2.5 py-1 rounded-full border border-[var(--color-border-subtle)] bg-[var(--color-badge-bg)]">
+            <span className="text-xs font-semibold text-(--color-text-muted) px-2.5 py-1 rounded-full border border-(--color-border-subtle) bg-(--color-badge-bg)">
               {users.length} users
             </span>
           </div>
 
-          <div className="hidden md:block overflow-visible rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] shadow-sm">
+          <div className="hidden md:block overflow-visible rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-sm">
             <table className="w-full border-collapse text-left text-sm">
               <thead>
-                <tr className="border-b border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)] text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">
+                <tr className="border-b border-(--color-border-subtle) bg-(--color-bg-soft) text-xs font-semibold text-(--color-text-muted) uppercase tracking-wider">
                   <th className="px-6 py-4">User ID</th>
                   <th className="px-6 py-4">Email Address</th>
                   <th className="px-6 py-4">Tenant ID</th>
@@ -103,18 +103,18 @@ export default function UsersPage() {
                   <th className="px-6 py-4">Change Role</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--color-border-subtle)]">
+              <tbody className="divide-y divide-(--color-border-subtle)">
                 {users.map((user) => (
-                  <tr key={user.id} className="hover:bg-[var(--color-bg-soft)]/50 transition-colors">
-                    <td className="px-6 py-4 font-mono text-xs text-[var(--color-text-muted)]">
+                  <tr key={user.id} className="hover:bg-(--color-bg-soft)/50 transition-colors">
+                    <td className="px-6 py-4 font-mono text-xs text-(--color-text-muted)">
                       <span className="block max-w-[200px] truncate" title={user.id}>
                         {user.id}
                       </span>
                     </td>
-                    <td className="px-6 py-4 font-semibold text-[var(--color-text-primary)]">
+                    <td className="px-6 py-4 font-semibold text-(--color-text-primary)">
                       {user.email}
                     </td>
-                    <td className="px-6 py-4 font-mono text-xs text-[var(--color-text-muted)]">
+                    <td className="px-6 py-4 font-mono text-xs text-(--color-text-muted)">
                       <span className="block max-w-[180px] truncate" title={user.tenantId || 'B2C Account'}>
                         {user.tenantId || 'B2C Account'}
                       </span>
@@ -140,15 +140,15 @@ export default function UsersPage() {
             {users.map((user) => (
               <div
                 key={user.id}
-                className="rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] shadow-sm p-4 flex flex-col gap-3"
+                className="rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-sm p-4 flex flex-col gap-3"
               >
                 <div className="flex items-start justify-between gap-3">
-                  <span className="font-semibold text-[var(--color-text-primary)] break-all">
+                  <span className="font-semibold text-(--color-text-primary) break-all">
                     {user.email}
                   </span>
                   <Badge variant={roleVariant(user.role)}>{roleLabel(user.role)}</Badge>
                 </div>
-                <div className="text-xs text-[var(--color-text-muted)] font-mono break-all">
+                <div className="text-xs text-(--color-text-muted) font-mono break-all">
                   {user.tenantId || 'B2C Account'}
                 </div>
                 <Select

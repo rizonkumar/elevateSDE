@@ -5,14 +5,15 @@ export interface BoardColumn {
   status: JobApplicationStatus;
   label: string;
   badge: BadgeVariant;
+  dotClass: string;
 }
 
 export const BOARD_COLUMNS: BoardColumn[] = [
-  { status: 'APPLIED', label: 'Applied', badge: 'neutral' },
-  { status: 'OA', label: 'Online Assessment', badge: 'accent' },
-  { status: 'INTERVIEW', label: 'Interview', badge: 'warning' },
-  { status: 'OFFER', label: 'Offer', badge: 'success' },
-  { status: 'REJECTED', label: 'Rejected', badge: 'danger' },
+  { status: 'APPLIED', label: 'Applied', badge: 'neutral', dotClass: 'bg-(--color-text-muted)' },
+  { status: 'OA', label: 'Assessment', badge: 'accent', dotClass: 'bg-teal-500' },
+  { status: 'INTERVIEW', label: 'Interview', badge: 'warning', dotClass: 'bg-amber-500' },
+  { status: 'OFFER', label: 'Offer', badge: 'success', dotClass: 'bg-emerald-500' },
+  { status: 'REJECTED', label: 'Rejected', badge: 'danger', dotClass: 'bg-rose-500' },
 ];
 
 export const STATUS_OPTIONS = BOARD_COLUMNS.map((column) => ({

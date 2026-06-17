@@ -2,7 +2,6 @@
 
 import * as React from 'react';
 import { motion } from 'framer-motion';
-import { Navbar } from '@/components/Navbar';
 import { useMockInterviewStore } from '@/store/mock-interview.store';
 import { InterviewSetup } from './_components/InterviewSetup';
 import { InterviewConsole } from './_components/InterviewConsole';
@@ -16,10 +15,14 @@ export default function MockInterviewPage() {
     setMounted(true);
   }, []);
 
+  function renderContent(): React.ReactNode {
+    if (status === 'ACTIVE') return <InterviewConsole />;
+    if (status === 'COMPLETED' && feedback) return <FeedbackReport feedback={feedback} />;
+    return <InterviewSetup />;
+  }
+
   return (
-    <div className="min-h-screen flex flex-col bg-(--color-bg) text-(--color-text-primary) transition-colors duration-200">
-      <Navbar wide />
-      <main className="flex-1 w-full max-w-300 mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+    <div className="w-full max-w-300 mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
         <motion.header
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -38,18 +41,11 @@ export default function MockInterviewPage() {
           </p>
         </motion.header>
 
-        {!mounted ? (
+        {mounted ? renderContent() : (
           <div className="flex items-center justify-center py-24 text-sm text-(--color-text-muted)">
             Loading…
           </div>
-        ) : status === 'ACTIVE' ? (
-          <InterviewConsole />
-        ) : status === 'COMPLETED' && feedback ? (
-          <FeedbackReport feedback={feedback} />
-        ) : (
-          <InterviewSetup />
         )}
-      </main>
     </div>
   );
 }

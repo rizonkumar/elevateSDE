@@ -48,8 +48,8 @@ interface LegacyWindow extends Window {
 }
 
 function getRecognitionConstructor(): SpeechRecognitionConstructor | null {
-  if (typeof window === 'undefined') return null;
-  const speechWindow = window as SpeechWindow;
+  if (typeof globalThis.window === 'undefined') return null;
+  const speechWindow = globalThis.window as unknown as SpeechWindow;
   return speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition ?? null;
 }
 
@@ -114,7 +114,7 @@ export interface MicAnalyser {
 export async function createMicAnalyser(): Promise<MicAnalyser> {
   const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
   const AudioContextCtor =
-    window.AudioContext ?? (window as LegacyWindow).webkitAudioContext;
+    globalThis.window.AudioContext ?? (globalThis.window as unknown as LegacyWindow).webkitAudioContext;
   if (!AudioContextCtor) {
     stream.getTracks().forEach((track) => track.stop());
     throw new Error('AudioContext is not supported in this browser.');
@@ -131,8 +131,8 @@ export async function createMicAnalyser(): Promise<MicAnalyser> {
     getLevel: () => {
       analyser.getByteTimeDomainData(buffer);
       let sumSquares = 0;
-      for (let index = 0; index < buffer.length; index += 1) {
-        const centered = ((buffer[index] ?? 128) - 128) / 128;
+      for (const byte of buffer) {
+        const centered = (byte - 128) / 128;
         sumSquares += centered * centered;
       }
       const rms = Math.sqrt(sumSquares / buffer.length);
@@ -141,7 +141,7 @@ export async function createMicAnalyser(): Promise<MicAnalyser> {
     stop: () => {
       source.disconnect();
       stream.getTracks().forEach((track) => track.stop());
-      void context.close();
+      context.close().catch(() => undefined);
     },
   };
 }

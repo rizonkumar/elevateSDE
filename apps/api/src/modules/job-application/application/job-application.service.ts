@@ -1,6 +1,6 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { JobApplicationStatus } from '@prisma/client';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { IJobApplicationRepository } from '../domain/interfaces/job-application-repository.interface';
 import { JobApplication } from '../domain/entities/job-application';
 

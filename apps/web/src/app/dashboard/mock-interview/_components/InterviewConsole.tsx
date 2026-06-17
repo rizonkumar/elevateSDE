@@ -27,18 +27,25 @@ export function InterviewConsole() {
 
   if (!config) return null;
 
-  const handleSend = (event: React.FormEvent) => {
+  const handleSend = (event: React.SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (draft.trim().length === 0) return;
     submitTypedAnswer(draft);
     setDraft('');
   };
 
-  const statusLabel = isAiSpeaking
-    ? 'Interviewer is speaking'
-    : isMicActive
-      ? 'Listening — answer now'
-      : 'Your turn';
+  const handleMicToggle = () => {
+    toggleMic().catch(() => undefined);
+  };
+
+  let statusLabel: string;
+  if (isAiSpeaking) {
+    statusLabel = 'Interviewer is speaking';
+  } else if (isMicActive) {
+    statusLabel = 'Listening — answer now';
+  } else {
+    statusLabel = 'Your turn';
+  }
 
   return (
     <motion.div
@@ -72,9 +79,7 @@ export function InterviewConsole() {
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Button
               variant={isMicActive ? 'secondary' : 'primary'}
-              onClick={() => {
-                void toggleMic();
-              }}
+              onClick={handleMicToggle}
             >
               <span className="inline-flex items-center gap-2">
                 {isMicActive ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
@@ -114,7 +119,7 @@ export function InterviewConsole() {
         )}
       </div>
 
-      <div className="card flex h-[28rem] flex-col gap-3 lg:h-auto">
+      <div className="card flex h-112 flex-col gap-3 lg:h-auto">
         <h3 className="m-0 text-sm font-semibold uppercase tracking-wider text-(--color-text-muted)">
           Live transcript
         </h3>

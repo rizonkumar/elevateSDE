@@ -1,17 +1,17 @@
 'use client';
 
 import * as React from 'react';
-import { Button, Input, Modal, Select } from '@elevatesde/ui';
+import { Button, DatePicker, Input, Modal, Select } from '@elevatesde/ui';
 import type { JobApplicationDto, JobApplicationStatus } from '@elevatesde/shared-types';
 import type { JobApplicationInput } from '@/store/job-tracker.store';
 import { STATUS_OPTIONS } from './board';
 
 interface JobFormModalProps {
-  open: boolean;
-  initial: JobApplicationDto | null;
-  submitting: boolean;
-  onClose: () => void;
-  onSubmit: (input: JobApplicationInput) => void;
+  readonly open: boolean;
+  readonly initial: JobApplicationDto | null;
+  readonly submitting: boolean;
+  readonly onClose: () => void;
+  readonly onSubmit: (input: JobApplicationInput) => void;
 }
 
 interface FormState {
@@ -32,16 +32,6 @@ const EMPTY_FORM: FormState = {
   interviewDate: '',
 };
 
-function toDatetimeLocal(value: string | null): string {
-  if (!value) {
-    return '';
-  }
-  const date = new Date(value);
-  const offset = date.getTimezoneOffset();
-  const local = new Date(date.getTime() - offset * 60 * 1000);
-  return local.toISOString().slice(0, 16);
-}
-
 function fromForm(state: FormState): JobApplicationInput {
   return {
     company: state.company.trim(),
@@ -49,7 +39,7 @@ function fromForm(state: FormState): JobApplicationInput {
     status: state.status,
     salaryRange: state.salaryRange.trim() ? state.salaryRange.trim() : null,
     jobDescriptionUrl: state.jobDescriptionUrl.trim() ? state.jobDescriptionUrl.trim() : null,
-    interviewDate: state.interviewDate ? new Date(state.interviewDate).toISOString() : null,
+    interviewDate: state.interviewDate ? state.interviewDate : null,
   };
 }
 
@@ -68,7 +58,7 @@ export function JobFormModal({ open, initial, submitting, onClose, onSubmit }: J
         status: initial.status,
         salaryRange: initial.salaryRange ?? '',
         jobDescriptionUrl: initial.jobDescriptionUrl ?? '',
-        interviewDate: toDatetimeLocal(initial.interviewDate),
+        interviewDate: initial.interviewDate ?? '',
       });
     } else {
       setForm(EMPTY_FORM);
@@ -76,7 +66,7 @@ export function JobFormModal({ open, initial, submitting, onClose, onSubmit }: J
     setErrors({});
   }, [open, initial]);
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = (event: React.SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
     const nextErrors: { company?: string; role?: string } = {};
     if (!form.company.trim()) {
@@ -91,6 +81,8 @@ export function JobFormModal({ open, initial, submitting, onClose, onSubmit }: J
     }
     onSubmit(fromForm(form));
   };
+
+  const submitLabel = initial ? 'Save changes' : 'Add application';
 
   return (
     <Modal
@@ -122,22 +114,24 @@ export function JobFormModal({ open, initial, submitting, onClose, onSubmit }: J
           }}
           disabled={submitting}
         />
-        <Select
-          label="Stage"
-          value={form.status}
-          options={STATUS_OPTIONS}
-          onChange={(value) =>
-            setForm((prev) => ({ ...prev, status: value as JobApplicationStatus }))
-          }
-          disabled={submitting}
-        />
-        <Input
-          label="Salary range"
-          placeholder="$180k - $220k"
-          value={form.salaryRange}
-          onChange={(event) => setForm((prev) => ({ ...prev, salaryRange: event.target.value }))}
-          disabled={submitting}
-        />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Select
+            label="Stage"
+            value={form.status}
+            options={STATUS_OPTIONS}
+            onChange={(value) =>
+              setForm((prev) => ({ ...prev, status: value as JobApplicationStatus }))
+            }
+            disabled={submitting}
+          />
+          <Input
+            label="Salary range"
+            placeholder="$180k - $220k"
+            value={form.salaryRange}
+            onChange={(event) => setForm((prev) => ({ ...prev, salaryRange: event.target.value }))}
+            disabled={submitting}
+          />
+        </div>
         <Input
           label="Job description URL"
           type="url"
@@ -148,11 +142,11 @@ export function JobFormModal({ open, initial, submitting, onClose, onSubmit }: J
           }
           disabled={submitting}
         />
-        <Input
+        <DatePicker
           label="Interview date"
-          type="datetime-local"
-          value={form.interviewDate}
-          onChange={(event) => setForm((prev) => ({ ...prev, interviewDate: event.target.value }))}
+          withTime
+          value={form.interviewDate || null}
+          onChange={(next) => setForm((prev) => ({ ...prev, interviewDate: next ?? '' }))}
           disabled={submitting}
         />
         <div className="flex items-center justify-end gap-2 pt-2">
@@ -160,7 +154,7 @@ export function JobFormModal({ open, initial, submitting, onClose, onSubmit }: J
             Cancel
           </Button>
           <Button type="submit" disabled={submitting}>
-            {submitting ? 'Saving...' : initial ? 'Save changes' : 'Add application'}
+            {submitting ? 'Saving...' : submitLabel}
           </Button>
         </div>
       </form>

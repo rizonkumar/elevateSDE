@@ -14,7 +14,6 @@ import {
   Flag,
   type LucideIcon,
 } from 'lucide-react';
-import { Navbar } from '@/components/Navbar';
 import { useAuthStore } from '@/store/auth.store';
 import { useToastStore } from '@/store/toast.store';
 import {
@@ -77,15 +76,12 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-(--color-bg) text-(--color-text-primary) transition-colors duration-200">
-      <Navbar wide />
-
-      <motion.main
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="flex-1 w-full max-w-350 mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 flex flex-col gap-8 sm:gap-10"
-      >
+    <motion.main
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="w-full max-w-350 mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 flex flex-col gap-8 sm:gap-10"
+    >
         <motion.section variants={itemVariants}>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -231,7 +227,6 @@ export default function DashboardPage() {
             </div>
           </div>
         </motion.section>
-      </motion.main>
-    </div>
+    </motion.main>
   );
 }

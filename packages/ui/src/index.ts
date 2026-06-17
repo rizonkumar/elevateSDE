@@ -5,3 +5,5 @@ export * from './Select';
 export * from './Badge';
 export * from './Modal';
 export * from './Tabs';
+export * from './DatePicker';
+export * from './ConfirmDialog';

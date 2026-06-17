@@ -37,6 +37,8 @@ export class UsersRepository implements IUsersRepository {
         passwordHash: data.passwordHash,
         role: data.role,
         tenantId: data.tenantId,
+        firstName: data.firstName,
+        lastName: data.lastName,
       },
       create: {
         id: data.id,
@@ -44,6 +46,8 @@ export class UsersRepository implements IUsersRepository {
         passwordHash: data.passwordHash,
         role: data.role,
         tenantId: data.tenantId,
+        firstName: data.firstName,
+        lastName: data.lastName,
       },
     });
     return UserMapper.toDomain(prismaUser);

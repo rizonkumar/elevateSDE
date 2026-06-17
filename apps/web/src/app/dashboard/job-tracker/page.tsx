@@ -15,9 +15,8 @@ import {
 } from '@dnd-kit/core';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { Plus } from 'lucide-react';
-import { Button } from '@elevatesde/ui';
+import { Button, ConfirmDialog } from '@elevatesde/ui';
 import type { JobApplicationDto, JobApplicationStatus } from '@elevatesde/shared-types';
-import { Navbar } from '@/components/Navbar';
 import { useJobTrackerStore, type JobApplicationInput } from '@/store/job-tracker.store';
 import { JobColumn } from './_components/JobColumn';
 import { JobCardView } from './_components/JobCard';
@@ -64,6 +63,7 @@ export default function JobTrackerPage() {
   const [mounted, setMounted] = React.useState(false);
   const [submitting, setSubmitting] = React.useState(false);
   const [activeId, setActiveId] = React.useState<string | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     setMounted(true);
@@ -81,6 +81,9 @@ export default function JobTrackerPage() {
     : null;
   const activeApplication = activeId
     ? applications.find((application) => application.id === activeId) ?? null
+    : null;
+  const pendingDeleteApplication = pendingDeleteId
+    ? applications.find((application) => application.id === pendingDeleteId) ?? null
     : null;
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -127,9 +130,8 @@ export default function JobTrackerPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--color-bg)] text-[var(--color-text-primary)]">
-      <Navbar wide />
-      <main className="flex-1 w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+    <>
+      <main className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
         <motion.header
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -140,7 +142,7 @@ export default function JobTrackerPage() {
             <h1 className="text-2xl sm:text-3xl font-bold font-display tracking-tight">
               Job Tracker
             </h1>
-            <p className="text-sm text-[var(--color-text-muted)] mt-1.5">
+            <p className="text-sm text-(--color-text-muted) mt-1.5">
               Drag applications across stages to keep your pipeline current.
             </p>
           </div>
@@ -151,7 +153,7 @@ export default function JobTrackerPage() {
         </motion.header>
 
         {!mounted || isLoading ? (
-          <div className="flex items-center justify-center py-24 text-sm text-[var(--color-text-muted)]">
+          <div className="flex items-center justify-center py-24 text-sm text-(--color-text-muted)">
             Loading your applications...
           </div>
         ) : (
@@ -168,7 +170,7 @@ export default function JobTrackerPage() {
                   column={column}
                   applications={grouped[column.status]}
                   onEdit={openModal}
-                  onDelete={remove}
+                  onDelete={setPendingDeleteId}
                 />
               ))}
             </div>
@@ -178,7 +180,7 @@ export default function JobTrackerPage() {
                   application={activeApplication}
                   onEdit={() => undefined}
                   onDelete={() => undefined}
-                  className="shadow-[var(--shadow-soft)] cursor-grabbing"
+                  className="shadow-(--shadow-soft) cursor-grabbing"
                 />
               ) : null}
             </DragOverlay>
@@ -193,6 +195,25 @@ export default function JobTrackerPage() {
         onClose={closeModal}
         onSubmit={handleSubmit}
       />
-    </div>
+
+      <ConfirmDialog
+        open={pendingDeleteId !== null}
+        tone="danger"
+        title="Delete application?"
+        description={
+          pendingDeleteApplication
+            ? `This permanently removes ${pendingDeleteApplication.company} — ${pendingDeleteApplication.role}.`
+            : 'This permanently removes the application.'
+        }
+        confirmLabel="Delete"
+        onClose={() => setPendingDeleteId(null)}
+        onConfirm={() => {
+          if (pendingDeleteId) {
+            remove(pendingDeleteId);
+          }
+          setPendingDeleteId(null);
+        }}
+      />
+    </>
   );
 }

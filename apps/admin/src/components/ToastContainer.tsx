@@ -14,7 +14,7 @@ export function ToastContainer() {
       case 'error':
         return <AlertCircle className="w-5 h-5 text-rose-500 shrink-0" />;
       case 'info':
-        return <Info className="w-5 h-5 text-sky-500 shrink-0" />;
+        return <Info className="w-5 h-5 text-teal-500 shrink-0" />;
     }
   };
 
@@ -25,7 +25,7 @@ export function ToastContainer() {
       case 'error':
         return 'border-zinc-200 dark:border-zinc-800 border-l-rose-500 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-rose-500/5';
       case 'info':
-        return 'border-zinc-200 dark:border-zinc-800 border-l-sky-500 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-sky-500/5';
+        return 'border-zinc-200 dark:border-zinc-800 border-l-teal-500 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-teal-500/5';
     }
   };
 

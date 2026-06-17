@@ -48,18 +48,18 @@ export function Select({ value, options, onChange, disabled, className = '' }: S
         aria-haspopup="listbox"
         aria-expanded={open}
         onClick={() => setOpen((prev) => !prev)}
-        className="flex items-center justify-between gap-2 w-full min-w-[160px] text-xs font-semibold bg-[var(--color-bg)] border border-[var(--color-border-subtle)] rounded-lg px-3 py-2 text-[var(--color-text-primary)] hover:border-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/30 transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+        className="flex items-center justify-between gap-2 w-full min-w-[160px] text-xs font-semibold bg-(--color-bg) border border-(--color-border-subtle) rounded-lg px-3 py-2 text-(--color-text-primary) hover:border-(--color-text-muted) focus:outline-none focus:ring-2 focus:ring-(--color-accent)/30 transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
       >
         <span className="truncate">{selected?.label ?? 'Select'}</span>
         <ChevronDown
-          className={`w-3.5 h-3.5 shrink-0 text-[var(--color-text-muted)] transition-transform ${open ? 'rotate-180' : ''}`}
+          className={`w-3.5 h-3.5 shrink-0 text-(--color-text-muted) transition-transform ${open ? 'rotate-180' : ''}`}
         />
       </button>
 
       {open && !disabled && (
         <div
           role="listbox"
-          className="absolute right-0 z-30 mt-1.5 w-full min-w-[160px] rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-surface)] shadow-[var(--shadow-soft)] py-1"
+          className="absolute right-0 z-30 mt-1.5 w-full min-w-[160px] rounded-lg border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-soft) py-1"
         >
           {options.map((option) => {
             const active = option.value === value;
@@ -73,10 +73,10 @@ export function Select({ value, options, onChange, disabled, className = '' }: S
                   onChange(option.value);
                   setOpen(false);
                 }}
-                className={`flex items-center justify-between gap-2 w-full text-left text-xs px-3 py-2 transition-colors hover:bg-[var(--color-badge-bg)] cursor-pointer ${
+                className={`flex items-center justify-between gap-2 w-full text-left text-xs px-3 py-2 transition-colors hover:bg-(--color-badge-bg) cursor-pointer ${
                   active
-                    ? 'text-[var(--color-accent)] font-semibold'
-                    : 'text-[var(--color-text-primary)]'
+                    ? 'text-(--color-accent) font-semibold'
+                    : 'text-(--color-text-primary)'
                 }`}
               >
                 <span className="truncate">{option.label}</span>
