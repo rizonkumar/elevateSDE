@@ -233,7 +233,7 @@ export function scoreBand(score: number): ScoreBand {
     return { label: 'Excellent', badgeVariant: 'success', fill: '#10b981' };
   }
   if (score >= 60) {
-    return { label: 'Good', badgeVariant: 'accent', fill: '#0ea5e9' };
+    return { label: 'Good', badgeVariant: 'accent', fill: '#358f80' };
   }
   if (score >= 40) {
     return { label: 'Needs work', badgeVariant: 'warning', fill: '#f59e0b' };
