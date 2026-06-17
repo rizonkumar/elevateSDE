@@ -9,10 +9,10 @@ import { JobCard } from './JobCard';
 import { columnDroppableId, type BoardColumn } from './board';
 
 interface JobColumnProps {
-  column: BoardColumn;
-  applications: JobApplicationDto[];
-  onEdit: (id: string) => void;
-  onDelete: (id: string) => void;
+  readonly column: BoardColumn;
+  readonly applications: JobApplicationDto[];
+  readonly onEdit: (id: string) => void;
+  readonly onDelete: (id: string) => void;
 }
 
 export function JobColumn({ column, applications, onEdit, onDelete }: JobColumnProps) {
@@ -24,16 +24,16 @@ export function JobColumn({ column, applications, onEdit, onDelete }: JobColumnP
         <div className="flex items-center gap-2">
           <Badge variant={column.badge}>{column.label}</Badge>
         </div>
-        <span className="text-xs font-semibold text-[var(--color-text-muted)] tabular-nums">
+        <span className="text-xs font-semibold text-(--color-text-muted) tabular-nums">
           {applications.length}
         </span>
       </div>
       <div
         ref={setNodeRef}
-        className={`flex flex-col gap-2.5 rounded-[var(--radius-lg)] border border-dashed p-2.5 min-h-[160px] flex-1 transition-colors ${
+        className={`flex flex-col gap-2.5 rounded-lg border border-dashed p-2.5 min-h-[160px] flex-1 transition-colors ${
           isOver
-            ? 'border-[var(--color-accent)] bg-[var(--color-accent-soft)]'
-            : 'border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)]'
+            ? 'border-(--color-accent) bg-(--color-accent-soft)'
+            : 'border-(--color-border-subtle) bg-(--color-bg-soft)'
         }`}
       >
         <SortableContext
@@ -51,7 +51,7 @@ export function JobColumn({ column, applications, onEdit, onDelete }: JobColumnP
         </SortableContext>
         {applications.length === 0 && (
           <div className="flex flex-1 items-center justify-center py-6 text-center">
-            <span className="text-xs text-[var(--color-text-muted)]">Drop applications here</span>
+            <span className="text-xs text-(--color-text-muted)">Drop applications here</span>
           </div>
         )}
       </div>

@@ -14,7 +14,7 @@ import { scoreBand } from '@/lib/resume-analyzer';
 import { useMockInterviewStore } from '@/store/mock-interview.store';
 
 interface FeedbackReportProps {
-  feedback: MockInterviewFeedback;
+  readonly feedback: MockInterviewFeedback;
 }
 
 const SEVERITY_VARIANT: Record<InterviewCompetencySeverity, BadgeVariant> = {

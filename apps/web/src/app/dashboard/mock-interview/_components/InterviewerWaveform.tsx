@@ -4,9 +4,9 @@ import * as React from 'react';
 import { motion, useReducedMotion, type Target, type Transition } from 'framer-motion';
 
 interface InterviewerWaveformProps {
-  micLevel: number;
-  isAiSpeaking: boolean;
-  isMicActive: boolean;
+  readonly micLevel: number;
+  readonly isAiSpeaking: boolean;
+  readonly isMicActive: boolean;
 }
 
 const BAR_COUNT = 28;
@@ -49,7 +49,7 @@ export function InterviewerWaveform({
 
         return (
           <motion.span
-            key={index}
+            key={`waveform-bar-${index}`}
             className="w-1 rounded-full bg-(--color-accent) sm:w-1.5"
             style={{ height: 14 }}
             animate={animate}

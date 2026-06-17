@@ -15,6 +15,12 @@ export default function MockInterviewPage() {
     setMounted(true);
   }, []);
 
+  function renderContent(): React.ReactNode {
+    if (status === 'ACTIVE') return <InterviewConsole />;
+    if (status === 'COMPLETED' && feedback) return <FeedbackReport feedback={feedback} />;
+    return <InterviewSetup />;
+  }
+
   return (
     <div className="w-full max-w-300 mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
         <motion.header
@@ -35,16 +41,10 @@ export default function MockInterviewPage() {
           </p>
         </motion.header>
 
-        {!mounted ? (
+        {mounted ? renderContent() : (
           <div className="flex items-center justify-center py-24 text-sm text-(--color-text-muted)">
             Loading…
           </div>
-        ) : status === 'ACTIVE' ? (
-          <InterviewConsole />
-        ) : status === 'COMPLETED' && feedback ? (
-          <FeedbackReport feedback={feedback} />
-        ) : (
-          <InterviewSetup />
         )}
     </div>
   );

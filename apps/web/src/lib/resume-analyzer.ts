@@ -82,7 +82,119 @@ function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
-export function analyzeResumeText(text: string, fileName: string): ResumeAnalysis {
+function buildStructureFeedback(
+  wordCount: number,
+  missingSections: string[],
+  actionVerbCount: number,
+  hasMetrics: boolean,
+  hasEmail: boolean,
+): ResumeFeedbackItem[] {
+  const feedback: ResumeFeedbackItem[] = [];
+
+  if (wordCount < 300) {
+    feedback.push({
+      title: 'Resume looks short',
+      detail: `Around ${wordCount} words detected. Aim for 400–800 to give recruiters enough context.`,
+      severity: 'critical',
+    });
+  } else if (wordCount > 1000) {
+    feedback.push({
+      title: 'Resume may be too long',
+      detail: `Around ${wordCount} words detected. Tighten to one or two pages for senior ATS scans.`,
+      severity: 'warning',
+    });
+  } else {
+    feedback.push({
+      title: 'Length is well balanced',
+      detail: `Around ${wordCount} words — a good length for an engineering resume.`,
+      severity: 'good',
+    });
+  }
+
+  if (missingSections.length > 0) {
+    feedback.push({
+      title: 'Missing standard sections',
+      detail: `Add clear headings for: ${missingSections.join(', ')}.`,
+      severity: missingSections.length > 1 ? 'critical' : 'warning',
+    });
+  } else {
+    feedback.push({
+      title: 'All core sections present',
+      detail: 'Experience, education, skills, and projects were all detected.',
+      severity: 'good',
+    });
+  }
+
+  const verbItem: ResumeFeedbackItem =
+    actionVerbCount >= 4
+      ? {
+          title: 'Strong action verbs',
+          detail: `Detected ${actionVerbCount} impact verbs such as led, built, and optimized.`,
+          severity: 'good',
+        }
+      : {
+          title: 'Use more action verbs',
+          detail: 'Open bullet points with verbs like led, built, designed, or optimized.',
+          severity: 'warning',
+        };
+
+  const metricsItem: ResumeFeedbackItem = hasMetrics
+    ? {
+        title: 'Quantified impact found',
+        detail: 'Numbers and percentages help recruiters gauge your impact quickly.',
+        severity: 'good',
+      }
+    : {
+        title: 'Add measurable results',
+        detail: 'Quantify achievements, e.g. "cut latency 40%" or "served 2M requests/day".',
+        severity: 'critical',
+      };
+
+  feedback.push(verbItem, metricsItem);
+
+  if (!hasEmail) {
+    feedback.push({
+      title: 'No email detected',
+      detail: 'Make sure a professional email address is clearly visible at the top.',
+      severity: 'critical',
+    });
+  }
+
+  return feedback;
+}
+
+function buildActionableTips(
+  missingSkills: string[],
+  hasMetrics: boolean,
+  actionVerbCount: number,
+  missingSections: string[],
+  hasPhone: boolean,
+): string[] {
+  const tips: string[] = [];
+  if (missingSkills.length > 0) {
+    tips.push(
+      `Where truthful, surface in-demand skills you have experience with: ${missingSkills
+        .slice(0, 5)
+        .join(', ')}.`,
+    );
+  }
+  if (!hasMetrics) {
+    tips.push('Rewrite at least three bullets to include a concrete metric or outcome.');
+  }
+  if (actionVerbCount < 4) {
+    tips.push('Lead every bullet with a strong past-tense action verb.');
+  }
+  if (missingSections.includes('projects')) {
+    tips.push('Add a Projects section highlighting 2–3 technical builds with your role.');
+  }
+  if (!hasPhone) {
+    tips.push('Add a reachable phone number alongside your email and links.');
+  }
+  tips.push('Mirror keywords from the target job description to lift ATS keyword matching.');
+  return tips;
+}
+
+export function analyzeResumeText(text: string, _fileName: string): ResumeAnalysis {
   const padded = normalize(text);
   const wordCount = text.trim().length === 0 ? 0 : text.trim().split(/\s+/).length;
 
@@ -100,14 +212,21 @@ export function analyzeResumeText(text: string, fileName: string): ResumeAnalysi
   const hasPhone = /(\+?\d[\d\s().-]{7,}\d)/.test(text);
   const foundSections = SECTION_HEADINGS.filter((section) => padded.includes(` ${section} `));
   const actionVerbCount = countOccurrences(padded, ACTION_VERBS);
-  const hasMetrics = /(\d+%|\$\s?\d+|\b\d+\s?(x|k|m|\+))/i.test(text);
+  const hasMetrics = /(\d+%|\$\s?\d+|\b\d+\s?[xkm+])/i.test(text);
 
   const contactScore = (hasEmail ? 6 : 0) + (hasPhone ? 4 : 0);
   const sectionScore = foundSections.length * 5;
   const verbScore = clamp(actionVerbCount * 3, 0, 15);
   const metricsScore = hasMetrics ? 15 : 0;
   const skillScore = clamp(Math.round((parsedSkills.length / 12) * 30), 0, 30);
-  const lengthScore = wordCount >= 400 && wordCount <= 1000 ? 10 : wordCount >= 250 ? 6 : 2;
+  let lengthScore: number;
+  if (wordCount >= 400 && wordCount <= 1000) {
+    lengthScore = 10;
+  } else if (wordCount >= 250) {
+    lengthScore = 6;
+  } else {
+    lengthScore = 2;
+  }
 
   const atsScore = clamp(
     contactScore + sectionScore + verbScore + metricsScore + skillScore + lengthScore,
@@ -115,109 +234,32 @@ export function analyzeResumeText(text: string, fileName: string): ResumeAnalysi
     100,
   );
 
-  const structureFeedback: ResumeFeedbackItem[] = [];
-
-  if (wordCount < 300) {
-    structureFeedback.push({
-      title: 'Resume looks short',
-      detail: `Around ${wordCount} words detected. Aim for 400–800 to give recruiters enough context.`,
-      severity: 'critical',
-    });
-  } else if (wordCount > 1000) {
-    structureFeedback.push({
-      title: 'Resume may be too long',
-      detail: `Around ${wordCount} words detected. Tighten to one or two pages for senior ATS scans.`,
-      severity: 'warning',
-    });
-  } else {
-    structureFeedback.push({
-      title: 'Length is well balanced',
-      detail: `Around ${wordCount} words — a good length for an engineering resume.`,
-      severity: 'good',
-    });
-  }
-
   const missingSections = SECTION_HEADINGS.filter((section) => !foundSections.includes(section));
-  if (missingSections.length > 0) {
-    structureFeedback.push({
-      title: 'Missing standard sections',
-      detail: `Add clear headings for: ${missingSections.join(', ')}.`,
-      severity: missingSections.length > 1 ? 'critical' : 'warning',
-    });
+
+  const structureFeedback = buildStructureFeedback(
+    wordCount,
+    missingSections,
+    actionVerbCount,
+    hasMetrics,
+    hasEmail,
+  );
+
+  const actionableTips = buildActionableTips(
+    missingSkills,
+    hasMetrics,
+    actionVerbCount,
+    missingSections,
+    hasPhone,
+  );
+
+  let summary: string;
+  if (atsScore >= 80) {
+    summary = `Strong ATS alignment with ${parsedSkills.length} relevant skills detected.`;
+  } else if (atsScore >= 60) {
+    summary = `Solid foundation with ${parsedSkills.length} skills — a few targeted edits will push this higher.`;
   } else {
-    structureFeedback.push({
-      title: 'All core sections present',
-      detail: 'Experience, education, skills, and projects were all detected.',
-      severity: 'good',
-    });
+    summary = `Needs work: ${parsedSkills.length} skills matched. Focus on the critical items below.`;
   }
-
-  structureFeedback.push(
-    actionVerbCount >= 4
-      ? {
-          title: 'Strong action verbs',
-          detail: `Detected ${actionVerbCount} impact verbs such as led, built, and optimized.`,
-          severity: 'good',
-        }
-      : {
-          title: 'Use more action verbs',
-          detail: 'Open bullet points with verbs like led, built, designed, or optimized.',
-          severity: 'warning',
-        },
-  );
-
-  structureFeedback.push(
-    hasMetrics
-      ? {
-          title: 'Quantified impact found',
-          detail: 'Numbers and percentages help recruiters gauge your impact quickly.',
-          severity: 'good',
-        }
-      : {
-          title: 'Add measurable results',
-          detail: 'Quantify achievements, e.g. "cut latency 40%" or "served 2M requests/day".',
-          severity: 'critical',
-        },
-  );
-
-  if (!hasEmail) {
-    structureFeedback.push({
-      title: 'No email detected',
-      detail: 'Make sure a professional email address is clearly visible at the top.',
-      severity: 'critical',
-    });
-  }
-
-  const actionableTips: string[] = [];
-  if (missingSkills.length > 0) {
-    actionableTips.push(
-      `Where truthful, surface in-demand skills you have experience with: ${missingSkills
-        .slice(0, 5)
-        .join(', ')}.`,
-    );
-  }
-  if (!hasMetrics) {
-    actionableTips.push('Rewrite at least three bullets to include a concrete metric or outcome.');
-  }
-  if (actionVerbCount < 4) {
-    actionableTips.push('Lead every bullet with a strong past-tense action verb.');
-  }
-  if (missingSections.includes('projects')) {
-    actionableTips.push('Add a Projects section highlighting 2–3 technical builds with your role.');
-  }
-  if (!hasPhone) {
-    actionableTips.push('Add a reachable phone number alongside your email and links.');
-  }
-  actionableTips.push('Mirror keywords from the target job description to lift ATS keyword matching.');
-
-  const summary =
-    atsScore >= 80
-      ? `Strong ATS alignment with ${parsedSkills.length} relevant skills detected.`
-      : atsScore >= 60
-        ? `Solid foundation with ${parsedSkills.length} skills — a few targeted edits will push this higher.`
-        : `Needs work: ${parsedSkills.length} skills matched. Focus on the critical items below.`;
-
-  void fileName;
 
   return { atsScore, parsedSkills, missingSkills, structureFeedback, actionableTips, summary };
 }

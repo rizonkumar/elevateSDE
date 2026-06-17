@@ -13,9 +13,9 @@ interface JobCardViewProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 interface JobCardProps {
-  application: JobApplicationDto;
-  onEdit: (id: string) => void;
-  onDelete: (id: string) => void;
+  readonly application: JobApplicationDto;
+  readonly onEdit: (id: string) => void;
+  readonly onDelete: (id: string) => void;
 }
 
 function formatInterviewDate(value: string | null): string | null {

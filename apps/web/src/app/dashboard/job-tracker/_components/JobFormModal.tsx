@@ -7,11 +7,11 @@ import type { JobApplicationInput } from '@/store/job-tracker.store';
 import { STATUS_OPTIONS } from './board';
 
 interface JobFormModalProps {
-  open: boolean;
-  initial: JobApplicationDto | null;
-  submitting: boolean;
-  onClose: () => void;
-  onSubmit: (input: JobApplicationInput) => void;
+  readonly open: boolean;
+  readonly initial: JobApplicationDto | null;
+  readonly submitting: boolean;
+  readonly onClose: () => void;
+  readonly onSubmit: (input: JobApplicationInput) => void;
 }
 
 interface FormState {
@@ -76,7 +76,7 @@ export function JobFormModal({ open, initial, submitting, onClose, onSubmit }: J
     setErrors({});
   }, [open, initial]);
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const nextErrors: { company?: string; role?: string } = {};
     if (!form.company.trim()) {
@@ -91,6 +91,8 @@ export function JobFormModal({ open, initial, submitting, onClose, onSubmit }: J
     }
     onSubmit(fromForm(form));
   };
+
+  const submitLabel = initial ? 'Save changes' : 'Add application';
 
   return (
     <Modal
@@ -160,7 +162,7 @@ export function JobFormModal({ open, initial, submitting, onClose, onSubmit }: J
             Cancel
           </Button>
           <Button type="submit" disabled={submitting}>
-            {submitting ? 'Saving...' : initial ? 'Save changes' : 'Add application'}
+            {submitting ? 'Saving...' : submitLabel}
           </Button>
         </div>
       </form>

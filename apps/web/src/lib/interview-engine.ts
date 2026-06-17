@@ -38,26 +38,17 @@ export const DURATION_OPTIONS: SelectOption[] = [
   { value: '45', label: '45 minutes' },
 ];
 
-export const TOPIC_LABELS: Record<MockInterviewTopic, string> = {
-  SYSTEM_DESIGN: 'System Design',
-  BEHAVIORAL: 'Behavioral',
-  CODING: 'Coding',
-  DSA: 'Data Structures & Algorithms',
-};
+export const TOPIC_LABELS = Object.fromEntries(
+  TOPIC_OPTIONS.map(({ value, label }) => [value, label]),
+) as Record<MockInterviewTopic, string>;
 
-export const ROLE_LABELS: Record<InterviewRoleLevel, string> = {
-  JUNIOR: 'Junior Engineer',
-  MID: 'Mid-level Engineer',
-  SENIOR: 'Senior Engineer',
-  STAFF: 'Staff Engineer',
-};
+export const ROLE_LABELS = Object.fromEntries(
+  ROLE_OPTIONS.map(({ value, label }) => [value, label]),
+) as Record<InterviewRoleLevel, string>;
 
-export const STYLE_LABELS: Record<InterviewCompanyStyle, string> = {
-  GENERIC: 'Generic',
-  FAANG: 'FAANG',
-  STARTUP: 'High-growth Startup',
-  ENTERPRISE: 'Enterprise',
-};
+export const STYLE_LABELS = Object.fromEntries(
+  STYLE_OPTIONS.map(({ value, label }) => [value, label]),
+) as Record<InterviewCompanyStyle, string>;
 
 const OPENERS: Record<MockInterviewTopic, string> = {
   SYSTEM_DESIGN:
@@ -256,10 +247,11 @@ export function generateFeedback(
   }
 
   const topCompetency = [...competencies].sort((a, b) => b.score - a.score)[0];
+  const pluralSuffix = answerCount === 1 ? '' : 's';
   const summary =
     answerCount === 0
       ? 'No answers were captured this session. Start the microphone or type a response to get scored feedback.'
-      : `You answered ${answerCount} question${answerCount === 1 ? '' : 's'} across a ${ROLE_LABELS[config.roleLevel]} ${TOPIC_LABELS[config.topic]} round. Overall you scored ${overallScore}, with your strongest signal in ${(topCompetency?.label ?? 'communication').toLowerCase()}.`;
+      : `You answered ${answerCount} question${pluralSuffix} across a ${ROLE_LABELS[config.roleLevel]} ${TOPIC_LABELS[config.topic]} round. Overall you scored ${overallScore}, with your strongest signal in ${(topCompetency?.label ?? 'communication').toLowerCase()}.`;
 
   return { overallScore, competencies, strengths, improvements, summary };
 }

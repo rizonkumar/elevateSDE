@@ -3,7 +3,7 @@
 import { Clock } from 'lucide-react';
 
 interface SessionTimerProps {
-  remainingSeconds: number;
+  readonly remainingSeconds: number;
 }
 
 function format(seconds: number): string {
