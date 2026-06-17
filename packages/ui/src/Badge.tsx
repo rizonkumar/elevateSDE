@@ -10,7 +10,7 @@ interface BadgeProps {
 
 const variantClasses: Record<BadgeVariant, string> = {
   neutral:
-    'bg-[var(--color-badge-bg)] text-[var(--color-text-primary)] border-[var(--color-border-subtle)]',
+    'bg-(--color-badge-bg) text-(--color-text-primary) border-(--color-border-subtle)',
   accent: 'bg-teal-500/15 text-teal-700 dark:text-teal-300 border-teal-500/30',
   warning: 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30',
   danger: 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/30',

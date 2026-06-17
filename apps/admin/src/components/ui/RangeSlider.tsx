@@ -31,13 +31,13 @@ export function RangeSlider({
 
   return (
     <div className={`relative h-4 flex items-center ${className}`}>
-      <div className="relative w-full h-1.5 rounded-full bg-[var(--color-badge-bg)]">
+      <div className="relative w-full h-1.5 rounded-full bg-(--color-badge-bg)">
         <div
-          className="absolute left-0 top-0 h-full rounded-full bg-[var(--color-accent)]"
+          className="absolute left-0 top-0 h-full rounded-full bg-(--color-accent)"
           style={{ width: `${pct}%` }}
         />
         <span
-          className={`absolute top-1/2 h-3.5 w-3.5 -translate-y-1/2 -translate-x-1/2 rounded-full bg-white border-2 border-[var(--color-accent)] shadow-sm pointer-events-none ${
+          className={`absolute top-1/2 h-3.5 w-3.5 -translate-y-1/2 -translate-x-1/2 rounded-full bg-white border-2 border-(--color-accent) shadow-sm pointer-events-none ${
             disabled ? 'opacity-50' : ''
           }`}
           style={{ left: `${pct}%` }}

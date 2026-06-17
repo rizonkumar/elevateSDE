@@ -47,7 +47,7 @@ export class FeatureFlagService {
 
   async evaluate(flagKey: string, userId: string): Promise<boolean> {
     const flag = await this.featureFlagRepository.findByKey(flagKey);
-    if (!flag || !flag.getIsEnabled()) {
+    if (!flag?.getIsEnabled()) {
       return false;
     }
     const rollout = flag.getPercentageRollout();

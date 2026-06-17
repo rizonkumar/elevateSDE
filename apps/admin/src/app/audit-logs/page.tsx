@@ -38,28 +38,28 @@ export default function AuditLogsPage() {
     <AdminLayout>
       {loading ? (
         <div className="flex items-center justify-center min-h-[300px]">
-          <span className="text-sm text-[var(--color-text-muted)] animate-pulse">
+          <span className="text-sm text-(--color-text-muted) animate-pulse">
             Loading system audit records...
           </span>
         </div>
       ) : (
         <div className="flex flex-col gap-6">
-          <div className="overflow-x-auto rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] shadow-sm">
+          <div className="overflow-x-auto rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-sm">
             <table className="w-full border-collapse text-left text-sm">
               <thead>
-                <tr className="border-b border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)] text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">
+                <tr className="border-b border-(--color-border-subtle) bg-(--color-bg-soft) text-xs font-semibold text-(--color-text-muted) uppercase tracking-wider">
                   <th className="px-6 py-4">Action</th>
                   <th className="px-6 py-4">Executor ID</th>
                   <th className="px-6 py-4">Event Metadata</th>
                   <th className="px-6 py-4">Timestamp</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--color-border-subtle)]">
+              <tbody className="divide-y divide-(--color-border-subtle)">
                 {logs.length === 0 ? (
                   <tr>
                     <td
                       colSpan={4}
-                      className="px-6 py-8 text-center text-xs text-[var(--color-text-muted)]"
+                      className="px-6 py-8 text-center text-xs text-(--color-text-muted)"
                     >
                       No system events recorded yet.
                     </td>
@@ -68,24 +68,24 @@ export default function AuditLogsPage() {
                   logs.map((log) => (
                     <tr
                       key={log.id}
-                      className="hover:bg-[var(--color-bg-soft)]/50 transition-colors"
+                      className="hover:bg-(--color-bg-soft)/50 transition-colors"
                     >
-                      <td className="px-6 py-4 font-mono text-xs font-semibold tracking-wider text-[var(--color-text-primary)]">
+                      <td className="px-6 py-4 font-mono text-xs font-semibold tracking-wider text-(--color-text-primary)">
                         {log.action}
                       </td>
-                      <td className="px-6 py-4 font-mono text-xs text-[var(--color-text-muted)]">
+                      <td className="px-6 py-4 font-mono text-xs text-(--color-text-muted)">
                         {log.userId || 'system'}
                       </td>
                       <td className="px-6 py-4">
                         {log.metadata ? (
-                          <pre className="text-[10px] bg-[var(--color-bg-soft)] p-2.5 rounded border border-[var(--color-border-subtle)] font-mono text-[var(--color-text-muted)] max-w-md overflow-x-auto">
+                          <pre className="text-[10px] bg-(--color-bg-soft) p-2.5 rounded border border-(--color-border-subtle) font-mono text-(--color-text-muted) max-w-md overflow-x-auto">
                             {JSON.stringify(log.metadata, null, 2)}
                           </pre>
                         ) : (
-                          <span className="text-xs text-[var(--color-text-muted)]">None</span>
+                          <span className="text-xs text-(--color-text-muted)">None</span>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-xs text-[var(--color-text-muted)] font-mono">
+                      <td className="px-6 py-4 text-xs text-(--color-text-muted) font-mono">
                         {new Date(log.createdAt).toLocaleString()}
                       </td>
                     </tr>

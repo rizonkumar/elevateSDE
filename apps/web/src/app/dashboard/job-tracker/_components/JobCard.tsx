@@ -36,7 +36,7 @@ export const JobCardView = React.forwardRef<HTMLDivElement, JobCardViewProps>(
     return (
       <div
         ref={ref}
-        className={`rounded-(--radius-lg) border border-(--color-border-subtle) bg-(--color-surface) p-3.5 shadow-xs transition-shadow hover:shadow-(--shadow-soft) touch-none ${className}`}
+        className={`rounded-lg border border-(--color-border-subtle) bg-(--color-surface) p-3.5 shadow-xs transition-shadow hover:shadow-(--shadow-soft) touch-none ${className}`}
         {...rest}
       >
         <div className="flex items-start justify-between gap-2">

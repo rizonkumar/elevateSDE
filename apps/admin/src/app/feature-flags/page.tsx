@@ -108,29 +108,29 @@ export default function FeatureFlagsPage() {
     <AdminLayout>
       {loading ? (
         <div className="flex items-center justify-center min-h-[300px]">
-          <span className="text-sm text-[var(--color-text-muted)] animate-pulse">
+          <span className="text-sm text-(--color-text-muted) animate-pulse">
             Retrieving system feature flags...
           </span>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
           <div className="lg:col-span-2 flex flex-col gap-4">
-            <div className="hidden md:block overflow-x-auto rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] shadow-sm">
+            <div className="hidden md:block overflow-x-auto rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-sm">
               <table className="w-full border-collapse text-left text-sm">
                 <thead>
-                  <tr className="border-b border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)] text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">
+                  <tr className="border-b border-(--color-border-subtle) bg-(--color-bg-soft) text-xs font-semibold text-(--color-text-muted) uppercase tracking-wider">
                     <th className="px-6 py-4">Flag Key</th>
                     <th className="px-6 py-4">Status</th>
                     <th className="px-6 py-4">Rollout %</th>
                     <th className="px-6 py-4">Updated At</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[var(--color-border-subtle)]">
+                <tbody className="divide-y divide-(--color-border-subtle)">
                   {flags.length === 0 ? (
                     <tr>
                       <td
                         colSpan={4}
-                        className="px-6 py-8 text-center text-xs text-[var(--color-text-muted)]"
+                        className="px-6 py-8 text-center text-xs text-(--color-text-muted)"
                       >
                         No feature flags defined yet.
                       </td>
@@ -139,9 +139,9 @@ export default function FeatureFlagsPage() {
                     flags.map((flag) => (
                       <tr
                         key={flag.id}
-                        className="hover:bg-[var(--color-bg-soft)]/50 transition-colors"
+                        className="hover:bg-(--color-bg-soft)/50 transition-colors"
                       >
-                        <td className="px-6 py-4 font-mono text-xs font-bold text-[var(--color-text-primary)]">
+                        <td className="px-6 py-4 font-mono text-xs font-bold text-(--color-text-primary)">
                           {flag.flagKey}
                         </td>
                         <td className="px-6 py-4">
@@ -168,12 +168,12 @@ export default function FeatureFlagsPage() {
                               onCommit={(value) => handleRolloutChange(flag.id, value)}
                               className="w-32"
                             />
-                            <span className="font-mono text-xs font-semibold text-[var(--color-text-primary)] w-9 text-right">
+                            <span className="font-mono text-xs font-semibold text-(--color-text-primary) w-9 text-right">
                               {flag.percentageRollout}%
                             </span>
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-xs text-[var(--color-text-muted)] font-mono">
+                        <td className="px-6 py-4 text-xs text-(--color-text-muted) font-mono">
                           {new Date(flag.updatedAt).toLocaleString()}
                         </td>
                       </tr>
@@ -185,17 +185,17 @@ export default function FeatureFlagsPage() {
 
             <div className="md:hidden flex flex-col gap-4">
               {flags.length === 0 ? (
-                <div className="rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] shadow-sm px-6 py-10 text-center text-xs text-[var(--color-text-muted)]">
+                <div className="rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-sm px-6 py-10 text-center text-xs text-(--color-text-muted)">
                   No feature flags defined yet.
                 </div>
               ) : (
                 flags.map((flag) => (
                   <div
                     key={flag.id}
-                    className="rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] shadow-sm p-4 flex flex-col gap-3"
+                    className="rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-sm p-4 flex flex-col gap-3"
                   >
                     <div className="flex items-center justify-between gap-3">
-                      <span className="font-mono text-xs font-bold text-[var(--color-text-primary)] break-all">
+                      <span className="font-mono text-xs font-bold text-(--color-text-primary) break-all">
                         {flag.flagKey}
                       </span>
                       <Badge variant={flag.isEnabled ? 'success' : 'neutral'}>
@@ -216,7 +216,7 @@ export default function FeatureFlagsPage() {
                           onCommit={(value) => handleRolloutChange(flag.id, value)}
                           className="w-32"
                         />
-                        <span className="font-mono text-xs font-semibold text-[var(--color-text-primary)] w-9 text-right">
+                        <span className="font-mono text-xs font-semibold text-(--color-text-primary) w-9 text-right">
                           {flag.percentageRollout}%
                         </span>
                       </div>
@@ -227,9 +227,9 @@ export default function FeatureFlagsPage() {
             </div>
           </div>
 
-          <div className="p-6 rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] shadow-sm flex flex-col gap-6">
-            <h2 className="text-sm font-semibold text-[var(--color-text-primary)] border-b border-[var(--color-border-subtle)] pb-4 flex items-center gap-2">
-              <Plus className="w-4 h-4 text-[var(--color-accent)] shrink-0" />
+          <div className="p-6 rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-sm flex flex-col gap-6">
+            <h2 className="text-sm font-semibold text-(--color-text-primary) border-b border-(--color-border-subtle) pb-4 flex items-center gap-2">
+              <Plus className="w-4 h-4 text-(--color-accent) shrink-0" />
               Define Feature Flag
             </h2>
 
@@ -242,11 +242,11 @@ export default function FeatureFlagsPage() {
                 onChange={(e) => setNewFlagKey(e.target.value)}
                 disabled={creating}
                 required
-                icon={<Settings className="w-4 h-4 text-[var(--color-text-muted)]" />}
+                icon={<Settings className="w-4 h-4 text-(--color-text-muted)" />}
               />
 
-              <div className="flex items-center justify-between border border-[var(--color-border-subtle)] rounded-lg p-3 bg-[var(--color-bg-soft)]">
-                <span className="text-xs font-semibold text-[var(--color-text-primary)]">
+              <div className="flex items-center justify-between border border-(--color-border-subtle) rounded-lg p-3 bg-(--color-bg-soft)">
+                <span className="text-xs font-semibold text-(--color-text-primary)">
                   Enabled by Default
                 </span>
                 <Toggle
@@ -259,15 +259,15 @@ export default function FeatureFlagsPage() {
 
               <div className="flex flex-col gap-2">
                 <div className="flex justify-between items-center">
-                  <span className="text-xs font-semibold text-[var(--color-text-primary)]">
+                  <span className="text-xs font-semibold text-(--color-text-primary)">
                     Rollout Percentage
                   </span>
-                  <span className="text-xs font-mono font-semibold text-[var(--color-accent)]">
+                  <span className="text-xs font-mono font-semibold text-(--color-accent)">
                     {newRollout}%
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Percent className="w-4 h-4 text-[var(--color-text-muted)] shrink-0" />
+                  <Percent className="w-4 h-4 text-(--color-text-muted) shrink-0" />
                   <RangeSlider
                     value={newRollout}
                     onChange={setNewRollout}
