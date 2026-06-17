@@ -92,3 +92,55 @@ export interface ResumeDto {
   createdAt: string;
   updatedAt: string;
 }
+
+export type MockInterviewTopic = 'SYSTEM_DESIGN' | 'BEHAVIORAL' | 'CODING' | 'DSA';
+
+export type InterviewRoleLevel = 'JUNIOR' | 'MID' | 'SENIOR' | 'STAFF';
+
+export type InterviewCompanyStyle = 'GENERIC' | 'FAANG' | 'STARTUP' | 'ENTERPRISE';
+
+export type InterviewSpeaker = 'AI' | 'CANDIDATE';
+
+export type InterviewSessionStatus = 'IDLE' | 'ACTIVE' | 'COMPLETED';
+
+export interface InterviewConfig {
+  topic: MockInterviewTopic;
+  roleLevel: InterviewRoleLevel;
+  companyStyle: InterviewCompanyStyle;
+  durationMinutes: number;
+}
+
+export interface TranscriptEntry {
+  id: string;
+  speaker: InterviewSpeaker;
+  text: string;
+  createdAt: string;
+  isFinal: boolean;
+}
+
+export type InterviewCompetencySeverity = 'good' | 'warning' | 'critical';
+
+export interface InterviewCompetencyScore {
+  label: string;
+  score: number;
+  severity: InterviewCompetencySeverity;
+}
+
+export interface MockInterviewFeedback {
+  overallScore: number;
+  competencies: InterviewCompetencyScore[];
+  strengths: string[];
+  improvements: string[];
+  summary: string;
+}
+
+export interface MockInterviewSession {
+  id: string;
+  userId: string;
+  config: InterviewConfig;
+  status: InterviewSessionStatus;
+  transcript: TranscriptEntry[];
+  feedback: MockInterviewFeedback | null;
+  startedAt: string | null;
+  endedAt: string | null;
+}
