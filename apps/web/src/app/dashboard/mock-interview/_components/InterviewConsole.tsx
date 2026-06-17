@@ -27,7 +27,7 @@ export function InterviewConsole() {
 
   if (!config) return null;
 
-  const handleSend = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSend = (event: React.SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (draft.trim().length === 0) return;
     submitTypedAnswer(draft);

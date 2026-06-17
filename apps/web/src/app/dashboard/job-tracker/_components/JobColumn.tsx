@@ -3,7 +3,6 @@
 import * as React from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { Badge } from '@elevatesde/ui';
 import type { JobApplicationDto } from '@elevatesde/shared-types';
 import { JobCard } from './JobCard';
 import { columnDroppableId, type BoardColumn } from './board';
@@ -19,18 +18,21 @@ export function JobColumn({ column, applications, onEdit, onDelete }: JobColumnP
   const { setNodeRef, isOver } = useDroppable({ id: columnDroppableId(column.status) });
 
   return (
-    <div className="flex flex-col min-w-0">
-      <div className="flex items-center justify-between gap-2 px-1 pb-3">
-        <div className="flex items-center gap-2">
-          <Badge variant={column.badge}>{column.label}</Badge>
+    <div className="flex min-w-0 flex-col">
+      <div className="flex h-9 items-center justify-between gap-2 px-1">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className={`h-2 w-2 shrink-0 rounded-full ${column.dotClass}`} />
+          <span className="truncate text-xs font-semibold uppercase tracking-wider text-(--color-text-primary)">
+            {column.label}
+          </span>
         </div>
-        <span className="text-xs font-semibold text-(--color-text-muted) tabular-nums">
+        <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-(--color-badge-bg) px-1.5 text-xs font-semibold text-(--color-text-muted) tabular-nums">
           {applications.length}
         </span>
       </div>
       <div
         ref={setNodeRef}
-        className={`flex flex-col gap-2.5 rounded-lg border border-dashed p-2.5 min-h-[160px] flex-1 transition-colors ${
+        className={`mt-2 flex min-h-[200px] flex-1 flex-col gap-2.5 rounded-lg border border-dashed p-2.5 transition-colors ${
           isOver
             ? 'border-(--color-accent) bg-(--color-accent-soft)'
             : 'border-(--color-border-subtle) bg-(--color-bg-soft)'

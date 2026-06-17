@@ -45,7 +45,7 @@ export default function FeatureFlagsPage() {
     loadFeatureFlags();
   }, [loadFeatureFlags]);
 
-  const handleCreate = async (e: React.FormEvent) => {
+  const handleCreate = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     if (!newFlagKey) {
       addToast('Please enter a feature flag key.', 'error');

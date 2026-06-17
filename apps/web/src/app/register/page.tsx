@@ -34,7 +34,7 @@ export default function RegisterPage() {
   const [companyName, setCompanyName] = React.useState('');
   const [loading, setLoading] = React.useState(false);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!email || !password || (role === 'TENANT_ADMIN' && !companyName)) {
       addToast('Please fill in all required fields.', 'error');

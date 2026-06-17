@@ -15,7 +15,7 @@ import {
 } from '@dnd-kit/core';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { Plus } from 'lucide-react';
-import { Button } from '@elevatesde/ui';
+import { Button, ConfirmDialog } from '@elevatesde/ui';
 import type { JobApplicationDto, JobApplicationStatus } from '@elevatesde/shared-types';
 import { useJobTrackerStore, type JobApplicationInput } from '@/store/job-tracker.store';
 import { JobColumn } from './_components/JobColumn';
@@ -63,6 +63,7 @@ export default function JobTrackerPage() {
   const [mounted, setMounted] = React.useState(false);
   const [submitting, setSubmitting] = React.useState(false);
   const [activeId, setActiveId] = React.useState<string | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     setMounted(true);
@@ -80,6 +81,9 @@ export default function JobTrackerPage() {
     : null;
   const activeApplication = activeId
     ? applications.find((application) => application.id === activeId) ?? null
+    : null;
+  const pendingDeleteApplication = pendingDeleteId
+    ? applications.find((application) => application.id === pendingDeleteId) ?? null
     : null;
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -166,7 +170,7 @@ export default function JobTrackerPage() {
                   column={column}
                   applications={grouped[column.status]}
                   onEdit={openModal}
-                  onDelete={remove}
+                  onDelete={setPendingDeleteId}
                 />
               ))}
             </div>
@@ -190,6 +194,25 @@ export default function JobTrackerPage() {
         submitting={submitting}
         onClose={closeModal}
         onSubmit={handleSubmit}
+      />
+
+      <ConfirmDialog
+        open={pendingDeleteId !== null}
+        tone="danger"
+        title="Delete application?"
+        description={
+          pendingDeleteApplication
+            ? `This permanently removes ${pendingDeleteApplication.company} — ${pendingDeleteApplication.role}.`
+            : 'This permanently removes the application.'
+        }
+        confirmLabel="Delete"
+        onClose={() => setPendingDeleteId(null)}
+        onConfirm={() => {
+          if (pendingDeleteId) {
+            remove(pendingDeleteId);
+          }
+          setPendingDeleteId(null);
+        }}
       />
     </>
   );

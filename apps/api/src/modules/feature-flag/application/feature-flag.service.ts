@@ -64,11 +64,9 @@ export class FeatureFlagService {
 
   private hashCode(str: string): number {
     let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = (hash << 5) - hash + char;
-      hash |= 0;
+    for (const char of str) {
+      hash = (hash * 31 + (char.codePointAt(0) ?? 0)) % 2_147_483_647;
     }
-    return Math.abs(hash);
+    return hash;
   }
 }

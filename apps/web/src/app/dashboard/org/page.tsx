@@ -67,7 +67,7 @@ export default function OrgDashboardPage() {
   const seatData = [{ name: 'seats', value: seats.used }];
   const seatPercent = Math.round((seats.used / seats.total) * 100);
 
-  const handleInvite = (event: React.FormEvent) => {
+  const handleInvite = (event: React.SyntheticEvent) => {
     event.preventDefault();
     const result = inviteMember(email);
     if (result.ok) {
