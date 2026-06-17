@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { IFeatureFlagRepository } from '../domain/interfaces/feature-flag-repository.interface';
 import { FeatureFlag } from '../domain/entities/feature-flag';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 
 @Injectable()
 export class FeatureFlagService {

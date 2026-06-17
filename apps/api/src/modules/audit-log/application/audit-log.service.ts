@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { IAuditLogRepository } from '../domain/interfaces/audit-log-repository.interface';
 import { AuditLog } from '../domain/entities/audit-log';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 
 @Injectable()
 export class AuditLogService {

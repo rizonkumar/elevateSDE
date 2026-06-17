@@ -17,7 +17,7 @@ import type {
 } from '@elevatesde/shared-types';
 
 interface FeedbackTabsProps {
-  analysis: ResumeDto;
+  readonly analysis: ResumeDto;
 }
 
 type TabId = 'skills' | 'structure' | 'tips';
@@ -34,7 +34,7 @@ const severityColor: Record<ResumeFeedbackSeverity, string> = {
   critical: 'text-rose-500',
 };
 
-function FeedbackRow({ item }: { item: ResumeFeedbackItem }) {
+function FeedbackRow({ item }: { readonly item: ResumeFeedbackItem }) {
   const Icon = severityIcon[item.severity];
   return (
     <li className="flex items-start gap-3">

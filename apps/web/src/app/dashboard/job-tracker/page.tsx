@@ -138,7 +138,7 @@ export default function JobTrackerPage() {
             <h1 className="text-2xl sm:text-3xl font-bold font-display tracking-tight">
               Job Tracker
             </h1>
-            <p className="text-sm text-[var(--color-text-muted)] mt-1.5">
+            <p className="text-sm text-(--color-text-muted) mt-1.5">
               Drag applications across stages to keep your pipeline current.
             </p>
           </div>
@@ -149,7 +149,7 @@ export default function JobTrackerPage() {
         </motion.header>
 
         {!mounted || isLoading ? (
-          <div className="flex items-center justify-center py-24 text-sm text-[var(--color-text-muted)]">
+          <div className="flex items-center justify-center py-24 text-sm text-(--color-text-muted)">
             Loading your applications...
           </div>
         ) : (
@@ -176,7 +176,7 @@ export default function JobTrackerPage() {
                   application={activeApplication}
                   onEdit={() => undefined}
                   onDelete={() => undefined}
-                  className="shadow-[var(--shadow-soft)] cursor-grabbing"
+                  className="shadow-(--shadow-soft) cursor-grabbing"
                 />
               ) : null}
             </DragOverlay>

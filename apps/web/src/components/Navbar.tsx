@@ -19,7 +19,7 @@ export function Navbar({ wide = false }: NavbarProps) {
   }, []);
 
   const showAuth = mounted && isAuthenticated;
-  const containerClass = wide ? 'max-w-[1400px]' : 'max-w-[var(--page-max-width)]';
+  const containerClass = wide ? 'max-w-[1400px]' : 'max-w-(--page-max-width)';
 
   return (
     <header className="sticky top-0 z-40 border-b border-(--color-border-subtle) bg-(--color-bg) transition-colors duration-200">

@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { IUsersRepository } from '../domain/interfaces/users-repository.interface';
 import { User } from '../domain/entities/user';
 import { UserRole } from '@prisma/client';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 
 @Injectable()
 export class UsersService {

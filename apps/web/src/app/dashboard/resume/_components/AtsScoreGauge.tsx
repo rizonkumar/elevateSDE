@@ -5,7 +5,7 @@ import { RadialBarChart, RadialBar, PolarAngleAxis, ResponsiveContainer } from '
 import { scoreBand } from '@/lib/resume-analyzer';
 
 interface AtsScoreGaugeProps {
-  score: number;
+  readonly score: number;
 }
 
 export function AtsScoreGauge({ score }: AtsScoreGaugeProps) {
