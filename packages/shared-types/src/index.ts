@@ -66,3 +66,29 @@ export interface JobApplicationDto {
   createdAt: string;
   updatedAt: string;
 }
+
+export type ResumeStatus = 'PROCESSING' | 'COMPLETED' | 'FAILED';
+
+export type ResumeFeedbackSeverity = 'good' | 'warning' | 'critical';
+
+export interface ResumeFeedbackItem {
+  title: string;
+  detail: string;
+  severity: ResumeFeedbackSeverity;
+}
+
+export interface ResumeDto {
+  id: string;
+  userId: string;
+  fileName: string;
+  fileUrl: string | null;
+  status: ResumeStatus;
+  atsScore: number | null;
+  parsedSkills: string[];
+  missingSkills: string[];
+  structureFeedback: ResumeFeedbackItem[];
+  actionableTips: string[];
+  summary: string | null;
+  createdAt: string;
+  updatedAt: string;
+}

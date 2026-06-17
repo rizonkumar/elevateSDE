@@ -69,14 +69,14 @@ export default function LoginPage() {
         <div className="text-center lg:text-left mb-8">
           <Link
             href="/"
-            className="lg:hidden text-xl font-bold tracking-tight text-[var(--color-text-primary)] select-none"
+            className="lg:hidden text-xl font-bold tracking-tight text-(--color-text-primary) select-none"
           >
-            Elevate<span className="text-[var(--color-accent)]">SDE</span>
+            Elevate<span className="text-(--color-accent)">SDE</span>
           </Link>
-          <h2 className="text-xl font-semibold text-[var(--color-text-primary)] mt-4 lg:mt-0">
+          <h2 className="text-xl font-semibold text-(--color-text-primary) mt-4 lg:mt-0">
             Sign in to your account
           </h2>
-          <p className="text-xs text-[var(--color-text-muted)] mt-1.5">
+          <p className="text-xs text-(--color-text-muted) mt-1.5">
             Continue your interview preparation journey
           </p>
         </div>
@@ -91,7 +91,7 @@ export default function LoginPage() {
             disabled={loading}
             required
             autoComplete="email"
-            icon={<Mail className="w-4 h-4 text-[var(--color-text-muted)]" />}
+            icon={<Mail className="w-4 h-4 text-(--color-text-muted)" />}
           />
 
           <Input
@@ -103,7 +103,7 @@ export default function LoginPage() {
             disabled={loading}
             required
             autoComplete="current-password"
-            icon={<Lock className="w-4 h-4 text-[var(--color-text-muted)]" />}
+            icon={<Lock className="w-4 h-4 text-(--color-text-muted)" />}
           />
 
           <Button
@@ -115,22 +115,16 @@ export default function LoginPage() {
           </Button>
         </form>
 
-        <div className="text-center mt-6 flex flex-col gap-2.5 text-xs text-[var(--color-text-muted)]">
+        <div className="text-center mt-6 flex flex-col gap-2.5 text-xs text-(--color-text-muted)">
           <div>
             Don&apos;t have an account?{' '}
-            <Link
-              href="/register"
-              className="text-[var(--color-accent)] font-medium hover:underline"
-            >
+            <Link href="/register" className="text-(--color-accent) font-medium hover:underline">
               Create account
             </Link>
           </div>
-          <div className="border-t border-[var(--color-border-subtle)] pt-3 mt-1">
+          <div className="border-t border-(--color-border-subtle) pt-3 mt-1">
             Are you a system administrator?{' '}
-            <a
-              href="/admin/login"
-              className="text-[var(--color-accent)] font-semibold hover:underline"
-            >
+            <a href="/admin/login" className="text-(--color-accent) font-semibold hover:underline">
               Sign in to Admin Console
             </a>
           </div>
