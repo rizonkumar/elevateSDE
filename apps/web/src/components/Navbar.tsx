@@ -13,6 +13,7 @@ import {
   Shield,
   LogOut,
   Briefcase,
+  FileText,
 } from 'lucide-react';
 import { useAuthStore } from '../store/auth.store';
 import { api } from '../lib/api';
@@ -79,6 +80,7 @@ export function Navbar({ wide = false }: NavbarProps) {
   const navLinks: NavLink[] = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/dashboard/job-tracker', label: 'Job Tracker', icon: Briefcase },
+    { href: '/dashboard/resume', label: 'Resume Analyzer', icon: FileText },
   ];
   if (user?.role === 'TENANT_ADMIN') {
     navLinks.push({ href: '/dashboard/org', label: 'Organization', icon: Building2 });

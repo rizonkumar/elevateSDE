@@ -32,12 +32,12 @@ export function RoleList() {
         const Icon = role.icon;
         return (
           <li key={role.name} className="flex items-start gap-3.5">
-            <span className="flex items-center justify-center w-9 h-9 shrink-0 rounded-full bg-[var(--color-accent-soft)] text-[var(--color-accent)]">
+            <span className="flex items-center justify-center w-9 h-9 shrink-0 rounded-full bg-(--color-accent-soft) text-(--color-accent)">
               <Icon className="w-4 h-4" />
             </span>
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-[var(--color-text-primary)]">{role.name}</p>
-              <p className="text-xs text-[var(--color-text-muted)] mt-0.5 leading-relaxed">
+              <p className="text-sm font-semibold text-(--color-text-primary)">{role.name}</p>
+              <p className="text-xs text-(--color-text-muted) mt-0.5 leading-relaxed">
                 {role.summary}
               </p>
             </div>
