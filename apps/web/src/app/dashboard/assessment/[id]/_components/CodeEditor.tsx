@@ -1,8 +1,8 @@
 'use client';
 
-import * as React from 'react';
-import Editor from '@monaco-editor/react';
+import Editor, { type OnMount } from '@monaco-editor/react';
 import type { AssessmentLanguage } from '@elevatesde/shared-types';
+import type { EditorThemePref } from '@/store/assessment-settings.store';
 import { useThemeMode } from './useThemeMode';
 
 const MONACO_LANGUAGE: Record<AssessmentLanguage, string> = {
@@ -15,18 +15,34 @@ interface CodeEditorProps {
   language: AssessmentLanguage;
   value: string;
   onChange: (value: string) => void;
+  fontSize: number;
+  tabSize: number;
+  wordWrap: boolean;
+  themePref: EditorThemePref;
+  onMount?: OnMount;
 }
 
-export function CodeEditor({ language, value, onChange }: CodeEditorProps) {
-  const mode = useThemeMode();
+export function CodeEditor({
+  language,
+  value,
+  onChange,
+  fontSize,
+  tabSize,
+  wordWrap,
+  themePref,
+  onMount,
+}: Readonly<CodeEditorProps>) {
+  const systemMode = useThemeMode();
+  const resolvedMode = themePref === 'system' ? systemMode : themePref;
 
   return (
     <Editor
       height="100%"
       language={MONACO_LANGUAGE[language]}
-      theme={mode === 'dark' ? 'vs-dark' : 'light'}
+      theme={resolvedMode === 'dark' ? 'vs-dark' : 'light'}
       value={value}
       onChange={(next) => onChange(next ?? '')}
+      onMount={onMount}
       loading={
         <div className="flex h-full items-center justify-center text-sm text-(--color-text-muted)">
           Loading editor…
@@ -34,12 +50,13 @@ export function CodeEditor({ language, value, onChange }: CodeEditorProps) {
       }
       options={{
         automaticLayout: true,
-        fontSize: 14,
-        lineHeight: 22,
+        fontSize,
+        lineHeight: Math.round(fontSize * 1.6),
         minimap: { enabled: false },
         scrollBeyondLastLine: false,
         padding: { top: 16, bottom: 16 },
-        tabSize: 2,
+        tabSize,
+        wordWrap: wordWrap ? 'on' : 'off',
         smoothScrolling: true,
         cursorBlinking: 'smooth',
         renderLineHighlight: 'all',

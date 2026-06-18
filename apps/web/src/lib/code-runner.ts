@@ -59,6 +59,7 @@ export function runCode(
   problem: AssessmentProblemSeed,
   language: AssessmentLanguage,
   code: string,
+  customVisibleInputs?: string[],
 ): Promise<AssessmentRunResultDto> {
   const starter = problem.starterCode[language];
   const empty = isEmptyAttempt(code, starter);
@@ -80,11 +81,13 @@ export function runCode(
     const visibleIndex = problem.testCases.filter(
       (item, position) => !item.isHidden && position <= index,
     ).length;
+    const customInput = testCase.isHidden ? undefined : customVisibleInputs?.[visibleIndex - 1];
+    const displayedInput = customInput && customInput.trim().length > 0 ? customInput : testCase.input;
     return {
       testCaseId: testCase.id,
       label: testCase.isHidden ? `Hidden case ${index + 1}` : `Case ${visibleIndex}`,
       status,
-      input: testCase.isHidden ? 'Hidden' : testCase.input,
+      input: testCase.isHidden ? 'Hidden' : displayedInput,
       expectedOutput: testCase.isHidden ? 'Hidden' : testCase.expectedOutput,
       actualOutput: testCase.isHidden && status !== 'PASS' ? 'Hidden' : actualOutput,
       isHidden: testCase.isHidden,

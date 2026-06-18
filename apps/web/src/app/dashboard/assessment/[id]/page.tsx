@@ -4,13 +4,16 @@ import * as React from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import { Button } from '@elevatesde/ui';
-import { Play, Send, FileCode2, Code2, Terminal, ArrowLeft } from 'lucide-react';
+import { Play, Send, FileCode2, Code2, Terminal, ArrowLeft, Settings } from 'lucide-react';
 import { useAssessmentStore } from '@/store/assessment.store';
 import { ProblemPanel } from './_components/ProblemPanel';
 import { EditorPanel } from './_components/EditorPanel';
 import { ConsolePanel } from './_components/ConsolePanel';
-import { SessionTimer } from './_components/SessionTimer';
+import { TimerControl } from './_components/TimerControl';
+import { SettingsModal } from './_components/SettingsModal';
+import { useMediaQuery } from './_components/useMediaQuery';
 
 type MobileView = 'problem' | 'code' | 'output';
 
@@ -20,6 +23,22 @@ const MOBILE_VIEWS: { id: MobileView; label: string; icon: typeof FileCode2 }[] 
   { id: 'output', label: 'Output', icon: Terminal },
 ];
 
+function HorizontalHandle() {
+  return (
+    <PanelResizeHandle className="group flex w-3 items-center justify-center">
+      <div className="h-10 w-1 rounded-full bg-(--color-border-subtle) transition-colors group-hover:bg-(--color-accent) group-data-[resize-handle-state=drag]:bg-(--color-accent)" />
+    </PanelResizeHandle>
+  );
+}
+
+function VerticalHandle() {
+  return (
+    <PanelResizeHandle className="group flex h-3 items-center justify-center">
+      <div className="h-1 w-10 rounded-full bg-(--color-border-subtle) transition-colors group-hover:bg-(--color-accent) group-data-[resize-handle-state=drag]:bg-(--color-accent)" />
+    </PanelResizeHandle>
+  );
+}
+
 export default function AssessmentPage() {
   const params = useParams<{ id: string }>();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
@@ -28,13 +47,15 @@ export default function AssessmentPage() {
   const problem = useAssessmentStore((state) => state.problem);
   const isRunning = useAssessmentStore((state) => state.isRunning);
   const isSubmitting = useAssessmentStore((state) => state.isSubmitting);
-  const remainingSeconds = useAssessmentStore((state) => state.remainingSeconds);
+  const editorMaximized = useAssessmentStore((state) => state.editorMaximized);
   const loadProblem = useAssessmentStore((state) => state.loadProblem);
   const reset = useAssessmentStore((state) => state.reset);
   const run = useAssessmentStore((state) => state.run);
   const submit = useAssessmentStore((state) => state.submit);
 
+  const isDesktop = useMediaQuery('(min-width: 1024px)');
   const [mobileView, setMobileView] = React.useState<MobileView>('problem');
+  const [settingsOpen, setSettingsOpen] = React.useState(false);
 
   React.useEffect(() => {
     if (id) {
@@ -72,6 +93,69 @@ export default function AssessmentPage() {
 
   const busy = isRunning || isSubmitting;
 
+  const desktopLayout = editorMaximized ? (
+    <div className="min-h-0 flex-1 p-3">
+      <EditorPanel />
+    </div>
+  ) : (
+    <div className="min-h-0 flex-1 p-3">
+      <PanelGroup direction="horizontal" autoSaveId="assessment-layout-h-v1" className="h-full">
+        <Panel defaultSize={42} minSize={24} className="min-h-0">
+          <ProblemPanel problem={problem} />
+        </Panel>
+        <HorizontalHandle />
+        <Panel minSize={30} className="min-h-0">
+          <PanelGroup direction="vertical" autoSaveId="assessment-layout-v-v1" className="h-full">
+            <Panel defaultSize={62} minSize={20} className="min-h-0">
+              <EditorPanel />
+            </Panel>
+            <VerticalHandle />
+            <Panel defaultSize={38} minSize={15} className="min-h-0">
+              <ConsolePanel />
+            </Panel>
+          </PanelGroup>
+        </Panel>
+      </PanelGroup>
+    </div>
+  );
+
+  const mobileLayout = (
+    <>
+      <div className="flex items-center gap-1 border-b border-(--color-border-subtle) px-4 py-2">
+        {MOBILE_VIEWS.map((view) => {
+          const Icon = view.icon;
+          const active = mobileView === view.id;
+          return (
+            <button
+              key={view.id}
+              type="button"
+              onClick={() => setMobileView(view.id)}
+              className={`inline-flex flex-1 items-center justify-center gap-1.5 rounded-(--radius-lg) px-3 py-2 text-sm font-medium transition-colors ${
+                active
+                  ? 'bg-(--color-badge-bg) text-(--color-text-primary)'
+                  : 'text-(--color-text-muted)'
+              }`}
+            >
+              <Icon className="h-4 w-4" />
+              {view.label}
+            </button>
+          );
+        })}
+      </div>
+      <div className="min-h-0 flex-1 p-3">
+        <div className={`${mobileView === 'problem' ? 'block' : 'hidden'} h-full`}>
+          <ProblemPanel problem={problem} />
+        </div>
+        <div className={`${mobileView === 'code' ? 'block' : 'hidden'} h-full`}>
+          <EditorPanel />
+        </div>
+        <div className={`${mobileView === 'output' ? 'block' : 'hidden'} h-full`}>
+          <ConsolePanel />
+        </div>
+      </div>
+    </>
+  );
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -97,8 +181,16 @@ export default function AssessmentPage() {
             </h1>
           </div>
         </div>
-        <div className="flex items-center gap-2.5">
-          <SessionTimer remainingSeconds={remainingSeconds} />
+        <div className="flex items-center gap-2">
+          <TimerControl />
+          <button
+            type="button"
+            onClick={() => setSettingsOpen(true)}
+            aria-label="Settings"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-(--color-border-subtle) text-(--color-text-primary) transition-colors hover:bg-(--color-badge-bg) cursor-pointer"
+          >
+            <Settings className="h-4 w-4" />
+          </button>
           <Button
             variant="secondary"
             onClick={() => void run()}
@@ -120,50 +212,9 @@ export default function AssessmentPage() {
         </div>
       </header>
 
-      <div className="flex items-center gap-1 border-b border-(--color-border-subtle) px-4 py-2 lg:hidden">
-        {MOBILE_VIEWS.map((view) => {
-          const Icon = view.icon;
-          const active = mobileView === view.id;
-          return (
-            <button
-              key={view.id}
-              type="button"
-              onClick={() => setMobileView(view.id)}
-              className={`inline-flex flex-1 items-center justify-center gap-1.5 rounded-(--radius-lg) px-3 py-2 text-sm font-medium transition-colors ${
-                active
-                  ? 'bg-(--color-badge-bg) text-(--color-text-primary)'
-                  : 'text-(--color-text-muted)'
-              }`}
-            >
-              <Icon className="h-4 w-4" />
-              {view.label}
-            </button>
-          );
-        })}
-      </div>
+      {isDesktop ? desktopLayout : mobileLayout}
 
-      <div className="grid min-h-0 flex-1 gap-3 p-3 lg:grid-cols-2">
-        <div className={`${mobileView === 'problem' ? 'flex' : 'hidden'} min-h-0 lg:flex`}>
-          <div className="min-h-0 w-full">
-            <ProblemPanel problem={problem} />
-          </div>
-        </div>
-
-        <div className="flex min-h-0 flex-col gap-3">
-          <div className={`${mobileView === 'code' ? 'flex' : 'hidden'} min-h-0 flex-1 lg:flex`}>
-            <div className="min-h-0 w-full">
-              <EditorPanel />
-            </div>
-          </div>
-          <div
-            className={`${mobileView === 'output' ? 'flex' : 'hidden'} min-h-0 flex-1 lg:flex lg:h-2/5 lg:flex-none`}
-          >
-            <div className="min-h-0 w-full">
-              <ConsolePanel />
-            </div>
-          </div>
-        </div>
-      </div>
+      <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </motion.div>
   );
 }
