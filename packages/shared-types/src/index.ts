@@ -148,3 +148,60 @@ export interface MockInterviewSession {
   startedAt: string | null;
   endedAt: string | null;
 }
+
+export type AssessmentLanguage = 'javascript' | 'python' | 'cpp';
+
+export type AssessmentDifficulty = 'EASY' | 'MEDIUM' | 'HARD';
+
+export type TestCaseResultStatus = 'PASS' | 'FAIL' | 'ERROR';
+
+export type AssessmentRunStatus = 'ACCEPTED' | 'WRONG_ANSWER' | 'RUNTIME_ERROR';
+
+export interface CodingProblemExample {
+  input: string;
+  output: string;
+  explanation: string | null;
+}
+
+export interface AssessmentTestCase {
+  id: string;
+  input: string;
+  expectedOutput: string;
+  isHidden: boolean;
+}
+
+export interface CodingProblemDto {
+  id: string;
+  title: string;
+  difficulty: AssessmentDifficulty;
+  description: string;
+  constraints: string[];
+  tags: string[];
+  starterCode: Record<AssessmentLanguage, string>;
+  examples: CodingProblemExample[];
+  testCases: AssessmentTestCase[];
+  timeLimitMinutes: number;
+}
+
+export interface TestCaseResultDto {
+  testCaseId: string;
+  label: string;
+  status: TestCaseResultStatus;
+  input: string;
+  expectedOutput: string;
+  actualOutput: string;
+  isHidden: boolean;
+  runtimeMs: number;
+  memoryKb: number;
+}
+
+export interface AssessmentRunResultDto {
+  status: AssessmentRunStatus;
+  results: TestCaseResultDto[];
+  passedCount: number;
+  totalCount: number;
+  totalRuntimeMs: number;
+  peakMemoryKb: number;
+  stdout: string;
+  ranAt: string;
+}
