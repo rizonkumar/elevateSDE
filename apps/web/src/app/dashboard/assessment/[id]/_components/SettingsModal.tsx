@@ -2,7 +2,6 @@
 
 import * as React from 'react';
 import { Modal } from '@elevatesde/ui';
-import { Code2, Timer } from 'lucide-react';
 import {
   useAssessmentSettingsStore,
   type EditorFontSize,
@@ -15,9 +14,9 @@ import { SegmentedControl } from './SegmentedControl';
 
 type Section = 'editor' | 'timer';
 
-const SECTIONS: { id: Section; label: string; icon: typeof Code2 }[] = [
-  { id: 'editor', label: 'Code Editor', icon: Code2 },
-  { id: 'timer', label: 'Timer', icon: Timer },
+const SECTION_OPTIONS: readonly { value: Section; label: string }[] = [
+  { value: 'editor', label: 'Code Editor' },
+  { value: 'timer', label: 'Timer' },
 ];
 
 const FONT_SIZE_OPTIONS: readonly { value: EditorFontSize; label: string }[] = [
@@ -28,8 +27,8 @@ const FONT_SIZE_OPTIONS: readonly { value: EditorFontSize; label: string }[] = [
 ];
 
 const TAB_SIZE_OPTIONS: readonly { value: EditorTabSize; label: string }[] = [
-  { value: 2, label: '2 spaces' },
-  { value: 4, label: '4 spaces' },
+  { value: 2, label: '2' },
+  { value: 4, label: '4' },
 ];
 
 const THEME_OPTIONS: readonly { value: EditorThemePref; label: string }[] = [
@@ -43,33 +42,18 @@ const TIMER_MODE_OPTIONS: readonly { value: TimerMode; label: string }[] = [
   { value: 'countdown', label: 'Countdown' },
 ];
 
-function Field({ label, children }: Readonly<{ label: string; children: React.ReactNode }>) {
-  return (
-    <div>
-      <div className="mb-2 text-sm font-medium text-(--color-text-primary)">{label}</div>
-      {children}
-    </div>
-  );
-}
-
-function ToggleRow({
+function Row({
   label,
   description,
-  checked,
-  onChange,
-}: Readonly<{
-  label: string;
-  description?: string;
-  checked: boolean;
-  onChange: (value: boolean) => void;
-}>) {
+  children,
+}: Readonly<{ label: string; description?: string; children: React.ReactNode }>) {
   return (
-    <div className="flex items-center justify-between gap-4">
+    <div className="flex items-center justify-between gap-4 py-3">
       <div className="min-w-0">
         <div className="text-sm font-medium text-(--color-text-primary)">{label}</div>
         {description && <div className="mt-0.5 text-xs text-(--color-text-muted)">{description}</div>}
       </div>
-      <Toggle checked={checked} onChange={onChange} label={label} />
+      <div className="shrink-0">{children}</div>
     </div>
   );
 }
@@ -84,85 +68,60 @@ export function SettingsModal({ open, onClose }: Readonly<SettingsModalProps>) {
   const [section, setSection] = React.useState<Section>('editor');
 
   return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      title="Settings"
-      description="Personalize your editor and timer. Changes save automatically."
-    >
-      <div className="flex flex-col gap-5 sm:flex-row">
-        <div className="flex gap-1.5 sm:w-44 sm:shrink-0 sm:flex-col">
-          {SECTIONS.map((item) => {
-            const Icon = item.icon;
-            const active = section === item.id;
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => setSection(item.id)}
-                className={`inline-flex flex-1 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors cursor-pointer sm:flex-none ${
-                  active
-                    ? 'bg-(--color-badge-bg) text-(--color-text-primary)'
-                    : 'text-(--color-text-muted) hover:text-(--color-text-primary)'
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                {item.label}
-              </button>
-            );
-          })}
-        </div>
+    <Modal open={open} onClose={onClose} title="Settings" description="Changes are saved automatically.">
+      <div className="space-y-3">
+        <SegmentedControl
+          value={section}
+          options={SECTION_OPTIONS}
+          onChange={setSection}
+          ariaLabel="Settings section"
+        />
 
-        <div className="min-h-72 min-w-0 flex-1 space-y-5">
+        <div className="min-h-52">
           {section === 'editor' ? (
-            <>
-              <Field label="Font size">
+            <div className="divide-y divide-(--color-border-subtle)">
+              <Row label="Font size">
                 <SegmentedControl
                   value={settings.fontSize}
                   options={FONT_SIZE_OPTIONS}
                   onChange={settings.setFontSize}
                   ariaLabel="Font size"
                 />
-              </Field>
-              <Field label="Tab size">
+              </Row>
+              <Row label="Tab size">
                 <SegmentedControl
                   value={settings.tabSize}
                   options={TAB_SIZE_OPTIONS}
                   onChange={settings.setTabSize}
                   ariaLabel="Tab size"
                 />
-              </Field>
-              <Field label="Theme">
+              </Row>
+              <Row label="Theme">
                 <SegmentedControl
                   value={settings.editorTheme}
                   options={THEME_OPTIONS}
                   onChange={settings.setEditorTheme}
                   ariaLabel="Theme"
                 />
-              </Field>
-              <ToggleRow
-                label="Word wrap"
-                checked={settings.wordWrap}
-                onChange={settings.setWordWrap}
-              />
-            </>
+              </Row>
+              <Row label="Word wrap">
+                <Toggle checked={settings.wordWrap} onChange={settings.setWordWrap} label="Word wrap" />
+              </Row>
+            </div>
           ) : (
-            <>
-              <Field label="Default mode">
+            <div className="divide-y divide-(--color-border-subtle)">
+              <Row label="Default mode">
                 <SegmentedControl
                   value={settings.defaultTimerMode}
                   options={TIMER_MODE_OPTIONS}
                   onChange={settings.setDefaultTimerMode}
                   ariaLabel="Default timer mode"
                 />
-              </Field>
-              <ToggleRow
-                label="Auto reset"
-                description="Reset the timer when a submission is accepted."
-                checked={settings.autoReset}
-                onChange={settings.setAutoReset}
-              />
-            </>
+              </Row>
+              <Row label="Auto reset" description="Reset the timer when a submission is accepted.">
+                <Toggle checked={settings.autoReset} onChange={settings.setAutoReset} label="Auto reset" />
+              </Row>
+            </div>
           )}
         </div>
       </div>
