@@ -62,7 +62,7 @@ function storageKey(problemId: string, language: AssessmentLanguage): string {
 }
 
 function readSavedCode(problemId: string, language: AssessmentLanguage): string | null {
-  if (typeof globalThis.window === 'undefined') return null;
+  if (globalThis.window === undefined) return null;
   try {
     return globalThis.localStorage.getItem(storageKey(problemId, language));
   } catch {
@@ -71,7 +71,7 @@ function readSavedCode(problemId: string, language: AssessmentLanguage): string 
 }
 
 function writeSavedCode(problemId: string, language: AssessmentLanguage, code: string): void {
-  if (typeof globalThis.window === 'undefined') return;
+  if (globalThis.window === undefined) return;
   try {
     globalThis.localStorage.setItem(storageKey(problemId, language), code);
   } catch {
@@ -80,7 +80,7 @@ function writeSavedCode(problemId: string, language: AssessmentLanguage, code: s
 }
 
 function removeSavedCode(problemId: string, language: AssessmentLanguage): void {
-  if (typeof globalThis.window === 'undefined') return;
+  if (globalThis.window === undefined) return;
   try {
     globalThis.localStorage.removeItem(storageKey(problemId, language));
   } catch {

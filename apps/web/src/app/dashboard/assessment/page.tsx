@@ -37,7 +37,7 @@ export default function AssessmentIndexPage() {
           <Link
             key={problem.id}
             href={`/dashboard/assessment/${problem.id}`}
-            className="group flex flex-col rounded-(--radius-lg) border border-(--color-border-subtle) bg-(--color-surface) p-5 shadow-(--shadow-soft) transition-colors hover:border-(--color-accent)"
+            className="group flex flex-col rounded-lg border border-(--color-border-subtle) bg-(--color-surface) p-5 shadow-(--shadow-soft) transition-colors hover:border-(--color-accent)"
           >
             <div className="mb-2 flex items-center justify-between gap-2">
               <h2 className="m-0 font-display text-lg font-bold tracking-tight text-(--color-text-primary)">

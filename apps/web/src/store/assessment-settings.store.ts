@@ -45,7 +45,7 @@ const DEFAULTS: PersistedSettings = {
 };
 
 function readSettings(): PersistedSettings {
-  if (typeof globalThis.window === 'undefined') return DEFAULTS;
+  if (globalThis.window === undefined) return DEFAULTS;
   try {
     const raw = globalThis.localStorage.getItem(STORAGE_KEY);
     if (!raw) return DEFAULTS;
@@ -57,7 +57,7 @@ function readSettings(): PersistedSettings {
 }
 
 function persist(state: PersistedSettings): void {
-  if (typeof globalThis.window === 'undefined') return;
+  if (globalThis.window === undefined) return;
   try {
     globalThis.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   } catch {

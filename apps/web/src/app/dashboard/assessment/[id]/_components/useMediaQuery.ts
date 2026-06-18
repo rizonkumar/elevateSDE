@@ -6,7 +6,7 @@ export function useMediaQuery(query: string): boolean {
   const [matches, setMatches] = React.useState(false);
 
   React.useEffect(() => {
-    const media = window.matchMedia(query);
+    const media = globalThis.matchMedia(query);
     const update = () => setMatches(media.matches);
     update();
     media.addEventListener('change', update);

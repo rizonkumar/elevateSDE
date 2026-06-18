@@ -9,12 +9,12 @@ export function useThemeMode(): ThemeMode {
 
   React.useEffect(() => {
     const read = () => {
-      const attr = document.documentElement.getAttribute('data-theme');
+      const attr = document.documentElement.dataset.theme;
       if (attr === 'light' || attr === 'dark') {
         setMode(attr);
         return;
       }
-      setMode(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      setMode(globalThis.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     };
 
     read();
@@ -23,7 +23,7 @@ export function useThemeMode(): ThemeMode {
       attributes: true,
       attributeFilter: ['data-theme'],
     });
-    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    const media = globalThis.matchMedia('(prefers-color-scheme: dark)');
     media.addEventListener('change', read);
 
     return () => {

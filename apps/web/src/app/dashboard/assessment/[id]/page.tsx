@@ -130,7 +130,7 @@ export default function AssessmentPage() {
               key={view.id}
               type="button"
               onClick={() => setMobileView(view.id)}
-              className={`inline-flex flex-1 items-center justify-center gap-1.5 rounded-(--radius-lg) px-3 py-2 text-sm font-medium transition-colors ${
+              className={`inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                 active
                   ? 'bg-(--color-badge-bg) text-(--color-text-primary)'
                   : 'text-(--color-text-muted)'
@@ -193,18 +193,22 @@ export default function AssessmentPage() {
           </button>
           <Button
             variant="secondary"
-            onClick={() => void run()}
+            onClick={() => {
+              run();
+            }}
             disabled={busy}
-            className="inline-flex items-center gap-2 !px-4"
+            className="inline-flex items-center gap-2 px-4!"
           >
             <Play className="h-4 w-4" />
             {isRunning ? 'Running…' : 'Run'}
           </Button>
           <Button
             variant="primary"
-            onClick={() => void submit()}
+            onClick={() => {
+              submit();
+            }}
             disabled={busy}
-            className="inline-flex items-center gap-2 !px-4"
+            className="inline-flex items-center gap-2 px-4!"
           >
             <Send className="h-4 w-4" />
             {isSubmitting ? 'Submitting…' : 'Submit'}

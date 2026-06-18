@@ -61,7 +61,7 @@ export function EditorPanel() {
       addToast('Formatting is not available for this language.', 'info');
       return;
     }
-    void action.run();
+    action.run().catch(() => addToast('Could not format the code.', 'error'));
   };
 
   const handleCopy = async () => {
@@ -75,7 +75,7 @@ export function EditorPanel() {
   };
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-(--radius-lg) border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-soft)">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-soft)">
       <div className="flex items-center justify-between gap-3 border-b border-(--color-border-subtle) px-3 py-2">
         <div className="w-40">
           <Select
@@ -91,7 +91,7 @@ export function EditorPanel() {
           <ToolbarButton label="Format code" onClick={handleFormat}>
             <WandSparkles className="h-4 w-4" />
           </ToolbarButton>
-          <ToolbarButton label="Copy code" onClick={() => void handleCopy()}>
+          <ToolbarButton label="Copy code" onClick={() => { handleCopy(); }}>
             {copied ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
           </ToolbarButton>
           <ToolbarButton

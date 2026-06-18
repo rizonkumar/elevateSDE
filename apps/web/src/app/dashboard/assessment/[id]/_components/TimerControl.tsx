@@ -62,10 +62,17 @@ export function TimerControl() {
     }
   };
 
+  let actionLabel = 'Start';
+  if (running) {
+    actionLabel = 'Pause';
+  } else if (timerStatus === 'paused') {
+    actionLabel = 'Resume';
+  }
+
   return (
     <div ref={containerRef} className="relative">
       <div
-        className={`inline-flex items-center gap-1.5 rounded-(--radius-lg) border px-1.5 py-1 transition-colors ${
+        className={`inline-flex items-center gap-1.5 rounded-lg border px-1.5 py-1 transition-colors ${
           danger
             ? 'border-rose-500/40 bg-rose-500/10 text-rose-600 dark:text-rose-300'
             : 'border-(--color-border-subtle) bg-(--color-bg-soft) text-(--color-text-primary)'
@@ -92,8 +99,8 @@ export function TimerControl() {
       </div>
 
       {open && (
-        <div className="absolute right-0 z-40 mt-2 w-72 rounded-(--radius-lg) border border-(--color-border-subtle) bg-(--color-surface) p-4 shadow-(--shadow-soft)">
-          <div className="grid grid-cols-2 gap-1 rounded-(--radius-lg) bg-(--color-tab-bg) p-1">
+        <div className="absolute right-0 z-40 mt-2 w-72 rounded-lg border border-(--color-border-subtle) bg-(--color-surface) p-4 shadow-(--shadow-soft)">
+          <div className="grid grid-cols-2 gap-1 rounded-lg bg-(--color-tab-bg) p-1">
             {(['stopwatch', 'countdown'] as const).map((mode) => (
               <button
                 key={mode}
@@ -145,7 +152,7 @@ export function TimerControl() {
               className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-(--color-text-primary) px-4 py-2 text-sm font-semibold text-(--color-bg) transition-all hover:opacity-90 active:scale-[0.98] cursor-pointer"
             >
               {running ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-              {running ? 'Pause' : timerStatus === 'paused' ? 'Resume' : 'Start'}
+              {actionLabel}
             </button>
             <button
               type="button"

@@ -10,10 +10,20 @@ import type { AssessmentProblemSeed } from '@/lib/assessment-problems';
 function hashString(value: string): number {
   let hash = 2166136261;
   for (let index = 0; index < value.length; index += 1) {
-    hash ^= value.charCodeAt(index);
+    hash ^= value.codePointAt(index) ?? 0;
     hash = Math.imul(hash, 16777619);
   }
   return Math.abs(hash);
+}
+
+function resolveStatus(empty: boolean, passed: boolean): TestCaseResultStatus {
+  if (empty) return 'ERROR';
+  return passed ? 'PASS' : 'FAIL';
+}
+
+function resolveActualOutput(empty: boolean, passed: boolean, expected: string): string {
+  if (empty) return '';
+  return passed ? expected : deriveWrongOutput(expected);
 }
 
 function stripNoise(code: string): string {
@@ -72,12 +82,8 @@ export function runCode(
   const results: TestCaseResultDto[] = problem.testCases.map((testCase, index) => {
     const seed = hashString(`${baseSeed}:${testCase.id}:${index}`);
     const passed = index < passCount;
-    const status: TestCaseResultStatus = empty ? 'ERROR' : passed ? 'PASS' : 'FAIL';
-    const actualOutput = empty
-      ? ''
-      : passed
-        ? testCase.expectedOutput
-        : deriveWrongOutput(testCase.expectedOutput);
+    const status = resolveStatus(empty, passed);
+    const actualOutput = resolveActualOutput(empty, passed, testCase.expectedOutput);
     const visibleIndex = problem.testCases.filter(
       (item, position) => !item.isHidden && position <= index,
     ).length;

@@ -1,5 +1,6 @@
 'use client';
 
+import * as React from 'react';
 import { Tabs, Textarea } from '@elevatesde/ui';
 import {
   CheckCircle2,
@@ -24,6 +25,10 @@ const STATUS_HEADLINE: Record<AssessmentRunStatus, string> = {
   RUNTIME_ERROR: 'Runtime Error',
 };
 
+const DETAIL_FIELDS = ['Input', 'Expected', 'Output'] as const;
+
+type DetailField = (typeof DETAIL_FIELDS)[number];
+
 function statusTone(status: AssessmentRunStatus): string {
   if (status === 'ACCEPTED') {
     return 'border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300';
@@ -35,6 +40,12 @@ function caseDotClass(status: TestCaseResultStatus): string {
   if (status === 'PASS') return 'bg-emerald-500';
   if (status === 'FAIL') return 'bg-rose-500';
   return 'bg-amber-500';
+}
+
+function fieldValue(field: DetailField, result: TestCaseResultDto): string {
+  if (field === 'Input') return result.input;
+  if (field === 'Expected') return result.expectedOutput;
+  return result.actualOutput || '—';
 }
 
 function StatusIcon({ status }: Readonly<{ status: TestCaseResultStatus }>) {
@@ -61,10 +72,10 @@ function CaseSubTabs({
         const status = statuses?.[index];
         return (
           <button
-            key={`case-${index}`}
+            key={`case-tab-${index + 1}`}
             type="button"
             onClick={() => onSelect(index)}
-            className={`inline-flex items-center gap-1.5 rounded-(--radius-lg) px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer ${
+            className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer ${
               active
                 ? 'bg-(--color-badge-bg) text-(--color-text-primary)'
                 : 'text-(--color-text-muted) hover:text-(--color-text-primary)'
@@ -96,23 +107,17 @@ function CaseDetail({ result }: Readonly<{ result: TestCaseResultDto }>) {
           </span>
         </span>
       </div>
-      {(['Input', 'Expected', 'Output'] as const).map((field) => {
-        const value =
-          field === 'Input'
-            ? result.input
-            : field === 'Expected'
-              ? result.expectedOutput
-              : result.actualOutput || '—';
+      {DETAIL_FIELDS.map((field) => {
         const wrong = field === 'Output' && result.status !== 'PASS';
         return (
           <div key={field}>
             <div className="mb-1 text-xs text-(--color-text-muted)">{field}</div>
             <div
-              className={`rounded-(--radius-lg) border border-(--color-border-subtle) bg-(--color-bg-soft) px-3 py-2 font-mono text-xs break-all ${
+              className={`rounded-lg border border-(--color-border-subtle) bg-(--color-bg-soft) px-3 py-2 font-mono text-xs break-all ${
                 wrong ? 'text-rose-500' : 'text-(--color-text-primary)'
               }`}
             >
-              {value}
+              {fieldValue(field, result)}
             </div>
           </div>
         );
@@ -139,8 +144,77 @@ export function ConsolePanel() {
   const activeInput = caseInputs[safeIndex] ?? '';
   const activeResult = visibleResults[safeIndex];
 
+  const renderBody = (): React.ReactNode => {
+    if (testcaseTab === 'testcase') {
+      return (
+        <div className="space-y-4">
+          <CaseSubTabs
+            count={caseInputs.length}
+            activeIndex={safeIndex}
+            onSelect={setActiveCaseIndex}
+          />
+          <div>
+            <div className="mb-1.5 text-xs text-(--color-text-muted)">Input</div>
+            <Textarea
+              value={activeInput}
+              onChange={(event) => setCaseInput(safeIndex, event.target.value)}
+              className="font-mono text-xs"
+              spellCheck={false}
+            />
+          </div>
+        </div>
+      );
+    }
+
+    if (busy) {
+      return (
+        <div className="flex h-full items-center justify-center gap-2 text-sm text-(--color-text-muted)">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          {isSubmitting ? 'Submitting solution…' : 'Running test cases…'}
+        </div>
+      );
+    }
+
+    if (result) {
+      return (
+        <div className="space-y-4">
+          <div
+            className={`flex items-center gap-2 rounded-lg border px-3.5 py-2.5 text-sm font-semibold ${statusTone(result.status)}`}
+          >
+            {result.status === 'ACCEPTED' ? (
+              <CheckCircle2 className="h-4 w-4" />
+            ) : (
+              <XCircle className="h-4 w-4" />
+            )}
+            {STATUS_HEADLINE[result.status]}
+          </div>
+          <CaseSubTabs
+            count={visibleResults.length}
+            activeIndex={safeIndex}
+            onSelect={setActiveCaseIndex}
+            statuses={visibleResults.map((item) => item.status)}
+          />
+          {activeResult && <CaseDetail result={activeResult} />}
+          {hiddenResults.length > 0 && (
+            <div className="rounded-lg border border-(--color-border-subtle) bg-(--color-bg-soft) px-3.5 py-2.5 text-xs text-(--color-text-muted)">
+              {hiddenResults.filter((item) => item.status === 'PASS').length}/{hiddenResults.length}{' '}
+              hidden test cases passed.
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-1.5 text-center text-sm text-(--color-text-muted)">
+        <ListChecks className="h-5 w-5" />
+        <p className="m-0">Run your code to see test results.</p>
+      </div>
+    );
+  };
+
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-(--radius-lg) border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-soft)">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-soft)">
       <div className="flex items-center justify-between gap-3 border-b border-(--color-border-subtle) px-4 py-2.5">
         <Tabs
           value={testcaseTab}
@@ -158,62 +232,7 @@ export function ConsolePanel() {
         )}
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
-        {testcaseTab === 'testcase' ? (
-          <div className="space-y-4">
-            <CaseSubTabs
-              count={caseInputs.length}
-              activeIndex={safeIndex}
-              onSelect={setActiveCaseIndex}
-            />
-            <div>
-              <div className="mb-1.5 text-xs text-(--color-text-muted)">Input</div>
-              <Textarea
-                value={activeInput}
-                onChange={(event) => setCaseInput(safeIndex, event.target.value)}
-                className="font-mono text-xs"
-                spellCheck={false}
-              />
-            </div>
-          </div>
-        ) : busy ? (
-          <div className="flex h-full items-center justify-center gap-2 text-sm text-(--color-text-muted)">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            {isSubmitting ? 'Submitting solution…' : 'Running test cases…'}
-          </div>
-        ) : !result ? (
-          <div className="flex h-full flex-col items-center justify-center gap-1.5 text-center text-sm text-(--color-text-muted)">
-            <ListChecks className="h-5 w-5" />
-            <p className="m-0">Run your code to see test results.</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div
-              className={`flex items-center gap-2 rounded-(--radius-lg) border px-3.5 py-2.5 text-sm font-semibold ${statusTone(result.status)}`}
-            >
-              {result.status === 'ACCEPTED' ? (
-                <CheckCircle2 className="h-4 w-4" />
-              ) : (
-                <XCircle className="h-4 w-4" />
-              )}
-              {STATUS_HEADLINE[result.status]}
-            </div>
-            <CaseSubTabs
-              count={visibleResults.length}
-              activeIndex={safeIndex}
-              onSelect={setActiveCaseIndex}
-              statuses={visibleResults.map((item) => item.status)}
-            />
-            {activeResult && <CaseDetail result={activeResult} />}
-            {hiddenResults.length > 0 && (
-              <div className="rounded-(--radius-lg) border border-(--color-border-subtle) bg-(--color-bg-soft) px-3.5 py-2.5 text-xs text-(--color-text-muted)">
-                {hiddenResults.filter((item) => item.status === 'PASS').length}/{hiddenResults.length}{' '}
-                hidden test cases passed.
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">{renderBody()}</div>
     </div>
   );
 }

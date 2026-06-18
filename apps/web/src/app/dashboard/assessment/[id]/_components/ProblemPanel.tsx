@@ -16,30 +16,51 @@ const DIFFICULTY_LABEL: Record<AssessmentDifficulty, string> = {
   HARD: 'Hard',
 };
 
+interface KeyedText {
+  key: string;
+  value: string;
+}
+
+function toKeyed(items: string[]): KeyedText[] {
+  const counts = new Map<string, number>();
+  return items.map((value) => {
+    const seen = counts.get(value) ?? 0;
+    counts.set(value, seen + 1);
+    return { key: `${value}#${seen}`, value };
+  });
+}
+
 function renderInline(text: string, keyPrefix: string): React.ReactNode[] {
-  return text.split('`').map((part, index) =>
-    index % 2 === 1 ? (
+  const counts = new Map<string, number>();
+  return text.split('`').map((part, index) => {
+    const isCode = index % 2 === 1;
+    const tag = isCode ? 'code' : 'text';
+    const occurrence = counts.get(`${tag}:${part}`) ?? 0;
+    counts.set(`${tag}:${part}`, occurrence + 1);
+    const key = `${keyPrefix}-${tag}-${part}#${occurrence}`;
+    return isCode ? (
       <code
-        key={`${keyPrefix}-${index}`}
+        key={key}
         className="rounded bg-(--color-badge-bg) px-1.5 py-0.5 font-mono text-[0.85em] text-(--color-text-primary)"
       >
         {part}
       </code>
     ) : (
-      <React.Fragment key={`${keyPrefix}-${index}`}>{part}</React.Fragment>
-    ),
-  );
+      <React.Fragment key={key}>{part}</React.Fragment>
+    );
+  });
 }
 
 interface ProblemPanelProps {
   problem: CodingProblemDto;
 }
 
-export function ProblemPanel({ problem }: ProblemPanelProps) {
-  const lines = problem.description.split('\n');
+export function ProblemPanel({ problem }: Readonly<ProblemPanelProps>) {
+  const lines = toKeyed(problem.description.split('\n'));
+  const constraints = toKeyed(problem.constraints);
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-(--radius-lg) border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-soft)">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-soft)">
       <div className="flex items-center gap-2 border-b border-(--color-border-subtle) px-5 py-3.5">
         <span className="text-xs font-semibold uppercase tracking-[0.12em] text-(--color-text-muted)">
           Problem
@@ -67,12 +88,12 @@ export function ProblemPanel({ problem }: ProblemPanelProps) {
         )}
 
         <div className="space-y-2 text-sm leading-relaxed text-(--color-text-muted)">
-          {lines.map((line, index) =>
-            line.trim().length === 0 ? (
-              <div key={`line-${index}`} className="h-1" />
+          {lines.map(({ key, value }) =>
+            value.trim().length === 0 ? (
+              <div key={key} className="h-1" />
             ) : (
-              <p key={`line-${index}`} className="m-0 text-(--color-text-primary)/85">
-                {renderInline(line, `line-${index}`)}
+              <p key={key} className="m-0 text-(--color-text-primary)/85">
+                {renderInline(value, key)}
               </p>
             ),
           )}
@@ -81,10 +102,10 @@ export function ProblemPanel({ problem }: ProblemPanelProps) {
         <section className="mt-6">
           <h3 className="m-0 mb-2.5 text-sm font-semibold text-(--color-text-primary)">Examples</h3>
           <div className="space-y-3">
-            {problem.examples.map((example, index) => (
+            {problem.examples.map((example) => (
               <div
-                key={`example-${index}`}
-                className="rounded-(--radius-lg) border border-(--color-border-subtle) bg-(--color-bg-soft) p-3.5"
+                key={`${example.input}|${example.output}`}
+                className="rounded-lg border border-(--color-border-subtle) bg-(--color-bg-soft) p-3.5"
               >
                 <div className="font-mono text-xs leading-relaxed text-(--color-text-primary)">
                   <span className="text-(--color-text-muted)">Input: </span>
@@ -95,9 +116,7 @@ export function ProblemPanel({ problem }: ProblemPanelProps) {
                   {example.output}
                 </div>
                 {example.explanation && (
-                  <div className="mt-2 text-xs text-(--color-text-muted)">
-                    {example.explanation}
-                  </div>
+                  <div className="mt-2 text-xs text-(--color-text-muted)">{example.explanation}</div>
                 )}
               </div>
             ))}
@@ -109,8 +128,8 @@ export function ProblemPanel({ problem }: ProblemPanelProps) {
             Constraints
           </h3>
           <ul className="m-0 list-disc space-y-1.5 pl-5 text-sm text-(--color-text-muted)">
-            {problem.constraints.map((constraint, index) => (
-              <li key={`constraint-${index}`}>{renderInline(constraint, `constraint-${index}`)}</li>
+            {constraints.map(({ key, value }) => (
+              <li key={key}>{renderInline(value, key)}</li>
             ))}
           </ul>
         </section>
