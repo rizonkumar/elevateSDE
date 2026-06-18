@@ -77,7 +77,7 @@ export function SettingsModal({ open, onClose }: Readonly<SettingsModalProps>) {
           ariaLabel="Settings section"
         />
 
-        <div className="min-h-52">
+        <div className="min-h-60">
           {section === 'editor' ? (
             <div className="divide-y divide-(--color-border-subtle)">
               <Row label="Font size">
