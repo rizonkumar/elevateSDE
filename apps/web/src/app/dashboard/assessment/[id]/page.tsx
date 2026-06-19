@@ -163,7 +163,7 @@ export default function AssessmentPage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="flex h-[calc(100dvh-4rem)] flex-col"
+      className="flex h-[100dvh] flex-col"
     >
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-(--color-border-subtle) px-4 py-3 sm:px-6">
         <div className="flex min-w-0 items-center gap-3">

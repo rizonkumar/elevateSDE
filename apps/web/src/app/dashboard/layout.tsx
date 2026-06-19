@@ -13,11 +13,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     setOpen(false);
   }, [pathname]);
 
+  const isImmersive = /^\/dashboard\/assessment\/[^/]+$/.test(pathname);
+
   return (
     <div className="flex min-h-screen bg-(--color-bg) text-(--color-text-primary)">
       <Sidebar open={open} onClose={() => setOpen(false)} />
       <div className="flex min-w-0 flex-1 flex-col">
-        <DashboardTopbar onOpenSidebar={() => setOpen(true)} />
+        {!isImmersive && <DashboardTopbar onOpenSidebar={() => setOpen(true)} />}
         <main className="flex-1">{children}</main>
       </div>
     </div>
