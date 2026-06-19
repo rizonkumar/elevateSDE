@@ -132,7 +132,7 @@ export default function LoginPage() {
             href="/login"
             className="font-semibold text-(--color-text-primary) underline underline-offset-4 decoration-(--color-border-subtle) hover:decoration-(--color-text-primary) transition-colors"
           >
-            Back to candidate sign in
+            Back to standard sign in
           </a>
         </div>
       </motion.div>

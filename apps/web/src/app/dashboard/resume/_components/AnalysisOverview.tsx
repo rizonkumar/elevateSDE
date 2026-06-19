@@ -39,8 +39,8 @@ export function AnalysisOverview({ analysis, isAnalyzing, onFile }: AnalysisOver
       icon: PlusCircle,
       tone: 'text-(--color-text-muted)',
     },
-    { label: 'Strengths', value: strengths, icon: CheckCircle2, tone: 'text-emerald-500' },
-    { label: 'To fix', value: needsWork, icon: AlertTriangle, tone: 'text-amber-500' },
+    { label: 'Strengths', value: strengths, icon: CheckCircle2, tone: 'text-(--color-success)' },
+    { label: 'To fix', value: needsWork, icon: AlertTriangle, tone: 'text-(--color-warning)' },
   ];
 
   return (
@@ -66,10 +66,10 @@ export function AnalysisOverview({ analysis, isAnalyzing, onFile }: AnalysisOver
             return (
               <div
                 key={stat.label}
-                className="flex flex-col gap-1 rounded-(--radius-lg) border border-(--color-border-subtle) bg-(--color-badge-bg) px-3.5 py-3"
+                className="flex flex-col gap-1 rounded-(--radius-md) border border-(--color-border-subtle) bg-(--color-badge-bg) px-3.5 py-3"
               >
                 <Icon className={`h-4 w-4 ${stat.tone}`} />
-                <span className="font-display text-2xl font-bold leading-none text-(--color-text-primary)">
+                <span className="font-display text-2xl font-semibold leading-none text-(--color-text-primary)">
                   {stat.value}
                 </span>
                 <span className="text-[11px] font-medium uppercase tracking-wider text-(--color-text-muted)">

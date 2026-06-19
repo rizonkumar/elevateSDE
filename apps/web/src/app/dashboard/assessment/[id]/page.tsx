@@ -68,7 +68,9 @@ export default function AssessmentPage() {
     return (
       <div className="mx-auto flex max-w-xl flex-col items-center justify-center px-6 py-24 text-center">
         <FileCode2 className="mb-4 h-8 w-8 text-(--color-text-muted)" />
-        <h1 className="m-0 font-display text-2xl font-bold tracking-tight">Problem not found</h1>
+        <h1 className="m-0 font-display text-2xl font-semibold tracking-tight">
+          Problem not found
+        </h1>
         <p className="mt-2 text-sm text-(--color-text-muted)">
           We couldn&apos;t find an assessment with that id.
         </p>
@@ -130,7 +132,7 @@ export default function AssessmentPage() {
               key={view.id}
               type="button"
               onClick={() => setMobileView(view.id)}
-              className={`inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+              className={`inline-flex flex-1 items-center justify-center gap-1.5 rounded-sm px-3 py-2 text-sm font-medium transition-colors ${
                 active
                   ? 'bg-(--color-badge-bg) text-(--color-text-primary)'
                   : 'text-(--color-text-muted)'
@@ -176,7 +178,7 @@ export default function AssessmentPage() {
             <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-(--color-accent)">
               Coding assessment
             </div>
-            <h1 className="m-0 truncate font-display text-lg font-bold tracking-tight">
+            <h1 className="m-0 truncate font-display text-lg font-semibold tracking-tight">
               {problem.title}
             </h1>
           </div>

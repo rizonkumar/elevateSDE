@@ -72,9 +72,9 @@ export function TimerControl() {
   return (
     <div ref={containerRef} className="relative">
       <div
-        className={`inline-flex items-center gap-1.5 rounded-lg border px-1.5 py-1 transition-colors ${
+        className={`inline-flex items-center gap-1.5 rounded-(--radius-sm) border px-1.5 py-1 transition-colors ${
           danger
-            ? 'border-rose-500/40 bg-rose-500/10 text-rose-600 dark:text-rose-300'
+            ? 'border-(--color-danger) bg-(--color-danger-soft) text-(--color-danger)'
             : 'border-(--color-border-subtle) bg-(--color-bg-soft) text-(--color-text-primary)'
         }`}
       >
@@ -83,7 +83,7 @@ export function TimerControl() {
           onClick={() => setOpen((prev) => !prev)}
           aria-label="Timer settings"
           aria-expanded={open}
-          className="inline-flex items-center gap-1.5 rounded-md px-1.5 py-1 text-sm font-semibold tabular-nums hover:bg-(--color-badge-bg) cursor-pointer"
+          className="inline-flex items-center gap-1.5 rounded-(--radius-sm) px-1.5 py-1 text-sm font-semibold tabular-nums hover:bg-(--color-badge-bg) cursor-pointer"
         >
           <Clock className="h-4 w-4 shrink-0" />
           <span>{format(displaySeconds)}</span>
@@ -92,23 +92,23 @@ export function TimerControl() {
           type="button"
           onClick={togglePlay}
           aria-label={running ? 'Pause timer' : 'Start timer'}
-          className="inline-flex h-7 w-7 items-center justify-center rounded-md text-(--color-text-primary) hover:bg-(--color-badge-bg) cursor-pointer"
+          className="inline-flex h-7 w-7 items-center justify-center rounded-(--radius-sm) text-(--color-text-primary) hover:bg-(--color-badge-bg) cursor-pointer"
         >
           {running ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
         </button>
       </div>
 
       {open && (
-        <div className="absolute right-0 z-40 mt-2 w-72 rounded-lg border border-(--color-border-subtle) bg-(--color-surface) p-4 shadow-(--shadow-soft)">
-          <div className="grid grid-cols-2 gap-1 rounded-lg bg-(--color-tab-bg) p-1">
+        <div className="absolute right-0 z-40 mt-2 w-72 rounded-(--radius-md) border border-(--color-border-subtle) bg-(--color-surface) p-4 shadow-(--shadow-popover)">
+          <div className="grid grid-cols-2 gap-1 rounded-(--radius-sm) bg-(--color-tab-bg) p-1">
             {(['stopwatch', 'countdown'] as const).map((mode) => (
               <button
                 key={mode}
                 type="button"
                 onClick={() => setTimerMode(mode)}
-                className={`rounded-[calc(var(--radius-lg)-0.25rem)] px-3 py-1.5 text-sm font-medium capitalize transition-colors cursor-pointer ${
+                className={`rounded-[calc(var(--radius-sm)-2px)] px-3 py-1.5 text-sm font-medium capitalize transition-colors cursor-pointer ${
                   timerMode === mode
-                    ? 'bg-(--color-tab-active) text-(--color-text-primary) shadow-(--shadow-soft)'
+                    ? 'bg-(--color-tab-active) text-(--color-text-primary) shadow-(--shadow-card)'
                     : 'text-(--color-text-muted) hover:text-(--color-text-primary)'
                 }`}
               >
@@ -117,7 +117,7 @@ export function TimerControl() {
             ))}
           </div>
 
-          <div className="my-4 text-center font-display text-4xl font-bold tabular-nums tracking-tight text-(--color-text-primary)">
+          <div className="my-4 text-center font-display text-4xl font-semibold tabular-nums tracking-tight text-(--color-text-primary)">
             {format(displaySeconds)}
           </div>
 
@@ -149,7 +149,7 @@ export function TimerControl() {
             <button
               type="button"
               onClick={togglePlay}
-              className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-(--color-text-primary) px-4 py-2 text-sm font-semibold text-(--color-bg) transition-all hover:opacity-90 active:scale-[0.98] cursor-pointer"
+              className="inline-flex flex-1 items-center justify-center gap-2 rounded-(--radius-sm) bg-(--color-text-primary) px-4 py-2 text-sm font-semibold text-(--color-bg) transition-all hover:opacity-90 cursor-pointer"
             >
               {running ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
               {actionLabel}
@@ -158,7 +158,7 @@ export function TimerControl() {
               type="button"
               onClick={resetTimer}
               aria-label="Reset timer"
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-(--color-border-subtle) px-4 py-2 text-sm font-semibold text-(--color-text-primary) transition-colors hover:bg-(--color-badge-bg) cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 rounded-(--radius-sm) border border-(--color-border) px-4 py-2 text-sm font-semibold text-(--color-text-primary) transition-colors hover:bg-(--color-badge-bg) cursor-pointer"
             >
               <RotateCcw className="h-4 w-4" />
               Reset

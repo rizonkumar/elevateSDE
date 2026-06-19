@@ -36,7 +36,7 @@ export const JobCardView = React.forwardRef<HTMLDivElement, JobCardViewProps>(
     return (
       <div
         ref={ref}
-        className={`rounded-lg border border-(--color-border-subtle) bg-(--color-surface) p-3.5 shadow-xs transition-shadow hover:shadow-(--shadow-soft) touch-none ${className}`}
+        className={`rounded-(--radius-md) border border-(--color-border-subtle) bg-(--color-surface) p-3.5 shadow-xs transition-shadow hover:shadow-(--shadow-soft) touch-none ${className}`}
         {...rest}
       >
         <div className="flex items-start justify-between gap-2">
@@ -91,7 +91,7 @@ export const JobCardView = React.forwardRef<HTMLDivElement, JobCardViewProps>(
               aria-label="Edit application"
               onPointerDown={(event) => event.stopPropagation()}
               onClick={() => onEdit(application.id)}
-              className="p-1.5 rounded-md text-(--color-text-muted) hover:bg-(--color-badge-bg) hover:text-(--color-text-primary) transition cursor-pointer"
+              className="p-1.5 rounded-(--radius-sm) text-(--color-text-muted) hover:bg-(--color-badge-bg) hover:text-(--color-text-primary) transition cursor-pointer"
             >
               <Pencil className="w-3.5 h-3.5" />
             </button>
@@ -100,7 +100,7 @@ export const JobCardView = React.forwardRef<HTMLDivElement, JobCardViewProps>(
               aria-label="Delete application"
               onPointerDown={(event) => event.stopPropagation()}
               onClick={() => onDelete(application.id)}
-              className="p-1.5 rounded-md text-(--color-text-muted) hover:bg-rose-500/10 hover:text-rose-500 transition cursor-pointer"
+              className="p-1.5 rounded-(--radius-sm) text-(--color-text-muted) hover:bg-(--color-danger-soft) hover:text-(--color-danger) transition cursor-pointer"
             >
               <Trash2 className="w-3.5 h-3.5" />
             </button>

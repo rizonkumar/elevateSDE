@@ -24,7 +24,7 @@ function ToolbarButton({ label, onClick, children }: Readonly<ToolbarButtonProps
       onClick={onClick}
       aria-label={label}
       title={label}
-      className="inline-flex h-8 w-8 items-center justify-center rounded-md text-(--color-text-muted) transition-colors hover:bg-(--color-badge-bg) hover:text-(--color-text-primary) cursor-pointer"
+      className="inline-flex h-8 w-8 items-center justify-center rounded-(--radius-sm) text-(--color-text-muted) transition-colors hover:bg-(--color-badge-bg) hover:text-(--color-text-primary) cursor-pointer"
     >
       {children}
     </button>
@@ -75,7 +75,7 @@ export function EditorPanel() {
   };
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-soft)">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-(--radius-md) border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-card)">
       <div className="flex items-center justify-between gap-3 border-b border-(--color-border-subtle) px-3 py-2">
         <div className="w-40">
           <Select
@@ -92,7 +92,7 @@ export function EditorPanel() {
             <WandSparkles className="h-4 w-4" />
           </ToolbarButton>
           <ToolbarButton label="Copy code" onClick={() => { handleCopy(); }}>
-            {copied ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
+            {copied ? <Check className="h-4 w-4 text-(--color-success)" /> : <Copy className="h-4 w-4" />}
           </ToolbarButton>
           <ToolbarButton
             label={editorMaximized ? 'Restore layout' : 'Maximize editor'}

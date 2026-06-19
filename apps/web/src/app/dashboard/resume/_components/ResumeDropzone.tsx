@@ -61,7 +61,7 @@ export function ResumeDropzone({
     return (
       <div
         {...dropHandlers}
-        className={`flex items-center gap-3 rounded-lg border border-dashed px-4 py-3 transition-colors ${
+        className={`flex items-center gap-3 rounded-(--radius-md) border border-dashed px-4 py-3 transition-colors ${
           dragging
             ? 'border-(--color-accent) bg-(--color-accent-soft)'
             : 'border-(--color-border-subtle)'
@@ -86,7 +86,7 @@ export function ResumeDropzone({
           type="button"
           onClick={open}
           disabled={isAnalyzing}
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-(--radius-full) border border-(--color-border-subtle) px-3 py-1.5 text-xs font-semibold text-(--color-text-primary) transition-colors hover:border-(--color-text-muted) disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-(--radius-sm) border border-(--color-border) px-3 py-1.5 text-xs font-medium text-(--color-text-primary) transition-colors hover:bg-(--color-badge-bg) disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
         >
           <RefreshCw className="h-3.5 w-3.5" />
           Replace
@@ -102,7 +102,7 @@ export function ResumeDropzone({
       aria-disabled={isAnalyzing}
       onClick={open}
       {...dropHandlers}
-      className={`flex w-full flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed px-6 py-14 text-center transition-colors ${
+      className={`flex w-full flex-col items-center justify-center gap-4 rounded-(--radius-md) border-2 border-dashed px-6 py-14 text-center transition-colors ${
         isAnalyzing ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'
       } ${
         dragging

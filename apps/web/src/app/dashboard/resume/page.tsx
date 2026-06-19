@@ -16,6 +16,8 @@ import { ResumeDropzone } from './_components/ResumeDropzone';
 import { AnalysisOverview } from './_components/AnalysisOverview';
 import { FeedbackTabs } from './_components/FeedbackTabs';
 import { UpcomingFeatures } from './_components/UpcomingFeatures';
+import { PageContainer } from '@/components/dashboard/PageContainer';
+import { PageHeader } from '@/components/dashboard/PageHeader';
 
 const STEPS = [
   { icon: UploadCloud, title: 'Upload', detail: 'Drop a PDF or DOCX. Parsed in your browser.' },
@@ -120,7 +122,7 @@ export default function ResumeAnalyzerPage() {
 
         {active?.status === 'FAILED' && (
           <div className="card flex flex-col items-center gap-4 py-16 text-center">
-            <AlertCircle className="h-7 w-7 text-rose-500" />
+            <AlertCircle className="h-7 w-7 text-(--color-danger)" />
             <p className="mb-0 text-sm text-(--color-text-muted)">
               We couldn&apos;t read {active.fileName}. Try a different PDF or DOCX file.
             </p>
@@ -146,24 +148,19 @@ export default function ResumeAnalyzerPage() {
   }
 
   return (
-    <div className="w-full max-w-300 mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-      <motion.header
+    <PageContainer>
+      <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: 'easeOut' }}
         className="mb-8"
       >
-        <div className="text-xs font-semibold uppercase tracking-[0.12em] text-(--color-accent) mb-2">
-          Resume analyzer
-        </div>
-        <h1 className="text-2xl sm:text-3xl font-bold font-display tracking-tight">
-          ATS Score &amp; Feedback
-        </h1>
-        <p className="text-sm text-(--color-text-muted) mt-1.5 mb-0 max-w-xl">
-          Upload your engineering resume to see how it scores against applicant tracking
-          systems and where to improve.
-        </p>
-      </motion.header>
+        <PageHeader
+          kicker="Resume analyzer"
+          title="ATS Score & Feedback"
+          description="Upload your engineering resume to see how it scores against applicant tracking systems and where to improve."
+        />
+      </motion.div>
 
       {mounted ? renderContent() : (
         <div className="flex items-center justify-center py-24 text-sm text-(--color-text-muted)">
@@ -172,6 +169,6 @@ export default function ResumeAnalyzerPage() {
       )}
 
       {mounted && <UpcomingFeatures />}
-    </div>
+    </PageContainer>
   );
 }

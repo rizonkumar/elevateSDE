@@ -168,7 +168,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           <button
             onClick={handleLogout}
             title={rail ? 'Logout' : undefined}
-            className={`w-full flex items-center justify-center gap-2 px-4 py-2 text-xs font-semibold rounded-lg border border-(--color-border-subtle) hover:bg-rose-50/50 hover:text-rose-600 dark:hover:bg-rose-950/20 dark:hover:text-rose-400 transition-colors cursor-pointer ${
+            className={`w-full flex items-center justify-center gap-2 px-4 py-2 text-xs font-semibold rounded-(--radius-sm) border border-(--color-border-subtle) hover:bg-(--color-danger-soft) hover:text-(--color-danger) transition-colors cursor-pointer ${
               rail ? 'lg:px-0' : ''
             }`}
           >

@@ -10,22 +10,22 @@ export function ToastContainer() {
   const getIcon = (type: Toast['type']) => {
     switch (type) {
       case 'success':
-        return <CheckCircle className="w-5 h-5 text-emerald-500 shrink-0" />;
+        return <CheckCircle className="w-5 h-5 text-(--color-success) shrink-0" />;
       case 'error':
-        return <AlertCircle className="w-5 h-5 text-rose-500 shrink-0" />;
+        return <AlertCircle className="w-5 h-5 text-(--color-danger) shrink-0" />;
       case 'info':
-        return <Info className="w-5 h-5 text-teal-500 shrink-0" />;
+        return <Info className="w-5 h-5 text-(--color-accent) shrink-0" />;
     }
   };
 
   const getStyles = (type: Toast['type']) => {
     switch (type) {
       case 'success':
-        return 'border-zinc-200 dark:border-zinc-800 border-l-emerald-500 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-emerald-500/5';
+        return 'border-(--color-border-subtle) border-l-(--color-success) bg-(--color-surface) text-(--color-text-primary)';
       case 'error':
-        return 'border-zinc-200 dark:border-zinc-800 border-l-rose-500 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-rose-500/5';
+        return 'border-(--color-border-subtle) border-l-(--color-danger) bg-(--color-surface) text-(--color-text-primary)';
       case 'info':
-        return 'border-zinc-200 dark:border-zinc-800 border-l-teal-500 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-teal-500/5';
+        return 'border-(--color-border-subtle) border-l-(--color-accent) bg-(--color-surface) text-(--color-text-primary)';
     }
   };
 

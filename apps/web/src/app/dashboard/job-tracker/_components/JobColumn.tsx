@@ -32,7 +32,7 @@ export function JobColumn({ column, applications, onEdit, onDelete }: JobColumnP
       </div>
       <div
         ref={setNodeRef}
-        className={`mt-2 flex min-h-[200px] flex-1 flex-col gap-2.5 rounded-lg border border-dashed p-2.5 transition-colors ${
+        className={`mt-2 flex min-h-[200px] flex-1 flex-col gap-2.5 rounded-(--radius-md) border border-dashed p-2.5 transition-colors ${
           isOver
             ? 'border-(--color-accent) bg-(--color-accent-soft)'
             : 'border-(--color-border-subtle) bg-(--color-bg-soft)'

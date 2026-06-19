@@ -20,7 +20,7 @@ export function SessionTimer({ remainingSeconds }: SessionTimerProps) {
     <div
       className={`inline-flex items-center gap-2 rounded-(--radius-full) border px-3.5 py-1.5 text-sm font-semibold tabular-nums transition-colors ${
         isLow
-          ? 'border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-300'
+          ? 'border-(--color-warning) bg-(--color-warning-soft) text-(--color-warning)'
           : 'border-(--color-border-subtle) bg-(--color-bg-soft) text-(--color-text-primary)'
       }`}
     >

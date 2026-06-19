@@ -6,6 +6,8 @@ import { useMockInterviewStore } from '@/store/mock-interview.store';
 import { InterviewSetup } from './_components/InterviewSetup';
 import { InterviewConsole } from './_components/InterviewConsole';
 import { FeedbackReport } from './_components/FeedbackReport';
+import { PageContainer } from '@/components/dashboard/PageContainer';
+import { PageHeader } from '@/components/dashboard/PageHeader';
 
 export default function MockInterviewPage() {
   const { status, feedback } = useMockInterviewStore();
@@ -22,30 +24,25 @@ export default function MockInterviewPage() {
   }
 
   return (
-    <div className="w-full max-w-300 mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-        <motion.header
+    <PageContainer>
+        <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: 'easeOut' }}
           className="mb-8"
         >
-          <div className="text-xs font-semibold uppercase tracking-[0.12em] text-(--color-accent) mb-2">
-            Mock interview
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-bold font-display tracking-tight">
-            AI Interview Console
-          </h1>
-          <p className="text-sm text-(--color-text-muted) mt-1.5 mb-0 max-w-xl">
-            Practice realistic technical and behavioral rounds with an AI interviewer, then review a
-            scored breakdown of your performance.
-          </p>
-        </motion.header>
+          <PageHeader
+            kicker="Mock interview"
+            title="AI Interview Console"
+            description="Practice realistic technical and behavioral rounds with an AI interviewer, then review a scored breakdown of your performance."
+          />
+        </motion.div>
 
         {mounted ? renderContent() : (
           <div className="flex items-center justify-center py-24 text-sm text-(--color-text-muted)">
             Loading…
           </div>
         )}
-    </div>
+    </PageContainer>
   );
 }

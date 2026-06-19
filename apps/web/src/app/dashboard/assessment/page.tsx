@@ -3,6 +3,8 @@ import { Badge, type BadgeVariant } from '@elevatesde/ui';
 import { ArrowRight, Clock, ListChecks } from 'lucide-react';
 import type { AssessmentDifficulty } from '@elevatesde/shared-types';
 import { ASSESSMENT_PROBLEMS } from '@/lib/assessment-problems';
+import { PageContainer } from '@/components/dashboard/PageContainer';
+import { PageHeader } from '@/components/dashboard/PageHeader';
 
 const DIFFICULTY_VARIANT: Record<AssessmentDifficulty, BadgeVariant> = {
   EASY: 'success',
@@ -18,29 +20,23 @@ const DIFFICULTY_LABEL: Record<AssessmentDifficulty, string> = {
 
 export default function AssessmentIndexPage() {
   return (
-    <div className="mx-auto w-full max-w-300 px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
-      <header className="mb-8">
-        <div className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-(--color-accent)">
-          Code editor
-        </div>
-        <h1 className="m-0 font-display text-2xl font-bold tracking-tight sm:text-3xl">
-          Coding Assessments
-        </h1>
-        <p className="mt-1.5 mb-0 max-w-xl text-sm text-(--color-text-muted)">
-          Solve timed DSA problems in a full IDE with a Monaco editor, run against test cases, and
-          submit your solution.
-        </p>
-      </header>
+    <PageContainer>
+      <PageHeader
+        kicker="Code editor"
+        title="Coding Assessments"
+        description="Solve timed DSA problems in a full IDE with a Monaco editor, run against test cases, and submit your solution."
+        className="mb-8"
+      />
 
       <div className="grid gap-4 sm:grid-cols-2">
         {ASSESSMENT_PROBLEMS.map((problem) => (
           <Link
             key={problem.id}
             href={`/dashboard/assessment/${problem.id}`}
-            className="group flex flex-col rounded-lg border border-(--color-border-subtle) bg-(--color-surface) p-5 shadow-(--shadow-soft) transition-colors hover:border-(--color-accent)"
+            className="group flex flex-col rounded-(--radius-md) border border-(--color-border-subtle) bg-(--color-surface) p-5 shadow-(--shadow-card) transition-colors hover:border-(--color-accent)"
           >
             <div className="mb-2 flex items-center justify-between gap-2">
-              <h2 className="m-0 font-display text-lg font-bold tracking-tight text-(--color-text-primary)">
+              <h2 className="m-0 font-display text-lg font-semibold tracking-tight text-(--color-text-primary)">
                 {problem.title}
               </h2>
               <Badge variant={DIFFICULTY_VARIANT[problem.difficulty]}>
@@ -75,6 +71,6 @@ export default function AssessmentIndexPage() {
           </Link>
         ))}
       </div>
-    </div>
+    </PageContainer>
   );
 }

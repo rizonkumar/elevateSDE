@@ -60,7 +60,7 @@ export function ProblemPanel({ problem }: Readonly<ProblemPanelProps>) {
   const constraints = toKeyed(problem.constraints);
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-soft)">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-(--radius-md) border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-card)">
       <div className="flex items-center gap-2 border-b border-(--color-border-subtle) px-5 py-3.5">
         <span className="text-xs font-semibold uppercase tracking-[0.12em] text-(--color-text-muted)">
           Problem
@@ -69,7 +69,7 @@ export function ProblemPanel({ problem }: Readonly<ProblemPanelProps>) {
 
       <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
         <div className="mb-3 flex flex-wrap items-center gap-2.5">
-          <h2 className="m-0 font-display text-xl font-bold tracking-tight text-(--color-text-primary)">
+          <h2 className="m-0 font-display text-xl font-semibold tracking-tight text-(--color-text-primary)">
             {problem.title}
           </h2>
           <Badge variant={DIFFICULTY_VARIANT[problem.difficulty]}>
@@ -105,7 +105,7 @@ export function ProblemPanel({ problem }: Readonly<ProblemPanelProps>) {
             {problem.examples.map((example) => (
               <div
                 key={`${example.input}|${example.output}`}
-                className="rounded-lg border border-(--color-border-subtle) bg-(--color-bg-soft) p-3.5"
+                className="rounded-(--radius-sm) border border-(--color-border-subtle) bg-(--color-bg-soft) p-3.5"
               >
                 <div className="font-mono text-xs leading-relaxed text-(--color-text-primary)">
                   <span className="text-(--color-text-muted)">Input: </span>

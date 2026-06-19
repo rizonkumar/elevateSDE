@@ -16,11 +16,9 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 import { useToastStore } from '@/store/toast.store';
-import {
-  useDashboardStore,
-  type QuickActionKey,
-  type ActivityType,
-} from '@/store/dashboard.store';
+import { PageContainer } from '@/components/dashboard/PageContainer';
+import { PageHeader } from '@/components/dashboard/PageHeader';
+import { useDashboardStore, type QuickActionKey, type ActivityType } from '@/store/dashboard.store';
 
 const quickActionIcons: Record<QuickActionKey, LucideIcon> = {
   'mock-interview': Video,
@@ -69,41 +67,60 @@ export default function DashboardPage() {
 
   const currentUser = mounted ? user : null;
 
-  const statCards: { label: string; value: string; hint: string; icon: LucideIcon; accent: boolean }[] = [
-    { label: 'Interviews completed', value: `${stats.interviewsCompleted}`, hint: 'Across all tracks', icon: Trophy, accent: false },
-    { label: 'Average AI score', value: `${stats.avgAiScore}%`, hint: 'Last 30 days', icon: TrendingUp, accent: true },
-    { label: 'Active goals', value: `${stats.activeGoals}`, hint: 'In progress', icon: Flag, accent: false },
+  const statCards: {
+    label: string;
+    value: string;
+    hint: string;
+    icon: LucideIcon;
+    accent: boolean;
+  }[] = [
+    {
+      label: 'Interviews completed',
+      value: `${stats.interviewsCompleted}`,
+      hint: 'Across all tracks',
+      icon: Trophy,
+      accent: false,
+    },
+    {
+      label: 'Average AI score',
+      value: `${stats.avgAiScore}%`,
+      hint: 'Last 30 days',
+      icon: TrendingUp,
+      accent: true,
+    },
+    {
+      label: 'Active goals',
+      value: `${stats.activeGoals}`,
+      hint: 'In progress',
+      icon: Flag,
+      accent: false,
+    },
   ];
 
   return (
-    <motion.main
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className="w-full max-w-350 mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 flex flex-col gap-8 sm:gap-10"
-    >
+    <PageContainer>
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="flex flex-col gap-8 sm:gap-10"
+      >
         <motion.section variants={itemVariants}>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <div className="text-xs font-semibold uppercase tracking-[0.12em] text-(--color-accent) mb-2">
-                Welcome back
-              </div>
-              <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tight wrap-break-word">
-                {currentUser?.email ?? 'Your dashboard'}
-              </h1>
-              <p className="text-(--color-text-muted) mt-2 mb-0">
-                Track your preparation, launch a session, and review recent progress.
-              </p>
-            </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <span className="text-xs px-3 py-1.5 rounded-full border border-(--color-border-subtle) bg-(--color-badge-bg) text-(--color-text-muted) font-medium">
-                {currentUser?.role ?? 'Candidate'}
-              </span>
-              <span className="text-xs px-3 py-1.5 rounded-full border border-(--color-border-subtle) bg-(--color-badge-bg) text-(--color-text-muted) font-medium">
-                Active session
-              </span>
-            </div>
-          </div>
+          <PageHeader
+            kicker="Welcome back"
+            title={currentUser?.email ?? 'Your dashboard'}
+            description="Track your preparation, launch a session, and review recent progress."
+            actions={
+              <>
+                <span className="rounded-(--radius-full) border border-(--color-border-subtle) bg-(--color-badge-bg) px-3 py-1.5 text-xs font-medium text-(--color-text-muted)">
+                  {currentUser?.role ?? 'Candidate'}
+                </span>
+                <span className="rounded-(--radius-full) border border-(--color-border-subtle) bg-(--color-badge-bg) px-3 py-1.5 text-xs font-medium text-(--color-text-muted)">
+                  Active session
+                </span>
+              </>
+            }
+          />
         </motion.section>
 
         <motion.section variants={itemVariants}>
@@ -113,19 +130,19 @@ export default function DashboardPage() {
               return (
                 <div
                   key={card.label}
-                  className="rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-soft) p-5 flex items-start justify-between gap-4"
+                  className="rounded-md border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-card) p-5 flex items-start justify-between gap-4"
                 >
                   <div className="min-w-0">
                     <div className="text-xs font-semibold uppercase tracking-wider text-(--color-text-muted)">
                       {card.label}
                     </div>
-                    <div className="font-display text-3xl font-bold tracking-tight mt-2">
+                    <div className="font-display text-3xl font-semibold tracking-tight mt-2">
                       {card.value}
                     </div>
                     <div className="text-xs text-(--color-text-muted) mt-1">{card.hint}</div>
                   </div>
                   <span
-                    className={`inline-flex items-center justify-center w-10 h-10 rounded-lg shrink-0 ${
+                    className={`inline-flex items-center justify-center w-10 h-10 rounded-sm shrink-0 ${
                       card.accent
                         ? 'bg-(--color-accent) text-white'
                         : 'bg-(--color-accent-soft) text-(--color-accent)'
@@ -151,10 +168,10 @@ export default function DashboardPage() {
                   key={action.key}
                   type="button"
                   onClick={() => addToast(`${action.title} is coming soon.`, 'info')}
-                  className="group text-left rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-soft) p-5 flex flex-col gap-4 cursor-pointer transition-all hover:-translate-y-0.5 hover:border-(--color-accent)"
+                  className="group text-left rounded-md border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-card) p-5 flex flex-col gap-4 cursor-pointer transition-all hover:-translate-y-0.5 hover:border-(--color-accent)"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="inline-flex items-center justify-center w-11 h-11 rounded-lg bg-(--color-accent-soft) text-(--color-accent)">
+                    <span className="inline-flex items-center justify-center w-11 h-11 rounded-sm bg-(--color-accent-soft) text-(--color-accent)">
                       <Icon className="w-5 h-5" />
                     </span>
                     <ArrowUpRight className="w-4 h-4 text-(--color-text-muted) transition-colors group-hover:text-(--color-accent)" />
@@ -173,7 +190,7 @@ export default function DashboardPage() {
 
         <motion.section variants={itemVariants}>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-soft) p-5 sm:p-6">
+            <div className="lg:col-span-2 rounded-md border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-card) p-5 sm:p-6">
               <h2 className="text-sm font-semibold text-(--color-text-primary) mb-5">
                 Recent activity
               </h2>
@@ -202,7 +219,7 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div className="rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-soft) p-5 sm:p-6">
+            <div className="rounded-md border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-card) p-5 sm:p-6">
               <h2 className="text-sm font-semibold text-(--color-text-primary) mb-5">
                 Focus areas
               </h2>
@@ -227,6 +244,7 @@ export default function DashboardPage() {
             </div>
           </div>
         </motion.section>
-    </motion.main>
+      </motion.div>
+    </PageContainer>
   );
 }

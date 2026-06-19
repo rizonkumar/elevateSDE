@@ -21,6 +21,7 @@ import { Button, Input } from '@elevatesde/ui';
 import { useAuthStore } from '@/store/auth.store';
 import { useToastStore } from '@/store/toast.store';
 import { useOrgDashboardStore } from '@/store/org-dashboard.store';
+import { PageContainer } from '@/components/dashboard/PageContainer';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -85,12 +86,13 @@ export default function OrgDashboardPage() {
   }
 
   return (
-    <motion.main
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className="w-full max-w-350 mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 flex flex-col gap-8 sm:gap-10"
-    >
+    <PageContainer>
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="flex flex-col gap-8 sm:gap-10"
+      >
         <motion.section variants={itemVariants}>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -267,6 +269,7 @@ export default function OrgDashboardPage() {
             </div>
           </div>
         </motion.section>
-    </motion.main>
+      </motion.div>
+    </PageContainer>
   );
 }

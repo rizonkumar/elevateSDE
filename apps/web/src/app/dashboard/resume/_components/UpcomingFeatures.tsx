@@ -51,7 +51,7 @@ export function UpcomingFeatures() {
               <span className="absolute right-3 top-3 rounded-(--radius-full) border border-(--color-border-subtle) bg-(--color-badge-bg) px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-(--color-text-muted)">
                 Soon
               </span>
-              <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-(--color-accent-soft) text-(--color-accent)">
+              <span className="flex h-10 w-10 items-center justify-center rounded-(--radius-md) bg-(--color-accent-soft) text-(--color-accent)">
                 <Icon className="h-5 w-5" />
               </span>
               <div>
