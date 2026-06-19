@@ -205,3 +205,50 @@ export interface AssessmentRunResultDto {
   stdout: string;
   ranAt: string;
 }
+
+export type ForumSortOption = 'newest' | 'popular' | 'unanswered';
+
+export type ForumPostStatus = 'PUBLISHED' | 'FLAGGED' | 'REMOVED';
+
+export interface ForumAuthor {
+  id: string;
+  name: string;
+  headline: string | null;
+}
+
+export interface ForumPostDto {
+  id: string;
+  title: string;
+  body: string;
+  tags: string[];
+  author: ForumAuthor;
+  upvotes: number;
+  hasUpvoted: boolean;
+  replyCount: number;
+  viewCount: number;
+  createdAt: string;
+}
+
+export interface ForumCommentDto {
+  id: string;
+  postId: string;
+  author: ForumAuthor;
+  body: string;
+  upvotes: number;
+  hasUpvoted: boolean;
+  createdAt: string;
+}
+
+export type LeaderboardTimeframe = 'all-time' | 'monthly' | 'weekly';
+
+export interface LeaderboardEntryDto {
+  rank: number;
+  userId: string;
+  name: string;
+  headline: string | null;
+  points: number;
+  assessmentsCompleted: number;
+  badges: string[];
+  streakDays: number;
+  isCurrentUser: boolean;
+}
