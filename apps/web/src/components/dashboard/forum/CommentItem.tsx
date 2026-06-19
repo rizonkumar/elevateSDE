@@ -10,7 +10,7 @@ interface CommentItemProps {
   onUpvote: (commentId: string) => void;
 }
 
-export function CommentItem({ comment, onUpvote }: CommentItemProps) {
+export function CommentItem({ comment, onUpvote }: Readonly<CommentItemProps>) {
   return (
     <div className="flex gap-3 py-4 first:pt-0 last:pb-0">
       <AuthorAvatar name={comment.author.name} size="md" />

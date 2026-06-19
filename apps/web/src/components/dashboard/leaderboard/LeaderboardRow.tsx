@@ -10,7 +10,7 @@ interface LeaderboardRowProps {
   entry: LeaderboardEntryDto;
 }
 
-function MemberCell({ entry }: LeaderboardRowProps) {
+function MemberCell({ entry }: Readonly<LeaderboardRowProps>) {
   return (
     <div className="flex items-center gap-3">
       <AuthorAvatar name={entry.name} size="md" />
@@ -27,7 +27,7 @@ function MemberCell({ entry }: LeaderboardRowProps) {
   );
 }
 
-function BadgeList({ badges }: { badges: string[] }) {
+function BadgeList({ badges }: Readonly<{ badges: string[] }>) {
   if (badges.length === 0) {
     return <span className="text-xs text-(--color-text-disabled)">—</span>;
   }
@@ -42,7 +42,7 @@ function BadgeList({ badges }: { badges: string[] }) {
   );
 }
 
-export function LeaderboardRow({ entry }: LeaderboardRowProps) {
+export function LeaderboardRow({ entry }: Readonly<LeaderboardRowProps>) {
   return (
     <tr
       className={`transition-colors ${
@@ -72,7 +72,7 @@ export function LeaderboardRow({ entry }: LeaderboardRowProps) {
   );
 }
 
-export function LeaderboardCard({ entry }: LeaderboardRowProps) {
+export function LeaderboardCard({ entry }: Readonly<LeaderboardRowProps>) {
   return (
     <div
       className={`rounded-md border p-4 ${

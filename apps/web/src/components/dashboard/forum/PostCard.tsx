@@ -14,7 +14,7 @@ interface PostCardProps {
   onUpvote: (id: string) => void;
 }
 
-export function PostCard({ post, onUpvote }: PostCardProps) {
+export function PostCard({ post, onUpvote }: Readonly<PostCardProps>) {
   return (
     <article className="rounded-md border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-card) p-4 transition-colors hover:border-(--color-accent) sm:p-5">
       <div className="flex gap-4">

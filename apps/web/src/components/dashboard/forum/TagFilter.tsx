@@ -15,9 +15,9 @@ function chipClasses(active: boolean): string {
   }`;
 }
 
-export function TagFilter({ activeTag, onChange }: TagFilterProps) {
+export function TagFilter({ activeTag, onChange }: Readonly<TagFilterProps>) {
   return (
-    <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none [&::-webkit-scrollbar]:hidden">
       <button type="button" className={chipClasses(activeTag === null)} onClick={() => onChange(null)}>
         All topics
       </button>

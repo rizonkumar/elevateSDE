@@ -14,7 +14,7 @@ const sizeClasses: Record<AvatarSize, string> = {
   lg: 'h-12 w-12 text-sm',
 };
 
-export function AuthorAvatar({ name, size = 'md', className = '' }: AuthorAvatarProps) {
+export function AuthorAvatar({ name, size = 'md', className = '' }: Readonly<AuthorAvatarProps>) {
   return (
     <span
       aria-hidden="true"

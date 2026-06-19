@@ -30,7 +30,7 @@ export function CreatePostModal() {
     );
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (title.trim().length < 8) {
       addToast('Give your question a clearer title (at least 8 characters).', 'error');

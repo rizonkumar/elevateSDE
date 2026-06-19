@@ -15,7 +15,7 @@ export function UpvoteButton({
   active,
   onToggle,
   orientation = 'vertical',
-}: UpvoteButtonProps) {
+}: Readonly<UpvoteButtonProps>) {
   const isVertical = orientation === 'vertical';
   return (
     <motion.button
@@ -28,7 +28,7 @@ export function UpvoteButton({
       }}
       aria-pressed={active}
       aria-label={active ? 'Remove upvote' : 'Upvote'}
-      className={`inline-flex items-center justify-center gap-1 rounded-(--radius-sm) border font-semibold transition-colors cursor-pointer focus:outline-none focus-visible:shadow-[0_0_0_2px_var(--color-bg),0_0_0_4px_var(--color-accent)] ${
+      className={`inline-flex items-center justify-center gap-1 rounded-sm border font-semibold transition-colors cursor-pointer focus:outline-none focus-visible:shadow-[0_0_0_2px_var(--color-bg),0_0_0_4px_var(--color-accent)] ${
         isVertical ? 'flex-col px-2.5 py-2 text-sm w-12' : 'px-2.5 py-1.5 text-xs'
       } ${
         active

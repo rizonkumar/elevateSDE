@@ -28,7 +28,7 @@ export default function ForumPostPage() {
 
   const [reply, setReply] = React.useState('');
 
-  const handleReply = (event: React.FormEvent) => {
+  const handleReply = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!id || !reply.trim()) {
       return;
@@ -48,11 +48,7 @@ export default function ForumPostPage() {
           Back to forum
         </Link>
 
-        {!post ? (
-          <div className="rounded-md border border-dashed border-(--color-border-subtle) bg-(--color-surface) px-6 py-16 text-center">
-            <p className="m-0 text-sm text-(--color-text-muted)">This discussion is no longer available.</p>
-          </div>
-        ) : (
+        {post ? (
           <>
             <article className="rounded-md border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-card) p-5 sm:p-6">
               <div className="flex gap-4">
@@ -126,6 +122,10 @@ export default function ForumPostPage() {
               )}
             </section>
           </>
+        ) : (
+          <div className="rounded-md border border-dashed border-(--color-border-subtle) bg-(--color-surface) px-6 py-16 text-center">
+            <p className="m-0 text-sm text-(--color-text-muted)">This discussion is no longer available.</p>
+          </div>
         )}
       </div>
     </PageContainer>

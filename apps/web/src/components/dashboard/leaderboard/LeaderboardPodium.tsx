@@ -11,7 +11,7 @@ interface LeaderboardPodiumProps {
   entries: LeaderboardEntryDto[];
 }
 
-export function LeaderboardPodium({ entries }: LeaderboardPodiumProps) {
+export function LeaderboardPodium({ entries }: Readonly<LeaderboardPodiumProps>) {
   if (entries.length === 0) {
     return null;
   }

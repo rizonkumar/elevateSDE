@@ -8,7 +8,7 @@ const medalClasses: Record<number, string> = {
   3: 'bg-(--color-accent-soft) text-(--color-accent)',
 };
 
-export function RankBadge({ rank }: RankBadgeProps) {
+export function RankBadge({ rank }: Readonly<RankBadgeProps>) {
   const medal = medalClasses[rank];
   if (medal) {
     return (
