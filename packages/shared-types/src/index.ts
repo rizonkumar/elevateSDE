@@ -239,6 +239,28 @@ export interface ForumCommentDto {
   createdAt: string;
 }
 
+export interface ForumReportDto {
+  id: string;
+  reason: string;
+  createdAt: string;
+}
+
+export interface AdminForumPostDto {
+  id: string;
+  title: string;
+  body: string;
+  tags: string[];
+  author: ForumAuthor;
+  authorEmail: string;
+  status: ForumPostStatus;
+  upvotes: number;
+  replyCount: number;
+  viewCount: number;
+  reportCount: number;
+  reports: ForumReportDto[];
+  createdAt: string;
+}
+
 export type LeaderboardTimeframe = 'all-time' | 'monthly' | 'weekly';
 
 export interface LeaderboardEntryDto {

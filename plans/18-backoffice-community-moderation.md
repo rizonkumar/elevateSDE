@@ -37,15 +37,24 @@ posts, approve or remove content, and adjust leaderboard standings (points, badg
   abuse), reflected optimistically with a toast.
 - **Badges:** Award or revoke a badge via a small multi-select of badge keys.
 
-#### [NEW] [forum-moderation.store.ts](file:///Users/rizon.rahi/Personal/elevateSDE/apps/admin/src/store/forum-moderation.store.ts)
+#### [NEW] [forum-moderation-data.ts](file:///Users/rizon.rahi/Personal/elevateSDE/apps/admin/src/lib/forum-moderation-data.ts)
 
-- Zustand store managing the post list, the active review draft, modal/filter state, and the
-  approve/flag/remove actions against the `api` client (seeded in-memory until the backend
-  exists), so the swap to real endpoints is a one-line change per action.
+- Mock seed + thin async accessors (`getModerationPosts`, `getPostComments`, `getTagLabel`,
+  `FORUM_TAGS`) mirroring `apps/web/src/lib/forum-data.ts`. The page holds list/filter/modal
+  state in local `React.useState` and approve/flag/remove mutate that state — matching the
+  admin app's existing convention (`feature-flags/page.tsx`) rather than introducing Zustand.
+  Each accessor is the single swap point for the real `/api/v1/admin/forum-posts` endpoints.
 
-#### [NEW] [leaderboard-management.store.ts](file:///Users/rizon.rahi/Personal/elevateSDE/apps/admin/src/store/leaderboard-management.store.ts)
+#### [NEW] [leaderboard-management-data.ts](file:///Users/rizon.rahi/Personal/elevateSDE/apps/admin/src/lib/leaderboard-management-data.ts)
 
-- Zustand store loading standings and the selected member for points/badge adjustment.
+- Mock seed reusing the Plan-09 `PEOPLE` roster, exposing `getStandings()` and a `BADGE_KEYS`
+  constant. The page loads standings into local state; points/badge edits mutate and re-rank
+  in place.
+
+#### [NEW] [relative-time.ts](file:///Users/rizon.rahi/Personal/elevateSDE/apps/admin/src/lib/relative-time.ts)
+
+- `formatRelativeTime` and `getNameInitials`, mirrored from the webclient for post/comment
+  timestamps and avatar initials in the moderation views.
 
 #### [MODIFY] [AdminLayout.tsx](file:///Users/rizon.rahi/Personal/elevateSDE/apps/admin/src/components/AdminLayout.tsx)
 
@@ -54,10 +63,11 @@ posts, approve or remove content, and adjust leaderboard standings (points, badg
 
 ### Shared Types (`packages/shared-types`)
 
-- Reuse `ForumPostDto`, `ForumCommentDto`, `ForumPostStatus`, `LeaderboardEntryDto` (already
-  added for Plan 09). Add admin-facing shapes when the backend is built: `ForumReportDto`
-  (postId, reporterId, reason, createdAt), `ForumModerationActionDto` (postId, action,
-  moderatorId, note, createdAt), and `LeaderboardAdjustmentDto`.
+- Reuse `ForumCommentDto`, `ForumPostStatus`, `ForumAuthor`, `LeaderboardEntryDto` (already
+  added for Plan 09). Added `AdminForumPostDto` (post fields + `status`, `reportCount`,
+  `reports`, `authorEmail`) and `ForumReportDto` (`id`, `reason`, `createdAt`) for the
+  moderation views. Defer `ForumModerationActionDto` and `LeaderboardAdjustmentDto` to the
+  backend phase.
 
 ## Backend Dependency (future)
 
