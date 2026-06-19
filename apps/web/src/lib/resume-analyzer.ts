@@ -272,13 +272,13 @@ export interface ScoreBand {
 
 export function scoreBand(score: number): ScoreBand {
   if (score >= 80) {
-    return { label: 'Excellent', badgeVariant: 'success', fill: '#10b981' };
+    return { label: 'Excellent', badgeVariant: 'success', fill: 'var(--color-success)' };
   }
   if (score >= 60) {
-    return { label: 'Good', badgeVariant: 'accent', fill: '#358f80' };
+    return { label: 'Good', badgeVariant: 'accent', fill: 'var(--color-accent)' };
   }
   if (score >= 40) {
-    return { label: 'Needs work', badgeVariant: 'warning', fill: '#f59e0b' };
+    return { label: 'Needs work', badgeVariant: 'warning', fill: 'var(--color-warning)' };
   }
-  return { label: 'Poor', badgeVariant: 'danger', fill: '#f43f5e' };
+  return { label: 'Poor', badgeVariant: 'danger', fill: 'var(--color-danger)' };
 }

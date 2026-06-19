@@ -29,9 +29,9 @@ const severityIcon: Record<ResumeFeedbackSeverity, typeof CheckCircle2> = {
 };
 
 const severityColor: Record<ResumeFeedbackSeverity, string> = {
-  good: 'text-emerald-500',
-  warning: 'text-amber-500',
-  critical: 'text-rose-500',
+  good: 'text-(--color-success)',
+  warning: 'text-(--color-warning)',
+  critical: 'text-(--color-danger)',
 };
 
 function FeedbackRow({ item }: { readonly item: ResumeFeedbackItem }) {
@@ -70,7 +70,7 @@ export function FeedbackTabs({ analysis }: FeedbackTabsProps) {
       {tab === 'skills' && (
         <div className="flex flex-col gap-5">
           <div>
-            <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-(--color-text-muted)">
+            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-(--color-text-muted)">
               Matched skills
             </h3>
             {analysis.parsedSkills.length > 0 ? (
@@ -89,7 +89,7 @@ export function FeedbackTabs({ analysis }: FeedbackTabsProps) {
           </div>
           {analysis.missingSkills.length > 0 && (
             <div>
-              <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-(--color-text-muted)">
+              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-(--color-text-muted)">
                 Recommended to add
               </h3>
               <div className="flex flex-wrap gap-2">

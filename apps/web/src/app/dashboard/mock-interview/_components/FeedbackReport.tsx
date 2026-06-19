@@ -64,7 +64,7 @@ export function FeedbackReport({ feedback }: FeedbackReportProps) {
             </ResponsiveContainer>
           )}
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-            <div className="font-display text-4xl font-bold leading-none text-(--color-text-primary)">
+            <div className="font-display text-4xl font-semibold leading-none text-(--color-text-primary)">
               {feedback.overallScore}
             </div>
             <div className="mt-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-(--color-text-muted)">
@@ -122,7 +122,7 @@ export function FeedbackReport({ feedback }: FeedbackReportProps) {
           <ul className="m-0 flex flex-col gap-3 p-0">
             {feedback.strengths.map((item) => (
               <li key={item} className="flex items-start gap-2.5">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
+                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-(--color-success)" />
                 <span className="text-sm leading-relaxed text-(--color-text-primary)">{item}</span>
               </li>
             ))}

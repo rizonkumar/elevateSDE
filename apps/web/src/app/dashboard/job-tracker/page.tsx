@@ -20,6 +20,8 @@ import type { JobApplicationDto, JobApplicationStatus } from '@elevatesde/shared
 import { useJobTrackerStore, type JobApplicationInput } from '@/store/job-tracker.store';
 import { JobColumn } from './_components/JobColumn';
 import { JobCardView } from './_components/JobCard';
+import { PageContainer } from '@/components/dashboard/PageContainer';
+import { PageHeader } from '@/components/dashboard/PageHeader';
 import { JobFormModal } from './_components/JobFormModal';
 import {
   BOARD_COLUMNS,
@@ -131,26 +133,24 @@ export default function JobTrackerPage() {
 
   return (
     <>
-      <main className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-        <motion.header
+      <PageContainer>
+        <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: 'easeOut' }}
-          className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8"
+          className="mb-8"
         >
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold font-display tracking-tight">
-              Job Tracker
-            </h1>
-            <p className="text-sm text-(--color-text-muted) mt-1.5">
-              Drag applications across stages to keep your pipeline current.
-            </p>
-          </div>
-          <Button onClick={() => openModal()} className="flex items-center gap-2 self-start">
-            <Plus className="w-4 h-4" />
-            Add application
-          </Button>
-        </motion.header>
+          <PageHeader
+            title="Job Tracker"
+            description="Drag applications across stages to keep your pipeline current."
+            actions={
+              <Button onClick={() => openModal()} className="flex items-center gap-2">
+                <Plus className="w-4 h-4" />
+                Add application
+              </Button>
+            }
+          />
+        </motion.div>
 
         {!mounted || isLoading ? (
           <div className="flex items-center justify-center py-24 text-sm text-(--color-text-muted)">
@@ -186,7 +186,7 @@ export default function JobTrackerPage() {
             </DragOverlay>
           </DndContext>
         )}
-      </main>
+      </PageContainer>
 
       <JobFormModal
         open={isModalOpen}

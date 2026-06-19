@@ -31,15 +31,15 @@ type DetailField = (typeof DETAIL_FIELDS)[number];
 
 function statusTone(status: AssessmentRunStatus): string {
   if (status === 'ACCEPTED') {
-    return 'border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300';
+    return 'border-(--color-success) bg-(--color-success-soft) text-(--color-success)';
   }
-  return 'border-rose-500/40 bg-rose-500/10 text-rose-600 dark:text-rose-300';
+  return 'border-(--color-danger) bg-(--color-danger-soft) text-(--color-danger)';
 }
 
 function caseDotClass(status: TestCaseResultStatus): string {
-  if (status === 'PASS') return 'bg-emerald-500';
-  if (status === 'FAIL') return 'bg-rose-500';
-  return 'bg-amber-500';
+  if (status === 'PASS') return 'bg-(--color-success)';
+  if (status === 'FAIL') return 'bg-(--color-danger)';
+  return 'bg-(--color-warning)';
 }
 
 function fieldValue(field: DetailField, result: TestCaseResultDto): string {
@@ -49,9 +49,9 @@ function fieldValue(field: DetailField, result: TestCaseResultDto): string {
 }
 
 function StatusIcon({ status }: Readonly<{ status: TestCaseResultStatus }>) {
-  if (status === 'PASS') return <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />;
-  if (status === 'FAIL') return <XCircle className="h-4 w-4 shrink-0 text-rose-500" />;
-  return <AlertTriangle className="h-4 w-4 shrink-0 text-amber-500" />;
+  if (status === 'PASS') return <CheckCircle2 className="h-4 w-4 shrink-0 text-(--color-success)" />;
+  if (status === 'FAIL') return <XCircle className="h-4 w-4 shrink-0 text-(--color-danger)" />;
+  return <AlertTriangle className="h-4 w-4 shrink-0 text-(--color-warning)" />;
 }
 
 function CaseSubTabs({
@@ -75,7 +75,7 @@ function CaseSubTabs({
             key={`case-tab-${index + 1}`}
             type="button"
             onClick={() => onSelect(index)}
-            className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer ${
+            className={`inline-flex items-center gap-1.5 rounded-(--radius-sm) px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer ${
               active
                 ? 'bg-(--color-badge-bg) text-(--color-text-primary)'
                 : 'text-(--color-text-muted) hover:text-(--color-text-primary)'
@@ -113,8 +113,8 @@ function CaseDetail({ result }: Readonly<{ result: TestCaseResultDto }>) {
           <div key={field}>
             <div className="mb-1 text-xs text-(--color-text-muted)">{field}</div>
             <div
-              className={`rounded-lg border border-(--color-border-subtle) bg-(--color-bg-soft) px-3 py-2 font-mono text-xs break-all ${
-                wrong ? 'text-rose-500' : 'text-(--color-text-primary)'
+              className={`rounded-(--radius-sm) border border-(--color-border-subtle) bg-(--color-bg-soft) px-3 py-2 font-mono text-xs break-all ${
+                wrong ? 'text-(--color-danger)' : 'text-(--color-text-primary)'
               }`}
             >
               {fieldValue(field, result)}
@@ -179,7 +179,7 @@ export function ConsolePanel() {
       return (
         <div className="space-y-4">
           <div
-            className={`flex items-center gap-2 rounded-lg border px-3.5 py-2.5 text-sm font-semibold ${statusTone(result.status)}`}
+            className={`flex items-center gap-2 rounded-(--radius-sm) border px-3.5 py-2.5 text-sm font-semibold ${statusTone(result.status)}`}
           >
             {result.status === 'ACCEPTED' ? (
               <CheckCircle2 className="h-4 w-4" />
@@ -196,7 +196,7 @@ export function ConsolePanel() {
           />
           {activeResult && <CaseDetail result={activeResult} />}
           {hiddenResults.length > 0 && (
-            <div className="rounded-lg border border-(--color-border-subtle) bg-(--color-bg-soft) px-3.5 py-2.5 text-xs text-(--color-text-muted)">
+            <div className="rounded-(--radius-sm) border border-(--color-border-subtle) bg-(--color-bg-soft) px-3.5 py-2.5 text-xs text-(--color-text-muted)">
               {hiddenResults.filter((item) => item.status === 'PASS').length}/{hiddenResults.length}{' '}
               hidden test cases passed.
             </div>
@@ -214,7 +214,7 @@ export function ConsolePanel() {
   };
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-soft)">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-(--radius-md) border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-card)">
       <div className="flex items-center justify-between gap-3 border-b border-(--color-border-subtle) px-4 py-2.5">
         <Tabs
           value={testcaseTab}

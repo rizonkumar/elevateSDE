@@ -22,7 +22,7 @@ export function SegmentedControl<T extends string | number>({
     <div
       role="group"
       aria-label={ariaLabel}
-      className="inline-flex items-center gap-0.5 rounded-lg border border-(--color-border-subtle) bg-(--color-badge-bg) p-0.5"
+      className="inline-flex items-center gap-0.5 rounded-(--radius-sm) border border-(--color-border-subtle) bg-(--color-badge-bg) p-0.5"
     >
       {options.map((option) => {
         const active = option.value === value;
@@ -32,9 +32,9 @@ export function SegmentedControl<T extends string | number>({
             type="button"
             aria-pressed={active}
             onClick={() => onChange(option.value)}
-            className={`rounded-md px-3 py-1 text-sm font-medium transition-colors cursor-pointer ${
+            className={`rounded-[calc(var(--radius-sm)-2px)] px-3 py-1 text-sm font-medium transition-colors cursor-pointer ${
               active
-                ? 'bg-(--color-surface) text-(--color-text-primary) shadow-(--shadow-soft)'
+                ? 'bg-(--color-surface) text-(--color-text-primary) shadow-(--shadow-card)'
                 : 'text-(--color-text-muted) hover:text-(--color-text-primary)'
             }`}
           >

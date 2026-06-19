@@ -46,11 +46,11 @@ export function Modal({ open, onClose, title, description, children }: ModalProp
       <div
         ref={panelRef}
         tabIndex={-1}
-        className="relative w-full sm:max-w-lg max-h-[92vh] overflow-y-auto bg-(--color-surface) border border-(--color-border-subtle) rounded-t-(--radius-lg) sm:rounded-(--radius-lg) shadow-(--shadow-soft) focus:outline-none"
+        className="relative w-full sm:max-w-lg max-h-[92vh] overflow-y-auto bg-(--color-surface) border border-(--color-border-subtle) rounded-t-(--radius-md) sm:rounded-(--radius-md) shadow-(--shadow-modal) focus:outline-none"
       >
         <div className="flex items-start justify-between gap-4 px-5 sm:px-6 pt-5 pb-4 border-b border-(--color-border-subtle)">
           <div className="flex flex-col gap-1">
-            <h2 className="text-lg font-bold tracking-tight text-(--color-text-primary)">
+            <h2 className="text-lg font-semibold tracking-tight text-(--color-text-primary)">
               {title}
             </h2>
             {description && (

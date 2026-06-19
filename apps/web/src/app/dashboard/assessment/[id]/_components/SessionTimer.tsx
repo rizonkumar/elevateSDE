@@ -18,9 +18,9 @@ export function SessionTimer({ remainingSeconds }: SessionTimerProps) {
 
   return (
     <div
-      className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold tabular-nums transition-colors ${
+      className={`inline-flex items-center gap-2 rounded-(--radius-sm) border px-3 py-2 text-sm font-semibold tabular-nums transition-colors ${
         danger || expired
-          ? 'border-rose-500/40 bg-rose-500/10 text-rose-600 dark:text-rose-300'
+          ? 'border-(--color-danger) bg-(--color-danger-soft) text-(--color-danger)'
           : 'border-(--color-border-subtle) bg-(--color-bg-soft) text-(--color-text-primary)'
       }`}
       aria-live="polite"

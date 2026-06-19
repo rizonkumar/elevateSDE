@@ -87,7 +87,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
               key={link.href}
               href={link.href}
               title={isRail ? link.label : undefined}
-              className={`flex items-center gap-3 rounded-lg py-2.5 text-sm font-medium transition-colors ${
+              className={`flex items-center gap-3 rounded-(--radius-sm) py-2.5 text-sm font-medium transition-colors ${
                 isRail ? 'justify-center px-2' : 'px-3'
               } ${
                 active
@@ -107,7 +107,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
           <a
             href="/admin"
             title={isRail ? 'Admin Console' : undefined}
-            className={`flex items-center gap-3 rounded-lg py-2.5 text-sm font-medium text-(--color-text-muted) transition-colors hover:bg-(--color-badge-bg) hover:text-(--color-text-primary) ${
+            className={`flex items-center gap-3 rounded-(--radius-sm) py-2.5 text-sm font-medium text-(--color-text-muted) transition-colors hover:bg-(--color-badge-bg) hover:text-(--color-text-primary) ${
               isRail ? 'justify-center px-2' : 'px-3'
             }`}
           >
@@ -133,7 +133,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
           type="button"
           onClick={toggleCollapsed}
           title={isRail ? 'Expand sidebar' : 'Collapse sidebar'}
-          className={`hidden items-center gap-3 rounded-lg py-2.5 text-sm font-medium text-(--color-text-muted) transition-colors hover:bg-(--color-badge-bg) hover:text-(--color-text-primary) cursor-pointer lg:flex ${
+          className={`hidden items-center gap-3 rounded-(--radius-sm) py-2.5 text-sm font-medium text-(--color-text-muted) transition-colors hover:bg-(--color-badge-bg) hover:text-(--color-text-primary) cursor-pointer lg:flex ${
             isRail ? 'justify-center px-2' : 'px-3'
           }`}
         >

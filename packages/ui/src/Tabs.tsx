@@ -18,7 +18,7 @@ export function Tabs({ items, value, onChange, className = '' }: TabsProps) {
   return (
     <div
       role="tablist"
-      className={`inline-flex items-center gap-1 rounded-(--radius-lg) bg-(--color-tab-bg) p-1 ${className}`}
+      className={`inline-flex items-center gap-1 rounded-(--radius-md) bg-(--color-tab-bg) p-1 ${className}`}
     >
       {items.map((item) => {
         const Icon = item.icon;
@@ -30,9 +30,9 @@ export function Tabs({ items, value, onChange, className = '' }: TabsProps) {
             role="tab"
             aria-selected={active}
             onClick={() => onChange(item.id)}
-            className={`inline-flex items-center gap-2 rounded-[calc(var(--radius-lg)-0.25rem)] px-3.5 py-2 text-sm font-medium transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent)/30 ${
+            className={`inline-flex items-center gap-2 rounded-(--radius-sm) px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer focus:outline-none focus-visible:shadow-[0_0_0_2px_var(--color-bg),0_0_0_4px_var(--color-accent)] ${
               active
-                ? 'bg-(--color-tab-active) text-(--color-text-primary) shadow-(--shadow-soft)'
+                ? 'bg-(--color-tab-active) text-(--color-text-primary) shadow-(--shadow-card)'
                 : 'text-(--color-text-muted) hover:text-(--color-text-primary)'
             }`}
           >

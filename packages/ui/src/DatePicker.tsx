@@ -164,7 +164,7 @@ export function DatePicker({
         width: coords.width,
         transform: coords.placement === 'top' ? 'translateY(-100%)' : undefined,
       }}
-      className="z-[60] rounded-lg border border-(--color-border-subtle) bg-(--color-surface) p-3 shadow-(--shadow-soft)"
+      className="z-[60] rounded-(--radius-md) border border-(--color-border-subtle) bg-(--color-surface) p-3 shadow-(--shadow-popover)"
     >
       <div className="mb-2 flex items-center justify-between">
         <button
@@ -236,7 +236,7 @@ export function DatePicker({
             type="time"
             value={timeValue}
             onChange={(event) => changeTime(event.target.value)}
-            className="flex-1 rounded-md border border-(--color-border-subtle) bg-(--color-bg-soft) px-3 py-1.5 text-sm text-(--color-text-primary) focus:border-(--color-accent) focus:outline-none focus:ring-2 focus:ring-(--color-accent)/10"
+            className="flex-1 rounded-(--radius-sm) border border-(--color-border) bg-(--color-bg) px-3 py-1.5 text-sm text-(--color-text-primary) focus:border-(--color-accent) focus:outline-none focus:shadow-[0_0_0_2px_var(--color-bg),0_0_0_4px_var(--color-accent)]"
           />
         </div>
       )}
@@ -273,7 +273,7 @@ export function DatePicker({
   return (
     <div className="flex w-full flex-col gap-2">
       {label && (
-        <span className="ml-1 select-none text-[11px] font-bold uppercase tracking-wider text-(--color-text-muted)">
+        <span className="select-none text-[13px] font-medium text-(--color-text-primary)">
           {label}
         </span>
       )}
@@ -284,7 +284,7 @@ export function DatePicker({
         onClick={toggle}
         aria-haspopup="dialog"
         aria-expanded={open}
-        className="flex w-full items-center justify-between gap-2 rounded-lg border border-(--color-border-subtle) bg-(--color-bg-soft) px-3.5 py-2.5 text-sm font-medium text-(--color-text-primary) transition hover:border-(--color-text-muted) focus:border-(--color-accent) focus:outline-none focus:ring-2 focus:ring-(--color-accent)/10 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+        className="flex h-10 w-full items-center justify-between gap-2 rounded-(--radius-sm) border border-(--color-border) bg-(--color-bg) px-3 text-sm font-medium text-(--color-text-primary) transition focus:border-(--color-accent) focus:outline-none focus:shadow-[0_0_0_2px_var(--color-bg),0_0_0_4px_var(--color-accent)] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
       >
         <span className={selected ? 'truncate' : 'truncate text-(--color-text-muted)'}>
           {display}

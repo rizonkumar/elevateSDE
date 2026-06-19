@@ -48,7 +48,7 @@ export function Select({
   return (
     <div className="flex flex-col gap-2 w-full">
       {label && (
-        <span className="text-[11px] font-bold uppercase tracking-wider text-(--color-text-muted) select-none ml-1">
+        <span className="text-[13px] font-medium text-(--color-text-primary) select-none">
           {label}
         </span>
       )}
@@ -59,7 +59,7 @@ export function Select({
           aria-haspopup="listbox"
           aria-expanded={open}
           onClick={() => setOpen((prev) => !prev)}
-          className="flex items-center justify-between gap-2 w-full text-sm font-medium bg-(--color-bg-soft) border border-(--color-border-subtle) rounded-(--radius-lg) px-3.5 py-2.5 text-(--color-text-primary) hover:border-(--color-text-muted) focus:outline-none focus:ring-2 focus:ring-(--color-accent)/10 focus:border-(--color-accent) transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          className="flex h-10 items-center justify-between gap-2 w-full text-sm font-medium bg-(--color-bg) border border-(--color-border) rounded-(--radius-sm) px-3 text-(--color-text-primary) focus:outline-none focus:border-(--color-accent) focus:shadow-[0_0_0_2px_var(--color-bg),0_0_0_4px_var(--color-accent)] transition disabled:bg-(--color-badge-bg) disabled:text-(--color-text-disabled) disabled:cursor-not-allowed cursor-pointer"
         >
           <span className="truncate">{selected?.label ?? 'Select'}</span>
           <svg
@@ -80,7 +80,7 @@ export function Select({
         {open && !disabled && (
           <div
             role="listbox"
-            className="absolute left-0 z-30 mt-1.5 w-full rounded-(--radius-lg) border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-soft) py-1"
+            className="absolute left-0 z-30 mt-1.5 w-full rounded-(--radius-md) border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-popover) py-1"
           >
             {options.map((option) => {
               const active = option.value === value;
