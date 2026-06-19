@@ -9,6 +9,8 @@ import {
   Building2,
   FileText,
   ToggleLeft,
+  ShieldAlert,
+  Trophy,
   LogOut,
   Sun,
   Moon,
@@ -76,6 +78,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     { name: 'Tenants', href: '/tenants', icon: Building2 },
     { name: 'Audit Logs', href: '/audit-logs', icon: FileText },
     { name: 'Feature Flags', href: '/feature-flags', icon: ToggleLeft },
+    { name: 'Forum Moderation', href: '/forum-moderation', icon: ShieldAlert },
+    { name: 'Leaderboard', href: '/leaderboard-management', icon: Trophy },
   ];
 
   const rail = mounted && collapsed;
