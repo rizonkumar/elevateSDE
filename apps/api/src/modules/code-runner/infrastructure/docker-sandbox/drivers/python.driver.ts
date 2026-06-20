@@ -1,5 +1,15 @@
 export const PY_RESULT_SENTINEL = '###ELEVATE_RESULT###';
 
+export const PY_PRELUDE = `from typing import *
+import collections
+import heapq
+import math
+import functools
+import itertools
+import bisect
+import re
+`;
+
 export const PY_DRIVER = `
 import json as __elevate_json
 import sys as __elevate_sys
@@ -7,13 +17,20 @@ import time as __elevate_time
 import resource as __elevate_resource
 
 __elevate_sentinel = '${PY_RESULT_SENTINEL}'
+
+def __elevate_resolve():
+    if 'Solution' in globals():
+        return getattr(Solution(), '__ELEVATE_FN__')
+    return globals()['__ELEVATE_FN__']
+
 with open('/sandbox/cases.json') as __elevate_f:
     __elevate_cases = __elevate_json.load(__elevate_f)
 for __elevate_tc in __elevate_cases:
     __elevate_start = __elevate_time.perf_counter()
     try:
+        __elevate_target = __elevate_resolve()
         __elevate_args = __elevate_json.loads('[' + __elevate_tc['input'] + ']')
-        __elevate_out = __ELEVATE_FN__(*__elevate_args)
+        __elevate_out = __elevate_target(*__elevate_args)
         __elevate_ms = (__elevate_time.perf_counter() - __elevate_start) * 1000
         __elevate_line = {
             'caseId': __elevate_tc['id'],

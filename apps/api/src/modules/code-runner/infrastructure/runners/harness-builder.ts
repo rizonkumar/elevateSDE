@@ -1,6 +1,6 @@
 import { RunSpec } from '../../domain/value-objects/run-spec';
 import { JS_DRIVER } from '../docker-sandbox/drivers/javascript.driver';
-import { PY_DRIVER } from '../docker-sandbox/drivers/python.driver';
+import { PY_DRIVER, PY_PRELUDE } from '../docker-sandbox/drivers/python.driver';
 import { CPP_MAIN, CPP_PREFIX } from '../docker-sandbox/drivers/cpp.driver';
 
 export interface HarnessFile {
@@ -58,7 +58,9 @@ export function buildHarness(spec: RunSpec): HarnessArtifacts {
 
   if (spec.language === 'python') {
     const driver = PY_DRIVER.replace(/__ELEVATE_FN__/g, spec.functionName);
-    return { files: [{ name: 'main.py', content: `${spec.userCode}\n${driver}` }, cases] };
+    return {
+      files: [{ name: 'main.py', content: `${PY_PRELUDE}${spec.userCode}\n${driver}` }, cases],
+    };
   }
 
   const invoke = buildCppInvoke(spec);
