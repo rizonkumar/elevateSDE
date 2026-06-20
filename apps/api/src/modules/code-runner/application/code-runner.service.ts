@@ -84,7 +84,6 @@ export class CodeRunnerService {
 
       if (raw.compileError) {
         status = TestCaseResultStatus.ERROR;
-        actualOutput = '';
       } else if (!rawResult) {
         status = TestCaseResultStatus.ERROR;
         hasMissing = true;

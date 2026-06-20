@@ -10,7 +10,7 @@ import bisect
 import re
 `;
 
-export const PY_DRIVER = `
+export const PY_DRIVER = String.raw`
 import json as __elevate_json
 import sys as __elevate_sys
 import time as __elevate_time
@@ -48,5 +48,5 @@ for __elevate_tc in __elevate_cases:
             'runtimeMs': __elevate_ms,
             'peakMemoryKb': int(__elevate_resource.getrusage(__elevate_resource.RUSAGE_SELF).ru_maxrss),
         }
-    __elevate_sys.stdout.write(__elevate_sentinel + __elevate_json.dumps(__elevate_line) + '\\n')
+    __elevate_sys.stdout.write(__elevate_sentinel + __elevate_json.dumps(__elevate_line) + '\n')
 `;

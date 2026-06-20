@@ -64,7 +64,10 @@ const ACTION_VERBS = [
 ];
 
 function normalize(text: string): string {
-  return ` ${text.toLowerCase().replace(/[^a-z0-9+#./ ]/g, ' ').replace(/\s+/g, ' ')} `;
+  return ` ${text
+    .toLowerCase()
+    .replace(/[^a-z0-9+#./ ]/g, ' ')
+    .replace(/\s+/g, ' ')} `;
 }
 
 function matchesKeyword(paddedText: string, keyword: string): boolean {
@@ -202,9 +205,7 @@ export function analyzeResumeText(text: string, _fileName: string): ResumeAnalys
     skill.keywords.some((keyword) => matchesKeyword(padded, keyword)),
   ).map((skill) => skill.name);
 
-  const missingSkills = SDE_SKILLS.filter(
-    (skill) => !parsedSkills.includes(skill.name),
-  )
+  const missingSkills = SDE_SKILLS.filter((skill) => !parsedSkills.includes(skill.name))
     .map((skill) => skill.name)
     .slice(0, 8);
 
