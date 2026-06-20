@@ -20,6 +20,38 @@ enum JobApplicationStatus {
   REJECTED
 }
 
+enum AssessmentDifficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum AssessmentLanguage {
+  JAVASCRIPT
+  PYTHON
+  CPP
+}
+
+enum SubmissionStatus {
+  ACCEPTED
+  WRONG_ANSWER
+  RUNTIME_ERROR
+  TIME_LIMIT_EXCEEDED
+  COMPILE_ERROR
+}
+
+enum TestCaseResultStatus {
+  PASS
+  FAIL
+  ERROR
+}
+
+enum ComparisonMode {
+  EXACT
+  UNORDERED
+  FLOAT_TOLERANT
+}
+
 model Tenant {
   id               String   @id @default(uuid())
   name             String
@@ -44,6 +76,7 @@ model User {
   refreshTokens RefreshToken[]
   auditLogs    AuditLog[]
   jobApplications JobApplication[]
+  submissions  Submission[]
 }
 
 model RefreshToken {
@@ -88,4 +121,78 @@ model JobApplication {
   user              User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, status])
+}
+
+model Problem {
+  id                String               @id @default(uuid())
+  tenantId          String?
+  slug              String               @unique
+  title             String
+  difficulty        AssessmentDifficulty
+  description       String
+  constraints       String[]
+  tags              String[]
+  starterCode       Json
+  examples          Json
+  functionName      String
+  harness           Json
+  referenceSolution Json
+  comparisonMode    ComparisonMode       @default(EXACT)
+  timeLimitMinutes  Int                  @default(30)
+  isPublished       Boolean              @default(false)
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  testCases         ProblemTestCase[]
+  submissions       Submission[]
+
+  @@index([difficulty, isPublished])
+}
+
+model ProblemTestCase {
+  id             String   @id @default(uuid())
+  problemId      String
+  ordinal        Int
+  input          String
+  expectedOutput String
+  isHidden       Boolean  @default(false)
+  problem        Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@unique([problemId, ordinal])
+  @@index([problemId, isHidden])
+}
+
+model Submission {
+  id             String             @id @default(uuid())
+  userId         String
+  problemId      String
+  language       AssessmentLanguage
+  sourceCode     String
+  status         SubmissionStatus
+  passedCount    Int                @default(0)
+  totalCount     Int                @default(0)
+  totalRuntimeMs Float              @default(0)
+  peakMemoryKb   Int                @default(0)
+  stdout         String             @default("")
+  createdAt      DateTime           @default(now())
+  user           User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem        Problem            @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  results        SubmissionResult[]
+
+  @@index([userId, problemId])
+  @@index([problemId, status])
+}
+
+model SubmissionResult {
+  id           String               @id @default(uuid())
+  submissionId String
+  testCaseId   String
+  label        String
+  status       TestCaseResultStatus
+  actualOutput String               @default("")
+  runtimeMs    Float                @default(0)
+  memoryKb     Int                  @default(0)
+  isHidden     Boolean              @default(false)
+  submission   Submission           @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
 }

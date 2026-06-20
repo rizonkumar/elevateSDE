@@ -183,6 +183,27 @@ export interface CodingProblemDto {
   timeLimitMinutes: number;
 }
 
+export interface ProblemSummaryDto {
+  id: string;
+  title: string;
+  difficulty: AssessmentDifficulty;
+  tags: string[];
+  timeLimitMinutes: number;
+}
+
+export interface ProblemListDto {
+  items: ProblemSummaryDto[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+export interface AssessmentRunRequestDto {
+  problemId: string;
+  language: AssessmentLanguage;
+  code: string;
+}
+
 export interface TestCaseResultDto {
   testCaseId: string;
   label: string;
