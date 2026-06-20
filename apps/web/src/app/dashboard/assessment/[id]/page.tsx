@@ -6,7 +6,16 @@ import { useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import { Button } from '@elevatesde/ui';
-import { Play, Send, FileCode2, Code2, Terminal, ArrowLeft, Settings } from 'lucide-react';
+import {
+  Play,
+  Send,
+  FileCode2,
+  Code2,
+  Terminal,
+  ArrowLeft,
+  Settings,
+  FlaskConical,
+} from 'lucide-react';
 import { useAssessmentStore } from '@/store/assessment.store';
 import { ProblemPanel } from './_components/ProblemPanel';
 import { EditorPanel } from './_components/EditorPanel';
@@ -94,6 +103,7 @@ export default function AssessmentPage() {
   }
 
   const busy = isRunning || isSubmitting;
+  const comingSoon = problem.testCases.length === 0;
 
   const desktopLayout = editorMaximized ? (
     <div className="min-h-0 flex-1 p-3">
@@ -184,6 +194,12 @@ export default function AssessmentPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {comingSoon && (
+            <span className="hidden items-center gap-1.5 rounded-full border border-(--color-border-subtle) bg-(--color-badge-bg) px-3 py-1.5 text-xs font-medium text-(--color-text-muted) sm:inline-flex">
+              <FlaskConical className="h-3.5 w-3.5" />
+              Test cases coming soon
+            </span>
+          )}
           <TimerControl />
           <button
             type="button"
@@ -198,7 +214,7 @@ export default function AssessmentPage() {
             onClick={() => {
               run();
             }}
-            disabled={busy}
+            disabled={busy || comingSoon}
             className="inline-flex items-center gap-2 px-4!"
           >
             <Play className="h-4 w-4" />
@@ -209,7 +225,7 @@ export default function AssessmentPage() {
             onClick={() => {
               submit();
             }}
-            disabled={busy}
+            disabled={busy || comingSoon}
             className="inline-flex items-center gap-2 px-4!"
           >
             <Send className="h-4 w-4" />
