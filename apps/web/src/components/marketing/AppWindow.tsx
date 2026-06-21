@@ -6,10 +6,14 @@ interface AppWindowProps {
   className?: string;
 }
 
-export function AppWindow({ children, label = 'app.elevatesde.dev', className = '' }: AppWindowProps) {
+export function AppWindow({
+  children,
+  label = 'app.elevatesde.dev',
+  className = '',
+}: Readonly<AppWindowProps>) {
   return (
     <div
-      className={`overflow-hidden rounded-(--radius-lg) border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-soft) ${className}`}
+      className={`overflow-hidden rounded-lg border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-soft) ${className}`}
     >
       <div className="flex items-center gap-3 border-b border-(--color-border-subtle) bg-(--color-bg-soft) px-4 py-3">
         <div className="flex items-center gap-1.5">

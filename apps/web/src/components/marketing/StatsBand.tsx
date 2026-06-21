@@ -11,7 +11,7 @@ export function StatsBand() {
   return (
     <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
       <Reveal>
-        <dl className="grid grid-cols-2 divide-y divide-(--color-border-subtle) rounded-(--radius-lg) border border-(--color-border-subtle) bg-(--color-surface) sm:grid-cols-4 sm:divide-x sm:divide-y-0">
+        <dl className="grid grid-cols-2 divide-y divide-(--color-border-subtle) rounded-lg border border-(--color-border-subtle) bg-(--color-surface) sm:grid-cols-4 sm:divide-x sm:divide-y-0">
           {STATS.map((stat) => (
             <div key={stat.label} className="flex flex-col gap-1.5 px-6 py-7">
               <dt className="font-display text-3xl font-bold tracking-tight text-(--color-text-primary) sm:text-4xl">

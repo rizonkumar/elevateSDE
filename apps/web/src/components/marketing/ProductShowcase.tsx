@@ -59,8 +59,9 @@ const TABS: ShowcaseTab[] = [
 ];
 
 export function ProductShowcase() {
-  const [activeId, setActiveId] = React.useState(TABS[0]!.id);
-  const active = TABS.find((tab) => tab.id === activeId) ?? TABS[0]!;
+  const [firstTab] = TABS;
+  const [activeId, setActiveId] = React.useState(firstTab.id);
+  const active = TABS.find((tab) => tab.id === activeId) ?? firstTab;
 
   return (
     <SectionShell id="product" bordered>
@@ -99,7 +100,7 @@ export function ProductShowcase() {
 
       <Reveal delay={0.15} className="mt-6">
         <AppWindow label={active.route}>
-          <div className="aspect-[16/10] w-full sm:aspect-[16/9]">
+          <div className="aspect-16/10 w-full sm:aspect-video">
             <ThemedShot
               key={active.shot}
               name={active.shot}
@@ -110,7 +111,7 @@ export function ProductShowcase() {
             />
           </div>
         </AppWindow>
-        <p className="mt-4 text-center font-mono text-xs uppercase tracking-[0.1em] text-(--color-text-muted)">
+        <p className="mt-4 text-center font-mono text-xs uppercase tracking-widest text-(--color-text-muted)">
           {active.caption}
         </p>
       </Reveal>

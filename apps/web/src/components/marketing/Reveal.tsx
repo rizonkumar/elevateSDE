@@ -10,7 +10,7 @@ interface RevealProps {
   className?: string;
 }
 
-export function Reveal({ children, delay = 0, y = 16, className = '' }: RevealProps) {
+export function Reveal({ children, delay = 0, y = 16, className = '' }: Readonly<RevealProps>) {
   const reduceMotion = useReducedMotion();
   return (
     <motion.div

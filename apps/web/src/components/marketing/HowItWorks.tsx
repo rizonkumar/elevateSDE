@@ -32,10 +32,10 @@ export function HowItWorks() {
       </Reveal>
 
       <Reveal delay={0.1} className="mt-12">
-        <ol className="grid gap-px overflow-hidden rounded-(--radius-lg) border border-(--color-border-subtle) bg-(--color-border-subtle) sm:grid-cols-3">
+        <ol className="grid gap-px overflow-hidden rounded-lg border border-(--color-border-subtle) bg-(--color-border-subtle) sm:grid-cols-3">
           {STEPS.map((item) => (
             <li key={item.step} className="flex flex-col gap-3 bg-(--color-surface) p-7">
-              <span className="font-mono text-sm font-semibold tracking-[0.1em] text-(--color-accent)">
+              <span className="font-mono text-sm font-semibold tracking-widest text-(--color-accent)">
                 {item.step}
               </span>
               <h3 className="text-lg font-semibold text-(--color-text-primary)">{item.title}</h3>

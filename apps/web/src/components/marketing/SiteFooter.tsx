@@ -57,7 +57,7 @@ export function SiteFooter() {
           </p>
           <span className="mt-2 inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.12em] text-(--color-text-muted)">
             <span className="h-1.5 w-1.5 rounded-full bg-(--color-success)" />
-            All systems normal
+            <span>All systems normal</span>
           </span>
         </div>
 
@@ -85,7 +85,7 @@ export function SiteFooter() {
       <div className="border-t border-(--color-border-subtle)">
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-3 px-4 py-6 text-xs text-(--color-text-muted) sm:flex-row sm:px-6 lg:px-8">
           <span>© 2026 ElevateSDE. All rights reserved.</span>
-          <span className="font-mono uppercase tracking-[0.1em]">Built for software engineers</span>
+          <span className="font-mono uppercase tracking-widest">Built for software engineers</span>
         </div>
       </div>
     </footer>

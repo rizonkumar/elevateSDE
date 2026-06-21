@@ -24,13 +24,13 @@ interface TileProps {
   className?: string;
 }
 
-function Tile({ icon: Icon, meta, title, body, preview, className = '' }: TileProps) {
+function Tile({ icon: Icon, meta, title, body, preview, className = '' }: Readonly<TileProps>) {
   return (
     <div
-      className={`group flex flex-col gap-5 rounded-(--radius-lg) border border-(--color-border-subtle) bg-(--color-surface) p-6 shadow-(--shadow-soft) transition-colors hover:border-(--color-accent) ${className}`}
+      className={`group flex flex-col gap-5 rounded-lg border border-(--color-border-subtle) bg-(--color-surface) p-6 shadow-(--shadow-soft) transition-colors hover:border-(--color-accent) ${className}`}
     >
       <div className="flex items-center justify-between">
-        <span className="flex h-10 w-10 items-center justify-center rounded-(--radius-md) bg-(--color-accent-soft) text-(--color-accent)">
+        <span className="flex h-10 w-10 items-center justify-center rounded-md bg-(--color-accent-soft) text-(--color-accent)">
           <Icon className="h-5 w-5" />
         </span>
         <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-(--color-text-muted)">
@@ -46,10 +46,13 @@ function Tile({ icon: Icon, meta, title, body, preview, className = '' }: TilePr
   );
 }
 
-function MiniPanel({ children, className = '' }: { children: ReactNode; className?: string }) {
+function MiniPanel({
+  children,
+  className = '',
+}: Readonly<{ children: ReactNode; className?: string }>) {
   return (
     <div
-      className={`rounded-(--radius-md) border border-(--color-border-subtle) bg-(--color-bg-soft) p-4 ${className}`}
+      className={`rounded-md border border-(--color-border-subtle) bg-(--color-bg-soft) p-4 ${className}`}
     >
       {children}
     </div>
@@ -67,7 +70,7 @@ function InterviewPreview() {
           Walk me through how you&apos;d shard a write-heavy service.
         </p>
       </div>
-      <div className="flex items-center justify-between rounded-(--radius-sm) border border-(--color-border-subtle) bg-(--color-surface) px-3 py-2">
+      <div className="flex items-center justify-between rounded-sm border border-(--color-border-subtle) bg-(--color-surface) px-3 py-2">
         <span className="font-mono text-[11px] uppercase tracking-wider text-(--color-text-muted)">
           Round score
         </span>
@@ -149,9 +152,9 @@ function KanbanPreview() {
             </span>
             <span className="text-[10px] text-(--color-text-muted)">{col.count}</span>
           </div>
-          <div className="h-7 rounded-(--radius-sm) border border-(--color-border-subtle) bg-(--color-surface)" />
+          <div className="h-7 rounded-sm border border-(--color-border-subtle) bg-(--color-surface)" />
           {col.count > 1 ? (
-            <div className="h-7 rounded-(--radius-sm) border border-(--color-border-subtle) bg-(--color-surface)" />
+            <div className="h-7 rounded-sm border border-(--color-border-subtle) bg-(--color-surface)" />
           ) : null}
         </div>
       ))}
@@ -191,7 +194,7 @@ function ForumPreview() {
     <MiniPanel className="flex flex-col gap-2.5">
       {posts.map((post) => (
         <div key={post.title} className="flex items-center gap-3">
-          <span className="flex w-9 shrink-0 flex-col items-center rounded-(--radius-sm) border border-(--color-border-subtle) bg-(--color-surface) py-1">
+          <span className="flex w-9 shrink-0 flex-col items-center rounded-sm border border-(--color-border-subtle) bg-(--color-surface) py-1">
             <ArrowUp className="h-3 w-3 text-(--color-accent)" />
             <span className="text-[10px] font-semibold text-(--color-text-primary)">
               {post.votes}

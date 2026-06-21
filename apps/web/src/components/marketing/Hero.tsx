@@ -24,7 +24,7 @@ export function Hero() {
           className="inline-flex items-center gap-2 rounded-(--radius-full) border border-(--color-border-subtle) bg-(--color-bg-soft) px-3.5 py-1.5 font-mono text-xs font-medium uppercase tracking-[0.18em] text-(--color-accent)"
         >
           <span className="h-1.5 w-1.5 rounded-full bg-(--color-accent)" />
-          Enterprise AI interview prep
+          <span>Enterprise AI interview prep</span>
         </motion.span>
 
         <motion.h1
@@ -60,7 +60,7 @@ export function Hero() {
 
         <motion.ul
           {...rise(0.32)}
-          className="mt-7 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 font-mono text-xs uppercase tracking-[0.1em] text-(--color-text-muted)"
+          className="mt-7 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 font-mono text-xs uppercase tracking-widest text-(--color-text-muted)"
         >
           {SIGNALS.map((signal) => (
             <li key={signal} className="flex items-center gap-2">
@@ -78,7 +78,7 @@ export function Hero() {
         className="mt-16"
       >
         <AppWindow label="app.elevatesde.dev/dashboard">
-          <div className="aspect-[16/10] w-full sm:aspect-[16/9]">
+          <div className="aspect-16/10 w-full sm:aspect-video">
             <ThemedShot
               name="dashboard"
               alt="ElevateSDE candidate dashboard showing assessment stats, job pipeline, and preparation insights"
