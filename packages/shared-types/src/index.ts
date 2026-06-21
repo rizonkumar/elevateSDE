@@ -295,3 +295,48 @@ export interface LeaderboardEntryDto {
   streakDays: number;
   isCurrentUser: boolean;
 }
+
+export interface DashboardJobTrackerStats {
+  total: number;
+  byStatus: Record<JobApplicationStatus, number>;
+  upcomingInterviews: number;
+}
+
+export interface DashboardAssessmentStats {
+  problemsSolved: number;
+  problemsAttempted: number;
+  totalSubmissions: number;
+  acceptanceRate: number;
+  byDifficulty: Record<AssessmentDifficulty, number>;
+}
+
+export interface DashboardLeaderboardStats {
+  rank: number | null;
+  points: number;
+  streakDays: number;
+  badges: string[];
+  assessmentsCompleted: number;
+}
+
+export interface DashboardForumStats {
+  postsCreated: number;
+  commentsPosted: number;
+  upvotesReceived: number;
+}
+
+export interface DashboardRecentSubmission {
+  problemTitle: string;
+  difficulty: AssessmentDifficulty;
+  status: string;
+  passedCount: number;
+  totalCount: number;
+  createdAt: string;
+}
+
+export interface DashboardStatsDto {
+  jobTracker: DashboardJobTrackerStats;
+  assessments: DashboardAssessmentStats;
+  leaderboard: DashboardLeaderboardStats;
+  forum: DashboardForumStats;
+  recentSubmissions: DashboardRecentSubmission[];
+}
