@@ -1,5 +1,6 @@
 'use client';
 
+import * as React from 'react';
 import { TrendingUp, ClipboardCheck, Flame } from 'lucide-react';
 import { Button, Tabs, type TabItem } from '@elevatesde/ui';
 import type { LeaderboardTimeframe } from '@elevatesde/shared-types';
@@ -8,7 +9,6 @@ import { PageHeader } from '@/components/dashboard/PageHeader';
 import { LeaderboardPodium } from '@/components/dashboard/leaderboard/LeaderboardPodium';
 import { LeaderboardRow, LeaderboardCard } from '@/components/dashboard/leaderboard/LeaderboardRow';
 import { useLeaderboardStore } from '@/store/leaderboard.store';
-import { getLeaderboardEntries } from '@/lib/leaderboard-data';
 
 const TIMEFRAME_TABS: TabItem[] = [
   { id: 'all-time', label: 'All time' },
@@ -21,8 +21,13 @@ export default function LeaderboardPage() {
   const visibleCount = useLeaderboardStore((state) => state.visibleCount);
   const setTimeframe = useLeaderboardStore((state) => state.setTimeframe);
   const loadMore = useLeaderboardStore((state) => state.loadMore);
+  const entries = useLeaderboardStore((state) => state.entries);
+  const fetchEntries = useLeaderboardStore((state) => state.fetchEntries);
 
-  const entries = getLeaderboardEntries(timeframe);
+  React.useEffect(() => {
+    void fetchEntries();
+  }, [timeframe, fetchEntries]);
+
   const podium = entries.slice(0, 3);
   const currentUser = entries.find((entry) => entry.isCurrentUser);
   const rows = entries.slice(0, visibleCount);

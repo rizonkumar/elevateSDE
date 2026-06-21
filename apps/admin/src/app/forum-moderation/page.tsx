@@ -89,7 +89,7 @@ export default function ForumModerationPage() {
 
   const mergePost = (updated: AdminForumPostDto) => {
     setPosts((prev) => prev.map((post) => (post.id === updated.id ? updated : post)));
-    setSelectedPost((prev) => (prev && prev.id === updated.id ? updated : prev));
+    setSelectedPost((prev) => (prev?.id === updated.id ? updated : prev));
   };
 
   const changeStatus = async (
