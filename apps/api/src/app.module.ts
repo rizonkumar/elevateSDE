@@ -9,6 +9,8 @@ import { AdminModule } from './modules/admin/admin.module';
 import { JobApplicationModule } from './modules/job-application/job-application.module';
 import { ProblemModule } from './modules/problem/problem.module';
 import { CodeRunnerModule } from './modules/code-runner/code-runner.module';
+import { ForumModule } from './modules/forum/forum.module';
+import { LeaderboardModule } from './modules/leaderboard/leaderboard.module';
 
 @Module({
   imports: [
@@ -20,6 +22,8 @@ import { CodeRunnerModule } from './modules/code-runner/code-runner.module';
     JobApplicationModule,
     ProblemModule,
     CodeRunnerModule,
+    ForumModule,
+    LeaderboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,13 +1,7 @@
 import { create } from 'zustand';
-import type {
-  ForumCommentDto,
-  ForumPostDto,
-  ForumSortOption,
-} from '@elevatesde/shared-types';
-import { FORUM_COMMENTS_SEED, FORUM_POSTS_SEED } from '@/lib/forum-data';
-import { useAuthStore } from '@/store/auth.store';
+import type { ForumCommentDto, ForumPostDto, ForumSortOption } from '@elevatesde/shared-types';
+import { api } from '@/lib/api';
 import { useToastStore } from '@/store/toast.store';
-import { getDisplayName } from '@/lib/user-display';
 
 const PAGE_SIZE = 6;
 
@@ -31,31 +25,22 @@ interface ForumState {
   query: string;
   visibleCount: number;
   isModalOpen: boolean;
+  isLoading: boolean;
   setSort: (sort: ForumSortOption) => void;
   setTag: (tag: string | null) => void;
   setQuery: (query: string) => void;
   loadMore: () => void;
-  createPost: (input: CreatePostInput) => void;
-  togglePostUpvote: (id: string) => void;
-  toggleCommentUpvote: (postId: string, commentId: string) => void;
-  addComment: (postId: string, body: string) => void;
+  fetchPosts: () => Promise<void>;
+  fetchPost: (id: string) => Promise<void>;
+  fetchComments: (postId: string) => Promise<void>;
+  createPost: (input: CreatePostInput) => Promise<void>;
+  togglePostUpvote: (id: string) => Promise<void>;
+  toggleCommentUpvote: (postId: string, commentId: string) => Promise<void>;
+  addComment: (postId: string, body: string) => Promise<void>;
   getPostById: (id: string) => ForumPostDto | undefined;
   getComments: (postId: string) => ForumCommentDto[];
   openModal: () => void;
   closeModal: () => void;
-}
-
-function makeId(prefix: string): string {
-  return `${prefix}-${Math.random().toString(36).slice(2, 10)}`;
-}
-
-function currentAuthor() {
-  const user = useAuthStore.getState().user;
-  return {
-    id: user?.id ?? 'u-you',
-    name: user ? getDisplayName(user) : 'You',
-    headline: user?.role ?? null,
-  };
 }
 
 export function filterAndSortPosts(posts: ForumPostDto[], filters: ForumFilters): ForumPostDto[] {
@@ -85,104 +70,142 @@ export function filterAndSortPosts(posts: ForumPostDto[], filters: ForumFilters)
   return sorted;
 }
 
+function upsertPost(posts: ForumPostDto[], next: ForumPostDto): ForumPostDto[] {
+  const exists = posts.some((post) => post.id === next.id);
+  return exists ? posts.map((post) => (post.id === next.id ? next : post)) : [next, ...posts];
+}
+
+function toggleVoteState<T extends { hasUpvoted: boolean; upvotes: number }>(item: T): T {
+  return {
+    ...item,
+    hasUpvoted: !item.hasUpvoted,
+    upvotes: item.upvotes + (item.hasUpvoted ? -1 : 1),
+  };
+}
+
 export const useForumStore = create<ForumState>((set, get) => ({
-  posts: FORUM_POSTS_SEED,
-  comments: FORUM_COMMENTS_SEED,
+  posts: [],
+  comments: {},
   sort: 'newest',
   activeTag: null,
   query: '',
   visibleCount: PAGE_SIZE,
   isModalOpen: false,
+  isLoading: false,
 
   setSort: (sort) => set({ sort, visibleCount: PAGE_SIZE }),
   setTag: (activeTag) => set({ activeTag, visibleCount: PAGE_SIZE }),
   setQuery: (query) => set({ query, visibleCount: PAGE_SIZE }),
   loadMore: () => set((state) => ({ visibleCount: state.visibleCount + PAGE_SIZE })),
 
-  createPost: (input) => {
-    const author = currentAuthor();
-    const post: ForumPostDto = {
-      id: makeId('post'),
-      title: input.title.trim(),
-      body: input.body.trim(),
-      tags: input.tags,
-      author,
-      upvotes: 0,
-      hasUpvoted: false,
-      replyCount: 0,
-      viewCount: 0,
-      createdAt: new Date().toISOString(),
-    };
-    set((state) => ({
-      posts: [post, ...state.posts],
-      isModalOpen: false,
-      sort: 'newest',
-      activeTag: null,
-      query: '',
-      visibleCount: PAGE_SIZE,
-    }));
-    useToastStore.getState().addToast('Your post is live.', 'success');
+  fetchPosts: async () => {
+    set({ isLoading: true });
+    try {
+      const { data } = await api.get<ForumPostDto[]>('/api/v1/forum/posts');
+      set({ posts: data, isLoading: false });
+    } catch {
+      set({ isLoading: false });
+      useToastStore.getState().addToast('Could not load discussions.', 'error');
+    }
   },
 
-  togglePostUpvote: (id) =>
-    set((state) => ({
-      posts: state.posts.map((post) =>
-        post.id === id
-          ? {
-              ...post,
-              hasUpvoted: !post.hasUpvoted,
-              upvotes: post.upvotes + (post.hasUpvoted ? -1 : 1),
-            }
-          : post,
-      ),
-    })),
+  fetchPost: async (id) => {
+    try {
+      const { data } = await api.get<ForumPostDto>(`/api/v1/forum/posts/${id}`);
+      set((state) => ({ posts: upsertPost(state.posts, data) }));
+    } catch {
+      set((state) => ({ posts: state.posts.filter((post) => post.id !== id) }));
+    }
+  },
 
-  toggleCommentUpvote: (postId, commentId) =>
-    set((state) => {
-      const list = state.comments[postId];
-      if (!list) {
-        return {};
-      }
-      return {
+  fetchComments: async (postId) => {
+    try {
+      const { data } = await api.get<ForumCommentDto[]>(`/api/v1/forum/posts/${postId}/comments`);
+      set((state) => ({ comments: { ...state.comments, [postId]: data } }));
+    } catch {
+      useToastStore.getState().addToast('Could not load replies.', 'error');
+    }
+  },
+
+  createPost: async (input) => {
+    try {
+      const { data } = await api.post<ForumPostDto>('/api/v1/forum/posts', input);
+      set((state) => ({
+        posts: [data, ...state.posts],
+        isModalOpen: false,
+        sort: 'newest',
+        activeTag: null,
+        query: '',
+        visibleCount: PAGE_SIZE,
+      }));
+      useToastStore.getState().addToast('Your post is live.', 'success');
+    } catch {
+      useToastStore.getState().addToast('Could not publish your post.', 'error');
+    }
+  },
+
+  togglePostUpvote: async (id) => {
+    const previous = get().posts;
+    set({ posts: previous.map((post) => (post.id === id ? toggleVoteState(post) : post)) });
+    try {
+      const { data } = await api.post<ForumPostDto>(`/api/v1/forum/posts/${id}/upvote`);
+      set((state) => ({ posts: state.posts.map((post) => (post.id === id ? data : post)) }));
+    } catch {
+      set({ posts: previous });
+      useToastStore.getState().addToast('Could not register your vote.', 'error');
+    }
+  },
+
+  toggleCommentUpvote: async (postId, commentId) => {
+    const previous = get().comments[postId];
+    if (!previous) {
+      return;
+    }
+    set((state) => ({
+      comments: {
+        ...state.comments,
+        [postId]: previous.map((comment) =>
+          comment.id === commentId ? toggleVoteState(comment) : comment,
+        ),
+      },
+    }));
+    try {
+      const { data } = await api.post<ForumCommentDto>(
+        `/api/v1/forum/comments/${commentId}/upvote`,
+      );
+      set((state) => ({
         comments: {
           ...state.comments,
-          [postId]: list.map((comment) =>
-            comment.id === commentId
-              ? {
-                  ...comment,
-                  hasUpvoted: !comment.hasUpvoted,
-                  upvotes: comment.upvotes + (comment.hasUpvoted ? -1 : 1),
-                }
-              : comment,
+          [postId]: (state.comments[postId] ?? []).map((comment) =>
+            comment.id === commentId ? data : comment,
           ),
         },
-      };
-    }),
+      }));
+    } catch {
+      set((state) => ({ comments: { ...state.comments, [postId]: previous } }));
+      useToastStore.getState().addToast('Could not register your vote.', 'error');
+    }
+  },
 
-  addComment: (postId, body) => {
+  addComment: async (postId, body) => {
     const trimmed = body.trim();
     if (!trimmed) {
       return;
     }
-    const comment: ForumCommentDto = {
-      id: makeId('c'),
-      postId,
-      author: currentAuthor(),
-      body: trimmed,
-      upvotes: 0,
-      hasUpvoted: false,
-      createdAt: new Date().toISOString(),
-    };
-    set((state) => ({
-      comments: {
-        ...state.comments,
-        [postId]: [...(state.comments[postId] ?? []), comment],
-      },
-      posts: state.posts.map((post) =>
-        post.id === postId ? { ...post, replyCount: post.replyCount + 1 } : post,
-      ),
-    }));
-    useToastStore.getState().addToast('Reply posted.', 'success');
+    try {
+      const { data } = await api.post<ForumCommentDto>(`/api/v1/forum/posts/${postId}/comments`, {
+        body: trimmed,
+      });
+      set((state) => ({
+        comments: { ...state.comments, [postId]: [...(state.comments[postId] ?? []), data] },
+        posts: state.posts.map((post) =>
+          post.id === postId ? { ...post, replyCount: post.replyCount + 1 } : post,
+        ),
+      }));
+      useToastStore.getState().addToast('Reply posted.', 'success');
+    } catch {
+      useToastStore.getState().addToast('Could not post your reply.', 'error');
+    }
   },
 
   getPostById: (id) => get().posts.find((post) => post.id === id),

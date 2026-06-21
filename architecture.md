@@ -104,20 +104,20 @@ The platform exposes a **single public origin** to users; the admin backoffice i
 
 ### Dashboard Surfaces
 
-| Surface | Route (via web origin) | Access |
-| --- | --- | --- |
-| Candidate dashboard | `/dashboard` | Any authenticated user |
-| Job tracker | `/dashboard/job-tracker` | Any authenticated user |
-| Organization dashboard | `/dashboard/org` | `TENANT_ADMIN` |
-| Super-Admin backoffice | `/admin` | `ADMIN` |
+| Surface                | Route (via web origin)   | Access                 |
+| ---------------------- | ------------------------ | ---------------------- |
+| Candidate dashboard    | `/dashboard`             | Any authenticated user |
+| Job tracker            | `/dashboard/job-tracker` | Any authenticated user |
+| Organization dashboard | `/dashboard/org`         | `TENANT_ADMIN`         |
+| Super-Admin backoffice | `/admin`                 | `ADMIN`                |
 
-The backoffice consumes live `/api/v1/admin/*` endpoints and the job tracker consumes live, user-scoped `/api/v1/job-applications` endpoints. The remaining candidate and organization dashboard surfaces are currently backed by typed client-side Zustand stores until their domain models (mock interviews, assessments, seats, invitations) are implemented.
+The backoffice consumes live `/api/v1/admin/*` endpoints (including forum moderation and leaderboard management). The job tracker, coding assessments, community forum, and leaderboard all consume live, user-scoped endpoints (`/api/v1/job-applications`, `/api/v1/problems` + `/api/v1/submissions`, `/api/v1/forum/*`, `/api/v1/leaderboard`). The remaining candidate and organization dashboard surfaces (mock interviews, resume analyzer, seats, invitations) are currently backed by typed client-side Zustand stores until their domain models are implemented.
 
 ---
 
 ## Domain-Driven Design (DDD) Backend Architecture
 
-Instead of grouping by framework features (controllers/services), the API is structured by business domains. Current domain modules include `users`, `auth`, `audit-log`, `feature-flag`, `admin`, and `job-application` (the candidate job tracker), each following the layered template below.
+Instead of grouping by framework features (controllers/services), the API is structured by business domains. Current domain modules include `users`, `auth`, `audit-log`, `feature-flag`, `admin`, `job-application` (the candidate job tracker), `problem` and `code-runner` (the coding assessment bank and Dockerized execution sandbox), and `forum` and `leaderboard` (the community discussion board and rankings), each following the layered template below.
 
 ### Example: Users Domain
 
@@ -176,8 +176,12 @@ apps/api/src/modules/users/
 
 **Community & Tracking**
 
-- `DiscussionPost`: `id`, `userId`, `title`, `content`, `upvotes`
-- `DiscussionComment`: `id`, `postId`, `userId`, `content`
+- `ForumPost`: `id`, `userId`, `title`, `body`, `tags`, `status` (`ForumPostStatus` enum: PUBLISHED, FLAGGED, REMOVED), `viewCount`, `createdAt`, `updatedAt`
+- `ForumComment`: `id`, `postId`, `userId`, `body`, `createdAt`, `updatedAt`
+- `ForumPostVote` / `ForumCommentVote`: composite-key join tables (`postId`/`commentId` + `userId`) backing upvote counts and per-viewer `hasUpvoted`
+- `ForumReport`: `id`, `postId`, `reporterId`, `reason`, `createdAt` (drives the backoffice moderation queue)
+- `UserStats`: `userId`, `points`, `monthlyPoints`, `weeklyPoints`, `assessmentsCompleted`, `badges`, `streakDays` (powers the leaderboard timeframe rankings)
+- `Problem` / `ProblemTestCase` / `Submission` / `SubmissionResult`: the coding assessment bank and per-test execution results produced by the sandbox
 - `JobApplication`: `id`, `userId`, `company`, `role`, `status` (`JobApplicationStatus` enum: APPLIED, OA, INTERVIEW, OFFER, REJECTED), `salaryRange`, `jobDescriptionUrl`, `interviewDate`, `boardPosition` (Kanban ordering), `createdAt`, `updatedAt`
 
 ---
@@ -199,7 +203,7 @@ Business logic is decoupled using events.
 Resource-intensive tasks are offloaded from the main event loop.
 
 - **Resume Processing:** Extracts text from S3 documents, parses via LLM, and calculates ATS score.
-- **Code Execution Engine:** Secure, isolated Docker environment for evaluating candidate DSA submissions against test cases.
+- **Code Execution Engine** _(implemented)_: Secure, isolated Docker environment (the `code-runner` module) for evaluating candidate DSA submissions against test cases, with per-language drivers (JavaScript, Python, C++), timeouts, and memory limits. Currently invoked synchronously; migrating execution onto BullMQ is a follow-up once the queue layer lands.
 
 ### 3. AI Mock Interviews (RAG Implementation)
 
@@ -224,5 +228,5 @@ Resource-intensive tasks are offloaded from the main event loop.
 - **Phase 1 (Core Foundations):** Monorepo setup, Auth, Users, RBAC, Basic Questions, Next.js Dashboard.
 - **Phase 2 (Asynchronous & Real-time):** Redis, BullMQ, WebSockets, Notifications, Job Tracker.
 - **Phase 3 (Enterprise & AI):** Multi-tenancy, Stripe Subscriptions, AI Resume Analyzer, LangChain integration.
-- **Phase 4 (Advanced Systems):** pgvector RAG, Dockerized Code Execution Engine, Discussion Forums, Leaderboards.
+- **Phase 4 (Advanced Systems):** pgvector RAG _(pending)_, Dockerized Code Execution Engine _(done)_, Discussion Forums _(done)_, Leaderboards _(done)_.
 - **Phase 5 (Production Readiness):** OpenTelemetry, Sentry, Swagger Docs, Feature Flags, Audit Logging, CI/CD pipelines.

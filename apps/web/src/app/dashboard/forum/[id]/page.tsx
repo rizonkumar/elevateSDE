@@ -20,13 +20,28 @@ export default function ForumPostPage() {
   const params = useParams<{ id: string }>();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
 
-  const post = useForumStore((state) => (id ? state.posts.find((item) => item.id === id) : undefined));
-  const comments = useForumStore((state) => (id ? (state.comments[id] ?? EMPTY_COMMENTS) : EMPTY_COMMENTS));
+  const post = useForumStore((state) =>
+    id ? state.posts.find((item) => item.id === id) : undefined,
+  );
+  const comments = useForumStore((state) =>
+    id ? (state.comments[id] ?? EMPTY_COMMENTS) : EMPTY_COMMENTS,
+  );
   const togglePostUpvote = useForumStore((state) => state.togglePostUpvote);
   const toggleCommentUpvote = useForumStore((state) => state.toggleCommentUpvote);
   const addComment = useForumStore((state) => state.addComment);
+  const fetchPost = useForumStore((state) => state.fetchPost);
+  const fetchComments = useForumStore((state) => state.fetchComments);
 
   const [reply, setReply] = React.useState('');
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    if (!id) {
+      return;
+    }
+    setIsLoading(true);
+    void Promise.all([fetchPost(id), fetchComments(id)]).finally(() => setIsLoading(false));
+  }, [id, fetchPost, fetchComments]);
 
   const handleReply = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -124,7 +139,9 @@ export default function ForumPostPage() {
           </>
         ) : (
           <div className="rounded-md border border-dashed border-(--color-border-subtle) bg-(--color-surface) px-6 py-16 text-center">
-            <p className="m-0 text-sm text-(--color-text-muted)">This discussion is no longer available.</p>
+            <p className="m-0 text-sm text-(--color-text-muted)">
+              {isLoading ? 'Loading discussion…' : 'This discussion is no longer available.'}
+            </p>
           </div>
         )}
       </div>

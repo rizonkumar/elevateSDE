@@ -52,6 +52,12 @@ enum ComparisonMode {
   FLOAT_TOLERANT
 }
 
+enum ForumPostStatus {
+  PUBLISHED
+  FLAGGED
+  REMOVED
+}
+
 model Tenant {
   id               String   @id @default(uuid())
   name             String
@@ -69,6 +75,7 @@ model User {
   passwordHash String
   firstName    String?
   lastName     String?
+  headline     String?
   role         UserRole  @default(USER)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
@@ -77,6 +84,12 @@ model User {
   auditLogs    AuditLog[]
   jobApplications JobApplication[]
   submissions  Submission[]
+  forumPosts        ForumPost[]
+  forumComments     ForumComment[]
+  forumPostVotes    ForumPostVote[]
+  forumCommentVotes ForumCommentVote[]
+  forumReports      ForumReport[]
+  stats             UserStats?
 }
 
 model RefreshToken {
@@ -195,4 +208,81 @@ model SubmissionResult {
   submission   Submission           @relation(fields: [submissionId], references: [id], onDelete: Cascade)
 
   @@index([submissionId])
+}
+
+model ForumPost {
+  id        String          @id @default(uuid())
+  userId    String
+  title     String
+  body      String
+  tags      String[]
+  status    ForumPostStatus @default(PUBLISHED)
+  viewCount Int             @default(0)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comments  ForumComment[]
+  votes     ForumPostVote[]
+  reports   ForumReport[]
+
+  @@index([status, createdAt])
+  @@index([userId])
+}
+
+model ForumComment {
+  id        String             @id @default(uuid())
+  postId    String
+  userId    String
+  body      String
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  post      ForumPost          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  votes     ForumCommentVote[]
+
+  @@index([postId])
+}
+
+model ForumPostVote {
+  postId    String
+  userId    String
+  createdAt DateTime  @default(now())
+  post      ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([postId, userId])
+}
+
+model ForumCommentVote {
+  commentId String
+  userId    String
+  createdAt DateTime     @default(now())
+  comment   ForumComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([commentId, userId])
+}
+
+model ForumReport {
+  id         String    @id @default(uuid())
+  postId     String
+  reporterId String
+  reason     String
+  createdAt  DateTime  @default(now())
+  post       ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  reporter   User      @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+}
+
+model UserStats {
+  userId               String   @id
+  points               Int      @default(0)
+  monthlyPoints        Int      @default(0)
+  weeklyPoints         Int      @default(0)
+  assessmentsCompleted Int      @default(0)
+  badges               String[]
+  streakDays           Int      @default(0)
+  updatedAt            DateTime @updatedAt
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
