@@ -9,6 +9,7 @@ import {
   getModerationPosts,
   getPostComments,
   getTagLabel,
+  updatePostStatus,
 } from '../../lib/forum-moderation-data';
 import { formatRelativeTime, getNameInitials } from '../../lib/relative-time';
 import { Button, ConfirmDialog, Input, Modal } from '@elevatesde/ui';
@@ -90,42 +91,46 @@ export default function ForumModerationPage() {
     setComments([]);
   };
 
-  const applyStatus = (id: string, status: ForumPostStatus) => {
-    setPosts((prev) => prev.map((post) => (post.id === id ? { ...post, status } : post)));
-    setSelectedPost((prev) => (prev && prev.id === id ? { ...prev, status } : prev));
+  const mergePost = (updated: AdminForumPostDto) => {
+    setPosts((prev) => prev.map((post) => (post.id === updated.id ? updated : post)));
+    setSelectedPost((prev) => (prev && prev.id === updated.id ? updated : prev));
   };
 
-  const handleApprove = async (post: AdminForumPostDto) => {
+  const changeStatus = async (
+    post: AdminForumPostDto,
+    status: ForumPostStatus,
+    message: string,
+  ) => {
     setUpdatingId(post.id);
     try {
-      applyStatus(post.id, 'PUBLISHED');
-      addToast('Post approved and published.', 'success');
+      const updated = await updatePostStatus(post.id, status);
+      mergePost(updated);
+      addToast(message, 'success');
+      return true;
+    } catch {
+      addToast('Could not update the post.', 'error');
+      return false;
     } finally {
       setUpdatingId(null);
     }
   };
 
-  const handleFlag = async (post: AdminForumPostDto) => {
-    setUpdatingId(post.id);
-    try {
-      applyStatus(post.id, 'FLAGGED');
-      addToast('Post flagged for review.', 'success');
-    } finally {
-      setUpdatingId(null);
-    }
-  };
+  const handleApprove = (post: AdminForumPostDto) =>
+    changeStatus(post, 'PUBLISHED', 'Post approved and published.');
+
+  const handleFlag = (post: AdminForumPostDto) =>
+    changeStatus(post, 'FLAGGED', 'Post flagged for review.');
 
   const handleRemove = async () => {
     if (!removeTarget) return;
-    const target = removeTarget;
-    setUpdatingId(target.id);
-    try {
-      applyStatus(target.id, 'REMOVED');
-      addToast('Post removed from the community.', 'success');
+    const removed = await changeStatus(
+      removeTarget,
+      'REMOVED',
+      'Post removed from the community.',
+    );
+    if (removed) {
       setRemoveTarget(null);
       closeReview();
-    } finally {
-      setUpdatingId(null);
     }
   };
 

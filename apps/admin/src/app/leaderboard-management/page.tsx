@@ -4,7 +4,7 @@ import * as React from 'react';
 import { AdminLayout } from '../../components/AdminLayout';
 import { Badge } from '../../components/ui';
 import { useToastStore } from '../../store/toast.store';
-import { BADGE_KEYS, getStandings } from '../../lib/leaderboard-management-data';
+import { BADGE_KEYS, adjustStanding, getStandings } from '../../lib/leaderboard-management-data';
 import { getNameInitials } from '../../lib/relative-time';
 import { Button, Input, Modal } from '@elevatesde/ui';
 import type { LeaderboardEntryDto } from '@elevatesde/shared-types';
@@ -70,17 +70,12 @@ export default function LeaderboardManagementPage() {
     const targetId = adjustTarget.userId;
     setSaving(true);
     try {
-      setEntries((prev) =>
-        rerank(
-          prev.map((entry) =>
-            entry.userId === targetId
-              ? { ...entry, points: Math.round(nextPoints), badges: draftBadges }
-              : entry,
-          ),
-        ),
-      );
+      const standings = await adjustStanding(targetId, Math.round(nextPoints), draftBadges);
+      setEntries(rerank(standings));
       addToast('Member standing updated.', 'success');
       closeAdjust();
+    } catch {
+      addToast('Could not update the member standing.', 'error');
     } finally {
       setSaving(false);
     }
