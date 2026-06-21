@@ -24,7 +24,10 @@ export class ForumRepository implements IForumRepository {
     const records = await this.prisma.forumPost.findMany({
       where: { status: ForumPostStatus.PUBLISHED },
       orderBy: { createdAt: 'desc' },
-      include: { user: { select: authorSelect }, _count: { select: { comments: true, votes: true } } },
+      include: {
+        user: { select: authorSelect },
+        _count: { select: { comments: true, votes: true } },
+      },
     });
     const votedIds = await this.votedPostIds(
       viewerId,

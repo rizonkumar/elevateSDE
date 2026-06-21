@@ -88,5 +88,7 @@ function clampNonNegative(value: number): number {
 }
 
 function normalizeBadges(badges: string[]): string[] {
-  return Array.from(new Set(badges.map((badge) => badge.trim()).filter((badge) => badge.length > 0)));
+  return Array.from(
+    new Set(badges.map((badge) => badge.trim()).filter((badge) => badge.length > 0)),
+  );
 }

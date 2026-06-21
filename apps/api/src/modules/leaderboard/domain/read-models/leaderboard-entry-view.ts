@@ -8,3 +8,9 @@ export interface LeaderboardEntryView {
   badges: string[];
   streakDays: number;
 }
+
+export interface RankedLeaderboardEntry {
+  view: LeaderboardEntryView;
+  rank: number;
+  isCurrentUser: boolean;
+}
