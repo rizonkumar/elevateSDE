@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @source "../../../../packages/ui/src/**/*.tsx";
 
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 @theme inline {
   --font-sans: var(--font-geist-sans), system-ui, sans-serif;
   --font-display: var(--font-geist-sans), system-ui, sans-serif;

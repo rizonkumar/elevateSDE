@@ -1,106 +1,93 @@
 'use client';
 
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { ArrowRight, Mic2, FileText, Gauge } from 'lucide-react';
+import { motion, useReducedMotion } from 'framer-motion';
+import { ArrowRight } from 'lucide-react';
+import { AppWindow } from './AppWindow';
+import { ThemedShot } from './ThemedShot';
 
-const CHIPS = [
-  'Multi-Tenant Scoping',
-  'AI Evaluation Engine',
-  'pgvector Similarity',
-  'BullMQ Async Processing',
-  'Stripe Billing',
-];
-
-const PREVIEW_ITEMS = [
-  { icon: Mic2, title: 'Mock interview', detail: 'System Design · Senior' },
-  { icon: FileText, title: 'Resume analyzed', detail: 'ATS score 86 · 4 fixes' },
-  { icon: Gauge, title: 'Readiness', detail: 'Up 18% this week' },
-];
+const SIGNALS = ['Free candidate plan', 'Real-time AI feedback', 'SOC 2-ready audit trail'];
 
 export function Hero() {
+  const reduceMotion = useReducedMotion();
+  const rise = (delay: number) => ({
+    initial: reduceMotion ? { opacity: 0 } : { opacity: 0, y: 18 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.55, ease: 'easeOut' as const, delay },
+  });
+
   return (
-    <section className="mx-auto w-full max-w-6xl px-4 pt-16 pb-12 sm:px-6 sm:pt-24 lg:px-8">
-      <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: 'easeOut' }}
+    <section className="mx-auto w-full max-w-6xl px-4 pt-20 pb-12 sm:px-6 sm:pt-28 lg:px-8">
+      <div className="flex flex-col items-center text-center">
+        <motion.span
+          {...rise(0)}
+          className="inline-flex items-center gap-2 rounded-(--radius-full) border border-(--color-border-subtle) bg-(--color-bg-soft) px-3.5 py-1.5 font-mono text-xs font-medium uppercase tracking-[0.18em] text-(--color-accent)"
         >
-          <span className="inline-flex items-center gap-2 rounded-full border border-(--color-border-subtle) bg-(--color-bg-soft) px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-(--color-accent)">
-            Enterprise AI Interview Prep
-          </span>
-          <h1 className="mt-5 font-display text-4xl font-bold leading-[1.05] tracking-tight text-(--color-text-primary) sm:text-5xl lg:text-6xl">
-            Elevate your software engineering career
-          </h1>
-          <p className="mt-5 max-w-xl text-base leading-relaxed text-(--color-text-muted) sm:text-lg">
-            Practice timed assessments, attend real-time AI mock interviews, and get a personalized
-            learning path — built for individual developers and B2B engineering teams alike.
-          </p>
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            <Link
-              href="/register"
-              className="inline-flex items-center gap-2 rounded-full bg-(--color-accent) px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
-            >
-              Get started free
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link href="/login" className="btn-ghost text-sm">
-              Access dashboard
-            </Link>
-          </div>
-          <div className="mt-9 flex flex-wrap gap-2">
-            {CHIPS.map((chip) => (
-              <span
-                key={chip}
-                className="rounded-full border border-(--color-border-subtle) px-2.5 py-1 text-xs font-medium text-(--color-text-muted)"
-              >
-                {chip}
-              </span>
-            ))}
-          </div>
+          <span className="h-1.5 w-1.5 rounded-full bg-(--color-accent)" />
+          Enterprise AI interview prep
+        </motion.span>
+
+        <motion.h1
+          {...rise(0.08)}
+          className="mt-6 max-w-4xl font-display text-4xl font-bold leading-[1.04] tracking-tight text-(--color-text-primary) sm:text-6xl lg:text-7xl"
+        >
+          Elevate your software engineering career
+        </motion.h1>
+
+        <motion.p
+          {...rise(0.16)}
+          className="mt-6 max-w-2xl text-base leading-relaxed text-(--color-text-muted) sm:text-lg"
+        >
+          Timed coding assessments, real-time AI mock interviews, resume analysis, and a job
+          tracker — one platform for individual engineers and the teams that hire them.
+        </motion.p>
+
+        <motion.div {...rise(0.24)} className="mt-9 flex flex-wrap items-center justify-center gap-3">
+          <Link
+            href="/register"
+            className="inline-flex items-center gap-2 rounded-(--radius-full) bg-(--color-accent) px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+          >
+            Get started free
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+          <Link
+            href="#product"
+            className="inline-flex items-center gap-2 rounded-(--radius-full) border border-(--color-border) bg-(--color-bg) px-6 py-3 text-sm font-semibold text-(--color-text-primary) transition-colors hover:bg-(--color-badge-bg)"
+          >
+            See it in action
+          </Link>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: 'easeOut', delay: 0.1 }}
-          className="rounded-(--radius-lg) border border-(--color-border-subtle) bg-(--color-surface) p-5 shadow-(--shadow-soft) sm:p-6"
+        <motion.ul
+          {...rise(0.32)}
+          className="mt-7 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 font-mono text-xs uppercase tracking-[0.1em] text-(--color-text-muted)"
         >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-(--color-text-muted)">
-              Your prep, at a glance
-            </span>
-            <span className="flex items-center gap-1.5 text-xs font-medium text-(--color-accent)">
-              <span className="h-1.5 w-1.5 rounded-full bg-(--color-accent)" />
-              Live
-            </span>
-          </div>
-          <div className="mt-5 flex flex-col gap-3">
-            {PREVIEW_ITEMS.map((item) => {
-              const Icon = item.icon;
-              return (
-                <div
-                  key={item.title}
-                  className="flex items-center gap-3 rounded-(--radius-lg) border border-(--color-border-subtle) bg-(--color-bg-soft) px-4 py-3"
-                >
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-(--color-accent-soft) text-(--color-accent)">
-                    <Icon className="h-4 w-4" />
-                  </span>
-                  <div className="flex min-w-0 flex-col">
-                    <span className="text-sm font-semibold text-(--color-text-primary)">
-                      {item.title}
-                    </span>
-                    <span className="truncate text-xs text-(--color-text-muted)">
-                      {item.detail}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </motion.div>
+          {SIGNALS.map((signal) => (
+            <li key={signal} className="flex items-center gap-2">
+              <span className="h-1 w-1 rounded-full bg-(--color-text-disabled)" />
+              {signal}
+            </li>
+          ))}
+        </motion.ul>
       </div>
+
+      <motion.div
+        initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 28 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: 'easeOut', delay: 0.4 }}
+        className="mt-16"
+      >
+        <AppWindow label="app.elevatesde.dev/dashboard">
+          <div className="aspect-[16/10] w-full sm:aspect-[16/9]">
+            <ThemedShot
+              name="dashboard"
+              alt="ElevateSDE candidate dashboard showing assessment stats, job pipeline, and preparation insights"
+              width={1440}
+              height={900}
+            />
+          </div>
+        </AppWindow>
+      </motion.div>
     </section>
   );
 }
