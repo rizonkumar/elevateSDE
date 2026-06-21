@@ -19,16 +19,18 @@ interface ShowcaseTab {
   alt: string;
 }
 
+const INTERVIEW_TAB: ShowcaseTab = {
+  id: 'interview',
+  label: 'Mock Interview',
+  icon: Mic2,
+  shot: 'mock-interview',
+  route: 'app.elevatesde.dev/mock-interview',
+  caption: 'Configure topic, role level, and company style, then run a scored AI round.',
+  alt: 'AI mock interview console with round configuration',
+};
+
 const TABS: ShowcaseTab[] = [
-  {
-    id: 'interview',
-    label: 'Mock Interview',
-    icon: Mic2,
-    shot: 'mock-interview',
-    route: 'app.elevatesde.dev/mock-interview',
-    caption: 'Configure topic, role level, and company style, then run a scored AI round.',
-    alt: 'AI mock interview console with round configuration',
-  },
+  INTERVIEW_TAB,
   {
     id: 'editor',
     label: 'Code Editor',
@@ -59,9 +61,8 @@ const TABS: ShowcaseTab[] = [
 ];
 
 export function ProductShowcase() {
-  const [firstTab] = TABS;
-  const [activeId, setActiveId] = React.useState(firstTab.id);
-  const active = TABS.find((tab) => tab.id === activeId) ?? firstTab;
+  const [activeId, setActiveId] = React.useState(INTERVIEW_TAB.id);
+  const active = TABS.find((tab) => tab.id === activeId) ?? INTERVIEW_TAB;
 
   return (
     <SectionShell id="product" bordered>
