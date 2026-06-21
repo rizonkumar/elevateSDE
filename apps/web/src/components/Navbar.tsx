@@ -10,7 +10,7 @@ interface NavbarProps {
   wide?: boolean;
 }
 
-export function Navbar({ wide = false }: NavbarProps) {
+export function Navbar({ wide = false }: Readonly<NavbarProps>) {
   const { isAuthenticated } = useAuthStore();
   const [mounted, setMounted] = React.useState(false);
 

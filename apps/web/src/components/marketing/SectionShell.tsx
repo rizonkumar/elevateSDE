@@ -7,7 +7,12 @@ interface SectionShellProps {
   className?: string;
 }
 
-export function SectionShell({ id, children, bordered = false, className = '' }: SectionShellProps) {
+export function SectionShell({
+  id,
+  children,
+  bordered = false,
+  className = '',
+}: Readonly<SectionShellProps>) {
   return (
     <section
       id={id}

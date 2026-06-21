@@ -14,7 +14,7 @@ export function ThemedShot({
   height,
   className = '',
   position = 'object-top',
-}: ThemedShotProps) {
+}: Readonly<ThemedShotProps>) {
   const shared = `block h-full w-full object-cover ${position} ${className}`;
   return (
     <>

@@ -16,7 +16,14 @@ interface RoleCardProps {
   preview: ReactNode;
 }
 
-function RoleCard({ icon: Icon, kicker, title, description, points, preview }: RoleCardProps) {
+function RoleCard({
+  icon: Icon,
+  kicker,
+  title,
+  description,
+  points,
+  preview,
+}: Readonly<RoleCardProps>) {
   return (
     <div className="flex flex-col gap-5 rounded-(--radius-lg) border border-(--color-border-subtle) bg-(--color-surface) p-6 shadow-(--shadow-soft)">
       <div className="flex items-center gap-3">
@@ -50,6 +57,14 @@ function CandidatePreview() {
     { value: '2,480', label: 'Points' },
     { value: '12d', label: 'Streak' },
   ];
+  const bars = [
+    { id: 'mon', value: 40 },
+    { id: 'tue', value: 65 },
+    { id: 'wed', value: 50 },
+    { id: 'thu', value: 80 },
+    { id: 'fri', value: 70 },
+    { id: 'sat', value: 95 },
+  ];
   return (
     <div className="flex h-full flex-col gap-2 rounded-(--radius-md) border border-(--color-border-subtle) bg-(--color-bg-soft) p-4">
       <div className="grid grid-cols-3 gap-2">
@@ -66,11 +81,11 @@ function CandidatePreview() {
         ))}
       </div>
       <div className="flex flex-1 items-end gap-1.5">
-        {[40, 65, 50, 80, 70, 95].map((h, i) => (
+        {bars.map((bar) => (
           <div
-            key={i}
-            style={{ height: `${h}%` }}
-            className="flex-1 rounded-t-(--radius-sm) bg-(--color-accent-soft)"
+            key={bar.id}
+            style={{ height: `${bar.value}%` }}
+            className="flex-1 rounded-t-sm bg-(--color-accent-soft)"
           />
         ))}
       </div>
