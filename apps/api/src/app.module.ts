@@ -11,6 +11,7 @@ import { ProblemModule } from './modules/problem/problem.module';
 import { CodeRunnerModule } from './modules/code-runner/code-runner.module';
 import { ForumModule } from './modules/forum/forum.module';
 import { LeaderboardModule } from './modules/leaderboard/leaderboard.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { LeaderboardModule } from './modules/leaderboard/leaderboard.module';
     CodeRunnerModule,
     ForumModule,
     LeaderboardModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],
