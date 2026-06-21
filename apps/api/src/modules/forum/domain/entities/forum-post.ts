@@ -6,6 +6,18 @@ export interface ForumPostDraft {
   tags: string[];
 }
 
+export interface ForumPostSnapshot {
+  id: string;
+  userId: string;
+  title: string;
+  body: string;
+  tags: string[];
+  status: ForumPostStatus;
+  viewCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export class ForumPost {
   private constructor(
     private readonly id: string,
@@ -40,18 +52,18 @@ export class ForumPost {
     );
   }
 
-  static reconstitute(
-    id: string,
-    userId: string,
-    title: string,
-    body: string,
-    tags: string[],
-    status: ForumPostStatus,
-    viewCount: number,
-    createdAt: Date,
-    updatedAt: Date,
-  ): ForumPost {
-    return new ForumPost(id, userId, title, body, tags, status, viewCount, createdAt, updatedAt);
+  static reconstitute(snapshot: ForumPostSnapshot): ForumPost {
+    return new ForumPost(
+      snapshot.id,
+      snapshot.userId,
+      snapshot.title,
+      snapshot.body,
+      snapshot.tags,
+      snapshot.status,
+      snapshot.viewCount,
+      snapshot.createdAt,
+      snapshot.updatedAt,
+    );
   }
 
   withStatus(status: ForumPostStatus): ForumPost {

@@ -15,7 +15,7 @@ export class UserMapper {
     );
   }
 
-  static toPersistence(user: User): Omit<PrismaUser, 'createdAt' | 'updatedAt'> {
+  static toPersistence(user: User): Omit<PrismaUser, 'createdAt' | 'updatedAt' | 'headline'> {
     return {
       id: user.getId(),
       tenantId: user.getTenantId(),

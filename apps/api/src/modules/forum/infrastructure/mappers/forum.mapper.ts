@@ -7,17 +7,17 @@ import { ForumComment } from '../../domain/entities/forum-comment';
 
 export class ForumMapper {
   static toDomainPost(record: PrismaForumPost): ForumPost {
-    return ForumPost.reconstitute(
-      record.id,
-      record.userId,
-      record.title,
-      record.body,
-      record.tags,
-      record.status,
-      record.viewCount,
-      record.createdAt,
-      record.updatedAt,
-    );
+    return ForumPost.reconstitute({
+      id: record.id,
+      userId: record.userId,
+      title: record.title,
+      body: record.body,
+      tags: record.tags,
+      status: record.status,
+      viewCount: record.viewCount,
+      createdAt: record.createdAt,
+      updatedAt: record.updatedAt,
+    });
   }
 
   static toPostPersistence(
