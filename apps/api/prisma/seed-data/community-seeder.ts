@@ -33,12 +33,27 @@ interface SeedPost {
 }
 
 const ROSTER: RosterMember[] = [
-  { id: 'u-kenji', name: 'Kenji Watanabe', headline: 'Distributed systems', badges: ['Top Mentor', 'System Design'] },
-  { id: 'u-priya', name: 'Priya Nair', headline: 'SDE II @ fintech', badges: ['DSA Streak', 'Helpful'] },
+  {
+    id: 'u-kenji',
+    name: 'Kenji Watanabe',
+    headline: 'Distributed systems',
+    badges: ['Top Mentor', 'System Design'],
+  },
+  {
+    id: 'u-priya',
+    name: 'Priya Nair',
+    headline: 'SDE II @ fintech',
+    badges: ['DSA Streak', 'Helpful'],
+  },
   { id: 'u-raj', name: 'Raj Patel', headline: 'Staff candidate', badges: ['System Design'] },
   { id: 'u-sofia', name: 'Sofia Bianchi', headline: 'Frontend specialist', badges: ['Resume Pro'] },
   { id: 'u-aisha', name: 'Aisha Rahman', headline: 'Senior Engineer', badges: ['Top Mentor'] },
-  { id: 'u-daniel', name: 'Daniel Okoro', headline: 'Backend @ healthtech', badges: ['DSA Streak'] },
+  {
+    id: 'u-daniel',
+    name: 'Daniel Okoro',
+    headline: 'Backend @ healthtech',
+    badges: ['DSA Streak'],
+  },
   { id: 'u-marco', name: 'Marco Velasquez', headline: 'New grad, 2025', badges: ['Fast Learner'] },
   { id: 'u-lena', name: 'Lena Fischer', headline: 'Switching from QA', badges: ['Consistent'] },
   { id: 'u-omar', name: 'Omar Haddad', headline: 'Mobile engineer', badges: [] },
@@ -312,9 +327,20 @@ async function seedCandidateStats(prisma: PrismaClient): Promise<void> {
   }
   await prisma.user.update({
     where: { id: candidate.id },
-    data: { headline: candidate.headline ?? 'Preparing for interviews' },
+    data: {
+      headline: candidate.headline ?? 'Preparing for interviews',
+      firstName: candidate.firstName ?? 'Alex',
+      lastName: candidate.lastName ?? 'Candidate',
+    },
   });
-  const stats = { points: 2480, monthlyPoints: 840, weeklyPoints: 270, assessmentsCompleted: 34, badges: ['Rising Star'], streakDays: 12 };
+  const stats = {
+    points: 2480,
+    monthlyPoints: 840,
+    weeklyPoints: 270,
+    assessmentsCompleted: 34,
+    badges: ['Rising Star'],
+    streakDays: 12,
+  };
   await prisma.userStats.upsert({
     where: { userId: candidate.id },
     update: stats,

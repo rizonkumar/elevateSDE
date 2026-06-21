@@ -76,7 +76,11 @@ function upsertPost(posts: ForumPostDto[], next: ForumPostDto): ForumPostDto[] {
 }
 
 function toggleVoteState<T extends { hasUpvoted: boolean; upvotes: number }>(item: T): T {
-  return { ...item, hasUpvoted: !item.hasUpvoted, upvotes: item.upvotes + (item.hasUpvoted ? -1 : 1) };
+  return {
+    ...item,
+    hasUpvoted: !item.hasUpvoted,
+    upvotes: item.upvotes + (item.hasUpvoted ? -1 : 1),
+  };
 }
 
 export const useForumStore = create<ForumState>((set, get) => ({
@@ -166,7 +170,9 @@ export const useForumStore = create<ForumState>((set, get) => ({
       },
     }));
     try {
-      const { data } = await api.post<ForumCommentDto>(`/api/v1/forum/comments/${commentId}/upvote`);
+      const { data } = await api.post<ForumCommentDto>(
+        `/api/v1/forum/comments/${commentId}/upvote`,
+      );
       set((state) => ({
         comments: {
           ...state.comments,
