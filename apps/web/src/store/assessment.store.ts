@@ -1,13 +1,13 @@
 import { create } from 'zustand';
-import type { AssessmentLanguage, AssessmentRunResultDto } from '@elevatesde/shared-types';
+import type {
+  AssessmentLanguage,
+  AssessmentRunResultDto,
+  CodingProblemDto,
+} from '@elevatesde/shared-types';
 import { useToastStore } from '@/store/toast.store';
 import { useAssessmentSettingsStore, type TimerMode } from '@/store/assessment-settings.store';
-import { runCode } from '@/lib/code-runner';
-import {
-  ASSESSMENT_LANGUAGE_OPTIONS,
-  getProblemById,
-  type AssessmentProblemSeed,
-} from '@/lib/assessment-problems';
+import { getProblem, runAssessment, submitAssessment } from '@/lib/assessments-api';
+import { ASSESSMENT_LANGUAGE_OPTIONS } from '@/lib/assessment-problems';
 
 export type AssessmentStatus = 'LOADING' | 'READY' | 'NOT_FOUND';
 
@@ -17,7 +17,7 @@ export type TimerStatus = 'idle' | 'running' | 'paused';
 
 interface AssessmentState {
   status: AssessmentStatus;
-  problem: AssessmentProblemSeed | null;
+  problem: CodingProblemDto | null;
   language: AssessmentLanguage;
   codeByLanguage: Record<AssessmentLanguage, string>;
   isRunning: boolean;
@@ -33,7 +33,7 @@ interface AssessmentState {
   remainingSeconds: number;
   countdownMinutes: number;
   editorMaximized: boolean;
-  loadProblem: (id: string) => void;
+  loadProblem: (id: string) => Promise<void>;
   setLanguage: (language: AssessmentLanguage) => void;
   setCode: (code: string) => void;
   resetCodeToStarter: () => void;
@@ -88,7 +88,7 @@ function removeSavedCode(problemId: string, language: AssessmentLanguage): void 
   }
 }
 
-function buildInitialCode(problem: AssessmentProblemSeed): Record<AssessmentLanguage, string> {
+function buildInitialCode(problem: CodingProblemDto): Record<AssessmentLanguage, string> {
   const result = { ...problem.starterCode };
   for (const language of LANGUAGES) {
     const saved = readSavedCode(problem.id, language);
@@ -99,7 +99,7 @@ function buildInitialCode(problem: AssessmentProblemSeed): Record<AssessmentLang
   return result;
 }
 
-function visibleInputs(problem: AssessmentProblemSeed): string[] {
+function visibleInputs(problem: CodingProblemDto): string[] {
   return problem.testCases.filter((testCase) => !testCase.isHidden).map((testCase) => testCase.input);
 }
 
@@ -164,11 +164,14 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => {
     countdownMinutes: 30,
     editorMaximized: false,
 
-    loadProblem: (id) => {
+    loadProblem: async (id) => {
       clearTimer();
       clearAutosave();
-      const problem = getProblemById(id);
-      if (!problem) {
+      set({ status: 'LOADING', problem: null });
+      let problem: CodingProblemDto;
+      try {
+        problem = await getProblem(id);
+      } catch {
         set({ status: 'NOT_FOUND', problem: null });
         return;
       }
@@ -277,38 +280,64 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => {
     toggleEditorMaximized: () => set((state) => ({ editorMaximized: !state.editorMaximized })),
 
     run: async () => {
-      const { problem, language, codeByLanguage, caseInputs, isRunning } = get();
+      const { problem, language, codeByLanguage, isRunning } = get();
       if (!problem || isRunning) return;
+      if (problem.testCases.length === 0) {
+        useToastStore.getState().addToast('Test cases are coming soon for this problem.', 'info');
+        return;
+      }
       set({ isRunning: true, testcaseTab: 'result' });
-      const result = await runCode(problem, language, codeByLanguage[language], caseInputs);
-      set({ isRunning: false, lastResult: result });
-      if (result.status === 'RUNTIME_ERROR') {
-        useToastStore.getState().addToast('No solution detected. Write your code first.', 'info');
-      } else {
-        useToastStore
-          .getState()
-          .addToast(`Ran ${result.totalCount} tests — ${result.passedCount} passed.`, 'info');
+      try {
+        const result = await runAssessment({
+          problemId: problem.id,
+          language,
+          code: codeByLanguage[language],
+        });
+        set({ isRunning: false, lastResult: result });
+        if (result.status === 'RUNTIME_ERROR') {
+          useToastStore.getState().addToast('Runtime error while running your code.', 'error');
+        } else {
+          useToastStore
+            .getState()
+            .addToast(`Ran ${result.totalCount} tests — ${result.passedCount} passed.`, 'info');
+        }
+      } catch {
+        set({ isRunning: false });
+        useToastStore.getState().addToast('Could not run your code. Please try again.', 'error');
       }
     },
 
     submit: async () => {
-      const { problem, language, codeByLanguage, caseInputs, isSubmitting } = get();
+      const { problem, language, codeByLanguage, isSubmitting } = get();
       if (!problem || isSubmitting) return;
+      if (problem.testCases.length === 0) {
+        useToastStore.getState().addToast('Test cases are coming soon for this problem.', 'info');
+        return;
+      }
       set({ isSubmitting: true, testcaseTab: 'result' });
-      const result = await runCode(problem, language, codeByLanguage[language], caseInputs);
-      set({ isSubmitting: false, lastResult: result, hasSubmitted: true });
-      if (result.status === 'ACCEPTED') {
-        useToastStore.getState().addToast('Accepted — all test cases passed!', 'success');
-        if (useAssessmentSettingsStore.getState().autoReset) {
-          get().resetTimer();
+      try {
+        const result = await submitAssessment({
+          problemId: problem.id,
+          language,
+          code: codeByLanguage[language],
+        });
+        set({ isSubmitting: false, lastResult: result, hasSubmitted: true });
+        if (result.status === 'ACCEPTED') {
+          useToastStore.getState().addToast('Accepted — all test cases passed!', 'success');
+          if (useAssessmentSettingsStore.getState().autoReset) {
+            get().resetTimer();
+          }
+        } else {
+          useToastStore
+            .getState()
+            .addToast(
+              `Submission failed — ${result.passedCount}/${result.totalCount} passed.`,
+              'error',
+            );
         }
-      } else {
-        useToastStore
-          .getState()
-          .addToast(
-            `Submission failed — ${result.passedCount}/${result.totalCount} passed.`,
-            'error',
-          );
+      } catch {
+        set({ isSubmitting: false });
+        useToastStore.getState().addToast('Could not submit your code. Please try again.', 'error');
       }
     },
 

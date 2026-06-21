@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
 import * as bcrypt from 'bcrypt';
+import { seedProblems } from './seed-data/problems-seeder';
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
@@ -75,7 +76,7 @@ async function main() {
   const flags = [
     { flagKey: 'AI_MOCK_INTERVIEW_BETA', isEnabled: true, percentageRollout: 100 },
     { flagKey: 'RESUME_ATS_SCORING', isEnabled: true, percentageRollout: 75 },
-    { flagKey: 'CODE_EXECUTION_SANDBOX', isEnabled: false, percentageRollout: 0 },
+    { flagKey: 'CODE_EXECUTION_SANDBOX', isEnabled: true, percentageRollout: 100 },
     { flagKey: 'DISCUSSION_FORUMS', isEnabled: false, percentageRollout: 25 },
   ];
 
@@ -99,6 +100,9 @@ async function main() {
       data: { userId: admin.id, action: entry.action, metadata: entry.metadata },
     });
   }
+
+  const totalProblems = await seedProblems(prisma);
+  console.log(`Seeded coding problems. Total problems in database: ${totalProblems}`);
 }
 
 main()

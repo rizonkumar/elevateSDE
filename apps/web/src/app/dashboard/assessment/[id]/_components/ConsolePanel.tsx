@@ -145,6 +145,19 @@ export function ConsolePanel() {
   const activeResult = visibleResults[safeIndex];
 
   const renderBody = (): React.ReactNode => {
+    if (caseInputs.length === 0) {
+      return (
+        <div className="flex h-full flex-col items-center justify-center gap-1.5 text-center text-sm text-(--color-text-muted)">
+          <FlaskConical className="h-5 w-5" />
+          <p className="m-0 font-medium text-(--color-text-primary)">Test cases coming soon</p>
+          <p className="m-0 max-w-xs text-xs">
+            This problem doesn&apos;t have test cases yet. You can still read it and draft your
+            solution in the editor.
+          </p>
+        </div>
+      );
+    }
+
     if (testcaseTab === 'testcase') {
       return (
         <div className="space-y-4">

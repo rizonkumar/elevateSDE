@@ -13,7 +13,7 @@ A sandbox orchestrator that schedules candidate code submissions into isolated D
 
 #### [NEW] [docker-sandbox/](file:///Users/rizonkumarrahi/Developer/elevateSDE/apps/api/src/modules/code-runner/infrastructure/docker-sandbox/)
 
-- Isolated configurations containing runner environments (Python/Node.js runtimes) with memory limits (`50mb`) and execution timeouts (`2s`).
+- Isolated configurations containing ry.unner environments (Python/Node.js runtimes) with memory limits (`50mb`) and execution timeouts (`2s`).
 
 ---
 
