@@ -136,6 +136,33 @@ export default function ForumModerationPage() {
     return matchesStatus && matchesQuery;
   });
 
+  const renderCommentThread = () => {
+    if (commentsLoading) {
+      return (
+        <span className="text-xs text-(--color-text-muted) animate-pulse">Loading comments...</span>
+      );
+    }
+    if (comments.length === 0) {
+      return <span className="text-xs text-(--color-text-muted)">No comments on this post.</span>;
+    }
+    return comments.map((comment) => (
+      <div key={comment.id} className="flex gap-3">
+        <div className="shrink-0 w-8 h-8 rounded-full bg-(--color-badge-bg) text-(--color-text-muted) flex items-center justify-center text-[11px] font-semibold">
+          {getNameInitials(comment.author.name)}
+        </div>
+        <div className="flex flex-col gap-0.5">
+          <div className="flex items-center gap-2 text-xs">
+            <span className="font-semibold text-(--color-text-primary)">{comment.author.name}</span>
+            <span className="text-(--color-text-muted)">
+              {formatRelativeTime(comment.createdAt)}
+            </span>
+          </div>
+          <p className="text-sm text-(--color-text-primary)">{comment.body}</p>
+        </div>
+      </div>
+    ));
+  };
+
   return (
     <AdminLayout>
       {loading ? (
@@ -359,32 +386,7 @@ export default function ForumModerationPage() {
               <span className="text-xs font-semibold text-(--color-text-muted) uppercase tracking-wider">
                 Comment thread
               </span>
-              {commentsLoading ? (
-                <span className="text-xs text-(--color-text-muted) animate-pulse">
-                  Loading comments...
-                </span>
-              ) : comments.length === 0 ? (
-                <span className="text-xs text-(--color-text-muted)">No comments on this post.</span>
-              ) : (
-                comments.map((comment) => (
-                  <div key={comment.id} className="flex gap-3">
-                    <div className="shrink-0 w-8 h-8 rounded-full bg-(--color-badge-bg) text-(--color-text-muted) flex items-center justify-center text-[11px] font-semibold">
-                      {getNameInitials(comment.author.name)}
-                    </div>
-                    <div className="flex flex-col gap-0.5">
-                      <div className="flex items-center gap-2 text-xs">
-                        <span className="font-semibold text-(--color-text-primary)">
-                          {comment.author.name}
-                        </span>
-                        <span className="text-(--color-text-muted)">
-                          {formatRelativeTime(comment.createdAt)}
-                        </span>
-                      </div>
-                      <p className="text-sm text-(--color-text-primary)">{comment.body}</p>
-                    </div>
-                  </div>
-                ))
-              )}
+              {renderCommentThread()}
             </div>
 
             <div className="sticky bottom-0 -mx-5 sm:-mx-6 -mb-5 px-5 sm:px-6 py-4 bg-(--color-surface) border-t border-(--color-border-subtle) flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2">
