@@ -40,6 +40,12 @@ export default function ForumPage() {
   const loadMore = useForumStore((state) => state.loadMore);
   const togglePostUpvote = useForumStore((state) => state.togglePostUpvote);
   const openModal = useForumStore((state) => state.openModal);
+  const fetchPosts = useForumStore((state) => state.fetchPosts);
+  const isLoading = useForumStore((state) => state.isLoading);
+
+  React.useEffect(() => {
+    void fetchPosts();
+  }, [fetchPosts]);
 
   const matched = React.useMemo(
     () => filterAndSortPosts(posts, { sort, activeTag, query }),
@@ -65,7 +71,11 @@ export default function ForumPage() {
 
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <Tabs items={SORT_TABS} value={sort} onChange={(id) => setSort(id as ForumSortOption)} />
+            <Tabs
+              items={SORT_TABS}
+              value={sort}
+              onChange={(id) => setSort(id as ForumSortOption)}
+            />
             <div className="sm:w-72">
               <Input
                 placeholder="Search discussions"
@@ -84,7 +94,7 @@ export default function ForumPage() {
               <MessagesSquare className="h-5 w-5" />
             </span>
             <p className="m-0 text-sm text-(--color-text-muted)">
-              No discussions match your filters yet.
+              {isLoading ? 'Loading discussions…' : 'No discussions match your filters yet.'}
             </p>
           </div>
         ) : (

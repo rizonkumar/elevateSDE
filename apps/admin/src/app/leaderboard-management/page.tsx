@@ -83,8 +83,7 @@ export default function LeaderboardManagementPage() {
 
   const normalizedQuery = query.trim().toLowerCase();
   const matched = entries.filter(
-    (entry) =>
-      normalizedQuery.length === 0 || entry.name.toLowerCase().includes(normalizedQuery),
+    (entry) => normalizedQuery.length === 0 || entry.name.toLowerCase().includes(normalizedQuery),
   );
 
   const topContributor = entries[0] ?? null;
@@ -159,7 +158,10 @@ export default function LeaderboardManagementPage() {
               <tbody className="divide-y divide-(--color-border-subtle)">
                 {matched.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-8 text-center text-xs text-(--color-text-muted)">
+                    <td
+                      colSpan={7}
+                      className="px-6 py-8 text-center text-xs text-(--color-text-muted)"
+                    >
                       No members match your search.
                     </td>
                   </tr>
@@ -182,9 +184,13 @@ export default function LeaderboardManagementPage() {
                             {getNameInitials(entry.name)}
                           </div>
                           <div className="flex flex-col">
-                            <span className="font-semibold text-(--color-text-primary)">{entry.name}</span>
+                            <span className="font-semibold text-(--color-text-primary)">
+                              {entry.name}
+                            </span>
                             {entry.headline && (
-                              <span className="text-xs text-(--color-text-muted)">{entry.headline}</span>
+                              <span className="text-xs text-(--color-text-muted)">
+                                {entry.headline}
+                              </span>
                             )}
                           </div>
                         </div>
@@ -239,14 +245,20 @@ export default function LeaderboardManagementPage() {
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <span className="font-mono text-xs font-semibold text-(--color-text-muted)">#{entry.rank}</span>
+                    <span className="font-mono text-xs font-semibold text-(--color-text-muted)">
+                      #{entry.rank}
+                    </span>
                     <div className="shrink-0 w-8 h-8 rounded-full bg-(--color-badge-bg) text-(--color-text-muted) flex items-center justify-center text-[11px] font-semibold">
                       {getNameInitials(entry.name)}
                     </div>
                     <div className="flex flex-col min-w-0">
-                      <span className="font-semibold text-sm text-(--color-text-primary) truncate">{entry.name}</span>
+                      <span className="font-semibold text-sm text-(--color-text-primary) truncate">
+                        {entry.name}
+                      </span>
                       {entry.headline && (
-                        <span className="text-xs text-(--color-text-muted) truncate">{entry.headline}</span>
+                        <span className="text-xs text-(--color-text-muted) truncate">
+                          {entry.headline}
+                        </span>
                       )}
                     </div>
                   </div>
@@ -272,7 +284,12 @@ export default function LeaderboardManagementPage() {
                       ))}
                     </div>
                   )}
-                  <Button type="button" variant="secondary" onClick={() => openAdjust(entry)} className="w-full">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => openAdjust(entry)}
+                    className="w-full"
+                  >
                     Adjust
                   </Button>
                 </div>

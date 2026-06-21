@@ -13,11 +13,7 @@ import {
 } from '../../lib/forum-moderation-data';
 import { formatRelativeTime, getNameInitials } from '../../lib/relative-time';
 import { Button, ConfirmDialog, Input, Modal } from '@elevatesde/ui';
-import type {
-  AdminForumPostDto,
-  ForumCommentDto,
-  ForumPostStatus,
-} from '@elevatesde/shared-types';
+import type { AdminForumPostDto, ForumCommentDto, ForumPostStatus } from '@elevatesde/shared-types';
 import { ArrowBigUp, Check, Eye, Flag, MessageSquare, Search, ShieldCheck } from 'lucide-react';
 
 interface StatusFilterOption {
@@ -123,11 +119,7 @@ export default function ForumModerationPage() {
 
   const handleRemove = async () => {
     if (!removeTarget) return;
-    const removed = await changeStatus(
-      removeTarget,
-      'REMOVED',
-      'Post removed from the community.',
-    );
+    const removed = await changeStatus(removeTarget, 'REMOVED', 'Post removed from the community.');
     if (removed) {
       setRemoveTarget(null);
       closeReview();
@@ -188,7 +180,10 @@ export default function ForumModerationPage() {
               <tbody className="divide-y divide-(--color-border-subtle)">
                 {matched.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-8 text-center text-xs text-(--color-text-muted)">
+                    <td
+                      colSpan={7}
+                      className="px-6 py-8 text-center text-xs text-(--color-text-muted)"
+                    >
                       No posts match the current filters.
                     </td>
                   </tr>
@@ -204,7 +199,10 @@ export default function ForumModerationPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <Badge variant={STATUS_VARIANT[post.status]} className="justify-center min-w-[84px]">
+                        <Badge
+                          variant={STATUS_VARIANT[post.status]}
+                          className="justify-center min-w-[84px]"
+                        >
                           {STATUS_LABEL[post.status]}
                         </Badge>
                       </td>
@@ -217,7 +215,9 @@ export default function ForumModerationPage() {
                       <td className="px-6 py-4 text-right">
                         <span
                           className={`font-mono text-xs font-semibold ${
-                            post.reportCount > 0 ? 'text-(--color-danger)' : 'text-(--color-text-muted)'
+                            post.reportCount > 0
+                              ? 'text-(--color-danger)'
+                              : 'text-(--color-text-muted)'
                           }`}
                         >
                           {post.reportCount}
@@ -250,10 +250,14 @@ export default function ForumModerationPage() {
                   className="rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-sm p-4 flex flex-col gap-3"
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <span className="font-semibold text-sm text-(--color-text-primary)">{post.title}</span>
+                    <span className="font-semibold text-sm text-(--color-text-primary)">
+                      {post.title}
+                    </span>
                     <Badge variant={STATUS_VARIANT[post.status]}>{STATUS_LABEL[post.status]}</Badge>
                   </div>
-                  <span className="text-xs text-(--color-text-muted) font-mono break-all">{post.authorEmail}</span>
+                  <span className="text-xs text-(--color-text-muted) font-mono break-all">
+                    {post.authorEmail}
+                  </span>
                   <div className="flex items-center gap-4 text-xs text-(--color-text-muted)">
                     <span className="inline-flex items-center gap-1">
                       <ArrowBigUp className="w-3.5 h-3.5 shrink-0" />
@@ -273,7 +277,12 @@ export default function ForumModerationPage() {
                     </span>
                     <span className="ml-auto">{formatRelativeTime(post.createdAt)}</span>
                   </div>
-                  <Button type="button" variant="secondary" onClick={() => openReview(post)} className="w-full">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => openReview(post)}
+                    className="w-full"
+                  >
                     Review
                   </Button>
                 </div>
@@ -287,12 +296,16 @@ export default function ForumModerationPage() {
         open={selectedPost !== null}
         onClose={closeReview}
         title={selectedPost?.title ?? 'Review post'}
-        description={selectedPost ? `${selectedPost.author.name} · ${selectedPost.authorEmail}` : undefined}
+        description={
+          selectedPost ? `${selectedPost.author.name} · ${selectedPost.authorEmail}` : undefined
+        }
       >
         {selectedPost && (
           <div className="flex flex-col gap-5">
             <div className="flex items-center gap-2 flex-wrap">
-              <Badge variant={STATUS_VARIANT[selectedPost.status]}>{STATUS_LABEL[selectedPost.status]}</Badge>
+              <Badge variant={STATUS_VARIANT[selectedPost.status]}>
+                {STATUS_LABEL[selectedPost.status]}
+              </Badge>
               {selectedPost.tags.map((tag) => (
                 <Badge key={tag} variant="neutral">
                   {getTagLabel(tag)}
@@ -328,9 +341,14 @@ export default function ForumModerationPage() {
                 </span>
                 <ul className="flex flex-col gap-1.5">
                   {selectedPost.reports.map((report) => (
-                    <li key={report.id} className="text-xs text-(--color-text-muted) flex items-center justify-between gap-3">
+                    <li
+                      key={report.id}
+                      className="text-xs text-(--color-text-muted) flex items-center justify-between gap-3"
+                    >
                       <span className="text-(--color-text-primary)">{report.reason}</span>
-                      <span className="font-mono shrink-0">{formatRelativeTime(report.createdAt)}</span>
+                      <span className="font-mono shrink-0">
+                        {formatRelativeTime(report.createdAt)}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -342,7 +360,9 @@ export default function ForumModerationPage() {
                 Comment thread
               </span>
               {commentsLoading ? (
-                <span className="text-xs text-(--color-text-muted) animate-pulse">Loading comments...</span>
+                <span className="text-xs text-(--color-text-muted) animate-pulse">
+                  Loading comments...
+                </span>
               ) : comments.length === 0 ? (
                 <span className="text-xs text-(--color-text-muted)">No comments on this post.</span>
               ) : (
@@ -353,8 +373,12 @@ export default function ForumModerationPage() {
                     </div>
                     <div className="flex flex-col gap-0.5">
                       <div className="flex items-center gap-2 text-xs">
-                        <span className="font-semibold text-(--color-text-primary)">{comment.author.name}</span>
-                        <span className="text-(--color-text-muted)">{formatRelativeTime(comment.createdAt)}</span>
+                        <span className="font-semibold text-(--color-text-primary)">
+                          {comment.author.name}
+                        </span>
+                        <span className="text-(--color-text-muted)">
+                          {formatRelativeTime(comment.createdAt)}
+                        </span>
                       </div>
                       <p className="text-sm text-(--color-text-primary)">{comment.body}</p>
                     </div>
