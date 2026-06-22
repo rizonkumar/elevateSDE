@@ -3,10 +3,11 @@ import { IProblemRepository } from './domain/interfaces/problem-repository.inter
 import { ProblemRepository } from './infrastructure/repositories/problem.repository';
 import { ProblemService } from './application/problem.service';
 import { ProblemsController } from './presentation/controllers/problems.controller';
+import { CodingProblemsAdminController } from './presentation/controllers/coding-problems-admin.controller';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 
 @Module({
-  controllers: [ProblemsController],
+  controllers: [ProblemsController, CodingProblemsAdminController],
   providers: [
     ProblemService,
     PrismaService,
