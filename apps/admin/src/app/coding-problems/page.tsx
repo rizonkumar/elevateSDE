@@ -126,6 +126,7 @@ export default function CodingProblemsPage() {
                     value={String(pageSize)}
                     options={PAGE_SIZE_OPTIONS}
                     onChange={(value) => setPageSize(Number(value))}
+                    menuPlacement="top"
                   />
                 </div>
                 <div className="flex items-center gap-2">

@@ -14,9 +14,17 @@ interface SelectProps {
   onChange: (value: string) => void;
   disabled?: boolean;
   className?: string;
+  menuPlacement?: 'bottom' | 'top';
 }
 
-export function Select({ value, options, onChange, disabled, className = '' }: SelectProps) {
+export function Select({
+  value,
+  options,
+  onChange,
+  disabled,
+  className = '',
+  menuPlacement = 'bottom',
+}: Readonly<SelectProps>) {
   const [open, setOpen] = React.useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
 
@@ -59,7 +67,9 @@ export function Select({ value, options, onChange, disabled, className = '' }: S
       {open && !disabled && (
         <div
           role="listbox"
-          className="absolute right-0 z-30 mt-1.5 w-full min-w-[160px] rounded-lg border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-soft) py-1"
+          className={`absolute right-0 z-30 w-full min-w-[160px] rounded-lg border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-soft) py-1 ${
+            menuPlacement === 'top' ? 'bottom-full mb-1.5' : 'mt-1.5'
+          }`}
         >
           {options.map((option) => {
             const active = option.value === value;
@@ -74,9 +84,7 @@ export function Select({ value, options, onChange, disabled, className = '' }: S
                   setOpen(false);
                 }}
                 className={`flex items-center justify-between gap-2 w-full text-left text-xs px-3 py-2 transition-colors hover:bg-(--color-badge-bg) cursor-pointer ${
-                  active
-                    ? 'text-(--color-accent) font-semibold'
-                    : 'text-(--color-text-primary)'
+                  active ? 'text-(--color-accent) font-semibold' : 'text-(--color-text-primary)'
                 }`}
               >
                 <span className="truncate">{option.label}</span>
