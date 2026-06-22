@@ -1,11 +1,11 @@
 'use client';
 
 import { Pencil, Trash2 } from 'lucide-react';
-import type { AdminCodingProblemDto, AssessmentDifficulty } from '@elevatesde/shared-types';
+import type { AdminProblemSummaryDto, AssessmentDifficulty } from '@elevatesde/shared-types';
 import { Badge, type BadgeVariant, Toggle } from '../../../components/ui';
 
 interface ProblemDirectoryProps {
-  problems: AdminCodingProblemDto[];
+  problems: AdminProblemSummaryDto[];
   togglingId: string | null;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
@@ -85,7 +85,7 @@ export function ProblemDirectory({
                 <td className="px-6 py-4">
                   <TagList tags={problem.tags} />
                 </td>
-                <td className="px-6 py-4 text-(--color-text-muted)">{problem.testCases.length}</td>
+                <td className="px-6 py-4 text-(--color-text-muted)">{problem.testCaseCount}</td>
                 <td className="px-6 py-4">
                   <Toggle
                     checked={problem.isPublished}
@@ -134,7 +134,7 @@ export function ProblemDirectory({
             </div>
             <TagList tags={problem.tags} />
             <div className="flex items-center justify-between gap-3 text-xs text-(--color-text-muted)">
-              <span>{problem.testCases.length} test cases</span>
+              <span>{problem.testCaseCount} test cases</span>
               <div className="flex items-center gap-2">
                 <span>Published</span>
                 <Toggle

@@ -41,6 +41,7 @@ function toFormValues(problem: AdminCodingProblemDto | null): ProblemFormValues 
       timeLimitMinutes: 30,
       tags: [],
       description: '',
+      constraints: [],
       starterCode: { ...EMPTY_STARTER_CODE },
       testCases: [],
       isPublished: false,
@@ -52,6 +53,7 @@ function toFormValues(problem: AdminCodingProblemDto | null): ProblemFormValues 
     timeLimitMinutes: problem.timeLimitMinutes,
     tags: [...problem.tags],
     description: problem.description,
+    constraints: [...problem.constraints],
     starterCode: { ...problem.starterCode },
     testCases: problem.testCases.map((testCase) => ({ ...testCase })),
     isPublished: problem.isPublished,
@@ -60,38 +62,30 @@ function toFormValues(problem: AdminCodingProblemDto | null): ProblemFormValues 
 
 export function ProblemFormModal() {
   const isModalOpen = useCodingProblemsStore((state) => state.isModalOpen);
-  const editingId = useCodingProblemsStore((state) => state.editingId);
-  const problems = useCodingProblemsStore((state) => state.problems);
+  const editingProblem = useCodingProblemsStore((state) => state.editingProblem);
   const savingId = useCodingProblemsStore((state) => state.savingId);
   const closeModal = useCodingProblemsStore((state) => state.closeModal);
-  const createProblem = useCodingProblemsStore((state) => state.createProblem);
-  const updateProblem = useCodingProblemsStore((state) => state.updateProblem);
-
-  const editingProblem = editingId
-    ? (problems.find((problem) => problem.id === editingId) ?? null)
-    : null;
+  const saveProblem = useCodingProblemsStore((state) => state.saveProblem);
 
   const [values, setValues] = React.useState<ProblemFormValues>(() => toFormValues(editingProblem));
   const [activeLanguage, setActiveLanguage] = React.useState<AssessmentLanguage>('javascript');
   const [showErrors, setShowErrors] = React.useState(false);
 
+  const isEditing = editingProblem !== null;
+
   React.useEffect(() => {
     if (!isModalOpen) {
       return;
     }
-    const current = editingId
-      ? (useCodingProblemsStore.getState().problems.find((problem) => problem.id === editingId) ??
-        null)
-      : null;
-    setValues(toFormValues(current));
+    setValues(toFormValues(editingProblem));
     setActiveLanguage('javascript');
     setShowErrors(false);
-  }, [isModalOpen, editingId]);
+  }, [isModalOpen, editingProblem]);
 
   const saving = savingId !== null;
   const titleError = showErrors && !values.title.trim() ? 'Title is required.' : undefined;
 
-  const submitLabel = editingId ? 'Save changes' : 'Create problem';
+  const submitLabel = isEditing ? 'Save changes' : 'Create problem';
 
   const updateValues = (patch: Partial<ProblemFormValues>) => {
     setValues((current) => ({ ...current, ...patch }));
@@ -109,18 +103,14 @@ export function ProblemFormModal() {
       setShowErrors(true);
       return;
     }
-    if (editingId) {
-      await updateProblem(editingId, values);
-      return;
-    }
-    await createProblem(values);
+    await saveProblem(values);
   };
 
   return (
     <Modal
       open={isModalOpen}
       onClose={closeModal}
-      title={editingId ? 'Edit coding problem' : 'New coding problem'}
+      title={isEditing ? 'Edit coding problem' : 'New coding problem'}
       description="Author the problem statement, starter code, and test cases."
     >
       <div className="flex flex-col gap-5">
