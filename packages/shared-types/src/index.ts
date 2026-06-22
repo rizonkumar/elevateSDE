@@ -198,6 +198,19 @@ export interface ProblemListDto {
   pageSize: number;
 }
 
+export interface AdminCodingProblemDto extends CodingProblemDto {
+  isPublished: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminProblemSummaryDto extends ProblemSummaryDto {
+  isPublished: boolean;
+  testCaseCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface AssessmentRunRequestDto {
   problemId: string;
   language: AssessmentLanguage;
