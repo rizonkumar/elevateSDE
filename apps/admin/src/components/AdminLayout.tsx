@@ -150,7 +150,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         </nav>
 
         <div className="p-4 border-t border-(--color-border-subtle) flex flex-col gap-3 shrink-0">
-          <div className={`flex items-center justify-between px-2 ${rail ? 'lg:px-0 lg:justify-center' : ''}`}>
+          <div
+            className={`flex items-center justify-between px-2 ${rail ? 'lg:px-0 lg:justify-center' : ''}`}
+          >
             <div className={`flex flex-col min-w-0 ${hideOnRail}`}>
               <span className="text-xs font-semibold truncate leading-4">
                 {mounted ? user?.email || 'Administrator' : 'Administrator'}
