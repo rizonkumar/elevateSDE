@@ -29,7 +29,7 @@ interface AdminLayoutProps {
 
 const COLLAPSE_KEY = 'admin-sidebar-collapsed';
 
-export function AdminLayout({ children }: AdminLayoutProps) {
+export function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, clearAuth } = useAuthStore();
@@ -41,7 +41,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
   React.useEffect(() => {
     setMounted(true);
-    const docTheme = document.documentElement.getAttribute('data-theme') as 'light' | 'dark' | null;
+    const docTheme = document.documentElement.dataset.theme as 'light' | 'dark' | undefined;
     if (docTheme) {
       setTheme(docTheme);
     }
@@ -55,7 +55,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const toggleTheme = () => {
     const nextTheme = theme === 'light' ? 'dark' : 'light';
     setTheme(nextTheme);
-    document.documentElement.setAttribute('data-theme', nextTheme);
+    document.documentElement.dataset.theme = nextTheme;
     localStorage.setItem('theme', nextTheme);
   };
 
@@ -176,7 +176,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           <button
             onClick={handleLogout}
             title={rail ? 'Logout' : undefined}
-            className={`w-full flex items-center justify-center gap-2 px-4 py-2 text-xs font-semibold rounded-(--radius-sm) border border-(--color-border-subtle) hover:bg-(--color-danger-soft) hover:text-(--color-danger) transition-colors cursor-pointer ${
+            className={`w-full flex items-center justify-center gap-2 px-4 py-2 text-xs font-semibold rounded-sm border border-(--color-border-subtle) hover:bg-(--color-danger-soft) hover:text-(--color-danger) transition-colors cursor-pointer ${
               rail ? 'lg:px-0' : ''
             }`}
           >

@@ -12,7 +12,7 @@ const variantClasses: Record<NonNullable<ButtonProps['variant']>, string> = {
   danger: 'bg-(--color-danger) text-white hover:opacity-90 shadow-xs',
 };
 
-export function Button({ variant = 'primary', className = '', ...props }: ButtonProps) {
+export function Button({ variant = 'primary', className = '', ...props }: Readonly<ButtonProps>) {
   const baseStyle =
     'inline-flex h-10 items-center justify-center gap-2 rounded-(--radius-sm) px-3 text-sm font-medium transition-all duration-150 cursor-pointer select-none focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_var(--color-bg),0_0_0_4px_var(--color-accent)] disabled:cursor-not-allowed disabled:opacity-60';
   return <button className={`${baseStyle} ${variantClasses[variant]} ${className}`} {...props} />;
