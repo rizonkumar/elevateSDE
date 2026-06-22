@@ -29,6 +29,7 @@ export default function CodingProblemsPage() {
   const setDifficultyFilter = useCodingProblemsStore((state) => state.setDifficultyFilter);
   const openCreate = useCodingProblemsStore((state) => state.openCreate);
   const openEdit = useCodingProblemsStore((state) => state.openEdit);
+  const togglePublish = useCodingProblemsStore((state) => state.togglePublish);
   const requestDelete = useCodingProblemsStore((state) => state.requestDelete);
   const cancelDelete = useCodingProblemsStore((state) => state.cancelDelete);
   const confirmDelete = useCodingProblemsStore((state) => state.confirmDelete);
