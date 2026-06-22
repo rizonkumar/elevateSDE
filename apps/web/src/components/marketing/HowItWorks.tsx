@@ -1,3 +1,7 @@
+import { SectionShell } from './SectionShell';
+import { SectionHeading } from './SectionHeading';
+import { Reveal } from './Reveal';
+
 const STEPS = [
   {
     step: '01',
@@ -18,26 +22,28 @@ const STEPS = [
 
 export function HowItWorks() {
   return (
-    <section className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
-      <div className="mb-8 max-w-2xl">
-        <h2 className="font-display text-2xl font-bold tracking-tight text-(--color-text-primary) sm:text-3xl">
-          How it works
-        </h2>
-        <p className="mt-2 text-sm text-(--color-text-muted) sm:text-base">
-          Three steps from sign-up to interview-ready.
-        </p>
-      </div>
-      <div className="grid gap-5 sm:grid-cols-3">
-        {STEPS.map((item) => (
-          <div key={item.step} className="flex flex-col gap-3">
-            <span className="font-display text-3xl font-bold text-(--color-accent)">
-              {item.step}
-            </span>
-            <h3 className="text-base font-semibold text-(--color-text-primary)">{item.title}</h3>
-            <p className="text-sm leading-relaxed text-(--color-text-muted)">{item.body}</p>
-          </div>
-        ))}
-      </div>
-    </section>
+    <SectionShell id="how-it-works" bordered>
+      <Reveal>
+        <SectionHeading
+          kicker="How it works"
+          title="Three steps from sign-up to interview-ready"
+          description="No setup overhead. Start practicing the same day you join."
+        />
+      </Reveal>
+
+      <Reveal delay={0.1} className="mt-12">
+        <ol className="grid gap-px overflow-hidden rounded-lg border border-(--color-border-subtle) bg-(--color-border-subtle) sm:grid-cols-3">
+          {STEPS.map((item) => (
+            <li key={item.step} className="flex flex-col gap-3 bg-(--color-surface) p-7">
+              <span className="font-mono text-sm font-semibold tracking-widest text-(--color-accent)">
+                {item.step}
+              </span>
+              <h3 className="text-lg font-semibold text-(--color-text-primary)">{item.title}</h3>
+              <p className="text-sm leading-relaxed text-(--color-text-muted)">{item.body}</p>
+            </li>
+          ))}
+        </ol>
+      </Reveal>
+    </SectionShell>
   );
 }

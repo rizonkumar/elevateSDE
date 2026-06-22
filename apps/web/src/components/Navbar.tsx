@@ -10,7 +10,7 @@ interface NavbarProps {
   wide?: boolean;
 }
 
-export function Navbar({ wide = false }: NavbarProps) {
+export function Navbar({ wide = false }: Readonly<NavbarProps>) {
   const { isAuthenticated } = useAuthStore();
   const [mounted, setMounted] = React.useState(false);
 
@@ -20,6 +20,12 @@ export function Navbar({ wide = false }: NavbarProps) {
 
   const showAuth = mounted && isAuthenticated;
   const containerClass = wide ? 'max-w-[1400px]' : 'max-w-(--page-max-width)';
+
+  const navLinks = [
+    { label: 'Features', href: '/#features' },
+    { label: 'Solutions', href: '/#solutions' },
+    { label: 'Pricing', href: '/#pricing' },
+  ];
 
   return (
     <header className="sticky top-0 z-40 border-b border-(--color-border-subtle) bg-(--color-bg) transition-colors duration-200">
@@ -32,6 +38,18 @@ export function Navbar({ wide = false }: NavbarProps) {
         >
           Elevate<span className="text-(--color-accent)">SDE</span>
         </Link>
+
+        <nav className="hidden items-center gap-7 md:flex">
+          {navLinks.map((link) => (
+            <Link
+              key={link.label}
+              href={link.href}
+              className="text-sm font-medium text-(--color-text-muted) transition-colors hover:text-(--color-text-primary)"
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
           <ThemeToggle />
