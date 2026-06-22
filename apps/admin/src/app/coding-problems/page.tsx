@@ -16,6 +16,12 @@ const DIFFICULTY_FILTER_OPTIONS: { value: DifficultyFilter; label: string }[] = 
   { value: 'HARD', label: 'Hard' },
 ];
 
+const PAGE_SIZE_OPTIONS = [
+  { value: '20', label: '20 / page' },
+  { value: '50', label: '50 / page' },
+  { value: '100', label: '100 / page' },
+];
+
 const SEARCH_DEBOUNCE_MS = 350;
 
 export default function CodingProblemsPage() {
@@ -33,6 +39,7 @@ export default function CodingProblemsPage() {
   const setSearch = useCodingProblemsStore((state) => state.setSearch);
   const setDifficultyFilter = useCodingProblemsStore((state) => state.setDifficultyFilter);
   const setPage = useCodingProblemsStore((state) => state.setPage);
+  const setPageSize = useCodingProblemsStore((state) => state.setPageSize);
   const openCreate = useCodingProblemsStore((state) => state.openCreate);
   const openEdit = useCodingProblemsStore((state) => state.openEdit);
   const togglePublish = useCodingProblemsStore((state) => state.togglePublish);
@@ -111,9 +118,16 @@ export default function CodingProblemsPage() {
 
             {total > 0 && (
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <span className="text-xs text-(--color-text-muted)">
-                  Showing {rangeStart}–{rangeEnd} of {total}
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-(--color-text-muted)">
+                    Showing {rangeStart}–{rangeEnd} of {total}
+                  </span>
+                  <Select
+                    value={String(pageSize)}
+                    options={PAGE_SIZE_OPTIONS}
+                    onChange={(value) => setPageSize(Number(value))}
+                  />
+                </div>
                 <div className="flex items-center gap-2">
                   <Button
                     type="button"
