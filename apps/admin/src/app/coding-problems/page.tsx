@@ -5,11 +5,14 @@ import { Plus, Search } from 'lucide-react';
 import { Button, ConfirmDialog, Input } from '@elevatesde/ui';
 import { AdminLayout } from '../../components/AdminLayout';
 import { Select } from '../../components/ui';
-import { useCodingProblemsStore } from '../../store/coding-problems.store';
+import {
+  useCodingProblemsStore,
+  type DifficultyFilter,
+} from '../../store/coding-problems.store';
 import { ProblemDirectory } from './_components/ProblemDirectory';
 import { ProblemFormModal } from './_components/ProblemFormModal';
 
-const DIFFICULTY_FILTER_OPTIONS = [
+const DIFFICULTY_FILTER_OPTIONS: { value: DifficultyFilter; label: string }[] = [
   { value: 'ALL', label: 'All difficulties' },
   { value: 'EASY', label: 'Easy' },
   { value: 'MEDIUM', label: 'Medium' },
@@ -79,9 +82,7 @@ export default function CodingProblemsPage() {
               <Select
                 value={difficultyFilter}
                 options={DIFFICULTY_FILTER_OPTIONS}
-                onChange={(value) =>
-                  setDifficultyFilter(value as (typeof DIFFICULTY_FILTER_OPTIONS)[number]['value'])
-                }
+                onChange={(value) => setDifficultyFilter(value as DifficultyFilter)}
               />
             </div>
             <Button type="button" onClick={openCreate}>
@@ -95,7 +96,7 @@ export default function CodingProblemsPage() {
             togglingId={togglingId}
             onEdit={openEdit}
             onDelete={requestDelete}
-            onTogglePublish={useCodingProblemsStore.getState().togglePublish}
+            onTogglePublish={togglePublish}
           />
         </div>
       )}

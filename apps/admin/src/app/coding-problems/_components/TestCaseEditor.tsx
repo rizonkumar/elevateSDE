@@ -10,7 +10,7 @@ interface TestCaseEditorProps {
   onChange: (next: AssessmentTestCase[]) => void;
 }
 
-export function TestCaseEditor({ testCases, onChange }: TestCaseEditorProps) {
+export function TestCaseEditor({ testCases, onChange }: Readonly<TestCaseEditorProps>) {
   const addTestCase = () => {
     const next: AssessmentTestCase = {
       id: crypto.randomUUID(),

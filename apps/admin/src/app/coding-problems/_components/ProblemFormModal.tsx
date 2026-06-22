@@ -132,9 +132,9 @@ export function ProblemFormModal() {
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-2">
-            <label className="text-[13px] font-medium text-(--color-text-primary) select-none">
+            <span className="text-[13px] font-medium text-(--color-text-primary) select-none">
               Difficulty
-            </label>
+            </span>
             <Select
               value={values.difficulty}
               options={DIFFICULTY_OPTIONS}

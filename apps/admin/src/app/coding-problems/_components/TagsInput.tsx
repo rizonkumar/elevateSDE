@@ -10,7 +10,7 @@ interface TagsInputProps {
   placeholder?: string;
 }
 
-export function TagsInput({ label, value, onChange, placeholder }: TagsInputProps) {
+export function TagsInput({ label, value, onChange, placeholder }: Readonly<TagsInputProps>) {
   const [draft, setDraft] = React.useState('');
 
   const commitDraft = () => {

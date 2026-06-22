@@ -24,7 +24,7 @@ const DIFFICULTY_VARIANT: Record<AssessmentDifficulty, BadgeVariant> = {
   HARD: 'danger',
 };
 
-function TagList({ tags }: { tags: string[] }) {
+function TagList({ tags }: Readonly<{ tags: string[] }>) {
   if (tags.length === 0) {
     return <span className="text-xs text-(--color-text-muted)">—</span>;
   }
@@ -48,7 +48,7 @@ export function ProblemDirectory({
   onEdit,
   onDelete,
   onTogglePublish,
-}: ProblemDirectoryProps) {
+}: Readonly<ProblemDirectoryProps>) {
   if (problems.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-(--color-border-subtle) bg-(--color-surface) p-10 text-center">
