@@ -149,7 +149,7 @@ export function ProblemDirectory({
               <button
                 type="button"
                 onClick={() => onEdit(problem.id)}
-                className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold rounded-(--radius-sm) border border-(--color-border-subtle) text-(--color-text-primary) hover:bg-(--color-badge-bg) transition-colors cursor-pointer"
+                className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold rounded-sm border border-(--color-border-subtle) text-(--color-text-primary) hover:bg-(--color-badge-bg) transition-colors cursor-pointer"
               >
                 <Pencil className="w-3.5 h-3.5 shrink-0" />
                 Edit
@@ -157,7 +157,7 @@ export function ProblemDirectory({
               <button
                 type="button"
                 onClick={() => onDelete(problem.id)}
-                className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold rounded-(--radius-sm) border border-(--color-border-subtle) text-(--color-text-muted) hover:bg-(--color-danger-soft) hover:text-(--color-danger) transition-colors cursor-pointer"
+                className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold rounded-sm border border-(--color-border-subtle) text-(--color-text-muted) hover:bg-(--color-danger-soft) hover:text-(--color-danger) transition-colors cursor-pointer"
               >
                 <Trash2 className="w-3.5 h-3.5 shrink-0" />
                 Delete

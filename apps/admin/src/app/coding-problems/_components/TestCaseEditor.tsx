@@ -40,7 +40,7 @@ export function TestCaseEditor({ testCases, onChange }: Readonly<TestCaseEditorP
       </div>
 
       {testCases.length === 0 ? (
-        <p className="text-xs text-(--color-text-muted) rounded-(--radius-sm) border border-dashed border-(--color-border-subtle) px-3 py-4 text-center">
+        <p className="text-xs text-(--color-text-muted) rounded-sm border border-dashed border-(--color-border-subtle) px-3 py-4 text-center">
           No test cases yet. Add at least one to evaluate submissions.
         </p>
       ) : (
@@ -48,7 +48,7 @@ export function TestCaseEditor({ testCases, onChange }: Readonly<TestCaseEditorP
           {testCases.map((testCase, index) => (
             <div
               key={testCase.id}
-              className="flex flex-col gap-3 rounded-(--radius-sm) border border-(--color-border-subtle) bg-(--color-bg-soft) p-3"
+              className="flex flex-col gap-3 rounded-sm border border-(--color-border-subtle) bg-(--color-bg-soft) p-3"
             >
               <div className="flex items-center justify-between gap-3">
                 <span className="text-xs font-semibold text-(--color-text-muted) uppercase tracking-wider">

@@ -47,7 +47,7 @@ export function TagsInput({ label, value, onChange, placeholder }: Readonly<Tags
           {label}
         </label>
       )}
-      <div className="flex flex-wrap items-center gap-2 min-h-10 px-2 py-1.5 bg-(--color-bg) border border-(--color-border) rounded-(--radius-sm) focus-within:border-(--color-accent) focus-within:shadow-[0_0_0_2px_var(--color-bg),0_0_0_4px_var(--color-accent)] transition-all">
+      <div className="flex flex-wrap items-center gap-2 min-h-10 px-2 py-1.5 bg-(--color-bg) border border-(--color-border) rounded-sm focus-within:border-(--color-accent) focus-within:shadow-[0_0_0_2px_var(--color-bg),0_0_0_4px_var(--color-accent)] transition-all">
         {value.map((tag) => (
           <span
             key={tag}
