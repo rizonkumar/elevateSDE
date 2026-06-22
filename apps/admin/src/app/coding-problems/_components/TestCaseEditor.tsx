@@ -22,7 +22,9 @@ export function TestCaseEditor({ testCases, onChange }: Readonly<TestCaseEditorP
   };
 
   const updateTestCase = (id: string, patch: Partial<AssessmentTestCase>) => {
-    onChange(testCases.map((testCase) => (testCase.id === id ? { ...testCase, ...patch } : testCase)));
+    onChange(
+      testCases.map((testCase) => (testCase.id === id ? { ...testCase, ...patch } : testCase)),
+    );
   };
 
   const removeTestCase = (id: string) => {
@@ -33,7 +35,12 @@ export function TestCaseEditor({ testCases, onChange }: Readonly<TestCaseEditorP
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
         <span className="text-[13px] font-medium text-(--color-text-primary)">Test cases</span>
-        <Button type="button" variant="secondary" onClick={addTestCase} className="h-8 px-2.5 text-xs">
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={addTestCase}
+          className="h-8 px-2.5 text-xs"
+        >
           <Plus className="w-3.5 h-3.5 shrink-0" />
           Add case
         </Button>
@@ -83,7 +90,9 @@ export function TestCaseEditor({ testCases, onChange }: Readonly<TestCaseEditorP
                 <Textarea
                   label="Expected output"
                   value={testCase.expectedOutput}
-                  onChange={(event) => updateTestCase(testCase.id, { expectedOutput: event.target.value })}
+                  onChange={(event) =>
+                    updateTestCase(testCase.id, { expectedOutput: event.target.value })
+                  }
                   className="min-h-[64px] font-mono text-xs"
                 />
               </div>

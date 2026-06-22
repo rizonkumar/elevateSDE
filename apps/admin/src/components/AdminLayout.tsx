@@ -11,6 +11,7 @@ import {
   ToggleLeft,
   ShieldAlert,
   Trophy,
+  Code2,
   LogOut,
   Sun,
   Moon,
@@ -80,6 +81,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     { name: 'Feature Flags', href: '/feature-flags', icon: ToggleLeft },
     { name: 'Forum Moderation', href: '/forum-moderation', icon: ShieldAlert },
     { name: 'Leaderboard', href: '/leaderboard-management', icon: Trophy },
+    { name: 'Coding Problems', href: '/coding-problems', icon: Code2 },
   ];
 
   const rail = mounted && collapsed;

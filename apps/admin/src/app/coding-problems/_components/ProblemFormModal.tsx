@@ -91,6 +91,8 @@ export function ProblemFormModal() {
   const saving = savingId !== null;
   const titleError = showErrors && !values.title.trim() ? 'Title is required.' : undefined;
 
+  const submitLabel = editingId ? 'Save changes' : 'Create problem';
+
   const updateValues = (patch: Partial<ProblemFormValues>) => {
     setValues((current) => ({ ...current, ...patch }));
   };
@@ -196,7 +198,7 @@ export function ProblemFormModal() {
             Cancel
           </Button>
           <Button type="button" onClick={handleSubmit} disabled={saving}>
-            {saving ? 'Saving…' : editingId ? 'Save changes' : 'Create problem'}
+            {saving ? 'Saving…' : submitLabel}
           </Button>
         </div>
       </div>
