@@ -170,9 +170,9 @@ export function ProblemFormModal() {
         />
 
         <div className="flex flex-col gap-2">
-          <label className="text-[13px] font-medium text-(--color-text-primary) select-none">
+          <span className="text-[13px] font-medium text-(--color-text-primary) select-none">
             Starter code
-          </label>
+          </span>
           <Tabs
             items={LANGUAGE_TABS}
             value={activeLanguage}
