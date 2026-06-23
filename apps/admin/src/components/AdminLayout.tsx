@@ -11,6 +11,7 @@ import {
   ToggleLeft,
   ShieldAlert,
   Trophy,
+  Code2,
   LogOut,
   Sun,
   Moon,
@@ -28,7 +29,7 @@ interface AdminLayoutProps {
 
 const COLLAPSE_KEY = 'admin-sidebar-collapsed';
 
-export function AdminLayout({ children }: AdminLayoutProps) {
+export function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, clearAuth } = useAuthStore();
@@ -40,7 +41,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
   React.useEffect(() => {
     setMounted(true);
-    const docTheme = document.documentElement.getAttribute('data-theme') as 'light' | 'dark' | null;
+    const docTheme = document.documentElement.dataset.theme as 'light' | 'dark' | undefined;
     if (docTheme) {
       setTheme(docTheme);
     }
@@ -54,7 +55,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const toggleTheme = () => {
     const nextTheme = theme === 'light' ? 'dark' : 'light';
     setTheme(nextTheme);
-    document.documentElement.setAttribute('data-theme', nextTheme);
+    document.documentElement.dataset.theme = nextTheme;
     localStorage.setItem('theme', nextTheme);
   };
 
@@ -80,6 +81,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     { name: 'Feature Flags', href: '/feature-flags', icon: ToggleLeft },
     { name: 'Forum Moderation', href: '/forum-moderation', icon: ShieldAlert },
     { name: 'Leaderboard', href: '/leaderboard-management', icon: Trophy },
+    { name: 'Coding Problems', href: '/coding-problems', icon: Code2 },
   ];
 
   const rail = mounted && collapsed;
@@ -148,7 +150,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         </nav>
 
         <div className="p-4 border-t border-(--color-border-subtle) flex flex-col gap-3 shrink-0">
-          <div className={`flex items-center justify-between px-2 ${rail ? 'lg:px-0 lg:justify-center' : ''}`}>
+          <div
+            className={`flex items-center justify-between px-2 ${rail ? 'lg:px-0 lg:justify-center' : ''}`}
+          >
             <div className={`flex flex-col min-w-0 ${hideOnRail}`}>
               <span className="text-xs font-semibold truncate leading-4">
                 {mounted ? user?.email || 'Administrator' : 'Administrator'}
@@ -172,7 +176,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           <button
             onClick={handleLogout}
             title={rail ? 'Logout' : undefined}
-            className={`w-full flex items-center justify-center gap-2 px-4 py-2 text-xs font-semibold rounded-(--radius-sm) border border-(--color-border-subtle) hover:bg-(--color-danger-soft) hover:text-(--color-danger) transition-colors cursor-pointer ${
+            className={`w-full flex items-center justify-center gap-2 px-4 py-2 text-xs font-semibold rounded-sm border border-(--color-border-subtle) hover:bg-(--color-danger-soft) hover:text-(--color-danger) transition-colors cursor-pointer ${
               rail ? 'lg:px-0' : ''
             }`}
           >

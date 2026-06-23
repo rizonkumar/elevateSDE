@@ -110,8 +110,9 @@ The platform exposes a **single public origin** to users; the admin backoffice i
 | Job tracker            | `/dashboard/job-tracker` | Any authenticated user |
 | Organization dashboard | `/dashboard/org`         | `TENANT_ADMIN`         |
 | Super-Admin backoffice | `/admin`                 | `ADMIN`                |
+| Coding problem bank    | `/admin/coding-problems` | `ADMIN`                |
 
-The backoffice consumes live `/api/v1/admin/*` endpoints (including forum moderation and leaderboard management). The job tracker, coding assessments, community forum, and leaderboard all consume live, user-scoped endpoints (`/api/v1/job-applications`, `/api/v1/problems` + `/api/v1/submissions`, `/api/v1/forum/*`, `/api/v1/leaderboard`). The remaining candidate and organization dashboard surfaces (mock interviews, resume analyzer, seats, invitations) are currently backed by typed client-side Zustand stores until their domain models are implemented.
+The backoffice consumes live `/api/v1/admin/*` endpoints (including forum moderation and leaderboard management). The job tracker, coding assessments, community forum, and leaderboard all consume live, user-scoped endpoints (`/api/v1/job-applications`, `/api/v1/problems` + `/api/v1/submissions`, `/api/v1/forum/*`, `/api/v1/leaderboard`). The remaining candidate and organization dashboard surfaces (mock interviews, resume analyzer, seats, invitations) are currently backed by typed client-side Zustand stores until their domain models are implemented. The backoffice coding problem bank manager (`/admin/coding-problems`) is likewise store-backed, seeded with in-memory problems, pending its `/api/v1/admin/coding-problems` backend (Plan 15/16).
 
 ---
 

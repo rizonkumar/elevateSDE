@@ -116,23 +116,24 @@ The API requires a PostgreSQL database (and Redis for caching/queues). Both are 
 
 ## Dashboards
 
-| Surface | URL | Access |
-| --- | --- | --- |
-| Candidate dashboard | `http://localhost:3001/dashboard` | Any authenticated user |
-| Organization dashboard | `http://localhost:3001/dashboard/org` | `TENANT_ADMIN` only |
-| Super-Admin backoffice | `http://localhost:3001/admin` | `ADMIN` only |
+| Surface                | URL                                           | Access                 |
+| ---------------------- | --------------------------------------------- | ---------------------- |
+| Candidate dashboard    | `http://localhost:3001/dashboard`             | Any authenticated user |
+| Organization dashboard | `http://localhost:3001/dashboard/org`         | `TENANT_ADMIN` only    |
+| Super-Admin backoffice | `http://localhost:3001/admin`                 | `ADMIN` only           |
+| Coding problem bank    | `http://localhost:3001/admin/coding-problems` | `ADMIN` only           |
 
 > Everything is reached through the single web origin on **port 3001**. The backoffice is a separate Next.js app (`apps/admin`) that runs internally on port `3002` with `basePath: '/admin'`; `apps/web/next.config.ts` rewrites `/admin/:path*` to it, so you always visit `localhost:3001/admin` (a reverse proxy does the same under one domain in production). Do not open port `3002` directly.
 
 Seeded demo logins (all use the password `Password123!`):
 
-| Email | Role |
-| --- | --- |
-| `admin@elevatesde.dev` | `ADMIN` |
-| `org@elevatesde.dev` | `TENANT_ADMIN` |
-| `candidate@elevatesde.dev` | `USER` |
+| Email                      | Role           |
+| -------------------------- | -------------- |
+| `admin@elevatesde.dev`     | `ADMIN`        |
+| `org@elevatesde.dev`       | `TENANT_ADMIN` |
+| `candidate@elevatesde.dev` | `USER`         |
 
-The candidate and organization dashboards are driven by typed client-side stores (mock data) since their backing domain models are not yet implemented; the backoffice consumes live `/api/v1/admin/*` endpoints.
+The candidate and organization dashboards are driven by typed client-side stores (mock data) since their backing domain models are not yet implemented; the backoffice consumes live `/api/v1/admin/*` endpoints. The backoffice coding problem bank manager (`/admin/coding-problems`) is likewise client-store/mock-driven until its `/api/v1/admin/coding-problems` backend lands.
 
 ## Common Commands
 

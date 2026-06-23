@@ -198,6 +198,42 @@ export interface ProblemListDto {
   pageSize: number;
 }
 
+export interface AdminCodingProblemDto extends CodingProblemDto {
+  isPublished: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminProblemSummaryDto extends ProblemSummaryDto {
+  isPublished: boolean;
+  testCaseCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminProblemListDto {
+  items: AdminProblemSummaryDto[];
+  total: number;
+}
+
+export interface AdminTestCaseInput {
+  input: string;
+  expectedOutput: string;
+  isHidden: boolean;
+}
+
+export interface AdminCodingProblemInput {
+  title: string;
+  difficulty: AssessmentDifficulty;
+  description: string;
+  constraints: string[];
+  tags: string[];
+  starterCode: Record<AssessmentLanguage, string>;
+  timeLimitMinutes: number;
+  isPublished: boolean;
+  testCases: AdminTestCaseInput[];
+}
+
 export interface AssessmentRunRequestDto {
   problemId: string;
   language: AssessmentLanguage;
