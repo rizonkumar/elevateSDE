@@ -2,11 +2,14 @@ import { create } from 'zustand';
 import type {
   AssessmentLanguage,
   AssessmentRunResultDto,
+  AssessmentRunStatus,
   CodingProblemDto,
+  SubmissionDetailDto,
+  SubmissionStatusValue,
 } from '@elevatesde/shared-types';
 import { useToastStore } from '@/store/toast.store';
 import { useAssessmentSettingsStore, type TimerMode } from '@/store/assessment-settings.store';
-import { getProblem, runAssessment, submitAssessment } from '@/lib/assessments-api';
+import { getProblem, getSubmission, runAssessment, submitAssessment } from '@/lib/assessments-api';
 import { ASSESSMENT_LANGUAGE_OPTIONS } from '@/lib/assessment-problems';
 
 export type AssessmentStatus = 'LOADING' | 'READY' | 'NOT_FOUND';
@@ -15,6 +18,41 @@ export type TestcaseTab = 'testcase' | 'result';
 
 export type TimerStatus = 'idle' | 'running' | 'paused';
 
+export type SubmissionPhase = 'QUEUED' | 'RUNNING' | null;
+
+const POLL_INTERVAL_MS = 1200;
+
+const TERMINAL_STATUSES: SubmissionStatusValue[] = [
+  'ACCEPTED',
+  'WRONG_ANSWER',
+  'RUNTIME_ERROR',
+  'TIME_LIMIT_EXCEEDED',
+  'COMPILE_ERROR',
+];
+
+function isTerminalStatus(status: SubmissionStatusValue): boolean {
+  return TERMINAL_STATUSES.includes(status);
+}
+
+function toRunStatus(status: SubmissionStatusValue): AssessmentRunStatus {
+  if (status === 'ACCEPTED') return 'ACCEPTED';
+  if (status === 'WRONG_ANSWER') return 'WRONG_ANSWER';
+  return 'RUNTIME_ERROR';
+}
+
+function toRunResult(detail: SubmissionDetailDto): AssessmentRunResultDto {
+  return {
+    status: toRunStatus(detail.status),
+    results: detail.results,
+    passedCount: detail.passedCount,
+    totalCount: detail.totalCount,
+    totalRuntimeMs: detail.totalRuntimeMs,
+    peakMemoryKb: detail.peakMemoryKb,
+    stdout: detail.stdout,
+    ranAt: detail.updatedAt,
+  };
+}
+
 interface AssessmentState {
   status: AssessmentStatus;
   problem: CodingProblemDto | null;
@@ -22,6 +60,7 @@ interface AssessmentState {
   codeByLanguage: Record<AssessmentLanguage, string>;
   isRunning: boolean;
   isSubmitting: boolean;
+  submissionPhase: SubmissionPhase;
   hasSubmitted: boolean;
   lastResult: AssessmentRunResultDto | null;
   testcaseTab: TestcaseTab;
@@ -54,6 +93,7 @@ interface AssessmentState {
 
 let timerId: ReturnType<typeof setInterval> | null = null;
 let autosaveId: ReturnType<typeof setTimeout> | null = null;
+let submissionPollId: ReturnType<typeof setTimeout> | null = null;
 
 const LANGUAGES: AssessmentLanguage[] = ASSESSMENT_LANGUAGE_OPTIONS.map((option) => option.value);
 
@@ -117,6 +157,13 @@ function clearAutosave(): void {
   }
 }
 
+function clearSubmissionPoll(): void {
+  if (submissionPollId !== null) {
+    clearTimeout(submissionPollId);
+    submissionPollId = null;
+  }
+}
+
 const EMPTY_CODE: Record<AssessmentLanguage, string> = {
   javascript: '',
   python: '',
@@ -145,6 +192,51 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => {
     timerId = setInterval(tick, 1000);
   };
 
+  const finishSubmission = (detail: SubmissionDetailDto) => {
+    set({
+      isSubmitting: false,
+      submissionPhase: null,
+      hasSubmitted: true,
+      lastResult: toRunResult(detail),
+    });
+    if (detail.status === 'ACCEPTED') {
+      useToastStore.getState().addToast('Accepted — all test cases passed!', 'success');
+      if (useAssessmentSettingsStore.getState().autoReset) {
+        get().resetTimer();
+      }
+      return;
+    }
+    useToastStore
+      .getState()
+      .addToast(
+        `Submission failed — ${detail.passedCount}/${detail.totalCount} passed.`,
+        'error',
+      );
+  };
+
+  const pollSubmission = (submissionId: string) => {
+    submissionPollId = setTimeout(() => {
+      submissionPollId = null;
+      void (async () => {
+        let detail: SubmissionDetailDto;
+        try {
+          detail = await getSubmission(submissionId);
+        } catch {
+          set({ isSubmitting: false, submissionPhase: null });
+          useToastStore.getState().addToast('Lost track of your submission. Please retry.', 'error');
+          return;
+        }
+        if (!get().isSubmitting) return;
+        if (isTerminalStatus(detail.status)) {
+          finishSubmission(detail);
+          return;
+        }
+        set({ submissionPhase: detail.status === 'RUNNING' ? 'RUNNING' : 'QUEUED' });
+        pollSubmission(submissionId);
+      })();
+    }, POLL_INTERVAL_MS);
+  };
+
   return {
     status: 'LOADING',
     problem: null,
@@ -152,6 +244,7 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => {
     codeByLanguage: EMPTY_CODE,
     isRunning: false,
     isSubmitting: false,
+    submissionPhase: null,
     hasSubmitted: false,
     lastResult: null,
     testcaseTab: 'testcase',
@@ -167,6 +260,7 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => {
     loadProblem: async (id) => {
       clearTimer();
       clearAutosave();
+      clearSubmissionPoll();
       set({ status: 'LOADING', problem: null });
       let problem: CodingProblemDto;
       try {
@@ -183,6 +277,7 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => {
         codeByLanguage: buildInitialCode(problem),
         isRunning: false,
         isSubmitting: false,
+        submissionPhase: null,
         hasSubmitted: false,
         lastResult: null,
         testcaseTab: 'testcase',
@@ -314,29 +409,17 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => {
         useToastStore.getState().addToast('Test cases are coming soon for this problem.', 'info');
         return;
       }
-      set({ isSubmitting: true, testcaseTab: 'result' });
+      clearSubmissionPoll();
+      set({ isSubmitting: true, submissionPhase: 'QUEUED', lastResult: null, testcaseTab: 'result' });
       try {
-        const result = await submitAssessment({
+        const accepted = await submitAssessment({
           problemId: problem.id,
           language,
           code: codeByLanguage[language],
         });
-        set({ isSubmitting: false, lastResult: result, hasSubmitted: true });
-        if (result.status === 'ACCEPTED') {
-          useToastStore.getState().addToast('Accepted — all test cases passed!', 'success');
-          if (useAssessmentSettingsStore.getState().autoReset) {
-            get().resetTimer();
-          }
-        } else {
-          useToastStore
-            .getState()
-            .addToast(
-              `Submission failed — ${result.passedCount}/${result.totalCount} passed.`,
-              'error',
-            );
-        }
+        pollSubmission(accepted.submissionId);
       } catch {
-        set({ isSubmitting: false });
+        set({ isSubmitting: false, submissionPhase: null });
         useToastStore.getState().addToast('Could not submit your code. Please try again.', 'error');
       }
     },
@@ -344,6 +427,7 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => {
     reset: () => {
       clearTimer();
       clearAutosave();
+      clearSubmissionPoll();
       set({
         status: 'LOADING',
         problem: null,
@@ -351,6 +435,7 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => {
         codeByLanguage: EMPTY_CODE,
         isRunning: false,
         isSubmitting: false,
+        submissionPhase: null,
         hasSubmitted: false,
         lastResult: null,
         testcaseTab: 'testcase',

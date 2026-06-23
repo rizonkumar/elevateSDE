@@ -263,6 +263,35 @@ export interface AssessmentRunResultDto {
   ranAt: string;
 }
 
+export type SubmissionStatusValue =
+  | 'QUEUED'
+  | 'RUNNING'
+  | 'ACCEPTED'
+  | 'WRONG_ANSWER'
+  | 'RUNTIME_ERROR'
+  | 'TIME_LIMIT_EXCEEDED'
+  | 'COMPILE_ERROR';
+
+export interface SubmissionAcceptedDto {
+  submissionId: string;
+  status: SubmissionStatusValue;
+}
+
+export interface SubmissionDetailDto {
+  id: string;
+  problemId: string;
+  language: AssessmentLanguage;
+  status: SubmissionStatusValue;
+  passedCount: number;
+  totalCount: number;
+  totalRuntimeMs: number;
+  peakMemoryKb: number;
+  stdout: string;
+  results: TestCaseResultDto[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type ForumSortOption = 'newest' | 'popular' | 'unanswered';
 
 export type ForumPostStatus = 'PUBLISHED' | 'FLAGGED' | 'REMOVED';
