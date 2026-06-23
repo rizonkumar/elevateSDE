@@ -73,6 +73,9 @@ export class ProblemRepository implements IProblemRepository {
     if (filter.search) {
       where.title = { contains: filter.search, mode: 'insensitive' };
     }
+    if (filter.hasTestCases) {
+      where.testCases = { some: {} };
+    }
     return where;
   }
 

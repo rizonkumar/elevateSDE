@@ -4,7 +4,7 @@ import { AssessmentRunOutcome, CaseOutcome } from '../../application/assessment-
 import { AssessmentRunResponseDto } from '../dtos/assessment-run-response.dto';
 import { TestCaseResultResponseDto } from '../dtos/test-case-result-response.dto';
 
-const HIDDEN_PLACEHOLDER = 'Hidden';
+export const HIDDEN_PLACEHOLDER = 'Hidden';
 
 function toRunStatus(status: SubmissionStatus): AssessmentRunStatus {
   if (status === SubmissionStatus.ACCEPTED) {
