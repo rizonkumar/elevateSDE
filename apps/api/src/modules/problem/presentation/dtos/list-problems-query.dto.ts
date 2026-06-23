@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import { IsBoolean, IsEnum, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 import { AssessmentDifficulty } from '@prisma/client';
 
 export class ListProblemsQueryDto {
@@ -18,6 +18,12 @@ export class ListProblemsQueryDto {
   @IsString()
   @IsOptional()
   search?: string;
+
+  @ApiPropertyOptional({ example: true, description: 'Only problems that have test cases' })
+  @Transform(({ value }) => value === true || value === 'true')
+  @IsBoolean()
+  @IsOptional()
+  hasTestCases?: boolean;
 
   @ApiPropertyOptional({ example: 1, default: 1 })
   @Type(() => Number)
