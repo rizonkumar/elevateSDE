@@ -24,6 +24,7 @@ export class ProblemsController {
       difficulty: query.difficulty,
       tag: query.tag,
       search: query.search,
+      hasTestCases: query.hasTestCases,
       page,
       pageSize,
     });

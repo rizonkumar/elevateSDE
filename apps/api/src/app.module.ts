@@ -12,9 +12,11 @@ import { CodeRunnerModule } from './modules/code-runner/code-runner.module';
 import { ForumModule } from './modules/forum/forum.module';
 import { LeaderboardModule } from './modules/leaderboard/leaderboard.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { QueuesModule } from './modules/queues/queues.module';
 
 @Module({
   imports: [
+    QueuesModule,
     AuthModule,
     UsersModule,
     AuditLogModule,
