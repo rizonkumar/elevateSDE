@@ -1,112 +1,112 @@
 import { create } from 'zustand';
-
-export type MemberStatus = 'active' | 'invited';
-
-export interface OrgCompany {
-  name: string;
-  plan: string;
-}
-
-export interface SeatUsage {
-  used: number;
-  total: number;
-}
-
-export interface OrgMember {
-  id: string;
-  email: string;
-  status: MemberStatus;
-  avgScore: number;
-}
-
-export interface PerformancePoint {
-  label: string;
-  score: number;
-}
-
-export interface Invitation {
-  id: string;
-  email: string;
-  sentAt: string;
-}
-
-interface OrgDashboardState {
-  company: OrgCompany;
-  seats: SeatUsage;
-  members: OrgMember[];
-  teamPerformance: PerformancePoint[];
-  invitations: Invitation[];
-  isLoaded: boolean;
-  loadOrgDashboard: () => void;
-  inviteMember: (email: string) => { ok: boolean; message: string };
-}
+import type {
+  InvitationDto,
+  OrgCompanyDto,
+  OrgMemberDto,
+  OrgPerformancePointDto,
+  SeatUsageDto,
+} from '@elevatesde/shared-types';
+import { createInvitation, fetchOrgOverview, revokeInvitation } from '@/lib/org-api';
+import { useToastStore } from '@/store/toast.store';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const SEED_COMPANY: OrgCompany = { name: 'Acme Corp', plan: 'TEAM' };
+const EMPTY_COMPANY: OrgCompanyDto = { name: '', plan: '' };
 
-const SEED_SEATS: SeatUsage = { used: 12, total: 20 };
+const EMPTY_SEATS: SeatUsageDto = { used: 0, total: 0 };
 
-const SEED_MEMBERS: OrgMember[] = [
-  { id: 'm-1', email: 'maya.patel@acme.dev', status: 'active', avgScore: 88 },
-  { id: 'm-2', email: 'leo.nguyen@acme.dev', status: 'active', avgScore: 74 },
-  { id: 'm-3', email: 'sara.cohen@acme.dev', status: 'active', avgScore: 91 },
-  { id: 'm-4', email: 'devon.ruiz@acme.dev', status: 'active', avgScore: 67 },
-  { id: 'm-5', email: 'priya.shah@acme.dev', status: 'invited', avgScore: 0 },
-];
+export interface InviteResult {
+  ok: boolean;
+  message: string;
+  inviteUrl?: string;
+}
 
-const SEED_PERFORMANCE: PerformancePoint[] = [
-  { label: 'Maya', score: 88 },
-  { label: 'Leo', score: 74 },
-  { label: 'Sara', score: 91 },
-  { label: 'Devon', score: 67 },
-  { label: 'Aria', score: 80 },
-];
+interface OrgDashboardState {
+  company: OrgCompanyDto;
+  seats: SeatUsageDto;
+  members: OrgMemberDto[];
+  teamPerformance: OrgPerformancePointDto[];
+  invitations: InvitationDto[];
+  isLoaded: boolean;
+  isLoading: boolean;
+  lastInviteUrl: string | null;
+  loadOrgDashboard: () => Promise<void>;
+  inviteMember: (email: string) => Promise<InviteResult>;
+  revoke: (id: string) => Promise<void>;
+  clearInviteUrl: () => void;
+}
 
 export const useOrgDashboardStore = create<OrgDashboardState>((set, get) => ({
-  company: SEED_COMPANY,
-  seats: SEED_SEATS,
-  members: SEED_MEMBERS,
-  teamPerformance: SEED_PERFORMANCE,
+  company: EMPTY_COMPANY,
+  seats: EMPTY_SEATS,
+  members: [],
+  teamPerformance: [],
   invitations: [],
   isLoaded: false,
-  loadOrgDashboard: () => {
-    set({
-      company: SEED_COMPANY,
-      seats: SEED_SEATS,
-      members: SEED_MEMBERS,
-      teamPerformance: SEED_PERFORMANCE,
-      isLoaded: true,
-    });
+  isLoading: false,
+  lastInviteUrl: null,
+
+  loadOrgDashboard: async () => {
+    set({ isLoading: true });
+    try {
+      const overview = await fetchOrgOverview();
+      set({
+        company: overview.company,
+        seats: overview.seats,
+        members: overview.members,
+        teamPerformance: overview.teamPerformance,
+        invitations: overview.invitations,
+        isLoaded: true,
+        isLoading: false,
+      });
+    } catch (error) {
+      set({ isLoading: false });
+      useToastStore
+        .getState()
+        .addToast(extractMessage(error, 'Could not load your organization.'), 'error');
+    }
   },
-  inviteMember: (rawEmail) => {
+
+  inviteMember: async (rawEmail) => {
     const email = rawEmail.trim().toLowerCase();
     if (!EMAIL_PATTERN.test(email)) {
       return { ok: false, message: 'Enter a valid email address.' };
     }
-    const state = get();
-    const exists =
-      state.members.some((member) => member.email === email) ||
-      state.invitations.some((invite) => invite.email === email);
-    if (exists) {
-      return { ok: false, message: 'That person is already a member or invited.' };
+    try {
+      const created = await createInvitation(email);
+      set({ lastInviteUrl: created.inviteUrl });
+      await get().loadOrgDashboard();
+      return { ok: true, message: `Invite link ready for ${email}.`, inviteUrl: created.inviteUrl };
+    } catch (error) {
+      return { ok: false, message: extractMessage(error, 'Could not create the invitation.') };
     }
-    if (state.seats.used >= state.seats.total) {
-      return { ok: false, message: 'No seats available. Upgrade your plan to invite more.' };
-    }
-    const invitation: Invitation = {
-      id: `inv-${state.invitations.length + 1}`,
-      email,
-      sentAt: new Date().toISOString(),
-    };
-    set({
-      invitations: [invitation, ...state.invitations],
-      seats: { ...state.seats, used: state.seats.used + 1 },
-      members: [
-        ...state.members,
-        { id: invitation.id, email, status: 'invited', avgScore: 0 },
-      ],
-    });
-    return { ok: true, message: `Invitation sent to ${email}.` };
   },
+
+  revoke: async (id) => {
+    try {
+      await revokeInvitation(id);
+      await get().loadOrgDashboard();
+      useToastStore.getState().addToast('Invitation revoked.', 'success');
+    } catch (error) {
+      useToastStore
+        .getState()
+        .addToast(extractMessage(error, 'Could not revoke the invitation.'), 'error');
+    }
+  },
+
+  clearInviteUrl: () => set({ lastInviteUrl: null }),
 }));
+
+function extractMessage(error: unknown, fallback: string): string {
+  if (typeof error === 'object' && error !== null) {
+    const response = (error as { response?: { data?: { message?: string | string[] } } }).response;
+    const message = response?.data?.message;
+    if (Array.isArray(message)) {
+      return message[0] ?? fallback;
+    }
+    if (typeof message === 'string') {
+      return message;
+    }
+  }
+  return fallback;
+}

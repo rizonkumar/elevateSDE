@@ -21,6 +21,17 @@ interface AxiosErrorResponse {
   };
 }
 
+function readSafeRedirect(): string {
+  if (typeof window === 'undefined') {
+    return '/dashboard';
+  }
+  const target = new URLSearchParams(window.location.search).get('redirect');
+  if (target && target.startsWith('/') && !target.startsWith('//')) {
+    return target;
+  }
+  return '/dashboard';
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const setAuth = useAuthStore((state) => state.setAuth);
@@ -29,6 +40,11 @@ export default function LoginPage() {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [loading, setLoading] = React.useState(false);
+  const [redirectTo, setRedirectTo] = React.useState('/dashboard');
+
+  React.useEffect(() => {
+    setRedirectTo(readSafeRedirect());
+  }, []);
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -46,7 +62,7 @@ export default function LoginPage() {
       const { user, accessToken, refreshToken } = response.data;
       setAuth(user, accessToken, refreshToken);
       addToast('Welcome back! Successfully logged in.', 'success');
-      router.push('/dashboard');
+      router.push(redirectTo);
     } catch (err) {
       const axiosError = err as AxiosErrorResponse;
       addToast(
@@ -118,7 +134,14 @@ export default function LoginPage() {
         <div className="text-center mt-6 flex flex-col gap-2.5 text-xs text-(--color-text-muted)">
           <div>
             Don&apos;t have an account?{' '}
-            <Link href="/register" className="text-(--color-accent) font-medium hover:underline">
+            <Link
+              href={
+                redirectTo === '/dashboard'
+                  ? '/register'
+                  : `/register?redirect=${encodeURIComponent(redirectTo)}`
+              }
+              className="text-(--color-accent) font-medium hover:underline"
+            >
               Create account
             </Link>
           </div>
