@@ -173,8 +173,9 @@ function clampScore(points: number): number {
 }
 
 function memberLabel(firstName: string | null, email: string): string {
-  if (firstName && firstName.trim().length > 0) {
-    return firstName.trim();
+  const trimmed = firstName?.trim();
+  if (trimmed) {
+    return trimmed;
   }
   return email.split('@')[0] ?? email;
 }

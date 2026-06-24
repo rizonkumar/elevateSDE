@@ -23,7 +23,7 @@ class FakeOrganizationRepository implements IOrganizationRepository {
   attached: Array<{ userId: string; tenantId: string }> = [];
 
   async getTenant(tenantId: string): Promise<TenantRecord | null> {
-    return this.tenant && this.tenant.id === tenantId ? this.tenant : null;
+    return this.tenant?.id === tenantId ? this.tenant : null;
   }
 
   async listMembers(): Promise<OrgMemberRecord[]> {
