@@ -12,6 +12,7 @@ import { CodeRunnerModule } from './modules/code-runner/code-runner.module';
 import { ForumModule } from './modules/forum/forum.module';
 import { LeaderboardModule } from './modules/leaderboard/leaderboard.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { OrganizationModule } from './modules/organization/organization.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
     ForumModule,
     LeaderboardModule,
     DashboardModule,
+    OrganizationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
