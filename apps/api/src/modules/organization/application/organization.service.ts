@@ -114,7 +114,10 @@ export class OrganizationService {
 
   async revoke(tenantId: string, invitationId: string): Promise<void> {
     const invitation = await this.organizationRepository.findInvitationById(invitationId);
-    if (!invitation || invitation.getTenantId() !== tenantId) {
+    if (!invitation) {
+      throw new NotFoundException('Invitation not found.');
+    }
+    if (invitation.getTenantId() !== tenantId) {
       throw new NotFoundException('Invitation not found.');
     }
     if (!invitation.isPending()) {

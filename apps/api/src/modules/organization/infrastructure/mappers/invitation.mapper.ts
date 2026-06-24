@@ -3,17 +3,17 @@ import { Invitation } from '../../domain/entities/invitation';
 
 export class InvitationMapper {
   static toDomain(record: PrismaInvitation): Invitation {
-    return Invitation.reconstitute(
-      record.id,
-      record.tenantId,
-      record.email,
-      record.token,
-      record.status,
-      record.invitedById,
-      record.createdAt,
-      record.expiresAt,
-      record.acceptedAt,
-    );
+    return Invitation.reconstitute({
+      id: record.id,
+      tenantId: record.tenantId,
+      email: record.email,
+      token: record.token,
+      status: record.status,
+      invitedById: record.invitedById,
+      createdAt: record.createdAt,
+      expiresAt: record.expiresAt,
+      acceptedAt: record.acceptedAt,
+    });
   }
 
   static toPersistence(invitation: Invitation): Omit<PrismaInvitation, 'createdAt'> {

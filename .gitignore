@@ -51,3 +51,4 @@ coverage/
 /blob-report/
 /playwright/.cache
 .eslintcache
+apps/web/tsconfig.tsbuildinfo

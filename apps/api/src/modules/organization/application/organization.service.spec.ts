@@ -179,17 +179,17 @@ describe('OrganizationService', () => {
     });
 
     it('rejects an expired invitation and marks it expired', async () => {
-      const expired = Invitation.reconstitute(
-        'inv-expired',
-        TENANT_ID,
-        'late@acme.dev',
-        'expired-token',
-        InvitationStatus.PENDING,
-        ADMIN_ID,
-        new Date('2026-01-01T00:00:00.000Z'),
-        new Date('2026-01-08T00:00:00.000Z'),
-        null,
-      );
+      const expired = Invitation.reconstitute({
+        id: 'inv-expired',
+        tenantId: TENANT_ID,
+        email: 'late@acme.dev',
+        token: 'expired-token',
+        status: InvitationStatus.PENDING,
+        invitedById: ADMIN_ID,
+        createdAt: new Date('2026-01-01T00:00:00.000Z'),
+        expiresAt: new Date('2026-01-08T00:00:00.000Z'),
+        acceptedAt: null,
+      });
       repository.invitations.push(expired);
 
       await expect(

@@ -1,5 +1,17 @@
 import { InvitationStatus } from '@prisma/client';
 
+export interface InvitationProps {
+  id: string;
+  tenantId: string;
+  email: string;
+  token: string;
+  status: InvitationStatus;
+  invitedById: string;
+  createdAt: Date;
+  expiresAt: Date;
+  acceptedAt: Date | null;
+}
+
 export class Invitation {
   private constructor(
     private readonly id: string,
@@ -38,27 +50,17 @@ export class Invitation {
     );
   }
 
-  static reconstitute(
-    id: string,
-    tenantId: string,
-    email: string,
-    token: string,
-    status: InvitationStatus,
-    invitedById: string,
-    createdAt: Date,
-    expiresAt: Date,
-    acceptedAt: Date | null,
-  ): Invitation {
+  static reconstitute(props: InvitationProps): Invitation {
     return new Invitation(
-      id,
-      tenantId,
-      email,
-      token,
-      status,
-      invitedById,
-      createdAt,
-      expiresAt,
-      acceptedAt,
+      props.id,
+      props.tenantId,
+      props.email,
+      props.token,
+      props.status,
+      props.invitedById,
+      props.createdAt,
+      props.expiresAt,
+      props.acceptedAt,
     );
   }
 

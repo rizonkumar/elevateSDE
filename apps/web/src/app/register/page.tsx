@@ -36,7 +36,7 @@ export default function RegisterPage() {
   const [redirectTo, setRedirectTo] = React.useState('/dashboard');
 
   React.useEffect(() => {
-    if (typeof globalThis.window === 'undefined') return;
+    if (globalThis.window === undefined) return;
     const target = new URLSearchParams(globalThis.location.search).get('redirect');
     if (target?.startsWith('/') && !target.startsWith('//')) {
       setRedirectTo(target);

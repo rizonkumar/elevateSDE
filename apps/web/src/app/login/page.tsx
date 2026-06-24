@@ -22,7 +22,7 @@ interface AxiosErrorResponse {
 }
 
 function readSafeRedirect(): string {
-  if (typeof globalThis.window === 'undefined') {
+  if (globalThis.window === undefined) {
     return '/dashboard';
   }
   const target = new URLSearchParams(globalThis.location.search).get('redirect');
