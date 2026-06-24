@@ -42,10 +42,7 @@ class FakeOrganizationRepository implements IOrganizationRepository {
     return this.invitations.find((invitation) => invitation.getToken() === token) ?? null;
   }
 
-  async findPendingInvitationByEmail(
-    _tenantId: string,
-    email: string,
-  ): Promise<Invitation | null> {
+  async findPendingInvitationByEmail(_tenantId: string, email: string): Promise<Invitation | null> {
     return (
       this.invitations.find(
         (invitation) => invitation.isPending() && invitation.matchesEmail(email),
@@ -137,9 +134,9 @@ describe('OrganizationService', () => {
 
     it('rejects a duplicate pending invitation', async () => {
       await service.invite(TENANT_ID, ADMIN_ID, 'pending@acme.dev');
-      await expect(
-        service.invite(TENANT_ID, ADMIN_ID, 'pending@acme.dev'),
-      ).rejects.toBeInstanceOf(ConflictException);
+      await expect(service.invite(TENANT_ID, ADMIN_ID, 'pending@acme.dev')).rejects.toBeInstanceOf(
+        ConflictException,
+      );
     });
   });
 
