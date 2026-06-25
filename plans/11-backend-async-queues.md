@@ -1,5 +1,7 @@
 # Backend: Distributed Task Queues (BullMQ & Redis)
 
+> **Status: TODO** — planned, not yet implemented.
+
 An infrastructure system managing resource-intensive tasks (e.g. LLM evaluations, resume parsing, code execution) asynchronously in the background.
 
 ## Database & Redis Architecture

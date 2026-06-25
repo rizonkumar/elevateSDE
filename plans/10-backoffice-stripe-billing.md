@@ -1,5 +1,7 @@
 # Backoffice: Multi-Tenant Subscription & Stripe Dashboard
 
+> **Status: ON HOLD** — payment work deferred.
+
 An administrative portal in the Super-Admin Backoffice Workspace to manage B2B tenants, view billing metrics, control plans, and review Stripe payment logs.
 
 ## Proposed UI/UX Changes

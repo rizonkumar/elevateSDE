@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ProblemModule } from '../problem/problem.module';
+import { DailyChallengeModule } from '../daily-challenge/daily-challenge.module';
 import { QueuesModule } from '../queues/queues.module';
 import { ISandboxRunner } from './domain/interfaces/sandbox-runner.interface';
 import { ISubmissionRepository } from './domain/interfaces/submission-repository.interface';
@@ -13,7 +14,7 @@ import { AssessmentsController } from './presentation/controllers/assessments.co
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 
 @Module({
-  imports: [ProblemModule, QueuesModule],
+  imports: [ProblemModule, QueuesModule, DailyChallengeModule],
   controllers: [AssessmentsController],
   providers: [
     CodeRunnerService,

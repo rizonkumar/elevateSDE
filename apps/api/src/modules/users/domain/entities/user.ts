@@ -9,6 +9,7 @@ export class User {
     private readonly role: UserRole,
     private readonly firstName: string | null,
     private readonly lastName: string | null,
+    private readonly headline: string | null,
     private readonly createdAt: Date,
   ) {}
 
@@ -20,6 +21,7 @@ export class User {
     tenantId: string | null = null,
     firstName: string | null = null,
     lastName: string | null = null,
+    headline: string | null = null,
   ): User {
     if (!email || !email.includes('@')) {
       throw new Error('Invalid email address');
@@ -27,7 +29,17 @@ export class User {
     if (!passwordHash) {
       throw new Error('Password hash cannot be empty');
     }
-    return new User(id, tenantId, email, passwordHash, role, firstName, lastName, new Date());
+    return new User(
+      id,
+      tenantId,
+      email,
+      passwordHash,
+      role,
+      firstName,
+      lastName,
+      headline,
+      new Date(),
+    );
   }
 
   static reconstitute(
@@ -39,8 +51,19 @@ export class User {
     createdAt: Date,
     firstName: string | null,
     lastName: string | null,
+    headline: string | null = null,
   ): User {
-    return new User(id, tenantId, email, passwordHash, role, firstName, lastName, createdAt);
+    return new User(
+      id,
+      tenantId,
+      email,
+      passwordHash,
+      role,
+      firstName,
+      lastName,
+      headline,
+      createdAt,
+    );
   }
 
   changeRole(newRole: UserRole): User {
@@ -52,6 +75,7 @@ export class User {
       newRole,
       this.firstName,
       this.lastName,
+      this.headline,
       this.createdAt,
     );
   }
@@ -86,5 +110,9 @@ export class User {
 
   getLastName(): string | null {
     return this.lastName;
+  }
+
+  getHeadline(): string | null {
+    return this.headline;
   }
 }

@@ -1,8 +1,10 @@
 import { Logger } from '@nestjs/common';
 import { OnWorkerEvent, Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
+import { SubmissionStatus } from '@prisma/client';
 import { QUEUE_NAMES } from '../../../queues/domain/queue-names';
 import { CodeExecutionJobData } from '../../../queues/domain/interfaces/code-execution-queue.interface';
+import { DailyChallengeService } from '../../../daily-challenge/application/daily-challenge.service';
 import { CodeRunnerService } from '../../application/code-runner.service';
 import { SubmissionService } from '../../application/submission.service';
 
@@ -15,15 +17,19 @@ export class CodeExecutionProcessor extends WorkerHost {
   constructor(
     private readonly codeRunnerService: CodeRunnerService,
     private readonly submissionService: SubmissionService,
+    private readonly dailyChallengeService: DailyChallengeService,
   ) {
     super();
   }
 
   async process(job: Job<CodeExecutionJobData>): Promise<void> {
-    const { submissionId, problemId, language, code } = job.data;
+    const { submissionId, userId, problemId, language, code } = job.data;
     await this.submissionService.markRunning(submissionId);
     const outcome = await this.codeRunnerService.evaluate(problemId, language, code, true);
     await this.submissionService.applyResult(submissionId, outcome);
+    if (outcome.status === SubmissionStatus.ACCEPTED) {
+      await this.dailyChallengeService.registerCompletion(userId, problemId, submissionId);
+    }
   }
 
   @OnWorkerEvent('failed')

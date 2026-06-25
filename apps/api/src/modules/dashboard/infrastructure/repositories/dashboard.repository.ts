@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { AssessmentDifficulty, JobApplicationStatus } from '@elevatesde/shared-types';
 import { PrismaService } from '../../../../infrastructure/prisma/prisma.service';
 import { IDashboardRepository } from '../../domain/interfaces/dashboard-repository.interface';
@@ -8,6 +9,7 @@ import {
   DashboardAssessmentView,
   DashboardLeaderboardView,
   DashboardForumView,
+  SubmissionHeatmapCell,
 } from '../../domain/read-models/dashboard-stats-view';
 
 const JOB_STATUSES: JobApplicationStatus[] = ['APPLIED', 'OA', 'INTERVIEW', 'OFFER', 'REJECTED'];
@@ -28,6 +30,21 @@ export class DashboardRepository implements IDashboardRepository {
     ]);
 
     return { jobTracker, assessments, leaderboard, forum, recentSubmissions };
+  }
+
+  async getSubmissionHeatmap(
+    userId: string,
+    from: Date,
+    to: Date,
+  ): Promise<SubmissionHeatmapCell[]> {
+    const rows = await this.prisma.$queryRaw<Array<{ date: string; count: number }>>(Prisma.sql`
+      SELECT to_char(date_trunc('day', "createdAt"), 'YYYY-MM-DD') AS date, count(*)::int AS count
+      FROM "Submission"
+      WHERE "userId" = ${userId} AND "createdAt" >= ${from} AND "createdAt" < ${to}
+      GROUP BY 1
+      ORDER BY 1
+    `);
+    return rows.map((row) => ({ date: row.date, count: Number(row.count) }));
   }
 
   private async getJobTracker(userId: string): Promise<DashboardJobTrackerView> {

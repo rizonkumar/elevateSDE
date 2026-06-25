@@ -14,6 +14,7 @@ import { LeaderboardModule } from './modules/leaderboard/leaderboard.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { QueuesModule } from './modules/queues/queues.module';
 import { OrganizationModule } from './modules/organization/organization.module';
+import { DailyChallengeModule } from './modules/daily-challenge/daily-challenge.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { OrganizationModule } from './modules/organization/organization.module';
     LeaderboardModule,
     DashboardModule,
     OrganizationModule,
+    DailyChallengeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

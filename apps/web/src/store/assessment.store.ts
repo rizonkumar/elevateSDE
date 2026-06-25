@@ -9,6 +9,7 @@ import type {
 } from '@elevatesde/shared-types';
 import { useToastStore } from '@/store/toast.store';
 import { useAssessmentSettingsStore, type TimerMode } from '@/store/assessment-settings.store';
+import { useDailyChallengeStore } from '@/store/daily-challenge.store';
 import { getProblem, getSubmission, runAssessment, submitAssessment } from '@/lib/assessments-api';
 import { ASSESSMENT_LANGUAGE_OPTIONS } from '@/lib/assessment-problems';
 
@@ -63,6 +64,7 @@ interface AssessmentState {
   submissionPhase: SubmissionPhase;
   hasSubmitted: boolean;
   lastResult: AssessmentRunResultDto | null;
+  celebration: { streak: number } | null;
   testcaseTab: TestcaseTab;
   activeCaseIndex: number;
   caseInputs: string[];
@@ -88,6 +90,7 @@ interface AssessmentState {
   toggleEditorMaximized: () => void;
   run: () => Promise<void>;
   submit: () => Promise<void>;
+  dismissCelebration: () => void;
   reset: () => void;
 }
 
@@ -204,6 +207,13 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => {
       if (useAssessmentSettingsStore.getState().autoReset) {
         get().resetTimer();
       }
+      void (async () => {
+        await useDailyChallengeStore.getState().fetchDaily();
+        const daily = useDailyChallengeStore.getState();
+        if (daily.today && daily.today.problem.id === detail.problemId) {
+          set({ celebration: { streak: daily.streak?.current ?? 0 } });
+        }
+      })();
       return;
     }
     useToastStore
@@ -247,6 +257,7 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => {
     submissionPhase: null,
     hasSubmitted: false,
     lastResult: null,
+    celebration: null,
     testcaseTab: 'testcase',
     activeCaseIndex: 0,
     caseInputs: [],
@@ -424,6 +435,8 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => {
       }
     },
 
+    dismissCelebration: () => set({ celebration: null }),
+
     reset: () => {
       clearTimer();
       clearAutosave();
@@ -438,6 +451,7 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => {
         submissionPhase: null,
         hasSubmitted: false,
         lastResult: null,
+        celebration: null,
         testcaseTab: 'testcase',
         activeCaseIndex: 0,
         caseInputs: [],

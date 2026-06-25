@@ -9,6 +9,7 @@ export class UserPresentationMapper {
     dto.tenantId = user.getTenantId();
     dto.firstName = user.getFirstName();
     dto.lastName = user.getLastName();
+    dto.headline = user.getHeadline();
     dto.role = user.getRole();
     dto.createdAt = user.getCreatedAt().toISOString();
     return dto;

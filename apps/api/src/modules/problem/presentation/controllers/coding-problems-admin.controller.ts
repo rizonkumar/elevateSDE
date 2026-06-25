@@ -42,6 +42,7 @@ export class CodingProblemsAdminController {
       difficulty: query.difficulty,
       tag: query.tag,
       search: query.search,
+      hasTestCases: query.hasTestCases,
       page,
       pageSize,
     });

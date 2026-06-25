@@ -3,6 +3,7 @@ import { SubmissionStatus } from '@prisma/client';
 import { CodeExecutionProcessor } from './code-execution.processor';
 import { CodeRunnerService } from '../../application/code-runner.service';
 import { SubmissionService } from '../../application/submission.service';
+import { DailyChallengeService } from '../../../daily-challenge/application/daily-challenge.service';
 import { AssessmentRunOutcome } from '../../application/assessment-outcome';
 import { CodeExecutionJobData } from '../../../queues/domain/interfaces/code-execution-queue.interface';
 
@@ -30,23 +31,31 @@ function buildProcessor(): {
   markRunning: jest.Mock;
   applyResult: jest.Mock;
   markFailed: jest.Mock;
+  registerCompletion: jest.Mock;
 } {
   const evaluate = jest.fn().mockResolvedValue(OUTCOME);
   const markRunning = jest.fn().mockResolvedValue(undefined);
   const applyResult = jest.fn().mockResolvedValue(undefined);
   const markFailed = jest.fn().mockResolvedValue(undefined);
+  const registerCompletion = jest.fn().mockResolvedValue(undefined);
   const codeRunnerService = { evaluate } as unknown as CodeRunnerService;
   const submissionService = {
     markRunning,
     applyResult,
     markFailed,
   } as unknown as SubmissionService;
+  const dailyChallengeService = { registerCompletion } as unknown as DailyChallengeService;
   return {
-    processor: new CodeExecutionProcessor(codeRunnerService, submissionService),
+    processor: new CodeExecutionProcessor(
+      codeRunnerService,
+      submissionService,
+      dailyChallengeService,
+    ),
     evaluate,
     markRunning,
     applyResult,
     markFailed,
+    registerCompletion,
   };
 }
 
@@ -60,6 +69,25 @@ describe('CodeExecutionProcessor', () => {
     expect(markRunning).toHaveBeenCalledWith('s1');
     expect(evaluate).toHaveBeenCalledWith('p1', 'javascript', 'solve()', true);
     expect(applyResult).toHaveBeenCalledWith('s1', OUTCOME);
+  });
+
+  it('registers a daily challenge completion when the submission is accepted', async () => {
+    const { processor, registerCompletion } = buildProcessor();
+    const job = { data: JOB_DATA } as Job<CodeExecutionJobData>;
+
+    await processor.process(job);
+
+    expect(registerCompletion).toHaveBeenCalledWith('u1', 'p1', 's1');
+  });
+
+  it('does not register a completion when the submission is not accepted', async () => {
+    const { processor, evaluate, registerCompletion } = buildProcessor();
+    evaluate.mockResolvedValue({ ...OUTCOME, status: SubmissionStatus.WRONG_ANSWER });
+    const job = { data: JOB_DATA } as Job<CodeExecutionJobData>;
+
+    await processor.process(job);
+
+    expect(registerCompletion).not.toHaveBeenCalled();
   });
 
   it('does not mark failed while retries remain', async () => {

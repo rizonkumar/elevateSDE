@@ -93,10 +93,10 @@ posts, approve or remove content, and adjust leaderboard standings (points, badg
 
 ### Manual Verification
 
-- Sign in as `ADMIN`, open `http://localhost:3002/forum-moderation`.
+- Sign in as `ADMIN`, open `http://localhost:3001/admin/forum-moderation`.
 - Filter by FLAGGED; open a post, review the thread, and remove it via the confirm dialog;
   confirm the status badge updates and a toast fires.
-- Open `http://localhost:3002/leaderboard-management`; adjust a member's points and award a
+- Open `http://localhost:3001/admin/leaderboard-management`; adjust a member's points and award a
   badge; verify the standings reflect the change.
 - Authenticate as a `USER` and confirm both admin routes are unreachable (middleware redirect
   to `/login`).

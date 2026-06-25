@@ -4,6 +4,7 @@ export interface UserDto {
   email: string;
   firstName: string | null;
   lastName: string | null;
+  headline: string | null;
   role: string;
   createdAt: string;
 }
@@ -404,6 +405,48 @@ export interface DashboardStatsDto {
   leaderboard: DashboardLeaderboardStats;
   forum: DashboardForumStats;
   recentSubmissions: DashboardRecentSubmission[];
+}
+
+export interface DailyChallengeDto {
+  id: string;
+  challengeDate: string;
+  problem: ProblemSummaryDto;
+  completed: boolean;
+}
+
+export interface StreakCalendarCellDto {
+  date: string;
+  completed: boolean;
+}
+
+export interface StreakSummaryDto {
+  current: number;
+  longest: number;
+  lastActiveDate: string | null;
+  calendar: StreakCalendarCellDto[];
+}
+
+export interface DailyChallengeScheduleDto {
+  id: string;
+  challengeDate: string;
+  problemId: string;
+  problemTitle: string;
+  difficulty: AssessmentDifficulty;
+  completionCount: number;
+}
+
+export interface CreateDailyChallengeDto {
+  challengeDate: string;
+  problemId: string;
+}
+
+export interface SubmissionHeatmapCellDto {
+  date: string;
+  count: number;
+}
+
+export interface SubmissionHeatmapDto {
+  cells: SubmissionHeatmapCellDto[];
 }
 
 export type InvitationStatus = 'PENDING' | 'ACCEPTED' | 'REVOKED' | 'EXPIRED';
