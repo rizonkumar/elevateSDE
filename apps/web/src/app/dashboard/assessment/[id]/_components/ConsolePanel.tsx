@@ -130,6 +130,7 @@ function CaseDetail({ result }: Readonly<{ result: TestCaseResultDto }>) {
 export function ConsolePanel() {
   const isRunning = useAssessmentStore((state) => state.isRunning);
   const isSubmitting = useAssessmentStore((state) => state.isSubmitting);
+  const submissionPhase = useAssessmentStore((state) => state.submissionPhase);
   const result = useAssessmentStore((state) => state.lastResult);
   const testcaseTab = useAssessmentStore((state) => state.testcaseTab);
   const setTestcaseTab = useAssessmentStore((state) => state.setTestcaseTab);
@@ -139,6 +140,8 @@ export function ConsolePanel() {
   const setCaseInput = useAssessmentStore((state) => state.setCaseInput);
 
   const busy = isRunning || isSubmitting;
+  const submitLabel = submissionPhase === 'RUNNING' ? 'Running test cases…' : 'Queued — waiting for a runner…';
+  const busyLabel = isSubmitting ? submitLabel : 'Running test cases…';
   const visibleResults = result?.results.filter((item) => !item.isHidden) ?? [];
   const hiddenResults = result?.results.filter((item) => item.isHidden) ?? [];
   const safeIndex = Math.min(activeCaseIndex, Math.max(0, caseInputs.length - 1));
@@ -184,7 +187,7 @@ export function ConsolePanel() {
       return (
         <div className="flex h-full items-center justify-center gap-2 text-sm text-(--color-text-muted)">
           <Loader2 className="h-4 w-4 animate-spin" />
-          {isSubmitting ? 'Submitting solution…' : 'Running test cases…'}
+          {busyLabel}
         </div>
       );
     }

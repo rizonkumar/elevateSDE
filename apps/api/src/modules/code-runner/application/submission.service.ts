@@ -11,41 +11,67 @@ import { toPrismaLanguage } from './language';
 export class SubmissionService {
   constructor(private readonly submissionRepository: ISubmissionRepository) {}
 
-  async record(
+  async createPending(
     userId: string,
     problemId: string,
     language: ProblemLanguage,
     code: string,
-    outcome: AssessmentRunOutcome,
   ): Promise<Submission> {
-    const results = outcome.results.map((result) =>
-      SubmissionResult.create({
-        id: randomUUID(),
-        testCaseId: result.testCaseId,
-        label: result.label,
-        status: result.status,
-        actualOutput: result.actualOutput,
-        runtimeMs: result.runtimeMs,
-        memoryKb: result.memoryKb,
-        isHidden: result.isHidden,
-      }),
-    );
-    const submission = Submission.create({
+    const submission = Submission.createQueued({
       id: randomUUID(),
       userId,
       problemId,
       language: toPrismaLanguage[language],
       sourceCode: code,
+      createdAt: new Date(),
+    });
+    return this.submissionRepository.save(submission);
+  }
+
+  async markRunning(submissionId: string): Promise<void> {
+    const submission = await this.submissionRepository.findById(submissionId);
+    if (!submission) return;
+    submission.markRunning();
+    await this.submissionRepository.update(submission);
+  }
+
+  async applyResult(submissionId: string, outcome: AssessmentRunOutcome): Promise<void> {
+    const submission = await this.submissionRepository.findById(submissionId);
+    if (!submission) return;
+    submission.applyOutcome({
       status: outcome.status,
       passedCount: outcome.passedCount,
       totalCount: outcome.totalCount,
       totalRuntimeMs: outcome.totalRuntimeMs,
       peakMemoryKb: outcome.peakMemoryKb,
       stdout: outcome.stdout,
-      results,
-      createdAt: new Date(),
+      results: outcome.results.map((result) =>
+        SubmissionResult.create({
+          id: randomUUID(),
+          testCaseId: result.testCaseId,
+          label: result.label,
+          status: result.status,
+          actualOutput: result.actualOutput,
+          runtimeMs: result.runtimeMs,
+          memoryKb: result.memoryKb,
+          isHidden: result.isHidden,
+        }),
+      ),
     });
-    return this.submissionRepository.save(submission);
+    await this.submissionRepository.update(submission);
+  }
+
+  async markFailed(submissionId: string, message: string): Promise<void> {
+    const submission = await this.submissionRepository.findById(submissionId);
+    if (!submission) return;
+    submission.markFailed(message);
+    await this.submissionRepository.update(submission);
+  }
+
+  async getForUser(submissionId: string, userId: string): Promise<Submission | null> {
+    const submission = await this.submissionRepository.findById(submissionId);
+    if (!submission || submission.getUserId() !== userId) return null;
+    return submission;
   }
 
   async listForUserProblem(userId: string, problemId: string): Promise<Submission[]> {

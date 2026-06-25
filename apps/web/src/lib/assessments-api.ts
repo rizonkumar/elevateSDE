@@ -4,6 +4,8 @@ import type {
   AssessmentRunResultDto,
   CodingProblemDto,
   ProblemListDto,
+  SubmissionAcceptedDto,
+  SubmissionDetailDto,
 } from '@elevatesde/shared-types';
 import { api } from './api';
 
@@ -12,6 +14,7 @@ export interface ListProblemsParams {
   pageSize?: number;
   search?: string;
   difficulty?: AssessmentDifficulty;
+  hasTestCases?: boolean;
 }
 
 export async function listProblems(params: ListProblemsParams): Promise<ProblemListDto> {
@@ -33,7 +36,14 @@ export async function runAssessment(
 
 export async function submitAssessment(
   payload: AssessmentRunRequestDto,
-): Promise<AssessmentRunResultDto> {
-  const response = await api.post<AssessmentRunResultDto>('/api/v1/assessments/submit', payload);
+): Promise<SubmissionAcceptedDto> {
+  const response = await api.post<SubmissionAcceptedDto>('/api/v1/assessments/submit', payload);
+  return response.data;
+}
+
+export async function getSubmission(submissionId: string): Promise<SubmissionDetailDto> {
+  const response = await api.get<SubmissionDetailDto>(
+    `/api/v1/assessments/submissions/${submissionId}`,
+  );
   return response.data;
 }

@@ -22,6 +22,7 @@ export class SubmissionMapper {
       peakMemoryKb: record.peakMemoryKb,
       stdout: record.stdout,
       createdAt: record.createdAt,
+      updatedAt: record.updatedAt,
       results: record.results.map((result) =>
         SubmissionResult.reconstitute({
           id: result.id,
