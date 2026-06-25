@@ -5,7 +5,7 @@ import { Plus, Trash2 } from 'lucide-react';
 import { Button, ConfirmDialog, DatePicker, Modal } from '@elevatesde/ui';
 import type { AssessmentDifficulty } from '@elevatesde/shared-types';
 import { AdminLayout } from '../../components/AdminLayout';
-import { Badge, Select, type BadgeVariant } from '../../components/ui';
+import { Badge, Select, Toggle, type BadgeVariant } from '../../components/ui';
 import { useDailyChallengesStore } from '../../store/daily-challenges.store';
 
 const DIFFICULTY_VARIANT: Record<AssessmentDifficulty, BadgeVariant> = {
@@ -28,6 +28,8 @@ export default function DailyChallengesPage() {
   const saving = useDailyChallengesStore((state) => state.saving);
   const pendingDeleteId = useDailyChallengesStore((state) => state.pendingDeleteId);
   const deletingId = useDailyChallengesStore((state) => state.deletingId);
+  const onlyWithTestCases = useDailyChallengesStore((state) => state.onlyWithTestCases);
+  const setOnlyWithTestCases = useDailyChallengesStore((state) => state.setOnlyWithTestCases);
   const loadSchedule = useDailyChallengesStore((state) => state.loadSchedule);
   const loadProblemOptions = useDailyChallengesStore((state) => state.loadProblemOptions);
   const openModal = useDailyChallengesStore((state) => state.openModal);
@@ -138,6 +140,11 @@ export default function DailyChallengesPage() {
       >
         <div className="flex flex-col gap-4">
           <DatePicker value={date} onChange={setDate} label="Challenge date" />
+          <Toggle
+            checked={onlyWithTestCases}
+            onChange={(next) => void setOnlyWithTestCases(next)}
+            label="Only problems with test cases"
+          />
           <div className="flex flex-col gap-1.5">
             <span className="text-xs font-medium text-(--color-text-muted)">Problem</span>
             <Select value={problemId} options={selectOptions} onChange={setProblemId} />

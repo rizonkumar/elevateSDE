@@ -30,6 +30,7 @@ const notify = (message: string, type: 'success' | 'error') =>
 interface DailyChallengesState {
   schedule: DailyChallengeScheduleDto[];
   problemOptions: ProblemOption[];
+  onlyWithTestCases: boolean;
   loading: boolean;
   isModalOpen: boolean;
   saving: boolean;
@@ -37,6 +38,7 @@ interface DailyChallengesState {
   deletingId: string | null;
   loadSchedule: () => Promise<void>;
   loadProblemOptions: () => Promise<void>;
+  setOnlyWithTestCases: (next: boolean) => Promise<void>;
   openModal: () => void;
   closeModal: () => void;
   createChallenge: (challengeDate: string, problemId: string) => Promise<boolean>;
@@ -48,6 +50,7 @@ interface DailyChallengesState {
 export const useDailyChallengesStore = create<DailyChallengesState>((set, get) => ({
   schedule: [],
   problemOptions: [],
+  onlyWithTestCases: true,
   loading: true,
   isModalOpen: false,
   saving: false,
@@ -67,7 +70,11 @@ export const useDailyChallengesStore = create<DailyChallengesState>((set, get) =
 
   loadProblemOptions: async () => {
     try {
-      const result = await fetchProblemList({ page: 1, pageSize: PROBLEM_OPTIONS_PAGE_SIZE });
+      const result = await fetchProblemList({
+        page: 1,
+        pageSize: PROBLEM_OPTIONS_PAGE_SIZE,
+        hasTestCases: get().onlyWithTestCases ? true : undefined,
+      });
       const problemOptions = result.items
         .filter((problem) => problem.isPublished)
         .map((problem) => ({ value: problem.id, label: problem.title }));
@@ -75,6 +82,11 @@ export const useDailyChallengesStore = create<DailyChallengesState>((set, get) =
     } catch (error) {
       notify(errorMessage(error, 'Failed to load published problems.'), 'error');
     }
+  },
+
+  setOnlyWithTestCases: async (next) => {
+    set({ onlyWithTestCases: next });
+    await get().loadProblemOptions();
   },
 
   openModal: () => set({ isModalOpen: true }),
