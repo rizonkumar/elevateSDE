@@ -377,6 +377,39 @@ export interface DashboardStatsDto {
   recentSubmissions: DashboardRecentSubmission[];
 }
 
+export interface DailyChallengeDto {
+  id: string;
+  challengeDate: string;
+  problem: ProblemSummaryDto;
+  completed: boolean;
+}
+
+export interface StreakCalendarCellDto {
+  date: string;
+  completed: boolean;
+}
+
+export interface StreakSummaryDto {
+  current: number;
+  longest: number;
+  lastActiveDate: string | null;
+  calendar: StreakCalendarCellDto[];
+}
+
+export interface DailyChallengeScheduleDto {
+  id: string;
+  challengeDate: string;
+  problemId: string;
+  problemTitle: string;
+  difficulty: AssessmentDifficulty;
+  completionCount: number;
+}
+
+export interface CreateDailyChallengeDto {
+  challengeDate: string;
+  problemId: string;
+}
+
 export type InvitationStatus = 'PENDING' | 'ACCEPTED' | 'REVOKED' | 'EXPIRED';
 
 export type OrgMemberStatus = 'active' | 'invited';

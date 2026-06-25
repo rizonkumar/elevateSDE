@@ -1,6 +1,7 @@
 import { AssessmentDifficulty, ComparisonMode, SubmissionStatus } from '@prisma/client';
 import { CodeRunnerService } from './code-runner.service';
 import { SubmissionService } from './submission.service';
+import { DailyChallengeService } from '../../daily-challenge/application/daily-challenge.service';
 import { ProblemService } from '../../problem/application/problem.service';
 import { Problem } from '../../problem/domain/entities/problem';
 import { ProblemTestCase } from '../../problem/domain/entities/problem-test-case';
@@ -106,15 +107,23 @@ function makeRaw(spec: RunSpec, config: RawConfig): RawRunOutput {
 
 function buildService(
   run: (spec: RunSpec) => Promise<RawRunOutput>,
-  record = jest.fn().mockResolvedValue(undefined),
+  record = jest.fn().mockResolvedValue({ getId: () => 'submission-test' }),
 ): { service: CodeRunnerService; record: jest.Mock; runSpy: jest.Mock } {
   const problem = buildProblem();
   const problemService = { getById: jest.fn().mockResolvedValue(problem) } as unknown as ProblemService;
   const runSpy = jest.fn(run);
   const sandboxRunner = { run: runSpy } as unknown as ISandboxRunner;
   const submissionService = { record } as unknown as SubmissionService;
+  const dailyChallengeService = {
+    registerCompletion: jest.fn().mockResolvedValue(undefined),
+  } as unknown as DailyChallengeService;
   return {
-    service: new CodeRunnerService(problemService, sandboxRunner, submissionService),
+    service: new CodeRunnerService(
+      problemService,
+      sandboxRunner,
+      submissionService,
+      dailyChallengeService,
+    ),
     record,
     runSpy,
   };

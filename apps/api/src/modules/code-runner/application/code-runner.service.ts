@@ -5,6 +5,7 @@ import { Problem, ProblemLanguage } from '../../problem/domain/entities/problem'
 import { ProblemTestCase } from '../../problem/domain/entities/problem-test-case';
 import { ISandboxRunner } from '../domain/interfaces/sandbox-runner.interface';
 import { RawRunOutput } from '../domain/value-objects/raw-run-output';
+import { DailyChallengeService } from '../../daily-challenge/application/daily-challenge.service';
 import { SubmissionService } from './submission.service';
 import { AssessmentRunOutcome, CaseOutcome } from './assessment-outcome';
 import { outputsMatch } from './output-comparator';
@@ -26,6 +27,7 @@ export class CodeRunnerService {
     private readonly problemService: ProblemService,
     private readonly sandboxRunner: ISandboxRunner,
     private readonly submissionService: SubmissionService,
+    private readonly dailyChallengeService: DailyChallengeService,
   ) {}
 
   async execute(input: ExecuteAssessmentInput): Promise<AssessmentRunOutcome> {
@@ -45,13 +47,20 @@ export class CodeRunnerService {
     const outcome = this.assemble(problem, cases, raw);
 
     if (input.persist) {
-      await this.submissionService.record(
+      const submission = await this.submissionService.record(
         input.userId,
         problem.getId(),
         input.language,
         input.code,
         outcome,
       );
+      if (outcome.status === SubmissionStatus.ACCEPTED) {
+        await this.dailyChallengeService.registerCompletion(
+          input.userId,
+          problem.getId(),
+          submission.getId(),
+        );
+      }
     }
 
     return outcome;

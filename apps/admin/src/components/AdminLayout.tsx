@@ -12,6 +12,7 @@ import {
   ShieldAlert,
   Trophy,
   Code2,
+  CalendarDays,
   LogOut,
   Sun,
   Moon,
@@ -82,6 +83,7 @@ export function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
     { name: 'Forum Moderation', href: '/forum-moderation', icon: ShieldAlert },
     { name: 'Leaderboard', href: '/leaderboard-management', icon: Trophy },
     { name: 'Coding Problems', href: '/coding-problems', icon: Code2 },
+    { name: 'Daily Challenges', href: '/daily-challenges', icon: CalendarDays },
   ];
 
   const rail = mounted && collapsed;
