@@ -13,6 +13,7 @@ import { ForumModule } from './modules/forum/forum.module';
 import { LeaderboardModule } from './modules/leaderboard/leaderboard.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { QueuesModule } from './modules/queues/queues.module';
+import { OrganizationModule } from './modules/organization/organization.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { QueuesModule } from './modules/queues/queues.module';
     ForumModule,
     LeaderboardModule,
     DashboardModule,
+    OrganizationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

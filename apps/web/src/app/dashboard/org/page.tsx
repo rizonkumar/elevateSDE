@@ -16,7 +16,7 @@ import {
   Tooltip,
   type TooltipContentProps,
 } from 'recharts';
-import { Mail, Users, TrendingUp } from 'lucide-react';
+import { Mail, Users, TrendingUp, Copy, Check } from 'lucide-react';
 import { Button, Input } from '@elevatesde/ui';
 import { useAuthStore } from '@/store/auth.store';
 import { useToastStore } from '@/store/toast.store';
@@ -47,12 +47,22 @@ export default function OrgDashboardPage() {
   const router = useRouter();
   const { user } = useAuthStore();
   const addToast = useToastStore((state) => state.addToast);
-  const { company, seats, members, teamPerformance, loadOrgDashboard, inviteMember } =
-    useOrgDashboardStore();
+  const {
+    company,
+    seats,
+    members,
+    teamPerformance,
+    loadOrgDashboard,
+    inviteMember,
+    lastInviteUrl,
+    clearInviteUrl,
+  } = useOrgDashboardStore();
 
   const [mounted, setMounted] = React.useState(false);
   const [email, setEmail] = React.useState('');
   const [error, setError] = React.useState('');
+  const [submitting, setSubmitting] = React.useState(false);
+  const [copied, setCopied] = React.useState(false);
 
   React.useEffect(() => {
     setMounted(true);
@@ -68,9 +78,13 @@ export default function OrgDashboardPage() {
   const seatData = [{ name: 'seats', value: seats.used }];
   const seatPercent = Math.round((seats.used / seats.total) * 100);
 
-  const handleInvite = (event: React.SyntheticEvent) => {
+  const handleInvite = async (event: React.SyntheticEvent) => {
     event.preventDefault();
-    const result = inviteMember(email);
+    if (submitting) return;
+    setSubmitting(true);
+    setCopied(false);
+    const result = await inviteMember(email);
+    setSubmitting(false);
     if (result.ok) {
       setError('');
       setEmail('');
@@ -78,6 +92,17 @@ export default function OrgDashboardPage() {
     } else {
       setError(result.message);
       addToast(result.message, 'error');
+    }
+  };
+
+  const handleCopyInviteUrl = async () => {
+    if (!lastInviteUrl) return;
+    try {
+      await navigator.clipboard.writeText(lastInviteUrl);
+      setCopied(true);
+      addToast('Invite link copied.', 'success');
+    } catch {
+      addToast('Could not copy the link. Copy it manually.', 'error');
     }
   };
 
@@ -122,9 +147,7 @@ export default function OrgDashboardPage() {
             <div className="card lg:col-span-2 flex flex-col">
               <div className="flex items-center gap-2 mb-2">
                 <Users className="w-4 h-4 text-(--color-accent)" />
-                <h2 className="text-sm font-semibold text-(--color-text-primary)">
-                  Seat usage
-                </h2>
+                <h2 className="text-sm font-semibold text-(--color-text-primary)">Seat usage</h2>
               </div>
               <div className="relative h-60 w-full">
                 {mounted && (
@@ -173,7 +196,10 @@ export default function OrgDashboardPage() {
               <div className="h-60 w-full">
                 {mounted && (
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={teamPerformance} margin={{ top: 12, right: 8, left: -16, bottom: 0 }}>
+                    <BarChart
+                      data={teamPerformance}
+                      margin={{ top: 12, right: 8, left: -16, bottom: 0 }}
+                    >
                       <CartesianGrid
                         strokeDasharray="3 3"
                         vertical={false}
@@ -191,8 +217,16 @@ export default function OrgDashboardPage() {
                         axisLine={false}
                         tick={{ fill: 'var(--color-text-muted)', fontSize: 12 }}
                       />
-                      <Tooltip cursor={{ fill: 'var(--color-accent-soft)' }} content={ChartTooltip} />
-                      <Bar dataKey="score" fill="var(--color-accent)" radius={[6, 6, 0, 0]} maxBarSize={48} />
+                      <Tooltip
+                        cursor={{ fill: 'var(--color-accent-soft)' }}
+                        content={ChartTooltip}
+                      />
+                      <Bar
+                        dataKey="score"
+                        fill="var(--color-accent)"
+                        radius={[6, 6, 0, 0]}
+                        maxBarSize={48}
+                      />
                     </BarChart>
                   </ResponsiveContainer>
                 )}
@@ -223,14 +257,44 @@ export default function OrgDashboardPage() {
                     if (error) setError('');
                   }}
                 />
-                <Button type="submit" className="w-full">
-                  Send invitation
+                <Button type="submit" className="w-full" disabled={submitting}>
+                  {submitting ? 'Generating link…' : 'Generate invite link'}
                 </Button>
                 <p className="text-xs text-(--color-text-muted) mb-0">
-                  {seats.total - seats.used} seat{seats.total - seats.used === 1 ? '' : 's'} remaining
-                  on your plan.
+                  {seats.total - seats.used} seat{seats.total - seats.used === 1 ? '' : 's'}{' '}
+                  remaining on your plan.
                 </p>
               </form>
+
+              {lastInviteUrl && (
+                <div className="mt-4 rounded-lg border border-(--color-border-subtle) bg-(--color-badge-bg) p-3">
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <span className="text-xs font-semibold text-(--color-text-primary)">
+                      Share this invite link
+                    </span>
+                    <button
+                      type="button"
+                      onClick={clearInviteUrl}
+                      className="text-xs text-(--color-text-muted) hover:text-(--color-text-primary)"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <code className="min-w-0 flex-1 truncate rounded-md bg-(--color-surface) px-2 py-1.5 text-xs text-(--color-text-muted)">
+                      {lastInviteUrl}
+                    </code>
+                    <button
+                      type="button"
+                      onClick={handleCopyInviteUrl}
+                      aria-label="Copy invite link"
+                      className="shrink-0 rounded-md border border-(--color-border-subtle) p-1.5 text-(--color-text-muted) hover:text-(--color-accent)"
+                    >
+                      {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="card lg:col-span-3">

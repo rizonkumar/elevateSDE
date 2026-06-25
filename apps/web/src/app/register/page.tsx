@@ -33,6 +33,15 @@ export default function RegisterPage() {
   const [password, setPassword] = React.useState('');
   const [companyName, setCompanyName] = React.useState('');
   const [loading, setLoading] = React.useState(false);
+  const [redirectTo, setRedirectTo] = React.useState('/dashboard');
+
+  React.useEffect(() => {
+    if (globalThis.window === undefined) return;
+    const target = new URLSearchParams(globalThis.location.search).get('redirect');
+    if (target?.startsWith('/') && !target.startsWith('//')) {
+      setRedirectTo(target);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -73,7 +82,7 @@ export default function RegisterPage() {
       const { user, accessToken, refreshToken } = response.data;
       setAuth(user, accessToken, refreshToken);
       addToast('Welcome to ElevateSDE! Account created.', 'success');
-      router.push('/dashboard');
+      router.push(redirectTo);
     } catch (err) {
       const axiosError = err as AxiosErrorResponse;
       addToast(
@@ -239,10 +248,7 @@ export default function RegisterPage() {
           </div>
           <div className="border-t border-(--color-border-subtle) pt-3 mt-1">
             Are you a system administrator?{' '}
-            <a
-              href="/admin/login"
-              className="text-(--color-accent) font-semibold hover:underline"
-            >
+            <a href="/admin/login" className="text-(--color-accent) font-semibold hover:underline">
               Sign in to Admin Console
             </a>
           </div>

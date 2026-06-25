@@ -11,7 +11,7 @@ interface AuthState {
 }
 
 const getInitialState = () => {
-  if (typeof window === 'undefined') {
+  if (globalThis.window === undefined) {
     return { user: null, accessToken: null, isAuthenticated: false };
   }
   const accessToken = Cookies.get('accessToken') || null;

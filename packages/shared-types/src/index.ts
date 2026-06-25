@@ -405,3 +405,57 @@ export interface DashboardStatsDto {
   forum: DashboardForumStats;
   recentSubmissions: DashboardRecentSubmission[];
 }
+
+export type InvitationStatus = 'PENDING' | 'ACCEPTED' | 'REVOKED' | 'EXPIRED';
+
+export type OrgMemberStatus = 'active' | 'invited';
+
+export interface OrgCompanyDto {
+  name: string;
+  plan: string;
+}
+
+export interface SeatUsageDto {
+  used: number;
+  total: number;
+}
+
+export interface OrgMemberDto {
+  id: string;
+  email: string;
+  status: OrgMemberStatus;
+  avgScore: number;
+}
+
+export interface OrgPerformancePointDto {
+  label: string;
+  score: number;
+}
+
+export interface InvitationDto {
+  id: string;
+  email: string;
+  status: InvitationStatus;
+  createdAt: string;
+  expiresAt: string;
+}
+
+export interface OrgOverviewDto {
+  company: OrgCompanyDto;
+  seats: SeatUsageDto;
+  members: OrgMemberDto[];
+  teamPerformance: OrgPerformancePointDto[];
+  invitations: InvitationDto[];
+}
+
+export interface InviteCreatedDto extends InvitationDto {
+  token: string;
+  inviteUrl: string;
+}
+
+export interface InvitePreviewDto {
+  tenantName: string;
+  email: string;
+  status: InvitationStatus;
+  valid: boolean;
+}
