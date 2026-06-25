@@ -22,6 +22,7 @@ import { EditorPanel } from './_components/EditorPanel';
 import { ConsolePanel } from './_components/ConsolePanel';
 import { TimerControl } from './_components/TimerControl';
 import { SettingsModal } from './_components/SettingsModal';
+import { StreakCelebrationModal } from '@/components/dashboard/daily/StreakCelebrationModal';
 import { useMediaQuery } from './_components/useMediaQuery';
 
 type MobileView = 'problem' | 'code' | 'output';
@@ -61,6 +62,8 @@ export default function AssessmentPage() {
   const reset = useAssessmentStore((state) => state.reset);
   const run = useAssessmentStore((state) => state.run);
   const submit = useAssessmentStore((state) => state.submit);
+  const celebration = useAssessmentStore((state) => state.celebration);
+  const dismissCelebration = useAssessmentStore((state) => state.dismissCelebration);
 
   const isDesktop = useMediaQuery('(min-width: 1024px)');
   const [mobileView, setMobileView] = React.useState<MobileView>('problem');
@@ -237,6 +240,12 @@ export default function AssessmentPage() {
       {isDesktop ? desktopLayout : mobileLayout}
 
       <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+
+      <StreakCelebrationModal
+        open={celebration !== null}
+        streak={celebration?.streak ?? 0}
+        onClose={dismissCelebration}
+      />
     </motion.div>
   );
 }

@@ -4,6 +4,7 @@ export interface UserDto {
   email: string;
   firstName: string | null;
   lastName: string | null;
+  headline: string | null;
   role: string;
   createdAt: string;
 }
@@ -437,6 +438,15 @@ export interface DailyChallengeScheduleDto {
 export interface CreateDailyChallengeDto {
   challengeDate: string;
   problemId: string;
+}
+
+export interface SubmissionHeatmapCellDto {
+  date: string;
+  count: number;
+}
+
+export interface SubmissionHeatmapDto {
+  cells: SubmissionHeatmapCellDto[];
 }
 
 export type InvitationStatus = 'PENDING' | 'ACCEPTED' | 'REVOKED' | 'EXPIRED';

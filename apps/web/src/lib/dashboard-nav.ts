@@ -8,6 +8,7 @@ import {
   Trophy,
   Building2,
   Flame,
+  UserRound,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -26,6 +27,7 @@ const BASE_LINKS: DashboardNavItem[] = [
   { href: '/dashboard/daily', label: 'Daily Challenge', icon: Flame },
   { href: '/dashboard/forum', label: 'Community', icon: MessagesSquare },
   { href: '/dashboard/leaderboard', label: 'Leaderboard', icon: Trophy },
+  { href: '/dashboard/profile', label: 'Profile', icon: UserRound },
 ];
 
 export function buildNavLinks(role?: string): DashboardNavItem[] {
