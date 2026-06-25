@@ -1,5 +1,7 @@
 # Backend: AWS S3 Upload & LLM Resume ATS Analyzer
 
+> **Status: TODO** — planned, not yet implemented.
+
 A microservice component receiving candidate resume documents, uploading them securely to AWS S3, and parsing the raw text content to evaluate ATS matches via Gemini/OpenAI models.
 
 ## Proposed Changes

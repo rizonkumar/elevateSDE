@@ -1,5 +1,7 @@
 # Webclient: AI Resume Analyzer & ATS Scorer
 
+> **Status: TODO** — planned, not yet implemented.
+
 An interactive interface for candidates to upload engineering resumes (PDF/DOCX format) to generate ATS optimization feedback, parse skills, and receive targeted improvement suggestions.
 
 ## Proposed UI/UX Changes

@@ -1,5 +1,7 @@
 # Backend: Multi-Tenant Stripe Subscriptions & Webhook Router
 
+> **Status: ON HOLD** — payment work deferred.
+
 A payment gateway integration supporting B2B company subscription management, webhooks processing, and multi-tenant seat checking.
 
 ## Proposed Changes

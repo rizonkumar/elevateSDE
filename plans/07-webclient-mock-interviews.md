@@ -1,5 +1,7 @@
 # Webclient: AI Mock Interview Voice & Chat Console
 
+> **Status: TODO** — planned, not yet implemented.
+
 An interactive web console supporting mock interviews. The client allows chat-based text dialogue and WebRTC/Audio streaming to simulate real-time technical rounds with feedback.
 
 ## Proposed UI/UX Changes

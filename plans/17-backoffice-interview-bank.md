@@ -1,5 +1,7 @@
 # Backoffice: Interview Question Bank & Results Review
 
+> **Status: TODO** — planned, not yet implemented.
+
 The internal admin panel for curating the mock-interview question bank that feeds the AI interviewer (candidate webclient Plan 07) and the WebSockets + RAG similarity backend (Plan 14), plus a read-only review surface for completed candidate interview sessions. Administrators author questions grouped by topic and role level with an "ideal answer" used as the RAG reference, and review scored session outcomes.
 
 > **Backend status:** No `Question` (pgvector) or `MockInterviewSession` Prisma models or endpoints exist yet (see Plan 14). The admin UI is built **mock-driven** first (Zustand stores seeded with in-memory data) and swaps to the real `/api/v1/admin/interview-questions` and results endpoints once the backend lands. The webclient already defines the shared shapes (`InterviewConfig`, `MockInterviewSession`, `MockInterviewFeedback`, `TranscriptEntry`) in `packages/shared-types`.
@@ -56,8 +58,8 @@ The internal admin panel for curating the mock-interview question bank that feed
 
 ### Manual Verification
 
-- Sign in as `ADMIN`, open `http://localhost:3002/interview-bank`.
+- Sign in as `ADMIN`, open `http://localhost:3001/admin/interview-bank`.
 - Create a System Design question for the Senior level with an ideal answer; verify it appears under the correct group and filters.
 - Edit and delete a question via the confirm dialog; confirm toast feedback.
-- Open `http://localhost:3002/interview-results`, open a seeded session, and verify the competency breakdown and transcript render.
+- Open `http://localhost:3001/admin/interview-results`, open a seeded session, and verify the competency breakdown and transcript render.
 - Authenticate as a `USER` and confirm both admin routes are unreachable (middleware redirect to `/login`).

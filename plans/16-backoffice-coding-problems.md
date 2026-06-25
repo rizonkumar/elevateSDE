@@ -52,7 +52,7 @@ The internal admin panel for authoring and curating the DSA problem bank that po
 
 ### Manual Verification
 
-- Sign in as `ADMIN`, open `http://localhost:3002/coding-problems`.
+- Sign in as `ADMIN`, open `http://localhost:3001/admin/coding-problems`.
 - Create a problem with two visible and two hidden test cases; verify it appears in the directory.
 - Edit starter code per language; toggle publish on/off and confirm toast feedback.
 - Delete a problem via the confirm dialog.

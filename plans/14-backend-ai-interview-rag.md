@@ -1,5 +1,7 @@
 # Backend: WebSockets Voice Stream & RAG Similarity Interviewer
 
+> **Status: TODO** — planned, not yet implemented.
+
 A real-time socket server that receives transcription chunks from the user, computes vector embeddings, matches them against ideal answers using `pgvector`, and responds with dynamic follow-up questions.
 
 ## Database & pgvector Schema
