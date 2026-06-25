@@ -1,7 +1,5 @@
 import { AssessmentDifficulty, ComparisonMode, SubmissionStatus } from '@prisma/client';
 import { CodeRunnerService } from './code-runner.service';
-import { SubmissionService } from './submission.service';
-import { DailyChallengeService } from '../../daily-challenge/application/daily-challenge.service';
 import { ProblemService } from '../../problem/application/problem.service';
 import { Problem } from '../../problem/domain/entities/problem';
 import { ProblemTestCase } from '../../problem/domain/entities/problem-test-case';
@@ -105,43 +103,27 @@ function makeRaw(spec: RunSpec, config: RawConfig): RawRunOutput {
   };
 }
 
-function buildService(
-  run: (spec: RunSpec) => Promise<RawRunOutput>,
-  record = jest.fn().mockResolvedValue({ getId: () => 'submission-test' }),
-): { service: CodeRunnerService; record: jest.Mock; runSpy: jest.Mock } {
+function buildService(run: (spec: RunSpec) => Promise<RawRunOutput>): {
+  service: CodeRunnerService;
+  runSpy: jest.Mock;
+} {
   const problem = buildProblem();
   const problemService = { getById: jest.fn().mockResolvedValue(problem) } as unknown as ProblemService;
   const runSpy = jest.fn(run);
   const sandboxRunner = { run: runSpy } as unknown as ISandboxRunner;
-  const submissionService = { record } as unknown as SubmissionService;
-  const dailyChallengeService = {
-    registerCompletion: jest.fn().mockResolvedValue(undefined),
-  } as unknown as DailyChallengeService;
   return {
-    service: new CodeRunnerService(
-      problemService,
-      sandboxRunner,
-      submissionService,
-      dailyChallengeService,
-    ),
-    record,
+    service: new CodeRunnerService(problemService, sandboxRunner),
     runSpy,
   };
 }
 
 describe('CodeRunnerService', () => {
-  it('runs only visible test cases when not persisting', async () => {
-    const { service, runSpy, record } = buildService((spec) =>
+  it('runs only visible test cases when hidden cases are excluded', async () => {
+    const { service, runSpy } = buildService((spec) =>
       Promise.resolve(makeRaw(spec, { outputs: { c1: '3', c2: '999' } })),
     );
 
-    const outcome = await service.execute({
-      userId: 'u1',
-      problemId: 'p1',
-      language: 'javascript',
-      code: 'x',
-      persist: false,
-    });
+    const outcome = await service.evaluate('p1', 'javascript', 'x', false);
 
     const spec = runSpy.mock.calls[0]?.[0] as RunSpec;
     expect(spec.cases.map((c) => c.id)).toEqual(['c1', 'c2']);
@@ -151,21 +133,14 @@ describe('CodeRunnerService', () => {
     expect(outcome.results[0]?.status).toBe('PASS');
     expect(outcome.results[1]?.status).toBe('FAIL');
     expect(outcome.results[0]?.label).toBe('Case 1');
-    expect(record).not.toHaveBeenCalled();
   });
 
-  it('runs all test cases and persists on submit, accepting a correct solution', async () => {
-    const { service, runSpy, record } = buildService((spec) =>
+  it('runs all test cases when hidden cases are included, accepting a correct solution', async () => {
+    const { service, runSpy } = buildService((spec) =>
       Promise.resolve(makeRaw(spec, { outputs: { c1: '3', c2: '4', c3: '0' } })),
     );
 
-    const outcome = await service.execute({
-      userId: 'u1',
-      problemId: 'p1',
-      language: 'javascript',
-      code: 'x',
-      persist: true,
-    });
+    const outcome = await service.evaluate('p1', 'javascript', 'x', true);
 
     const spec = runSpy.mock.calls[0]?.[0] as RunSpec;
     expect(spec.cases.map((c) => c.id)).toEqual(['c1', 'c2', 'c3']);
@@ -173,20 +148,13 @@ describe('CodeRunnerService', () => {
     expect(outcome.passedCount).toBe(3);
     expect(outcome.results[2]?.isHidden).toBe(true);
     expect(outcome.results[2]?.label).toBe('Hidden case 1');
-    expect(record).toHaveBeenCalledTimes(1);
   });
 
   it('maps a runtime error case to ERROR and overall RUNTIME_ERROR', async () => {
     const { service } = buildService((spec) =>
       Promise.resolve(makeRaw(spec, { outputs: { c1: '3' }, errorIds: ['c2'] })),
     );
-    const outcome = await service.execute({
-      userId: 'u1',
-      problemId: 'p1',
-      language: 'javascript',
-      code: 'x',
-      persist: false,
-    });
+    const outcome = await service.evaluate('p1', 'javascript', 'x', false);
     expect(outcome.results[1]?.status).toBe('ERROR');
     expect(outcome.status).toBe(SubmissionStatus.RUNTIME_ERROR);
   });
@@ -195,13 +163,7 @@ describe('CodeRunnerService', () => {
     const { service } = buildService((spec) =>
       Promise.resolve(makeRaw(spec, { compileError: 'syntax error on line 3' })),
     );
-    const outcome = await service.execute({
-      userId: 'u1',
-      problemId: 'p1',
-      language: 'cpp',
-      code: 'x',
-      persist: false,
-    });
+    const outcome = await service.evaluate('p1', 'cpp', 'x', false);
     expect(outcome.status).toBe(SubmissionStatus.COMPILE_ERROR);
     expect(outcome.stdout).toBe('syntax error on line 3');
     expect(outcome.results.every((r) => r.status === 'ERROR')).toBe(true);
@@ -211,13 +173,7 @@ describe('CodeRunnerService', () => {
     const { service } = buildService((spec) =>
       Promise.resolve(makeRaw(spec, { outputs: { c1: '3' }, omitIds: ['c2'], timedOut: true })),
     );
-    const outcome = await service.execute({
-      userId: 'u1',
-      problemId: 'p1',
-      language: 'javascript',
-      code: 'x',
-      persist: false,
-    });
+    const outcome = await service.evaluate('p1', 'javascript', 'x', false);
     expect(outcome.status).toBe(SubmissionStatus.TIME_LIMIT_EXCEEDED);
   });
 });

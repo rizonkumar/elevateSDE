@@ -5,65 +5,39 @@ import { Problem, ProblemLanguage } from '../../problem/domain/entities/problem'
 import { ProblemTestCase } from '../../problem/domain/entities/problem-test-case';
 import { ISandboxRunner } from '../domain/interfaces/sandbox-runner.interface';
 import { RawRunOutput } from '../domain/value-objects/raw-run-output';
-import { DailyChallengeService } from '../../daily-challenge/application/daily-challenge.service';
-import { SubmissionService } from './submission.service';
 import { AssessmentRunOutcome, CaseOutcome } from './assessment-outcome';
 import { outputsMatch } from './output-comparator';
 
 const TIMEOUT_MS_PER_CASE = 2000;
 const MEMORY_LIMIT_MB = 256;
 
-export interface ExecuteAssessmentInput {
-  userId: string;
-  problemId: string;
-  language: ProblemLanguage;
-  code: string;
-  persist: boolean;
-}
-
 @Injectable()
 export class CodeRunnerService {
   constructor(
     private readonly problemService: ProblemService,
     private readonly sandboxRunner: ISandboxRunner,
-    private readonly submissionService: SubmissionService,
-    private readonly dailyChallengeService: DailyChallengeService,
   ) {}
 
-  async execute(input: ExecuteAssessmentInput): Promise<AssessmentRunOutcome> {
-    const problem = await this.problemService.getById(input.problemId);
-    const cases = input.persist ? problem.getTestCases() : problem.getVisibleTestCases();
+  async evaluate(
+    problemId: string,
+    language: ProblemLanguage,
+    code: string,
+    includeHidden: boolean,
+  ): Promise<AssessmentRunOutcome> {
+    const problem = await this.problemService.getById(problemId);
+    const cases = includeHidden ? problem.getTestCases() : problem.getVisibleTestCases();
 
     const raw = await this.sandboxRunner.run({
-      language: input.language,
+      language,
       functionName: problem.getFunctionName(),
       harness: problem.getHarness(),
-      userCode: input.code,
+      userCode: code,
       cases: cases.map((testCase) => ({ id: testCase.getId(), input: testCase.getInput() })),
       timeoutMsPerCase: TIMEOUT_MS_PER_CASE,
       memoryLimitMb: MEMORY_LIMIT_MB,
     });
 
-    const outcome = this.assemble(problem, cases, raw);
-
-    if (input.persist) {
-      const submission = await this.submissionService.record(
-        input.userId,
-        problem.getId(),
-        input.language,
-        input.code,
-        outcome,
-      );
-      if (outcome.status === SubmissionStatus.ACCEPTED) {
-        await this.dailyChallengeService.registerCompletion(
-          input.userId,
-          problem.getId(),
-          submission.getId(),
-        );
-      }
-    }
-
-    return outcome;
+    return this.assemble(problem, cases, raw);
   }
 
   private assemble(

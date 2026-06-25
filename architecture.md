@@ -201,10 +201,13 @@ Business logic is decoupled using events.
 
 ### 2. Distributed Queues (BullMQ + Redis)
 
-Resource-intensive tasks are offloaded from the main event loop.
+Resource-intensive tasks are offloaded from the main event loop. The `queues` module owns the
+BullMQ root connection (Redis from `REDIS_URL`, namespaced under the `elevatesde` prefix) and
+exposes typed producer ports (e.g. `ICodeExecutionQueue`); each owning domain registers its own
+queue and processor. Queue names for `resume` and `email` are reserved for the follow-up modules.
 
-- **Resume Processing:** Extracts text from S3 documents, parses via LLM, and calculates ATS score.
-- **Code Execution Engine** _(implemented)_: Secure, isolated Docker environment (the `code-runner` module) for evaluating candidate DSA submissions against test cases, with per-language drivers (JavaScript, Python, C++), timeouts, and memory limits. Currently invoked synchronously; migrating execution onto BullMQ is a follow-up once the queue layer lands.
+- **Code Execution Engine** _(async on BullMQ — implemented)_: Secure, isolated Docker environment (the `code-runner` module) for evaluating candidate DSA submissions against test cases, with per-language drivers (JavaScript, Python, C++), timeouts, and memory limits. `POST /assessments/submit` persists a `QUEUED` submission, enqueues a job (`202` + `submissionId`), and a `CodeExecutionProcessor` worker transitions it `QUEUED → RUNNING → ACCEPTED/WRONG_ANSWER/…`; clients poll `GET /assessments/submissions/:id`. Jobs retry with exponential backoff, and an exhausted-retry handler marks the submission failed so it never stalls. The quick `POST /assessments/run` (visible cases only) remains synchronous.
+- **Resume Processing** _(pending)_: Extracts text from S3 documents, parses via LLM, and calculates ATS score.
 
 ### 3. AI Mock Interviews (RAG Implementation)
 

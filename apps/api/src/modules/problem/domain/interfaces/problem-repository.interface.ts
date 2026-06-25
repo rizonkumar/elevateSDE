@@ -5,6 +5,7 @@ export interface ProblemListFilter {
   difficulty?: AssessmentDifficulty;
   tag?: string;
   search?: string;
+  hasTestCases?: boolean;
   page: number;
   pageSize: number;
 }
