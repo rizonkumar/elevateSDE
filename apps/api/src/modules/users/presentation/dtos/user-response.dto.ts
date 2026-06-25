@@ -18,6 +18,9 @@ export class UserResponseDto implements UserDto {
   @ApiPropertyOptional({ example: 'Lovelace', nullable: true })
   lastName!: string | null;
 
+  @ApiPropertyOptional({ example: '3 YOE in Full Stack Development.', nullable: true })
+  headline!: string | null;
+
   @ApiProperty({ enum: UserRole })
   role!: string;
 

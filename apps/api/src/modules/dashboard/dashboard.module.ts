@@ -3,10 +3,11 @@ import { IDashboardRepository } from './domain/interfaces/dashboard-repository.i
 import { DashboardRepository } from './infrastructure/repositories/dashboard.repository';
 import { DashboardService } from './application/dashboard.service';
 import { DashboardController } from './presentation/controllers/dashboard.controller';
+import { SubmissionHeatmapController } from './presentation/controllers/submission-heatmap.controller';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 
 @Module({
-  controllers: [DashboardController],
+  controllers: [DashboardController, SubmissionHeatmapController],
   providers: [
     DashboardService,
     PrismaService,

@@ -13,6 +13,7 @@ export interface ProblemListParams {
   pageSize: number;
   search?: string;
   difficulty?: AssessmentDifficulty;
+  hasTestCases?: boolean;
 }
 
 export async function fetchProblemList(params: ProblemListParams): Promise<AdminProblemListDto> {

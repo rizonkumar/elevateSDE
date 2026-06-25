@@ -1,5 +1,10 @@
 import { AssessmentDifficulty, JobApplicationStatus } from '@elevatesde/shared-types';
 
+export interface SubmissionHeatmapCell {
+  date: string;
+  count: number;
+}
+
 export interface DashboardJobTrackerView {
   total: number;
   byStatus: Record<JobApplicationStatus, number>;
