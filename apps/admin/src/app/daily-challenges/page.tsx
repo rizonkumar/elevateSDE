@@ -140,11 +140,21 @@ export default function DailyChallengesPage() {
       >
         <div className="flex flex-col gap-4">
           <DatePicker value={date} onChange={setDate} label="Challenge date" />
-          <Toggle
-            checked={onlyWithTestCases}
-            onChange={(next) => void setOnlyWithTestCases(next)}
-            label="Only problems with test cases"
-          />
+          <div className="flex items-center justify-between gap-3 rounded-lg border border-(--color-border-subtle) bg-(--color-bg) px-3 py-2.5">
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-(--color-text-primary)">
+                Only problems with test cases
+              </span>
+              <span className="text-xs text-(--color-text-muted)">
+                Hide problems candidates can&apos;t submit against yet
+              </span>
+            </div>
+            <Toggle
+              checked={onlyWithTestCases}
+              onChange={(next) => void setOnlyWithTestCases(next)}
+              label="Only problems with test cases"
+            />
+          </div>
           <div className="flex flex-col gap-1.5">
             <span className="text-xs font-medium text-(--color-text-muted)">Problem</span>
             <Select value={problemId} options={selectOptions} onChange={setProblemId} />
