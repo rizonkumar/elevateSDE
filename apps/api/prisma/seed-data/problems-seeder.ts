@@ -1,5 +1,5 @@
 import { Prisma, PrismaClient } from '@prisma/client';
-import { loadCompleteDatasetProblems, loadDatasetProblems } from './leetcode';
+import { loadDatasetProblems, loadRunnableDatasetProblems } from './leetcode';
 
 const EMPTY_HARNESS = { paramTypes: [], returnType: '', cpp: { signature: '' } };
 
@@ -29,7 +29,7 @@ export async function seedProblems(prisma: PrismaClient): Promise<number> {
     await prisma.problem.createMany({ data: chunk, skipDuplicates: true });
   }
 
-  const runnableProblems = loadCompleteDatasetProblems();
+  const runnableProblems = loadRunnableDatasetProblems();
   for (const problem of runnableProblems) {
     const harness = (problem.harness ?? EMPTY_HARNESS) as unknown as Prisma.InputJsonValue;
     const comparisonMode = problem.comparisonMode ?? 'EXACT';

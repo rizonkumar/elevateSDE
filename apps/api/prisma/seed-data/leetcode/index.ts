@@ -44,8 +44,8 @@ export function loadDatasetProblems(): DatasetProblem[] {
   return JSON.parse(raw) as DatasetProblem[];
 }
 
-export function loadCompleteDatasetProblems(): DatasetProblem[] {
-  const filePath = join(__dirname, 'complete-problems.dataset.json');
+export function loadRunnableDatasetProblems(): DatasetProblem[] {
+  const filePath = join(__dirname, 'runnable-problems.dataset.json');
   const raw = readFileSync(filePath, 'utf8');
   return JSON.parse(raw) as DatasetProblem[];
 }
