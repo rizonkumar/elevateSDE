@@ -5,38 +5,44 @@ ElevateSDE is an enterprise-grade AI-driven interview preparation platform built
 ## Documentation
 
 - **Architecture:** Detailed technical stack, monorepo structure, DDD pattern, database schemas, and advanced systems are documented in [architecture.md](./architecture.md).
-- **Developer Guidelines:** Guidelines for development, coding standards (no comments), git branching strategy, and UI rules for AI assistants are documented in [Claude.md](./Claude.md).
+- **Developer Guidelines:** Guidelines for development, coding standards (no comments), git branching strategy, and UI rules for AI assistants are documented in [CLAUDE.md](./CLAUDE.md).
 
 ## System Architecture Diagram
 
 ```mermaid
 graph TD
     subgraph Clients["Frontend Clients (Next.js 16)"]
-        Web["Candidate Web Client (Port 3001)"]
-        Admin["Admin Backoffice Client (Port 3002)"]
+        Web["Candidate Web Client (:3001)"]
+        Admin["Admin Backoffice (:3002, internal — served at /admin)"]
     end
 
-    subgraph API["Backend API (NestJS - Port 3000)"]
-        Gateway["API Gateway / App Routing"]
+    subgraph API["Backend API (NestJS :4400 · /api/v1)"]
+        Gateway["Global prefix /api · URI versioning · JWT Auth Guard"]
 
         subgraph Domains["DDD Modules"]
-            AuthModule["Auth Module"]
-            UsersModule["Users Module"]
-            AuditModule["Audit Log Module"]
-            FlagModule["Feature Flag Module"]
+            CoreMods["auth · users · organization · admin"]
+            LearnMods["problem · code-runner · daily-challenge · dashboard"]
+            CommMods["forum · leaderboard · job-application"]
+            PlatMods["audit-log · feature-flag · queues"]
         end
 
-        subgraph Layers["Clean Architecture Layers"]
-            Pres["Presentation Layer (Controllers, DTOs, Mappers)"]
-            App["Application Layer (Services)"]
-            Dom["Domain Layer (Entities, Interfaces)"]
-            Infra["Infrastructure Layer (Repositories, Prisma Mappers)"]
+        subgraph Layers["Clean Architecture Layers (per module)"]
+            Pres["Presentation (Controllers, DTOs, Mappers)"]
+            App["Application (Services)"]
+            Dom["Domain (Entities, Interfaces)"]
+            Infra["Infrastructure (Repositories, Prisma Mappers)"]
         end
+    end
+
+    subgraph Async["Async Code Execution"]
+        Queue["CODE_EXECUTION Queue (BullMQ)"]
+        Worker["CodeExecutionProcessor (Worker)"]
+        Sandbox["Docker Sandbox<br/>node:20 · python:3.12 · gcc:13<br/>--network none · read-only · 2s / 256MB"]
     end
 
     subgraph Storage["Data Store Layer"]
-        DB[(PostgreSQL - Prisma)]
-        Cache[(Redis - Caching & BullMQ)]
+        DB[("PostgreSQL — Prisma")]
+        Cache[("Redis — Cache & BullMQ")]
     end
 
     Web --> Gateway
@@ -48,10 +54,29 @@ graph TD
     Infra --> DB
     App --> Cache
 
+    %% Code execution: synchronous run vs queued submit
+    App -->|POST /assessments/run · visible cases| Sandbox
+    App -->|POST /assessments/submit · all cases| Queue
+    Queue --> Cache
+    Queue --> Worker
+    Worker --> Sandbox
+    Worker --> DB
+
     %% Audit Logging Hook
-    App -.->|Trigger Audit Logs| AuditModule
-    AuditModule --> Infra
+    App -.->|Trigger Audit Logs| PlatMods
+    PlatMods --> Infra
 ```
+
+## Code Execution Sandbox
+
+Candidate submissions are evaluated by the `code-runner` module in isolated Docker containers. It is **harness-based** (the candidate writes a function; a generated driver invokes it with JSON-decoded arguments) rather than stdin/stdout-based.
+
+- **Languages:** JavaScript (`node:20-alpine`), Python (`python:3.12-alpine`), C++ (`gcc:13`, compiled with `-O2 -std=c++17`).
+- **Isolation & limits:** `--network none`, read-only filesystem, `2s` per test case, `256MB` memory, `--cpus=1.0`, `--pids-limit=64`.
+- **Grading:** each problem has a `comparisonMode` — `EXACT`, `UNORDERED` (multiset, order-independent), or `FLOAT_TOLERANT` (1e-6 relative tolerance).
+- **Two entry points:** `POST /api/v1/assessments/run` runs **visible** cases synchronously; `POST /api/v1/assessments/submit` queues a job (BullMQ) that runs **all** cases (incl. hidden) via the `CodeExecutionProcessor`, transitioning the submission `QUEUED → RUNNING → ACCEPTED / WRONG_ANSWER / …`. Clients poll `GET /api/v1/assessments/submissions/:id`.
+
+> **Docker must be running** for code execution. The runtime images are pulled automatically on first use (or pre-pull with `docker pull node:20-alpine python:3.12-alpine`).
 
 ## System Audit Logging & Compliance
 
@@ -108,6 +133,8 @@ The API requires a PostgreSQL database (and Redis for caching/queues). Both are 
    pnpm exec prisma db seed
    ```
 
+   > `db seed` loads the full problem catalogue plus the runnable problem set (with harnesses, test cases, and grading metadata) and community/demo data. To reseed only the problem bank, use `pnpm run db:seed:problems`. **Code execution requires Docker running** (see [Code Execution Sandbox](#code-execution-sandbox)).
+
 5. **Run the apps**:
 
    ```bash
@@ -116,12 +143,16 @@ The API requires a PostgreSQL database (and Redis for caching/queues). Both are 
 
 ## Dashboards
 
-| Surface                | URL                                           | Access                 |
-| ---------------------- | --------------------------------------------- | ---------------------- |
-| Candidate dashboard    | `http://localhost:3001/dashboard`             | Any authenticated user |
-| Organization dashboard | `http://localhost:3001/dashboard/org`         | `TENANT_ADMIN` only    |
-| Super-Admin backoffice | `http://localhost:3001/admin`                 | `ADMIN` only           |
-| Coding problem bank    | `http://localhost:3001/admin/coding-problems` | `ADMIN` only           |
+| Surface                  | URL                                            | Access                 |
+| ------------------------ | ---------------------------------------------- | ---------------------- |
+| Candidate dashboard      | `http://localhost:3001/dashboard`              | Any authenticated user |
+| Coding assessments       | `http://localhost:3001/dashboard/assessment`   | Any authenticated user |
+| Daily challenge & streak | `http://localhost:3001/dashboard/daily`        | Any authenticated user |
+| Profile & heatmap        | `http://localhost:3001/dashboard/profile`      | Any authenticated user |
+| Organization dashboard   | `http://localhost:3001/dashboard/org`          | `TENANT_ADMIN` only    |
+| Super-Admin backoffice   | `http://localhost:3001/admin`                  | `ADMIN` only           |
+| Coding problem bank      | `http://localhost:3001/admin/coding-problems`  | `ADMIN` only           |
+| Daily challenge schedule | `http://localhost:3001/admin/daily-challenges` | `ADMIN` only           |
 
 > Everything is reached through the single web origin on **port 3001**. The backoffice is a separate Next.js app (`apps/admin`) that runs internally on port `3002` with `basePath: '/admin'`; `apps/web/next.config.ts` rewrites `/admin/:path*` to it, so you always visit `localhost:3001/admin` (a reverse proxy does the same under one domain in production). Do not open port `3002` directly.
 
@@ -133,7 +164,7 @@ Seeded demo logins (all use the password `Password123!`):
 | `org@elevatesde.dev`       | `TENANT_ADMIN` |
 | `candidate@elevatesde.dev` | `USER`         |
 
-The candidate and organization dashboards are driven by typed client-side stores (mock data) since their backing domain models are not yet implemented; the backoffice consumes live `/api/v1/admin/*` endpoints. The backoffice coding problem bank manager (`/admin/coding-problems`) is likewise client-store/mock-driven until its `/api/v1/admin/coding-problems` backend lands.
+Most surfaces are backed by live, user-scoped API endpoints: the candidate dashboard, coding assessments + execution, daily challenge & streaks, profile & submission heatmap, job tracker, community forum, leaderboard, and the organization dashboard, plus the backoffice (`/api/v1/admin/*`, including the coding problem bank and daily-challenge scheduling). Only the **AI mock interview** and **resume analyzer** surfaces remain client-side mocks (in-browser engines), pending their domain models.
 
 ## Common Commands
 
