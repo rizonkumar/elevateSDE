@@ -13,6 +13,14 @@ export interface DatasetTestCase {
   isHidden: boolean;
 }
 
+export interface DatasetHarness {
+  paramTypes: string[];
+  returnType: string;
+  cpp: { signature: string };
+}
+
+export type DatasetComparisonMode = 'EXACT' | 'UNORDERED' | 'FLOAT_TOLERANT';
+
 export interface DatasetProblem {
   slug: string;
   frontendId: string;
@@ -26,10 +34,18 @@ export interface DatasetProblem {
   examples: DatasetExample[];
   timeLimitMinutes: number;
   testCases: DatasetTestCase[];
+  harness?: DatasetHarness;
+  comparisonMode?: DatasetComparisonMode;
 }
 
 export function loadDatasetProblems(): DatasetProblem[] {
   const filePath = join(__dirname, 'problems.dataset.json');
+  const raw = readFileSync(filePath, 'utf8');
+  return JSON.parse(raw) as DatasetProblem[];
+}
+
+export function loadCompleteDatasetProblems(): DatasetProblem[] {
+  const filePath = join(__dirname, 'complete-problems.dataset.json');
   const raw = readFileSync(filePath, 'utf8');
   return JSON.parse(raw) as DatasetProblem[];
 }

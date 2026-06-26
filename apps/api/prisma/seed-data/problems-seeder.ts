@@ -1,5 +1,5 @@
 import { Prisma, PrismaClient } from '@prisma/client';
-import { loadDatasetProblems } from './leetcode';
+import { loadCompleteDatasetProblems, loadDatasetProblems } from './leetcode';
 
 const EMPTY_HARNESS = { paramTypes: [], returnType: '', cpp: { signature: '' } };
 
@@ -29,8 +29,10 @@ export async function seedProblems(prisma: PrismaClient): Promise<number> {
     await prisma.problem.createMany({ data: chunk, skipDuplicates: true });
   }
 
-  const withTestCases = problems.filter((problem) => problem.testCases.length > 0);
-  for (const problem of withTestCases) {
+  const runnableProblems = loadCompleteDatasetProblems();
+  for (const problem of runnableProblems) {
+    const harness = (problem.harness ?? EMPTY_HARNESS) as unknown as Prisma.InputJsonValue;
+    const comparisonMode = problem.comparisonMode ?? 'EXACT';
     const record = await prisma.problem.upsert({
       where: { slug: problem.slug },
       update: {
@@ -42,6 +44,8 @@ export async function seedProblems(prisma: PrismaClient): Promise<number> {
         starterCode: problem.starterCode,
         examples: problem.examples as unknown as Prisma.InputJsonValue,
         functionName: problem.functionName,
+        harness,
+        comparisonMode,
         timeLimitMinutes: problem.timeLimitMinutes,
         isPublished: true,
       },
@@ -55,9 +59,9 @@ export async function seedProblems(prisma: PrismaClient): Promise<number> {
         starterCode: problem.starterCode,
         examples: problem.examples as unknown as Prisma.InputJsonValue,
         functionName: problem.functionName,
-        harness: EMPTY_HARNESS,
+        harness,
         referenceSolution: {},
-        comparisonMode: 'EXACT',
+        comparisonMode,
         timeLimitMinutes: problem.timeLimitMinutes,
         isPublished: true,
       },
