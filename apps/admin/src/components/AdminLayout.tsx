@@ -13,6 +13,7 @@ import {
   Trophy,
   Code2,
   CalendarDays,
+  Medal,
   LogOut,
   Sun,
   Moon,
@@ -84,6 +85,7 @@ export function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
     { name: 'Leaderboard', href: '/leaderboard-management', icon: Trophy },
     { name: 'Coding Problems', href: '/coding-problems', icon: Code2 },
     { name: 'Daily Challenges', href: '/daily-challenges', icon: CalendarDays },
+    { name: 'Badges', href: '/badges', icon: Medal },
   ];
 
   const rail = mounted && collapsed;
