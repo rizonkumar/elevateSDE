@@ -4,6 +4,7 @@ import { CodeExecutionProcessor } from './code-execution.processor';
 import { CodeRunnerService } from '../../application/code-runner.service';
 import { SubmissionService } from '../../application/submission.service';
 import { DailyChallengeService } from '../../../daily-challenge/application/daily-challenge.service';
+import { AchievementService } from '../../../achievement/application/achievement.service';
 import { AssessmentRunOutcome } from '../../application/assessment-outcome';
 import { CodeExecutionJobData } from '../../../queues/domain/interfaces/code-execution-queue.interface';
 
@@ -32,12 +33,14 @@ function buildProcessor(): {
   applyResult: jest.Mock;
   markFailed: jest.Mock;
   registerCompletion: jest.Mock;
+  evaluateAchievements: jest.Mock;
 } {
   const evaluate = jest.fn().mockResolvedValue(OUTCOME);
   const markRunning = jest.fn().mockResolvedValue(undefined);
   const applyResult = jest.fn().mockResolvedValue(undefined);
   const markFailed = jest.fn().mockResolvedValue(undefined);
   const registerCompletion = jest.fn().mockResolvedValue(undefined);
+  const evaluateAchievements = jest.fn().mockResolvedValue(undefined);
   const codeRunnerService = { evaluate } as unknown as CodeRunnerService;
   const submissionService = {
     markRunning,
@@ -45,17 +48,22 @@ function buildProcessor(): {
     markFailed,
   } as unknown as SubmissionService;
   const dailyChallengeService = { registerCompletion } as unknown as DailyChallengeService;
+  const achievementService = {
+    evaluate: evaluateAchievements,
+  } as unknown as AchievementService;
   return {
     processor: new CodeExecutionProcessor(
       codeRunnerService,
       submissionService,
       dailyChallengeService,
+      achievementService,
     ),
     evaluate,
     markRunning,
     applyResult,
     markFailed,
     registerCompletion,
+    evaluateAchievements,
   };
 }
 
@@ -71,23 +79,25 @@ describe('CodeExecutionProcessor', () => {
     expect(applyResult).toHaveBeenCalledWith('s1', OUTCOME);
   });
 
-  it('registers a daily challenge completion when the submission is accepted', async () => {
-    const { processor, registerCompletion } = buildProcessor();
+  it('registers a daily challenge completion and evaluates achievements when accepted', async () => {
+    const { processor, registerCompletion, evaluateAchievements } = buildProcessor();
     const job = { data: JOB_DATA } as Job<CodeExecutionJobData>;
 
     await processor.process(job);
 
     expect(registerCompletion).toHaveBeenCalledWith('u1', 'p1', 's1');
+    expect(evaluateAchievements).toHaveBeenCalledWith('u1');
   });
 
-  it('does not register a completion when the submission is not accepted', async () => {
-    const { processor, evaluate, registerCompletion } = buildProcessor();
+  it('does not register a completion or evaluate achievements when not accepted', async () => {
+    const { processor, evaluate, registerCompletion, evaluateAchievements } = buildProcessor();
     evaluate.mockResolvedValue({ ...OUTCOME, status: SubmissionStatus.WRONG_ANSWER });
     const job = { data: JOB_DATA } as Job<CodeExecutionJobData>;
 
     await processor.process(job);
 
     expect(registerCompletion).not.toHaveBeenCalled();
+    expect(evaluateAchievements).not.toHaveBeenCalled();
   });
 
   it('does not mark failed while retries remain', async () => {

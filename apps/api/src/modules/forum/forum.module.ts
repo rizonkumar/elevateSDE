@@ -5,8 +5,10 @@ import { ForumService } from './application/forum.service';
 import { ForumController } from './presentation/controllers/forum.controller';
 import { ForumModerationController } from './presentation/controllers/forum-moderation.controller';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
+import { AchievementModule } from '../achievement/achievement.module';
 
 @Module({
+  imports: [AchievementModule],
   controllers: [ForumController, ForumModerationController],
   providers: [
     ForumService,
