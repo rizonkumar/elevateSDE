@@ -502,3 +502,53 @@ export interface InvitePreviewDto {
   status: InvitationStatus;
   valid: boolean;
 }
+
+export type BadgeCriteriaType =
+  | 'PROBLEMS_SOLVED'
+  | 'STREAK_DAYS'
+  | 'ASSESSMENTS_COMPLETED'
+  | 'FORUM_POSTS'
+  | 'POINTS';
+
+export interface BadgeDto {
+  id: string;
+  key: string;
+  name: string;
+  description: string;
+  icon: string;
+  criteriaType: BadgeCriteriaType;
+  threshold: number;
+  isActive: boolean;
+}
+
+export interface UserBadgeDto extends BadgeDto {
+  awardedAt: string;
+}
+
+export interface LockedBadgeDto extends BadgeDto {
+  progress: number;
+}
+
+export interface AdminBadgeDto extends BadgeDto {
+  awardCount: number;
+}
+
+export interface AchievementsViewDto {
+  earned: UserBadgeDto[];
+  locked: LockedBadgeDto[];
+}
+
+export interface CreateBadgeDto {
+  key: string;
+  name: string;
+  description: string;
+  icon: string;
+  criteriaType: BadgeCriteriaType;
+  threshold: number;
+  isActive: boolean;
+}
+
+export interface GrantBadgeDto {
+  userId: string;
+  badgeId: string;
+}

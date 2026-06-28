@@ -5,6 +5,7 @@ import { SubmissionStatus } from '@prisma/client';
 import { QUEUE_NAMES } from '../../../queues/domain/queue-names';
 import { CodeExecutionJobData } from '../../../queues/domain/interfaces/code-execution-queue.interface';
 import { DailyChallengeService } from '../../../daily-challenge/application/daily-challenge.service';
+import { AchievementService } from '../../../achievement/application/achievement.service';
 import { CodeRunnerService } from '../../application/code-runner.service';
 import { SubmissionService } from '../../application/submission.service';
 
@@ -18,6 +19,7 @@ export class CodeExecutionProcessor extends WorkerHost {
     private readonly codeRunnerService: CodeRunnerService,
     private readonly submissionService: SubmissionService,
     private readonly dailyChallengeService: DailyChallengeService,
+    private readonly achievementService: AchievementService,
   ) {
     super();
   }
@@ -29,6 +31,7 @@ export class CodeExecutionProcessor extends WorkerHost {
     await this.submissionService.applyResult(submissionId, outcome);
     if (outcome.status === SubmissionStatus.ACCEPTED) {
       await this.dailyChallengeService.registerCompletion(userId, problemId, submissionId);
+      await this.achievementService.evaluate(userId);
     }
   }
 

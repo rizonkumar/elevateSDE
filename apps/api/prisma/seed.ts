@@ -5,6 +5,7 @@ import { Pool } from 'pg';
 import * as bcrypt from 'bcrypt';
 import { seedProblems } from './seed-data/problems-seeder';
 import { seedCommunity } from './seed-data/community-seeder';
+import { seedBadges } from './seed-data/badges-seeder';
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
@@ -107,6 +108,9 @@ async function main() {
 
   const totalMembers = await seedCommunity(prisma, password);
   console.log(`Seeded community. Total roster members: ${totalMembers}`);
+
+  const totalBadges = await seedBadges(prisma);
+  console.log(`Seeded badges. Total badges in database: ${totalBadges}`);
 }
 
 main()

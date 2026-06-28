@@ -5,6 +5,7 @@ import { IForumRepository } from '../domain/interfaces/forum-repository.interfac
 import { ForumPost } from '../domain/entities/forum-post';
 import { ForumComment } from '../domain/entities/forum-comment';
 import { ForumCommentView, ForumPostView } from '../domain/read-models/forum-view';
+import { AchievementService } from '../../achievement/application/achievement.service';
 
 export interface CreateForumPostInput {
   title: string;
@@ -14,7 +15,10 @@ export interface CreateForumPostInput {
 
 @Injectable()
 export class ForumService {
-  constructor(private readonly forumRepository: IForumRepository) {}
+  constructor(
+    private readonly forumRepository: IForumRepository,
+    private readonly achievementService: AchievementService,
+  ) {}
 
   async listFeed(viewerId: string): Promise<ForumPostView[]> {
     return this.forumRepository.listPublished(viewerId);
@@ -33,6 +37,7 @@ export class ForumService {
       tags: input.tags,
     });
     await this.forumRepository.createPost(post);
+    await this.achievementService.evaluate(userId);
     return this.requirePostView(post.getId(), userId);
   }
 

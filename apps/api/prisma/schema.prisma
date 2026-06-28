@@ -67,6 +67,14 @@ enum InvitationStatus {
   EXPIRED
 }
 
+enum BadgeCriteriaType {
+  PROBLEMS_SOLVED
+  STREAK_DAYS
+  ASSESSMENTS_COMPLETED
+  FORUM_POSTS
+  POINTS
+}
+
 model Tenant {
   id               String       @id @default(uuid())
   name             String
@@ -103,6 +111,7 @@ model User {
   stats             UserStats?
   sentInvitations   Invitation[]
   dailyChallengeCompletions DailyChallengeCompletion[]
+  userBadges        UserBadge[]
 }
 
 model RefreshToken {
@@ -345,4 +354,33 @@ model DailyChallengeCompletion {
 
   @@unique([userId, dailyChallengeId])
   @@index([dailyChallengeId])
+}
+
+model Badge {
+  id           String            @id @default(uuid())
+  key          String            @unique
+  name         String
+  description  String
+  icon         String
+  criteriaType BadgeCriteriaType
+  threshold    Int
+  tenantId     String?
+  isActive     Boolean           @default(true)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  userBadges   UserBadge[]
+
+  @@index([isActive])
+}
+
+model UserBadge {
+  id        String   @id @default(uuid())
+  userId    String
+  badgeId   String
+  awardedAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge     Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+  @@index([userId])
 }
