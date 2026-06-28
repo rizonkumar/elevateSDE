@@ -8,6 +8,7 @@ import type { AssessmentDifficulty, UserDto } from '@elevatesde/shared-types';
 import { PageContainer } from '@/components/dashboard/PageContainer';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { ContributionHeatmap } from '@/components/dashboard/profile/ContributionHeatmap';
+import { ProfileAchievements } from '@/components/dashboard/profile/ProfileAchievements';
 import { useProfileStore } from '@/store/profile.store';
 
 const DIFFICULTIES: { key: AssessmentDifficulty; label: string; tone: string }[] = [
@@ -96,16 +97,9 @@ export default function ProfilePage() {
               </p>
             </div>
           </div>
-          {leaderboard.badges.length > 0 && (
-            <div className="mt-4 flex flex-wrap gap-2">
-              {leaderboard.badges.map((badge) => (
-                <Badge key={badge} variant="accent">
-                  {badge}
-                </Badge>
-              ))}
-            </div>
-          )}
         </div>
+
+        <ProfileAchievements />
 
         <div className="grid gap-6 lg:grid-cols-2">
           <div className={cardClass}>
