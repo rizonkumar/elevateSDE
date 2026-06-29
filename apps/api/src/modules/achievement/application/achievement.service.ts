@@ -1,14 +1,22 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CreateBadgeDto } from '@elevatesde/shared-types';
 import { IAchievementRepository } from '../domain/interfaces/achievement-repository.interface';
 import { Badge } from '../domain/entities/badge';
 import { AchievementsView, AdminBadgeView } from '../domain/read-models/achievement-view';
+import {
+  BadgeAwardedEvent,
+  NOTIFICATION_EVENTS,
+} from '../../notification/domain/events/notification-events';
 
 const GLOBAL_SCOPE: string | null = null;
 
 @Injectable()
 export class AchievementService {
-  constructor(private readonly repository: IAchievementRepository) {}
+  constructor(
+    private readonly repository: IAchievementRepository,
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
 
   async listForUser(userId: string): Promise<AchievementsView> {
     const [earned, activeBadges, metrics] = await Promise.all([
@@ -41,6 +49,10 @@ export class AchievementService {
       await this.repository.award(userId, badge.getId());
       earned.add(badge.getKey());
       awardedAny = true;
+      this.eventEmitter.emit(NOTIFICATION_EVENTS.BADGE_AWARDED, {
+        userId,
+        badgeName: badge.getName(),
+      } satisfies BadgeAwardedEvent);
     }
     if (awardedAny) {
       await this.repository.syncUserStatsBadges(userId, [...earned]);

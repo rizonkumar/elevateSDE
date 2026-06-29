@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
@@ -16,9 +17,11 @@ import { QueuesModule } from './modules/queues/queues.module';
 import { OrganizationModule } from './modules/organization/organization.module';
 import { DailyChallengeModule } from './modules/daily-challenge/daily-challenge.module';
 import { AchievementModule } from './modules/achievement/achievement.module';
+import { NotificationModule } from './modules/notification/notification.module';
 
 @Module({
   imports: [
+    EventEmitterModule.forRoot(),
     QueuesModule,
     AuthModule,
     UsersModule,
@@ -34,6 +37,7 @@ import { AchievementModule } from './modules/achievement/achievement.module';
     OrganizationModule,
     DailyChallengeModule,
     AchievementModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

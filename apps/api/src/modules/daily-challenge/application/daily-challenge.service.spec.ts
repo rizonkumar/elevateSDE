@@ -1,4 +1,5 @@
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { AssessmentDifficulty } from '@prisma/client';
 import { DailyChallengeService } from './daily-challenge.service';
 import { IDailyChallengeRepository } from '../domain/interfaces/daily-challenge-repository.interface';
@@ -97,7 +98,7 @@ describe('DailyChallengeService', () => {
 
   beforeEach(() => {
     repository = new FakeDailyChallengeRepository();
-    service = new DailyChallengeService(repository);
+    service = new DailyChallengeService(repository, new EventEmitter2());
   });
 
   describe('getStreakSummary', () => {

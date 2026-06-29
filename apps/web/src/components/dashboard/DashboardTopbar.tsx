@@ -1,6 +1,7 @@
 'use client';
 
 import { Menu } from 'lucide-react';
+import { NotificationBell } from './NotificationBell';
 import { UserMenu } from './UserMenu';
 
 interface DashboardTopbarProps {
@@ -19,7 +20,10 @@ export function DashboardTopbar({ onOpenSidebar }: DashboardTopbarProps) {
         <Menu className="h-4 w-4" />
       </button>
       <div className="hidden lg:block" />
-      <UserMenu />
+      <div className="flex items-center gap-2 sm:gap-3">
+        <NotificationBell />
+        <UserMenu />
+      </div>
     </header>
   );
 }

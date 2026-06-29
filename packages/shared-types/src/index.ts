@@ -552,3 +552,40 @@ export interface GrantBadgeDto {
   userId: string;
   badgeId: string;
 }
+
+export type NotificationType =
+  | 'BADGE_AWARDED'
+  | 'STREAK_MILESTONE'
+  | 'FORUM_REPLY'
+  | 'FORUM_UPVOTE'
+  | 'SUBMISSION_ACCEPTED'
+  | 'SYSTEM';
+
+export interface NotificationDto {
+  id: string;
+  type: NotificationType;
+  title: string;
+  body: string;
+  linkUrl: string | null;
+  isRead: boolean;
+  createdAt: string;
+}
+
+export interface NotificationsViewDto {
+  notifications: NotificationDto[];
+  unreadCount: number;
+}
+
+export interface UnreadCountDto {
+  unreadCount: number;
+}
+
+export interface NotificationPreferenceDto {
+  type: NotificationType;
+  inAppEnabled: boolean;
+}
+
+export interface UpdateNotificationPreferenceDto {
+  type: NotificationType;
+  inAppEnabled: boolean;
+}
