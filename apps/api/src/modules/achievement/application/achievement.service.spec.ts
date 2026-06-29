@@ -1,4 +1,5 @@
 import { NotFoundException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { AchievementService } from './achievement.service';
 import { IAchievementRepository } from '../domain/interfaces/achievement-repository.interface';
 import { Badge } from '../domain/entities/badge';
@@ -99,7 +100,7 @@ describe('AchievementService', () => {
 
   beforeEach(() => {
     repository = new FakeAchievementRepository();
-    service = new AchievementService(repository);
+    service = new AchievementService(repository, new EventEmitter2());
   });
 
   describe('evaluate', () => {

@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ForumPostStatus } from '@prisma/client';
 import { randomUUID } from 'node:crypto';
 import { IForumRepository } from '../domain/interfaces/forum-repository.interface';
@@ -6,6 +7,11 @@ import { ForumPost } from '../domain/entities/forum-post';
 import { ForumComment } from '../domain/entities/forum-comment';
 import { ForumCommentView, ForumPostView } from '../domain/read-models/forum-view';
 import { AchievementService } from '../../achievement/application/achievement.service';
+import {
+  ForumReplyEvent,
+  ForumUpvoteEvent,
+  NOTIFICATION_EVENTS,
+} from '../../notification/domain/events/notification-events';
 
 export interface CreateForumPostInput {
   title: string;
@@ -18,6 +24,7 @@ export class ForumService {
   constructor(
     private readonly forumRepository: IForumRepository,
     private readonly achievementService: AchievementService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async listFeed(viewerId: string): Promise<ForumPostView[]> {
@@ -42,9 +49,18 @@ export class ForumService {
   }
 
   async togglePostUpvote(userId: string, id: string): Promise<ForumPostView> {
-    await this.findPublished(id);
+    const post = await this.findPublished(id);
     await this.forumRepository.togglePostVote(id, userId);
-    return this.requirePostView(id, userId);
+    const view = await this.requirePostView(id, userId);
+    if (view.viewerHasUpvoted && post.getUserId() !== userId) {
+      this.eventEmitter.emit(NOTIFICATION_EVENTS.FORUM_UPVOTE, {
+        recipientId: post.getUserId(),
+        actorId: userId,
+        postId: id,
+        postTitle: post.getTitle(),
+      } satisfies ForumUpvoteEvent);
+    }
+    return view;
   }
 
   async reportPost(userId: string, id: string, reason: string): Promise<void> {
@@ -58,9 +74,17 @@ export class ForumService {
   }
 
   async addComment(userId: string, postId: string, body: string): Promise<ForumCommentView> {
-    await this.findPublished(postId);
+    const post = await this.findPublished(postId);
     const comment = ForumComment.create(randomUUID(), postId, userId, body);
     await this.forumRepository.createComment(comment);
+    if (post.getUserId() !== userId) {
+      this.eventEmitter.emit(NOTIFICATION_EVENTS.FORUM_REPLY, {
+        recipientId: post.getUserId(),
+        actorId: userId,
+        postId,
+        postTitle: post.getTitle(),
+      } satisfies ForumReplyEvent);
+    }
     return this.requireCommentView(comment.getId(), userId);
   }
 

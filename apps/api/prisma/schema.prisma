@@ -75,6 +75,15 @@ enum BadgeCriteriaType {
   POINTS
 }
 
+enum NotificationType {
+  BADGE_AWARDED
+  STREAK_MILESTONE
+  FORUM_REPLY
+  FORUM_UPVOTE
+  SUBMISSION_ACCEPTED
+  SYSTEM
+}
+
 model Tenant {
   id               String       @id @default(uuid())
   name             String
@@ -112,6 +121,8 @@ model User {
   sentInvitations   Invitation[]
   dailyChallengeCompletions DailyChallengeCompletion[]
   userBadges        UserBadge[]
+  notifications             Notification[]
+  notificationPreferences   NotificationPreference[]
 }
 
 model RefreshToken {
@@ -383,4 +394,31 @@ model UserBadge {
 
   @@unique([userId, badgeId])
   @@index([userId])
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  tenantId  String?
+  type      NotificationType
+  title     String
+  body      String
+  linkUrl   String?
+  metadata  Json?
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([userId, readAt])
+}
+
+model NotificationPreference {
+  id           String           @id @default(uuid())
+  userId       String
+  type         NotificationType
+  inAppEnabled Boolean          @default(true)
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type])
 }

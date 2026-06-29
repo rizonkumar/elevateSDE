@@ -1,4 +1,5 @@
 import { Job } from 'bullmq';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { SubmissionStatus } from '@prisma/client';
 import { CodeExecutionProcessor } from './code-execution.processor';
 import { CodeRunnerService } from '../../application/code-runner.service';
@@ -57,6 +58,7 @@ function buildProcessor(): {
       submissionService,
       dailyChallengeService,
       achievementService,
+      new EventEmitter2(),
     ),
     evaluate,
     markRunning,

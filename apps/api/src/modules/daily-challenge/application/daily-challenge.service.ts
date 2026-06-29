@@ -1,4 +1,5 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { IDailyChallengeRepository } from '../domain/interfaces/daily-challenge-repository.interface';
 import { DailyChallenge } from '../domain/entities/daily-challenge';
 import { StreakState } from '../domain/entities/streak-state';
@@ -8,13 +9,24 @@ import {
   StreakSummaryView,
 } from '../domain/read-models/daily-challenge-view';
 import { addDays, startOfUtcDay, toDateKey } from '../domain/daily-date';
+import {
+  NOTIFICATION_EVENTS,
+  StreakMilestoneEvent,
+} from '../../notification/domain/events/notification-events';
 
 const STREAK_CALENDAR_DAYS = 119;
 const GLOBAL_SCOPE: string | null = null;
 
+function isStreakMilestone(streakDays: number): boolean {
+  return streakDays === 3 || (streakDays >= 7 && streakDays % 7 === 0);
+}
+
 @Injectable()
 export class DailyChallengeService {
-  constructor(private readonly repository: IDailyChallengeRepository) {}
+  constructor(
+    private readonly repository: IDailyChallengeRepository,
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
 
   async getToday(userId: string): Promise<DailyChallengeView | null> {
     return this.repository.findDailyView(startOfUtcDay(new Date()), GLOBAL_SCOPE, userId);
@@ -53,7 +65,14 @@ export class DailyChallengeService {
     const state =
       (await this.repository.findStreakState(userId)) ??
       StreakState.create({ streakDays: 0, longestStreak: 0, lastActiveDate: null });
-    await this.repository.saveStreakState(userId, state.registerActivity(today));
+    const updated = state.registerActivity(today);
+    await this.repository.saveStreakState(userId, updated);
+    if (isStreakMilestone(updated.getStreakDays())) {
+      this.eventEmitter.emit(NOTIFICATION_EVENTS.STREAK_MILESTONE, {
+        userId,
+        streakDays: updated.getStreakDays(),
+      } satisfies StreakMilestoneEvent);
+    }
   }
 
   async listSchedule(from: Date, to: Date): Promise<DailyChallengeScheduleView[]> {
