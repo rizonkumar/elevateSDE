@@ -18,6 +18,7 @@ import { OrganizationModule } from './modules/organization/organization.module';
 import { DailyChallengeModule } from './modules/daily-challenge/daily-challenge.module';
 import { AchievementModule } from './modules/achievement/achievement.module';
 import { NotificationModule } from './modules/notification/notification.module';
+import { ProblemSocialModule } from './modules/problem-social/problem-social.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { NotificationModule } from './modules/notification/notification.module';
     DailyChallengeModule,
     AchievementModule,
     NotificationModule,
+    ProblemSocialModule,
   ],
   controllers: [AppController],
   providers: [AppService],

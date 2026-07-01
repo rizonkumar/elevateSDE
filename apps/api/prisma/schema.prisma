@@ -97,32 +97,39 @@ model Tenant {
 }
 
 model User {
-  id           String    @id @default(uuid())
-  tenantId     String?
-  email        String    @unique
-  passwordHash String
-  firstName    String?
-  lastName     String?
-  headline     String?
-  role         UserRole  @default(USER)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  tenant       Tenant?   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  refreshTokens RefreshToken[]
-  auditLogs    AuditLog[]
-  jobApplications JobApplication[]
-  submissions  Submission[]
-  forumPosts        ForumPost[]
-  forumComments     ForumComment[]
-  forumPostVotes    ForumPostVote[]
-  forumCommentVotes ForumCommentVote[]
-  forumReports      ForumReport[]
-  stats             UserStats?
-  sentInvitations   Invitation[]
-  dailyChallengeCompletions DailyChallengeCompletion[]
-  userBadges        UserBadge[]
-  notifications             Notification[]
-  notificationPreferences   NotificationPreference[]
+  id                            String                         @id @default(uuid())
+  tenantId                      String?
+  email                         String                         @unique
+  passwordHash                  String
+  firstName                     String?
+  lastName                      String?
+  headline                      String?
+  role                          UserRole                       @default(USER)
+  createdAt                     DateTime                       @default(now())
+  updatedAt                     DateTime                       @updatedAt
+  tenant                        Tenant?                        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  refreshTokens                 RefreshToken[]
+  auditLogs                     AuditLog[]
+  jobApplications               JobApplication[]
+  submissions                   Submission[]
+  forumPosts                    ForumPost[]
+  forumComments                 ForumComment[]
+  forumPostVotes                ForumPostVote[]
+  forumCommentVotes             ForumCommentVote[]
+  forumReports                  ForumReport[]
+  stats                         UserStats?
+  sentInvitations               Invitation[]
+  dailyChallengeCompletions     DailyChallengeCompletion[]
+  userBadges                    UserBadge[]
+  notifications                 Notification[]
+  notificationPreferences       NotificationPreference[]
+  problemDiscussions            ProblemDiscussion[]
+  problemDiscussionComments     ProblemDiscussionComment[]
+  problemDiscussionVotes        ProblemDiscussionVote[]
+  problemDiscussionCommentVotes ProblemDiscussionCommentVote[]
+  bookmarks                     Bookmark[]
+  problemNotes                  ProblemNote[]
+  problemLists                  ProblemList[]
 }
 
 model RefreshToken {
@@ -191,18 +198,22 @@ model Problem {
   testCases         ProblemTestCase[]
   submissions       Submission[]
   dailyChallenges   DailyChallenge[]
+  discussions       ProblemDiscussion[]
+  bookmarks         Bookmark[]
+  notes             ProblemNote[]
+  listItems         ProblemListItem[]
 
   @@index([difficulty, isPublished])
 }
 
 model ProblemTestCase {
-  id             String   @id @default(uuid())
+  id             String  @id @default(uuid())
   problemId      String
   ordinal        Int
   input          String
   expectedOutput String
-  isHidden       Boolean  @default(false)
-  problem        Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  isHidden       Boolean @default(false)
+  problem        Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
 
   @@unique([problemId, ordinal])
   @@index([problemId, isHidden])
@@ -311,11 +322,11 @@ model ForumReport {
 }
 
 model UserStats {
-  userId               String   @id
-  points               Int      @default(0)
-  monthlyPoints        Int      @default(0)
-  weeklyPoints         Int      @default(0)
-  assessmentsCompleted Int      @default(0)
+  userId               String    @id
+  points               Int       @default(0)
+  monthlyPoints        Int       @default(0)
+  weeklyPoints         Int       @default(0)
+  assessmentsCompleted Int       @default(0)
   badges               String[]
   streakDays           Int       @default(0)
   longestStreak        Int       @default(0)
@@ -421,4 +432,105 @@ model NotificationPreference {
   user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, type])
+}
+
+model ProblemDiscussion {
+  id        String                     @id @default(uuid())
+  problemId String
+  userId    String
+  title     String
+  body      String
+  createdAt DateTime                   @default(now())
+  updatedAt DateTime                   @updatedAt
+  problem   Problem                    @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  user      User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comments  ProblemDiscussionComment[]
+  votes     ProblemDiscussionVote[]
+
+  @@index([problemId, createdAt])
+  @@index([userId])
+}
+
+model ProblemDiscussionComment {
+  id           String                         @id @default(uuid())
+  discussionId String
+  userId       String
+  body         String
+  createdAt    DateTime                       @default(now())
+  updatedAt    DateTime                       @updatedAt
+  discussion   ProblemDiscussion              @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  user         User                           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  votes        ProblemDiscussionCommentVote[]
+
+  @@index([discussionId])
+}
+
+model ProblemDiscussionVote {
+  discussionId String
+  userId       String
+  createdAt    DateTime          @default(now())
+  discussion   ProblemDiscussion @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([discussionId, userId])
+}
+
+model ProblemDiscussionCommentVote {
+  commentId String
+  userId    String
+  createdAt DateTime                 @default(now())
+  comment   ProblemDiscussionComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user      User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([commentId, userId])
+}
+
+model Bookmark {
+  id        String   @id @default(uuid())
+  userId    String
+  problemId String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem   Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, problemId])
+  @@index([userId, createdAt])
+}
+
+model ProblemNote {
+  id        String   @id @default(uuid())
+  userId    String
+  problemId String
+  body      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem   Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, problemId])
+}
+
+model ProblemList {
+  id        String            @id @default(uuid())
+  userId    String
+  name      String
+  isPublic  Boolean           @default(false)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     ProblemListItem[]
+
+  @@index([userId])
+}
+
+model ProblemListItem {
+  id        String      @id @default(uuid())
+  listId    String
+  problemId String
+  ordinal   Int
+  list      ProblemList @relation(fields: [listId], references: [id], onDelete: Cascade)
+  problem   Problem     @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@unique([listId, problemId])
+  @@index([listId, ordinal])
 }

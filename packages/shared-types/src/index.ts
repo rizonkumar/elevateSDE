@@ -589,3 +589,56 @@ export interface UpdateNotificationPreferenceDto {
   type: NotificationType;
   inAppEnabled: boolean;
 }
+
+export interface ProblemDiscussionDto {
+  id: string;
+  problemId: string;
+  title: string;
+  body: string;
+  author: ForumAuthor;
+  upvotes: number;
+  hasUpvoted: boolean;
+  replyCount: number;
+  createdAt: string;
+}
+
+export interface ProblemDiscussionCommentDto {
+  id: string;
+  discussionId: string;
+  author: ForumAuthor;
+  body: string;
+  upvotes: number;
+  hasUpvoted: boolean;
+  createdAt: string;
+}
+
+export interface BookmarkDto {
+  id: string;
+  problem: ProblemSummaryDto;
+  createdAt: string;
+}
+
+export interface BookmarkToggleDto {
+  bookmarked: boolean;
+}
+
+export interface ProblemNoteDto {
+  problemId: string;
+  body: string;
+  updatedAt: string;
+}
+
+export interface ProblemCollectionItemDto {
+  id: string;
+  ordinal: number;
+  problem: ProblemSummaryDto;
+}
+
+export interface ProblemCollectionDto {
+  id: string;
+  name: string;
+  isPublic: boolean;
+  itemCount: number;
+  items: ProblemCollectionItemDto[];
+  createdAt: string;
+}

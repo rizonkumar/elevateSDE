@@ -22,7 +22,7 @@ graph TD
         subgraph Domains["DDD Modules"]
             CoreMods["auth · users · organization · admin"]
             LearnMods["problem · code-runner · daily-challenge · dashboard"]
-            CommMods["forum · leaderboard · job-application"]
+            CommMods["forum · leaderboard · job-application · problem-social"]
             PlatMods["audit-log · feature-flag · queues"]
         end
 
@@ -164,7 +164,7 @@ Seeded demo logins (all use the password `Password123!`):
 | `org@elevatesde.dev`       | `TENANT_ADMIN` |
 | `candidate@elevatesde.dev` | `USER`         |
 
-Most surfaces are backed by live, user-scoped API endpoints: the candidate dashboard, coding assessments + execution, daily challenge & streaks, profile & submission heatmap, job tracker, community forum, leaderboard, and the organization dashboard, plus the backoffice (`/api/v1/admin/*`, including the coding problem bank and daily-challenge scheduling). Only the **AI mock interview** and **resume analyzer** surfaces remain client-side mocks (in-browser engines), pending their domain models.
+Most surfaces are backed by live, user-scoped API endpoints: the candidate dashboard, coding assessments + execution, daily challenge & streaks, profile & submission heatmap, job tracker, community forum, leaderboard, and the organization dashboard, plus the backoffice (`/api/v1/admin/*`, including the coding problem bank and daily-challenge scheduling). Per-problem community and curation endpoints are also live via the `problem-social` module: problem discussions with comments/upvotes (`/api/v1/problems/:id/discussions`, `/api/v1/discussions/*`), bookmarks (`/api/v1/problems/:id/bookmark`, `/api/v1/me/bookmarks`), private notes (`/api/v1/problems/:id/note`), and custom problem collections (`/api/v1/me/lists*`). Only the **AI mock interview** and **resume analyzer** surfaces remain client-side mocks (in-browser engines), pending their domain models.
 
 ## Common Commands
 
