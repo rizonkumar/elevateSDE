@@ -45,9 +45,13 @@ class FakeProblemSocialRepository implements IProblemSocialRepository {
     return null;
   }
 
-  async createDiscussion(): Promise<void> {}
+  createDiscussion(): Promise<void> {
+    return Promise.resolve();
+  }
 
-  async toggleDiscussionVote(): Promise<void> {}
+  toggleDiscussionVote(): Promise<void> {
+    return Promise.resolve();
+  }
 
   async listComments(): Promise<ProblemDiscussionCommentView[]> {
     return [];
@@ -61,9 +65,13 @@ class FakeProblemSocialRepository implements IProblemSocialRepository {
     return null;
   }
 
-  async createComment(): Promise<void> {}
+  createComment(): Promise<void> {
+    return Promise.resolve();
+  }
 
-  async toggleCommentVote(): Promise<void> {}
+  toggleCommentVote(): Promise<void> {
+    return Promise.resolve();
+  }
 
   async toggleBookmark(userId: string, problemId: string): Promise<boolean> {
     const key = `${userId}:${problemId}`;

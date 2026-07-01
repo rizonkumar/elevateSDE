@@ -69,7 +69,7 @@ export class ProblemNote {
 
 function normalizeBody(body: string): string {
   if (typeof body !== 'string') {
-    throw new Error('Note body must be a string');
+    throw new TypeError('Note body must be a string');
   }
   const trimmed = body.trim();
   if (trimmed.length > MAX_NOTE_LENGTH) {
