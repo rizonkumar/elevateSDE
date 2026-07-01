@@ -122,7 +122,7 @@ The backoffice consumes live `/api/v1/admin/*` endpoints (including the coding p
 
 ## Domain-Driven Design (DDD) Backend Architecture
 
-Instead of grouping by framework features (controllers/services), the API is structured by business domains. Current domain modules include `users`, `auth`, `audit-log`, `feature-flag`, `admin`, `organization` (tenant/seat/invitation management), `job-application` (the candidate job tracker), `problem` and `code-runner` (the coding assessment bank and Dockerized execution sandbox), `daily-challenge` (daily problems + streaks), `dashboard` (aggregated candidate stats), `forum` and `leaderboard` (the community discussion board and rankings), and `queues` (the shared BullMQ root that owns async job processing), each following the layered template below.
+Instead of grouping by framework features (controllers/services), the API is structured by business domains. Current domain modules include `users`, `auth`, `audit-log`, `feature-flag`, `admin`, `organization` (tenant/seat/invitation management), `job-application` (the candidate job tracker), `problem` and `code-runner` (the coding assessment bank and Dockerized execution sandbox), `daily-challenge` (daily problems + streaks), `dashboard` (aggregated candidate stats), `forum` and `leaderboard` (the community discussion board and rankings), `problem-social` (per-problem discussions with comments/upvotes plus personal bookmarks, private notes, and custom problem collections), and `queues` (the shared BullMQ root that owns async job processing), each following the layered template below.
 
 ### Example: Users Domain
 
@@ -191,6 +191,11 @@ apps/api/src/modules/users/
 - `ForumComment`: `id`, `postId`, `userId`, `body`, `createdAt`, `updatedAt`
 - `ForumPostVote` / `ForumCommentVote`: composite-key join tables (`postId`/`commentId` + `userId`) backing upvote counts and per-viewer `hasUpvoted`
 - `ForumReport`: `id`, `postId`, `reporterId`, `reason`, `createdAt` (drives the backoffice moderation queue)
+- `ProblemDiscussion` / `ProblemDiscussionComment`: per-problem discussion threads (`problemId`, `userId`, `title`/`body`) and their comments, mirroring the forum post/comment shape scoped to a `Problem`
+- `ProblemDiscussionVote` / `ProblemDiscussionCommentVote`: composite-key join tables backing discussion/comment upvote counts and per-viewer `hasUpvoted`
+- `Bookmark`: `id`, `userId`, `problemId`, `createdAt` (`@@unique([userId, problemId])`) — a user's saved problems
+- `ProblemNote`: `id`, `userId`, `problemId`, `body` (`@@unique([userId, problemId])`) — one private note per user per problem
+- `ProblemList` / `ProblemListItem`: user-owned custom problem collections (`name`, `isPublic`) and their ordered members (`ordinal`, `@@unique([listId, problemId])`)
 - `JobApplication`: `id`, `userId`, `company`, `role`, `status` (`JobApplicationStatus` enum: APPLIED, OA, INTERVIEW, OFFER, REJECTED), `salaryRange`, `jobDescriptionUrl`, `interviewDate`, `boardPosition` (Kanban ordering), `createdAt`, `updatedAt`
 
 ---
@@ -248,5 +253,5 @@ Daily engagement is driven by the `daily-challenge` module and the `UserStats` a
 - **Phase 1 (Core Foundations):** Monorepo setup, Auth, Users, RBAC, Basic Questions, Next.js Dashboard.
 - **Phase 2 (Asynchronous & Real-time):** Redis, BullMQ, WebSockets, Notifications, Job Tracker.
 - **Phase 3 (Enterprise & AI):** Multi-tenancy, Stripe Subscriptions, AI Resume Analyzer, LangChain integration.
-- **Phase 4 (Advanced Systems):** pgvector RAG _(pending)_, Dockerized Code Execution Engine _(done)_, Discussion Forums _(done)_, Leaderboards _(done)_, Gamification & Streaks — daily challenges, profile, submission heatmap _(done)_.
+- **Phase 4 (Advanced Systems):** pgvector RAG _(pending)_, Dockerized Code Execution Engine _(done)_, Discussion Forums _(done)_, Leaderboards _(done)_, Gamification & Streaks — daily challenges, profile, submission heatmap _(done)_, Problem Discussions + Bookmarks/Notes/Lists _(done)_.
 - **Phase 5 (Production Readiness):** OpenTelemetry, Sentry, Swagger Docs, Feature Flags, Audit Logging, CI/CD pipelines.

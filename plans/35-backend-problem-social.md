@@ -1,6 +1,11 @@
 # Backend: Problem Discussions + Bookmarks, Notes & Lists
 
-> **Status: TODO** — planned, not yet implemented.
+> **Status: DONE** — implemented as the `problem-social` DDD module (`apps/api/src/modules/problem-social/`).
+>
+> Notes on deviations from the original plan:
+> - The custom-list shared types are named **`ProblemCollectionDto` / `ProblemCollectionItemDto`** (not `ProblemListDto` / `ProblemListItemDto`) because `ProblemListDto` already exists in `@elevatesde/shared-types` as the paginated problem bank. User-facing routes still read `/v1/me/lists`.
+> - Discussion **notifications were deferred** — the forum's `FORUM_UPVOTE` / `FORUM_REPLY` events are not mirrored for discussions yet.
+> - The vote/threading logic is not extracted into a cross-module helper (Prisma delegate generics would force `any`); duplication is instead avoided within the module via a single `applyToggle` control-flow helper plus batch voted-id set builders that mirror the forum repository.
 
 Per-problem community discussion plus personal curation (bookmarks, private notes, custom problem lists). Fully in-house (Postgres only). Discussion reuses the existing `forum` voting/threading patterns scoped to a `problemId`.
 
