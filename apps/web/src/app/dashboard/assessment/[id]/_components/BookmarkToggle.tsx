@@ -16,7 +16,9 @@ export function BookmarkToggle({ problemId }: Readonly<BookmarkToggleProps>) {
   const fetchBookmarkState = useProblemSocialStore((state) => state.fetchBookmarkState);
 
   React.useEffect(() => {
-    void fetchBookmarkState(problemId);
+    if (!useProblemSocialStore.getState().hasLoadedBookmarks) {
+      void fetchBookmarkState(problemId);
+    }
   }, [problemId, fetchBookmarkState]);
 
   return (

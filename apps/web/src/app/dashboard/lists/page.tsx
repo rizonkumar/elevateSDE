@@ -4,6 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import { Reorder } from 'framer-motion';
 import {
+  Bookmark,
   Check,
   GripVertical,
   ListChecks,
@@ -22,12 +23,14 @@ import {
 } from '@elevatesde/ui';
 import type {
   AssessmentDifficulty,
-  ProblemCollectionDto,
   ProblemCollectionItemDto,
+  ProblemSummaryDto,
 } from '@elevatesde/shared-types';
 import { PageContainer } from '@/components/dashboard/PageContainer';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { useProblemSocialStore } from '@/store/problem-social.store';
+
+const BOOKMARKS_VIEW = '__bookmarks__';
 
 const DIFFICULTY_VARIANT: Record<AssessmentDifficulty, BadgeVariant> = {
   EASY: 'success',
@@ -41,11 +44,21 @@ const DIFFICULTY_LABEL: Record<AssessmentDifficulty, string> = {
   HARD: 'Hard',
 };
 
-function ListSidebarItem({
-  list,
+function SidebarEntry({
+  label,
+  count,
+  icon: Icon,
   active,
   onSelect,
-}: Readonly<{ list: ProblemCollectionDto; active: boolean; onSelect: () => void }>) {
+  badge,
+}: Readonly<{
+  label: string;
+  count: number;
+  icon: React.ComponentType<{ className?: string }>;
+  active: boolean;
+  onSelect: () => void;
+  badge?: React.ReactNode;
+}>) {
   return (
     <button
       type="button"
@@ -56,32 +69,37 @@ function ListSidebarItem({
           : 'border-(--color-border-subtle) bg-(--color-surface) hover:border-(--color-accent)'
       }`}
     >
-      <span className="min-w-0">
-        <span className="block truncate text-sm font-semibold text-(--color-text-primary)">
-          {list.name}
-        </span>
-        <span className="mt-0.5 block text-xs text-(--color-text-muted)">
-          {list.itemCount} {list.itemCount === 1 ? 'problem' : 'problems'}
+      <span className="flex min-w-0 items-center gap-2.5">
+        <Icon className="h-4 w-4 shrink-0 text-(--color-text-muted)" />
+        <span className="min-w-0">
+          <span className="block truncate text-sm font-semibold text-(--color-text-primary)">
+            {label}
+          </span>
+          <span className="mt-0.5 block text-xs text-(--color-text-muted)">
+            {count} {count === 1 ? 'problem' : 'problems'}
+          </span>
         </span>
       </span>
-      {list.isPublic && <Badge variant="accent">Public</Badge>}
+      {badge}
     </button>
   );
 }
 
 function ProblemItemRow({
-  item,
+  problem,
   onRemove,
-}: Readonly<{ item: ProblemCollectionItemDto; onRemove: () => void }>) {
-  const { problem } = item;
+  showHandle = false,
+}: Readonly<{ problem: ProblemSummaryDto; onRemove: () => void; showHandle?: boolean }>) {
   return (
     <div className="flex items-center gap-3 rounded-(--radius-md) border border-(--color-border-subtle) bg-(--color-surface) p-3">
-      <span
-        aria-hidden="true"
-        className="inline-flex cursor-grab items-center text-(--color-text-muted) active:cursor-grabbing"
-      >
-        <GripVertical className="h-4 w-4" />
-      </span>
+      {showHandle && (
+        <span
+          aria-hidden="true"
+          className="inline-flex cursor-grab items-center text-(--color-text-muted) active:cursor-grabbing"
+        >
+          <GripVertical className="h-4 w-4" />
+        </span>
+      )}
       <div className="min-w-0 flex-1">
         <Link
           href={`/dashboard/assessment/${problem.id}`}
@@ -103,7 +121,7 @@ function ProblemItemRow({
       <button
         type="button"
         onClick={onRemove}
-        aria-label={`Remove ${problem.title} from list`}
+        aria-label={`Remove ${problem.title}`}
         className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-(--color-text-muted) transition-colors hover:bg-(--color-badge-bg) hover:text-(--color-danger) cursor-pointer"
       >
         <X className="h-4 w-4" />
@@ -114,16 +132,19 @@ function ProblemItemRow({
 
 export default function ListsPage() {
   const lists = useProblemSocialStore((state) => state.lists);
+  const bookmarks = useProblemSocialStore((state) => state.bookmarks);
   const isLoading = useProblemSocialStore((state) => state.isLoadingLists);
   const hasLoaded = useProblemSocialStore((state) => state.hasLoadedLists);
   const fetchLists = useProblemSocialStore((state) => state.fetchLists);
+  const fetchBookmarks = useProblemSocialStore((state) => state.fetchBookmarks);
   const createList = useProblemSocialStore((state) => state.createList);
   const renameList = useProblemSocialStore((state) => state.renameList);
   const deleteList = useProblemSocialStore((state) => state.deleteList);
   const removeProblemFromList = useProblemSocialStore((state) => state.removeProblemFromList);
   const reorderList = useProblemSocialStore((state) => state.reorderList);
+  const toggleBookmark = useProblemSocialStore((state) => state.toggleBookmark);
 
-  const [selectedId, setSelectedId] = React.useState<string | null>(null);
+  const [selectedId, setSelectedId] = React.useState<string>(BOOKMARKS_VIEW);
   const [creating, setCreating] = React.useState(false);
   const [newName, setNewName] = React.useState('');
   const [renaming, setRenaming] = React.useState(false);
@@ -133,20 +154,17 @@ export default function ListsPage() {
 
   React.useEffect(() => {
     void fetchLists();
-  }, [fetchLists]);
+    void fetchBookmarks();
+  }, [fetchLists, fetchBookmarks]);
 
-  const selected = selectedId
-    ? (lists.find((list) => list.id === selectedId) ?? null)
-    : null;
+  const isBookmarksView = selectedId === BOOKMARKS_VIEW;
+  const selected = isBookmarksView ? null : (lists.find((list) => list.id === selectedId) ?? null);
 
   React.useEffect(() => {
-    if (!selectedId && lists.length > 0) {
-      setSelectedId(lists[0]?.id ?? null);
+    if (!isBookmarksView && !lists.some((list) => list.id === selectedId)) {
+      setSelectedId(BOOKMARKS_VIEW);
     }
-    if (selectedId && !lists.some((list) => list.id === selectedId)) {
-      setSelectedId(lists[0]?.id ?? null);
-    }
-  }, [lists, selectedId]);
+  }, [lists, selectedId, isBookmarksView]);
 
   React.useEffect(() => {
     setOrder(selected?.items ?? []);
@@ -203,129 +221,161 @@ export default function ListsPage() {
           }
         />
 
-        {hasLoaded && lists.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 rounded-md border border-dashed border-(--color-border-subtle) bg-(--color-surface) px-6 py-16 text-center">
-            <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-(--color-badge-bg) text-(--color-text-muted)">
-              <ListChecks className="h-5 w-5" />
-            </span>
-            <p className="m-0 text-sm text-(--color-text-muted)">
-              You have no lists yet. Create one, then add problems from any problem page.
-            </p>
-          </div>
-        ) : (
-          <div className="grid gap-6 lg:grid-cols-[18rem_1fr]">
-            <aside className="flex flex-col gap-2">
-              {isLoading && lists.length === 0 ? (
-                <p className="m-0 text-sm text-(--color-text-muted)">Loading your lists…</p>
-              ) : (
-                lists.map((list) => (
-                  <ListSidebarItem
-                    key={list.id}
-                    list={list}
-                    active={list.id === selectedId}
-                    onSelect={() => setSelectedId(list.id)}
-                  />
-                ))
-              )}
-            </aside>
+        <div className="grid gap-6 lg:grid-cols-[18rem_1fr]">
+          <aside className="flex flex-col gap-2">
+            <SidebarEntry
+              label="Bookmarked"
+              count={bookmarks.length}
+              icon={Bookmark}
+              active={isBookmarksView}
+              onSelect={() => setSelectedId(BOOKMARKS_VIEW)}
+            />
+            <div className="my-1 h-px bg-(--color-border-subtle)" />
+            {isLoading && lists.length === 0 ? (
+              <p className="m-0 px-1 text-sm text-(--color-text-muted)">Loading your lists…</p>
+            ) : lists.length === 0 ? (
+              <p className="m-0 px-1 text-sm text-(--color-text-muted)">
+                No lists yet. Create one, then add problems from any problem page.
+              </p>
+            ) : (
+              lists.map((list) => (
+                <SidebarEntry
+                  key={list.id}
+                  label={list.name}
+                  count={list.itemCount}
+                  icon={ListChecks}
+                  active={list.id === selectedId}
+                  onSelect={() => setSelectedId(list.id)}
+                  badge={list.isPublic ? <Badge variant="accent">Public</Badge> : undefined}
+                />
+              ))
+            )}
+          </aside>
 
-            <section className="min-w-0">
-              {selected ? (
-                <div className="flex flex-col gap-5 rounded-md border border-(--color-border-subtle) bg-(--color-surface) p-5 shadow-(--shadow-card) sm:p-6">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    {renaming ? (
-                      <div className="flex min-w-0 flex-1 items-center gap-2">
-                        <Input
-                          value={renameValue}
-                          onChange={(event) => setRenameValue(event.target.value)}
-                          maxLength={120}
-                          autoFocus
-                        />
-                        <button
-                          type="button"
-                          onClick={submitRename}
-                          aria-label="Save name"
-                          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-(--color-border-subtle) text-(--color-accent) transition-colors hover:bg-(--color-accent-soft) cursor-pointer"
-                        >
-                          <Check className="h-4 w-4" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setRenaming(false)}
-                          aria-label="Cancel rename"
-                          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-(--color-border-subtle) text-(--color-text-muted) transition-colors hover:bg-(--color-badge-bg) cursor-pointer"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex min-w-0 items-center gap-2.5">
-                        <h2 className="m-0 truncate font-display text-xl font-semibold tracking-tight text-(--color-text-primary)">
-                          {selected.name}
-                        </h2>
-                        {selected.isPublic && <Badge variant="accent">Public</Badge>}
-                      </div>
-                    )}
-
-                    {!renaming && (
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setRenameValue(selected.name);
-                            setRenaming(true);
-                          }}
-                          aria-label="Rename list"
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-(--color-border-subtle) text-(--color-text-muted) transition-colors hover:border-(--color-accent) hover:text-(--color-accent) cursor-pointer"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setConfirmDelete(true)}
-                          aria-label="Delete list"
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-(--color-border-subtle) text-(--color-text-muted) transition-colors hover:border-(--color-danger) hover:text-(--color-danger) cursor-pointer"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    )}
+          <section className="min-w-0">
+            {isBookmarksView ? (
+              <div className="flex flex-col gap-5 rounded-md border border-(--color-border-subtle) bg-(--color-surface) p-5 shadow-(--shadow-card) sm:p-6">
+                <div className="flex items-center gap-2.5">
+                  <Bookmark className="h-5 w-5 text-(--color-accent)" />
+                  <h2 className="m-0 font-display text-xl font-semibold tracking-tight text-(--color-text-primary)">
+                    Bookmarked
+                  </h2>
+                </div>
+                {bookmarks.length === 0 ? (
+                  <div className="rounded-(--radius-md) border border-dashed border-(--color-border-subtle) px-6 py-12 text-center">
+                    <p className="m-0 text-sm text-(--color-text-muted)">
+                      No bookmarks yet. Open a problem and tap the bookmark star.
+                    </p>
                   </div>
-
-                  {order.length === 0 ? (
-                    <div className="rounded-(--radius-md) border border-dashed border-(--color-border-subtle) px-6 py-12 text-center">
-                      <p className="m-0 text-sm text-(--color-text-muted)">
-                        This list is empty. Open a problem and use “Add to list”.
-                      </p>
+                ) : (
+                  <ul className="m-0 flex list-none flex-col gap-2 p-0">
+                    {bookmarks.map((bookmark) => (
+                      <li key={bookmark.id}>
+                        <ProblemItemRow
+                          problem={bookmark.problem}
+                          onRemove={() => toggleBookmark(bookmark.problem.id)}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ) : selected ? (
+              <div className="flex flex-col gap-5 rounded-md border border-(--color-border-subtle) bg-(--color-surface) p-5 shadow-(--shadow-card) sm:p-6">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  {renaming ? (
+                    <div className="flex min-w-0 flex-1 items-center gap-2">
+                      <Input
+                        value={renameValue}
+                        onChange={(event) => setRenameValue(event.target.value)}
+                        maxLength={120}
+                        autoFocus
+                      />
+                      <button
+                        type="button"
+                        onClick={submitRename}
+                        aria-label="Save name"
+                        className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-(--color-border-subtle) text-(--color-accent) transition-colors hover:bg-(--color-accent-soft) cursor-pointer"
+                      >
+                        <Check className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setRenaming(false)}
+                        aria-label="Cancel rename"
+                        className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-(--color-border-subtle) text-(--color-text-muted) transition-colors hover:bg-(--color-badge-bg) cursor-pointer"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
                     </div>
                   ) : (
-                    <Reorder.Group
-                      axis="y"
-                      values={order}
-                      onReorder={setOrder}
-                      className="m-0 flex list-none flex-col gap-2 p-0"
-                    >
-                      {order.map((item) => (
-                        <Reorder.Item key={item.id} value={item} onDragEnd={persistOrder}>
-                          <ProblemItemRow
-                            item={item}
-                            onRemove={() => removeProblemFromList(selected.id, item.problem.id)}
-                          />
-                        </Reorder.Item>
-                      ))}
-                    </Reorder.Group>
+                    <div className="flex min-w-0 items-center gap-2.5">
+                      <h2 className="m-0 truncate font-display text-xl font-semibold tracking-tight text-(--color-text-primary)">
+                        {selected.name}
+                      </h2>
+                      {selected.isPublic && <Badge variant="accent">Public</Badge>}
+                    </div>
+                  )}
+
+                  {!renaming && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRenameValue(selected.name);
+                          setRenaming(true);
+                        }}
+                        aria-label="Rename list"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-(--color-border-subtle) text-(--color-text-muted) transition-colors hover:border-(--color-accent) hover:text-(--color-accent) cursor-pointer"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setConfirmDelete(true)}
+                        aria-label="Delete list"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-(--color-border-subtle) text-(--color-text-muted) transition-colors hover:border-(--color-danger) hover:text-(--color-danger) cursor-pointer"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   )}
                 </div>
-              ) : (
-                <div className="rounded-md border border-dashed border-(--color-border-subtle) bg-(--color-surface) px-6 py-16 text-center">
-                  <p className="m-0 text-sm text-(--color-text-muted)">
-                    Select a list to view its problems.
-                  </p>
-                </div>
-              )}
-            </section>
-          </div>
-        )}
+
+                {order.length === 0 ? (
+                  <div className="rounded-(--radius-md) border border-dashed border-(--color-border-subtle) px-6 py-12 text-center">
+                    <p className="m-0 text-sm text-(--color-text-muted)">
+                      This list is empty. Open a problem and use “Add to list”.
+                    </p>
+                  </div>
+                ) : (
+                  <Reorder.Group
+                    axis="y"
+                    values={order}
+                    onReorder={setOrder}
+                    className="m-0 flex list-none flex-col gap-2 p-0"
+                  >
+                    {order.map((item) => (
+                      <Reorder.Item key={item.id} value={item} onDragEnd={persistOrder}>
+                        <ProblemItemRow
+                          problem={item.problem}
+                          onRemove={() => removeProblemFromList(selected.id, item.problem.id)}
+                          showHandle
+                        />
+                      </Reorder.Item>
+                    ))}
+                  </Reorder.Group>
+                )}
+              </div>
+            ) : (
+              <div className="rounded-md border border-dashed border-(--color-border-subtle) bg-(--color-surface) px-6 py-16 text-center">
+                <p className="m-0 text-sm text-(--color-text-muted)">
+                  {hasLoaded ? 'Select a list to view its problems.' : 'Loading…'}
+                </p>
+              </div>
+            )}
+          </section>
+        </div>
       </div>
 
       <Modal

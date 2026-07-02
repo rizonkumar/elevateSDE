@@ -22,8 +22,12 @@ export function NotesTab({ problemId }: Readonly<NotesTabProps>) {
   const dirtyRef = React.useRef(false);
 
   React.useEffect(() => {
-    setLoaded(false);
     dirtyRef.current = false;
+    if (useProblemSocialStore.getState().notes[problemId] !== undefined) {
+      setLoaded(true);
+      return;
+    }
+    setLoaded(false);
     void fetchNote(problemId).finally(() => setLoaded(true));
   }, [problemId, fetchNote]);
 

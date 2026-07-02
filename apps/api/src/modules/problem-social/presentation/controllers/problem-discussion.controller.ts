@@ -3,7 +3,6 @@ import {
   Controller,
   Get,
   HttpCode,
-  NotFoundException,
   Param,
   Post,
   Put,
@@ -76,16 +75,12 @@ export class ProblemDiscussionController {
   @Get(':id/note')
   @ApiOperation({ summary: 'Get the current user private note for a problem' })
   @ApiResponse({ status: 200, type: ProblemNoteResponseDto })
-  @ApiResponse({ status: 404, description: 'No note saved yet.' })
   async getNote(
     @Param('id') id: string,
     @Req() req: RequestWithUser,
-  ): Promise<ProblemNoteResponseDto> {
+  ): Promise<ProblemNoteResponseDto | null> {
     const note = await this.problemSocialService.getNote(req.user.getId(), id);
-    if (!note) {
-      throw new NotFoundException('Note not found');
-    }
-    return ProblemSocialPresentationMapper.toNoteResponse(note);
+    return note ? ProblemSocialPresentationMapper.toNoteResponse(note) : null;
   }
 
   @Put(':id/note')

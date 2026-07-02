@@ -45,7 +45,9 @@ export function DiscussionTab({ problemId }: Readonly<DiscussionTabProps>) {
   );
 
   React.useEffect(() => {
-    void fetchDiscussions(problemId);
+    if (useProblemSocialStore.getState().discussions[problemId] === undefined) {
+      void fetchDiscussions(problemId);
+    }
   }, [problemId, fetchDiscussions]);
 
   React.useEffect(() => {

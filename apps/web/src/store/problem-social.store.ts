@@ -29,6 +29,7 @@ interface ProblemSocialState {
   isSavingNote: boolean;
   isLoadingLists: boolean;
   hasLoadedLists: boolean;
+  hasLoadedBookmarks: boolean;
   fetchDiscussions: (problemId: string) => Promise<void>;
   createDiscussion: (problemId: string, input: CreateDiscussionInput) => Promise<boolean>;
   fetchDiscussionComments: (discussionId: string) => Promise<void>;
@@ -82,6 +83,7 @@ export const useProblemSocialStore = create<ProblemSocialState>((set, get) => ({
   isSavingNote: false,
   isLoadingLists: false,
   hasLoadedLists: false,
+  hasLoadedBookmarks: false,
 
   fetchDiscussions: async (problemId) => {
     set({ isLoadingDiscussions: true });
@@ -254,7 +256,7 @@ export const useProblemSocialStore = create<ProblemSocialState>((set, get) => ({
   fetchBookmarks: async () => {
     try {
       const { data } = await api.get<BookmarkDto[]>('/api/v1/me/bookmarks');
-      set({ bookmarks: data, bookmarkedProblemIds: bookmarkMap(data) });
+      set({ bookmarks: data, bookmarkedProblemIds: bookmarkMap(data), hasLoadedBookmarks: true });
     } catch {
       useToastStore.getState().addToast('Could not load bookmarks.', 'error');
     }
@@ -263,7 +265,7 @@ export const useProblemSocialStore = create<ProblemSocialState>((set, get) => ({
   fetchBookmarkState: async (problemId) => {
     try {
       const { data } = await api.get<BookmarkDto[]>('/api/v1/me/bookmarks');
-      set({ bookmarks: data, bookmarkedProblemIds: bookmarkMap(data) });
+      set({ bookmarks: data, bookmarkedProblemIds: bookmarkMap(data), hasLoadedBookmarks: true });
     } catch {
       set((state) => ({
         bookmarkedProblemIds: {
@@ -283,6 +285,9 @@ export const useProblemSocialStore = create<ProblemSocialState>((set, get) => ({
       const { data } = await api.post<BookmarkToggleDto>(`/api/v1/problems/${problemId}/bookmark`);
       set((state) => ({
         bookmarkedProblemIds: { ...state.bookmarkedProblemIds, [problemId]: data.bookmarked },
+        bookmarks: data.bookmarked
+          ? state.bookmarks
+          : state.bookmarks.filter((bookmark) => bookmark.problem.id !== problemId),
       }));
     } catch {
       set((state) => ({

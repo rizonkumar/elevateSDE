@@ -153,7 +153,12 @@ export function ProblemPanel({ problem }: Readonly<ProblemPanelProps>) {
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-(--radius-md) border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-card)">
       <div className="flex items-center justify-between gap-2 border-b border-(--color-border-subtle) px-4 py-2.5">
-        <Tabs items={tabs} value={tab} onChange={(id) => setTab(id as ProblemTab)} />
+        <Tabs
+          items={tabs}
+          value={tab}
+          onChange={(id) => setTab(id as ProblemTab)}
+          variant="plain"
+        />
         <div className="flex items-center gap-2">
           <BookmarkToggle problemId={problem.id} />
           <AddToListMenu problemId={problem.id} />
