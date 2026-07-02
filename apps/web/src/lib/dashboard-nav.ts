@@ -10,6 +10,7 @@ import {
   Flame,
   Award,
   Bell,
+  ListChecks,
   UserRound,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
@@ -28,6 +29,7 @@ const BASE_LINKS: DashboardNavItem[] = [
   { href: '/dashboard/assessment', label: 'Code Editor', icon: Code2 },
   { href: '/dashboard/daily', label: 'Daily Challenge', icon: Flame },
   { href: '/dashboard/forum', label: 'Community', icon: MessagesSquare },
+  { href: '/dashboard/lists', label: 'My Lists', icon: ListChecks },
   { href: '/dashboard/leaderboard', label: 'Leaderboard', icon: Trophy },
   { href: '/dashboard/achievements', label: 'Achievements', icon: Award },
   { href: '/dashboard/notifications', label: 'Notifications', icon: Bell },

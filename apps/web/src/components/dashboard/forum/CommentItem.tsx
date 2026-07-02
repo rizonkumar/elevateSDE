@@ -1,12 +1,21 @@
 'use client';
 
-import type { ForumCommentDto } from '@elevatesde/shared-types';
+import type { ForumAuthor } from '@elevatesde/shared-types';
 import { AuthorAvatar } from '@/components/dashboard/AuthorAvatar';
 import { UpvoteButton } from '@/components/dashboard/forum/UpvoteButton';
 import { formatRelativeTime } from '@/lib/relative-time';
 
+export interface ThreadComment {
+  id: string;
+  author: ForumAuthor;
+  body: string;
+  upvotes: number;
+  hasUpvoted: boolean;
+  createdAt: string;
+}
+
 interface CommentItemProps {
-  comment: ForumCommentDto;
+  comment: ThreadComment;
   onUpvote: (commentId: string) => void;
 }
 

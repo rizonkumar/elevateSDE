@@ -1,6 +1,12 @@
 # Webclient: Problem Discussions + Bookmarks, Notes & Lists
 
-> **Status: TODO** — planned, not yet implemented.
+> **Status: DONE** — implemented on the coding-assessment problem page plus a new `/dashboard/lists` page, backed by the `problem-social` API (Plan 35).
+>
+> Notes on deviations from the original plan:
+> - **Notes became a third tab** inside `ProblemPanel` (Description | Discuss | Notes) rather than a separate collapsible panel. The bookmark star and an Add-to-list menu live in the panel header row, so both the desktop (`react-resizable-panels`) and mobile layouts inherit them automatically — no change to the page's mobile view bar.
+> - **Discussions render inline** within the Discuss tab (list → inline thread with reply form), reusing the forum's `UpvoteButton`, `CommentItem`, and `AuthorAvatar`. To reuse `CommentItem` with zero copy, its prop type was generalized to a minimal `ThreadComment` shape (satisfied by both `ForumCommentDto` and `ProblemDiscussionCommentDto`), and `toggleVoteState` is now exported from `forum.store.ts`.
+> - **List reordering uses framer-motion `Reorder`** (drag-and-drop) — framer-motion is already a dependency, so no new package.
+> - Web client calls the API under the `/api/v1/...` prefix (matching `forum.store.ts`).
 
 Adds a Discuss/Solutions tab, bookmark toggle, private notes, and "My Lists" curation, backed by the `problem-social` API (Plan 35).
 
