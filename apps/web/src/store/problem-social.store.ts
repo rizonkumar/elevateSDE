@@ -24,12 +24,14 @@ interface ProblemSocialState {
   bookmarkedProblemIds: Record<string, boolean>;
   bookmarks: BookmarkDto[];
   lists: ProblemCollectionDto[];
+  solvedProblemIds: string[];
   isLoadingDiscussions: boolean;
   isLoadingComments: boolean;
   isSavingNote: boolean;
   isLoadingLists: boolean;
   hasLoadedLists: boolean;
   hasLoadedBookmarks: boolean;
+  hasLoadedSolved: boolean;
   fetchDiscussions: (problemId: string) => Promise<void>;
   createDiscussion: (problemId: string, input: CreateDiscussionInput) => Promise<boolean>;
   fetchDiscussionComments: (discussionId: string) => Promise<void>;
@@ -41,6 +43,7 @@ interface ProblemSocialState {
   fetchBookmarks: () => Promise<void>;
   fetchBookmarkState: (problemId: string) => Promise<void>;
   toggleBookmark: (problemId: string) => Promise<void>;
+  fetchSolvedProblemIds: () => Promise<void>;
   fetchLists: () => Promise<void>;
   createList: (name: string) => Promise<ProblemCollectionDto | null>;
   renameList: (listId: string, name: string) => Promise<void>;
@@ -78,12 +81,14 @@ export const useProblemSocialStore = create<ProblemSocialState>((set, get) => ({
   bookmarkedProblemIds: {},
   bookmarks: [],
   lists: [],
+  solvedProblemIds: [],
   isLoadingDiscussions: false,
   isLoadingComments: false,
   isSavingNote: false,
   isLoadingLists: false,
   hasLoadedLists: false,
   hasLoadedBookmarks: false,
+  hasLoadedSolved: false,
 
   fetchDiscussions: async (problemId) => {
     set({ isLoadingDiscussions: true });
@@ -294,6 +299,15 @@ export const useProblemSocialStore = create<ProblemSocialState>((set, get) => ({
         bookmarkedProblemIds: { ...state.bookmarkedProblemIds, [problemId]: previous },
       }));
       useToastStore.getState().addToast('Could not update bookmark.', 'error');
+    }
+  },
+
+  fetchSolvedProblemIds: async () => {
+    try {
+      const { data } = await api.get<string[]>('/api/v1/users/me/solved-problem-ids');
+      set({ solvedProblemIds: data, hasLoadedSolved: true });
+    } catch {
+      set({ hasLoadedSolved: true });
     }
   },
 

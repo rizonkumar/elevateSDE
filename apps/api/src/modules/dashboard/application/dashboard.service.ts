@@ -13,6 +13,10 @@ export class DashboardService {
     return this.dashboardRepository.getStats(userId);
   }
 
+  async getSolvedProblemIds(userId: string): Promise<string[]> {
+    return this.dashboardRepository.getSolvedProblemIds(userId);
+  }
+
   async getSubmissionHeatmap(
     userId: string,
     from: Date,

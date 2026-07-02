@@ -32,6 +32,14 @@ export class DashboardRepository implements IDashboardRepository {
     return { jobTracker, assessments, leaderboard, forum, recentSubmissions };
   }
 
+  async getSolvedProblemIds(userId: string): Promise<string[]> {
+    const solved = await this.prisma.submission.groupBy({
+      by: ['problemId'],
+      where: { userId, status: 'ACCEPTED' },
+    });
+    return solved.map((row) => row.problemId);
+  }
+
   async getSubmissionHeatmap(
     userId: string,
     from: Date,
