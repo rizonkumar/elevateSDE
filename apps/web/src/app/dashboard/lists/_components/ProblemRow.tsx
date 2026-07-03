@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { CheckCircle2, Circle, GripVertical, X } from 'lucide-react';
+import { CheckCircle2, GripVertical, X } from 'lucide-react';
 import { Badge } from '@elevatesde/ui';
 import type { ProblemSummaryDto } from '@elevatesde/shared-types';
 import { DIFFICULTY_LABEL, DIFFICULTY_VARIANT } from '@/lib/difficulty';
@@ -11,25 +11,36 @@ interface ProblemRowProps {
   solved: boolean;
   onRemove: () => void;
   showHandle?: boolean;
+  showStatus?: boolean;
 }
 
-export function ProblemRow({ problem, solved, onRemove, showHandle = false }: Readonly<ProblemRowProps>) {
+export function ProblemRow({
+  problem,
+  solved,
+  onRemove,
+  showHandle = false,
+  showStatus = false,
+}: Readonly<ProblemRowProps>) {
   return (
-    <div className="flex items-center gap-3 rounded-(--radius-md) border border-(--color-border-subtle) bg-(--color-surface) p-3">
+    <div className="flex items-center gap-2.5 rounded-(--radius-md) border border-(--color-border-subtle) bg-(--color-surface) px-3.5 py-3">
       {showHandle && (
         <span
           aria-hidden="true"
-          className="inline-flex cursor-grab items-center text-(--color-text-muted) active:cursor-grabbing"
+          className="inline-flex shrink-0 cursor-grab items-center text-(--color-text-disabled) transition-colors hover:text-(--color-text-muted) active:cursor-grabbing"
         >
           <GripVertical className="h-4 w-4" />
         </span>
       )}
-      {solved ? (
-        <CheckCircle2 className="h-4 w-4 shrink-0 text-(--color-success)" aria-label="Solved" />
-      ) : (
-        <Circle className="h-4 w-4 shrink-0 text-(--color-text-disabled)" aria-label="Not solved" />
-      )}
-      <div className="min-w-0 flex-1">
+      {showStatus &&
+        (solved ? (
+          <CheckCircle2
+            className="h-[18px] w-[18px] shrink-0 text-(--color-success)"
+            aria-label="Solved"
+          />
+        ) : (
+          <span className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />
+        ))}
+      <div className="ml-1 min-w-0 flex-1">
         <Link
           href={`/dashboard/assessment/${problem.id}`}
           className="block truncate text-sm font-semibold text-(--color-text-primary) transition-colors hover:text-(--color-accent)"

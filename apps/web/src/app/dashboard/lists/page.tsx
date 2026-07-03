@@ -199,7 +199,7 @@ export default function ListsPage() {
             )}
           </aside>
 
-          <section className="flex min-w-0 flex-col gap-6">
+          <section className="flex min-w-0 flex-col gap-5">
             {isBookmarksView ? (
               <>
                 <ListOverviewCard

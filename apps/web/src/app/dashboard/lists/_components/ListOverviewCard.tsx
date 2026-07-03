@@ -51,18 +51,18 @@ export function ListOverviewCard({
           primary={`${solvedCount}/${total}`}
           secondary="Solved"
         />
-        <div className="grid w-full grid-cols-3 gap-2 sm:max-w-sm">
+        <div className="grid w-full flex-1 grid-cols-3 gap-3">
           {breakdown.map((group) => (
             <div
               key={group.difficulty}
-              className="rounded-(--radius-md) border border-(--color-border-subtle) bg-(--color-bg-soft) px-3 py-3 text-center"
+              className="flex min-h-[92px] flex-col items-center justify-center rounded-(--radius-md) border border-(--color-border-subtle) bg-(--color-bg-soft) px-3 py-4 text-center"
             >
               <div
                 className={`text-[11px] font-semibold uppercase tracking-[0.1em] ${DIFFICULTY_TEXT[group.difficulty]}`}
               >
                 {DIFFICULTY_LABEL[group.difficulty]}
               </div>
-              <div className="mt-1 font-display text-lg font-semibold text-(--color-text-primary)">
+              <div className="mt-1.5 font-display text-xl font-semibold text-(--color-text-primary)">
                 {group.solved}
                 <span className="text-(--color-text-muted)">/{group.total}</span>
               </div>

@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { Reorder } from 'framer-motion';
 import { Search } from 'lucide-react';
-import { Button, Input, Select } from '@elevatesde/ui';
+import { Button, Input, Select, Tabs, type TabItem } from '@elevatesde/ui';
 import type { AssessmentDifficulty, ProblemSummaryDto } from '@elevatesde/shared-types';
 import { DIFFICULTIES, DIFFICULTY_LABEL, DIFFICULTY_ORDER } from '@/lib/difficulty';
 import { ProblemRow } from './ProblemRow';
@@ -19,9 +19,9 @@ const SORT_OPTIONS = [
   { value: 'unsolved', label: 'Unsolved first' },
 ];
 
-const DIFFICULTY_FILTERS: { value: AssessmentDifficulty | 'ALL'; label: string }[] = [
-  { value: 'ALL', label: 'All' },
-  ...DIFFICULTIES.map((difficulty) => ({ value: difficulty, label: DIFFICULTY_LABEL[difficulty] })),
+const DIFFICULTY_TABS: TabItem[] = [
+  { id: 'ALL', label: 'All' },
+  ...DIFFICULTIES.map((difficulty) => ({ id: difficulty, label: DIFFICULTY_LABEL[difficulty] })),
 ];
 
 interface QuestionsPanelProps {
@@ -57,6 +57,10 @@ export function QuestionsPanel({
 
   const isCustomView = sort === 'custom' && query.trim() === '' && difficulty === 'ALL';
   const canDrag = reorderable && isCustomView;
+  const anySolved = React.useMemo(
+    () => problems.some((problem) => solvedSet.has(problem.id)),
+    [problems, solvedSet],
+  );
 
   const filtered = React.useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -87,8 +91,8 @@ export function QuestionsPanel({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="lg:w-72">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center">
+        <div className="md:flex-1">
           <Input
             placeholder="Search questions"
             value={query}
@@ -96,35 +100,25 @@ export function QuestionsPanel({
             icon={<Search className="h-4 w-4" />}
           />
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex flex-wrap items-center gap-1">
-            {DIFFICULTY_FILTERS.map((filter) => {
-              const active = filter.value === difficulty;
-              return (
-                <button
-                  key={filter.value}
-                  type="button"
-                  onClick={() => setDifficulty(filter.value)}
-                  className={`rounded-(--radius-full) px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
-                    active
-                      ? 'bg-(--color-badge-bg) text-(--color-text-primary)'
-                      : 'text-(--color-text-muted) hover:text-(--color-text-primary)'
-                  }`}
-                >
-                  {filter.label}
-                </button>
-              );
-            })}
-          </div>
-          <div className="w-44">
-            <Select
-              value={sort}
-              options={SORT_OPTIONS}
-              onChange={(value) => setSort(value as SortKey)}
-            />
-          </div>
+        <div className="shrink-0 overflow-x-auto">
+          <Tabs
+            items={DIFFICULTY_TABS}
+            value={difficulty}
+            onChange={(value) => setDifficulty(value as AssessmentDifficulty | 'ALL')}
+          />
+        </div>
+        <div className="w-full shrink-0 md:w-44">
+          <Select
+            value={sort}
+            options={SORT_OPTIONS}
+            onChange={(value) => setSort(value as SortKey)}
+          />
         </div>
       </div>
+
+      <p className="m-0 text-sm text-(--color-text-muted)">
+        {filtered.length} of {problems.length} {problems.length === 1 ? 'question' : 'questions'}
+      </p>
 
       {canDrag ? (
         <Reorder.Group
@@ -144,6 +138,7 @@ export function QuestionsPanel({
                 solved={solvedSet.has(problem.id)}
                 onRemove={() => onRemove(problem.id)}
                 showHandle
+                showStatus={anySolved}
               />
             </Reorder.Item>
           ))}
@@ -161,6 +156,7 @@ export function QuestionsPanel({
                   problem={problem}
                   solved={solvedSet.has(problem.id)}
                   onRemove={() => onRemove(problem.id)}
+                  showStatus={anySolved}
                 />
               </li>
             ))}

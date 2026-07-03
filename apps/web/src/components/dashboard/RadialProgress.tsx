@@ -26,7 +26,7 @@ export function RadialProgress({
   const data = [{ name: 'progress', value: clamped }];
 
   return (
-    <div className="relative h-36 w-36 shrink-0 sm:h-40 sm:w-40">
+    <div className="relative h-32 w-32 shrink-0 sm:h-36 sm:w-36">
       {mounted && (
         <ResponsiveContainer width="100%" height="100%">
           <RadialBarChart
