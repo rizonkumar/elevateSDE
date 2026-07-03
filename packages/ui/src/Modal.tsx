@@ -10,11 +10,16 @@ interface ModalProps {
 
 export function Modal({ open, onClose, title, description, children }: ModalProps) {
   const panelRef = React.useRef<HTMLDivElement>(null);
+  const onCloseRef = React.useRef(onClose);
+
+  React.useEffect(() => {
+    onCloseRef.current = onClose;
+  });
 
   React.useEffect(() => {
     if (!open) return;
     const handleKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
+      if (event.key === 'Escape') onCloseRef.current();
     };
     document.addEventListener('keydown', handleKey);
     const previousOverflow = document.body.style.overflow;
@@ -24,7 +29,7 @@ export function Modal({ open, onClose, title, description, children }: ModalProp
       document.removeEventListener('keydown', handleKey);
       document.body.style.overflow = previousOverflow;
     };
-  }, [open, onClose]);
+  }, [open]);
 
   if (!open) {
     return null;

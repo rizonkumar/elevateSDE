@@ -75,7 +75,7 @@ function upsertPost(posts: ForumPostDto[], next: ForumPostDto): ForumPostDto[] {
   return exists ? posts.map((post) => (post.id === next.id ? next : post)) : [next, ...posts];
 }
 
-function toggleVoteState<T extends { hasUpvoted: boolean; upvotes: number }>(item: T): T {
+export function toggleVoteState<T extends { hasUpvoted: boolean; upvotes: number }>(item: T): T {
   return {
     ...item,
     hasUpvoted: !item.hasUpvoted,
