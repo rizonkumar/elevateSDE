@@ -19,6 +19,7 @@ import { DailyChallengeModule } from './modules/daily-challenge/daily-challenge.
 import { AchievementModule } from './modules/achievement/achievement.module';
 import { NotificationModule } from './modules/notification/notification.module';
 import { ProblemSocialModule } from './modules/problem-social/problem-social.module';
+import { ReviewModule } from './modules/review/review.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { ProblemSocialModule } from './modules/problem-social/problem-social.mod
     AchievementModule,
     NotificationModule,
     ProblemSocialModule,
+    ReviewModule,
   ],
   controllers: [AppController],
   providers: [AppService],
