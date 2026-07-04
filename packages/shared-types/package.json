@@ -5,6 +5,7 @@
   "main": "src/index.ts",
   "types": "src/index.ts",
   "scripts": {
+    "format": "prettier --write \"src/**/*.ts\"",
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {

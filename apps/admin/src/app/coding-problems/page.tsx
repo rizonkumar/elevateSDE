@@ -74,18 +74,18 @@ export default function CodingProblemsPage() {
           <p className="text-sm text-(--color-text-muted)">
             Author and curate the DSA problem bank served to candidates.
           </p>
-          <span className="text-xs font-semibold text-(--color-text-muted) px-2.5 py-1 rounded-full border border-(--color-border-subtle) bg-(--color-badge-bg)">
+          <span className="rounded-full border border-(--color-border-subtle) bg-(--color-badge-bg) px-2.5 py-1 text-xs font-semibold text-(--color-text-muted)">
             {total} problems
           </span>
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-1">
+          <div className="flex flex-col gap-3 sm:flex-1 sm:flex-row sm:items-center">
             <Input
               value={searchInput}
               onChange={(event) => setSearchInput(event.target.value)}
               placeholder="Search by title"
-              icon={<Search className="w-4 h-4" />}
+              icon={<Search className="h-4 w-4" />}
               className="sm:max-w-xs"
             />
             <Select
@@ -95,14 +95,14 @@ export default function CodingProblemsPage() {
             />
           </div>
           <Button type="button" onClick={openCreate}>
-            <Plus className="w-4 h-4 shrink-0" />
+            <Plus className="h-4 w-4 shrink-0" />
             New problem
           </Button>
         </div>
 
         {showInitialLoader ? (
-          <div className="flex items-center justify-center min-h-[300px]">
-            <span className="text-sm text-(--color-text-muted) animate-pulse">
+          <div className="flex min-h-[300px] items-center justify-center">
+            <span className="animate-pulse text-sm text-(--color-text-muted)">
               Retrieving coding problems...
             </span>
           </div>
@@ -137,10 +137,10 @@ export default function CodingProblemsPage() {
                     disabled={loading || page <= 1}
                     className="px-2.5"
                   >
-                    <ChevronLeft className="w-4 h-4 shrink-0" />
+                    <ChevronLeft className="h-4 w-4 shrink-0" />
                     Previous
                   </Button>
-                  <span className="text-xs font-medium text-(--color-text-muted) px-1">
+                  <span className="px-1 text-xs font-medium text-(--color-text-muted)">
                     Page {page} of {totalPages}
                   </span>
                   <Button
@@ -151,7 +151,7 @@ export default function CodingProblemsPage() {
                     className="px-2.5"
                   >
                     Next
-                    <ChevronRight className="w-4 h-4 shrink-0" />
+                    <ChevronRight className="h-4 w-4 shrink-0" />
                   </Button>
                 </div>
               </div>

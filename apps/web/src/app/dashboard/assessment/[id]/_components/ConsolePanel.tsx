@@ -76,7 +76,7 @@ function CaseSubTabs({
             key={`case-tab-${index + 1}`}
             type="button"
             onClick={() => onSelect(index)}
-            className={`inline-flex items-center gap-1.5 rounded-sm px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer ${
+            className={`inline-flex cursor-pointer items-center gap-1.5 rounded-sm px-3 py-1.5 text-sm font-medium transition-colors ${
               active
                 ? 'bg-(--color-badge-bg) text-(--color-text-primary)'
                 : 'text-(--color-text-muted) hover:text-(--color-text-primary)'
@@ -140,7 +140,8 @@ export function ConsolePanel() {
   const setCaseInput = useAssessmentStore((state) => state.setCaseInput);
 
   const busy = isRunning || isSubmitting;
-  const submitLabel = submissionPhase === 'RUNNING' ? 'Running test cases…' : 'Queued — waiting for a runner…';
+  const submitLabel =
+    submissionPhase === 'RUNNING' ? 'Running test cases…' : 'Queued — waiting for a runner…';
   const busyLabel = isSubmitting ? submitLabel : 'Running test cases…';
   const visibleResults = result?.results.filter((item) => !item.isHidden) ?? [];
   const hiddenResults = result?.results.filter((item) => item.isHidden) ?? [];

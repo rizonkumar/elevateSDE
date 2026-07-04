@@ -37,25 +37,25 @@ export default function BadgesPage() {
           <p className="text-sm text-(--color-text-muted)">
             Define achievement badges and grant or revoke them for candidates.
           </p>
-          <span className="text-xs font-semibold text-(--color-text-muted) px-2.5 py-1 rounded-full border border-(--color-border-subtle) bg-(--color-badge-bg)">
+          <span className="rounded-full border border-(--color-border-subtle) bg-(--color-badge-bg) px-2.5 py-1 text-xs font-semibold text-(--color-text-muted)">
             {badges.length} badges
           </span>
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
           <Button type="button" variant="secondary" onClick={openGrant}>
-            <UserPlus className="w-4 h-4 shrink-0" />
+            <UserPlus className="h-4 w-4 shrink-0" />
             Manual grant
           </Button>
           <Button type="button" onClick={openCreate}>
-            <Plus className="w-4 h-4 shrink-0" />
+            <Plus className="h-4 w-4 shrink-0" />
             New badge
           </Button>
         </div>
 
         {showInitialLoader ? (
-          <div className="flex items-center justify-center min-h-[300px]">
-            <span className="text-sm text-(--color-text-muted) animate-pulse">
+          <div className="flex min-h-[300px] items-center justify-center">
+            <span className="animate-pulse text-sm text-(--color-text-muted)">
               Retrieving badges...
             </span>
           </div>

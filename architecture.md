@@ -104,16 +104,16 @@ The platform exposes a **single public origin** to users; the admin backoffice i
 
 ### Dashboard Surfaces
 
-| Surface                | Route (via web origin)   | Access                 |
-| ---------------------- | ------------------------ | ---------------------- |
-| Candidate dashboard    | `/dashboard`              | Any authenticated user |
-| Coding assessments     | `/dashboard/assessment`   | Any authenticated user |
-| Daily challenge        | `/dashboard/daily`        | Any authenticated user |
-| Profile & heatmap      | `/dashboard/profile`      | Any authenticated user |
-| Job tracker            | `/dashboard/job-tracker`  | Any authenticated user |
-| Organization dashboard | `/dashboard/org`          | `TENANT_ADMIN`         |
-| Super-Admin backoffice | `/admin`                  | `ADMIN`                |
-| Coding problem bank    | `/admin/coding-problems`  | `ADMIN`                |
+| Surface                  | Route (via web origin)    | Access                 |
+| ------------------------ | ------------------------- | ---------------------- |
+| Candidate dashboard      | `/dashboard`              | Any authenticated user |
+| Coding assessments       | `/dashboard/assessment`   | Any authenticated user |
+| Daily challenge          | `/dashboard/daily`        | Any authenticated user |
+| Profile & heatmap        | `/dashboard/profile`      | Any authenticated user |
+| Job tracker              | `/dashboard/job-tracker`  | Any authenticated user |
+| Organization dashboard   | `/dashboard/org`          | `TENANT_ADMIN`         |
+| Super-Admin backoffice   | `/admin`                  | `ADMIN`                |
+| Coding problem bank      | `/admin/coding-problems`  | `ADMIN`                |
 | Daily challenge schedule | `/admin/daily-challenges` | `ADMIN`                |
 
 The backoffice consumes live `/api/v1/admin/*` endpoints (including the coding problem bank, daily-challenge scheduling, forum moderation, and leaderboard management). The candidate-facing surfaces are likewise live and user-scoped: the dashboard (`/api/v1/users/me/dashboard-stats`), coding assessments + execution (`/api/v1/problems`, `/api/v1/assessments/run` + `/submit`), daily challenge & streaks (`/api/v1/daily-challenge/today` + `/streak`), profile & submission heatmap (`/api/v1/users/me` + `/submission-heatmap`), job tracker (`/api/v1/job-applications`), community forum (`/api/v1/forum/*`), leaderboard (`/api/v1/leaderboard`), and the organization dashboard (`/api/v1/org/*`). Only the **AI mock interview** and **resume analyzer** surfaces remain backed by typed client-side Zustand stores (in-browser engines) until their domain models are implemented.

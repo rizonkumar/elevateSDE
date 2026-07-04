@@ -70,17 +70,14 @@ export function InterviewConsole() {
             isAiSpeaking={isAiSpeaking}
             isMicActive={isMicActive}
           />
-          <span className="text-xs font-semibold uppercase tracking-[0.14em] text-(--color-text-muted)">
+          <span className="text-xs font-semibold tracking-[0.14em] text-(--color-text-muted) uppercase">
             {statusLabel}
           </span>
         </div>
 
         {speechSupported ? (
           <div className="flex flex-wrap items-center justify-center gap-3">
-            <Button
-              variant={isMicActive ? 'secondary' : 'primary'}
-              onClick={handleMicToggle}
-            >
+            <Button variant={isMicActive ? 'secondary' : 'primary'} onClick={handleMicToggle}>
               <span className="inline-flex items-center gap-2">
                 {isMicActive ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
                 {isMicActive ? 'Stop microphone' : 'Start microphone'}
@@ -120,7 +117,7 @@ export function InterviewConsole() {
       </div>
 
       <div className="card flex h-112 flex-col gap-3 lg:h-auto">
-        <h3 className="m-0 text-sm font-semibold uppercase tracking-wider text-(--color-text-muted)">
+        <h3 className="m-0 text-sm font-semibold tracking-wider text-(--color-text-muted) uppercase">
           Live transcript
         </h3>
         <div className="min-h-0 flex-1">

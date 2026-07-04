@@ -71,7 +71,11 @@ export default function ProfilePage() {
   const tiles = [
     { icon: Zap, label: 'Points', value: leaderboard.points.toLocaleString() },
     { icon: Trophy, label: 'Global rank', value: leaderboard.rank ? `#${leaderboard.rank}` : '—' },
-    { icon: Flame, label: 'Current streak', value: `${streak?.current ?? leaderboard.streakDays} d` },
+    {
+      icon: Flame,
+      label: 'Current streak',
+      value: `${streak?.current ?? leaderboard.streakDays} d`,
+    },
     { icon: Award, label: 'Longest streak', value: `${streak?.longest ?? 0} d` },
   ];
 
@@ -103,7 +107,7 @@ export default function ProfilePage() {
 
         <div className="grid gap-6 lg:grid-cols-2">
           <div className={cardClass}>
-            <h3 className="m-0 mb-4 font-display text-sm font-semibold uppercase tracking-wider text-(--color-text-muted)">
+            <h3 className="m-0 mb-4 font-display text-sm font-semibold tracking-wider text-(--color-text-muted) uppercase">
               Solved
             </h3>
             <div className="flex items-center gap-6">
@@ -117,7 +121,12 @@ export default function ProfilePage() {
                       startAngle={90}
                       endAngle={-270}
                     >
-                      <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
+                      <PolarAngleAxis
+                        type="number"
+                        domain={[0, 100]}
+                        angleAxisId={0}
+                        tick={false}
+                      />
                       <RadialBar
                         background={{ fill: 'var(--color-badge-bg)' }}
                         dataKey="value"
@@ -129,10 +138,10 @@ export default function ProfilePage() {
                   </ResponsiveContainer>
                 )}
                 <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                  <div className="font-display text-3xl font-semibold leading-none">
+                  <div className="font-display text-3xl leading-none font-semibold">
                     {assessments.problemsSolved}
                   </div>
-                  <div className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-(--color-text-muted)">
+                  <div className="mt-1 text-[10px] font-semibold tracking-wider text-(--color-text-muted) uppercase">
                     Solved
                   </div>
                 </div>
@@ -153,7 +162,7 @@ export default function ProfilePage() {
           </div>
 
           <div className={cardClass}>
-            <h3 className="m-0 mb-4 font-display text-sm font-semibold uppercase tracking-wider text-(--color-text-muted)">
+            <h3 className="m-0 mb-4 font-display text-sm font-semibold tracking-wider text-(--color-text-muted) uppercase">
               Standing
             </h3>
             <div className="grid grid-cols-2 gap-3">
@@ -168,7 +177,7 @@ export default function ProfilePage() {
                       <Icon className="h-4 w-4" />
                     </span>
                     <div className="min-w-0">
-                      <div className="font-display text-lg font-semibold leading-none">
+                      <div className="font-display text-lg leading-none font-semibold">
                         {tile.value}
                       </div>
                       <div className="mt-1 text-[11px] text-(--color-text-muted)">{tile.label}</div>
@@ -181,7 +190,7 @@ export default function ProfilePage() {
         </div>
 
         <div className={cardClass}>
-          <h3 className="m-0 mb-4 font-display text-sm font-semibold uppercase tracking-wider text-(--color-text-muted)">
+          <h3 className="m-0 mb-4 font-display text-sm font-semibold tracking-wider text-(--color-text-muted) uppercase">
             Activity
           </h3>
           {heatmap ? (
@@ -192,7 +201,7 @@ export default function ProfilePage() {
         </div>
 
         <div className={cardClass}>
-          <h3 className="m-0 mb-4 font-display text-sm font-semibold uppercase tracking-wider text-(--color-text-muted)">
+          <h3 className="m-0 mb-4 font-display text-sm font-semibold tracking-wider text-(--color-text-muted) uppercase">
             Recent submissions
           </h3>
           {stats.recentSubmissions.length > 0 ? (

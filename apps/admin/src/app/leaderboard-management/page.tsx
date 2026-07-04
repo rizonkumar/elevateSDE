@@ -91,38 +91,38 @@ export default function LeaderboardManagementPage() {
   return (
     <AdminLayout>
       {loading ? (
-        <div className="flex items-center justify-center min-h-[300px]">
-          <span className="text-sm text-(--color-text-muted) animate-pulse">
+        <div className="flex min-h-[300px] items-center justify-center">
+          <span className="animate-pulse text-sm text-(--color-text-muted)">
             Retrieving leaderboard standings...
           </span>
         </div>
       ) : (
         <div className="flex flex-col gap-5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-sm p-5 flex items-center gap-4">
-              <div className="shrink-0 w-11 h-11 rounded-lg bg-(--color-accent-soft) text-(--color-accent) flex items-center justify-center">
-                <Trophy className="w-5 h-5 shrink-0" />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="flex items-center gap-4 rounded-xl border border-(--color-border-subtle) bg-(--color-surface) p-5 shadow-sm">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-(--color-accent-soft) text-(--color-accent)">
+                <Trophy className="h-5 w-5 shrink-0" />
               </div>
               <div className="flex flex-col">
-                <span className="text-xs text-(--color-text-muted) uppercase tracking-wider">
+                <span className="text-xs tracking-wider text-(--color-text-muted) uppercase">
                   Top contributor
                 </span>
                 <span className="text-sm font-semibold text-(--color-text-primary)">
                   {topContributor ? topContributor.name : '—'}
                 </span>
                 {topContributor && (
-                  <span className="text-xs text-(--color-text-muted) font-mono">
+                  <span className="font-mono text-xs text-(--color-text-muted)">
                     {topContributor.points.toLocaleString()} pts
                   </span>
                 )}
               </div>
             </div>
-            <div className="rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-sm p-5 flex items-center gap-4">
-              <div className="shrink-0 w-11 h-11 rounded-lg bg-(--color-badge-bg) text-(--color-text-muted) flex items-center justify-center">
-                <Users className="w-5 h-5 shrink-0" />
+            <div className="flex items-center gap-4 rounded-xl border border-(--color-border-subtle) bg-(--color-surface) p-5 shadow-sm">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-(--color-badge-bg) text-(--color-text-muted)">
+                <Users className="h-5 w-5 shrink-0" />
               </div>
               <div className="flex flex-col">
-                <span className="text-xs text-(--color-text-muted) uppercase tracking-wider">
+                <span className="text-xs tracking-wider text-(--color-text-muted) uppercase">
                   Active members
                 </span>
                 <span className="text-sm font-semibold text-(--color-text-primary)">
@@ -138,15 +138,15 @@ export default function LeaderboardManagementPage() {
               placeholder="Search members"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              icon={<Search className="w-4 h-4 text-(--color-text-muted)" />}
+              icon={<Search className="h-4 w-4 text-(--color-text-muted)" />}
             />
           </div>
 
-          <div className="hidden md:block overflow-x-auto rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-sm">
+          <div className="hidden overflow-x-auto rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-sm md:block">
             <table className="w-full border-collapse text-left text-sm">
               <thead>
-                <tr className="border-b border-(--color-border-subtle) bg-(--color-bg-soft) text-xs font-semibold text-(--color-text-muted) uppercase tracking-wider">
-                  <th className="px-6 py-4 w-16">Rank</th>
+                <tr className="border-b border-(--color-border-subtle) bg-(--color-bg-soft) text-xs font-semibold tracking-wider text-(--color-text-muted) uppercase">
+                  <th className="w-16 px-6 py-4">Rank</th>
                   <th className="px-6 py-4">Member</th>
                   <th className="px-6 py-4 text-right">Points</th>
                   <th className="px-6 py-4 text-right">Assessments</th>
@@ -180,7 +180,7 @@ export default function LeaderboardManagementPage() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="shrink-0 w-8 h-8 rounded-full bg-(--color-badge-bg) text-(--color-text-muted) flex items-center justify-center text-[11px] font-semibold">
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-(--color-badge-bg) text-[11px] font-semibold text-(--color-text-muted)">
                             {getNameInitials(entry.name)}
                           </div>
                           <div className="flex flex-col">
@@ -229,16 +229,16 @@ export default function LeaderboardManagementPage() {
             </table>
           </div>
 
-          <div className="md:hidden flex flex-col gap-4">
+          <div className="flex flex-col gap-4 md:hidden">
             {matched.length === 0 ? (
-              <div className="rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-sm px-6 py-10 text-center text-xs text-(--color-text-muted)">
+              <div className="rounded-xl border border-(--color-border-subtle) bg-(--color-surface) px-6 py-10 text-center text-xs text-(--color-text-muted) shadow-sm">
                 No members match your search.
               </div>
             ) : (
               matched.map((entry) => (
                 <div
                   key={entry.userId}
-                  className={`rounded-xl border shadow-sm p-4 flex flex-col gap-3 ${
+                  className={`flex flex-col gap-3 rounded-xl border p-4 shadow-sm ${
                     entry.isCurrentUser
                       ? 'border-(--color-accent) bg-(--color-accent-soft)/30'
                       : 'border-(--color-border-subtle) bg-(--color-surface)'
@@ -248,15 +248,15 @@ export default function LeaderboardManagementPage() {
                     <span className="font-mono text-xs font-semibold text-(--color-text-muted)">
                       #{entry.rank}
                     </span>
-                    <div className="shrink-0 w-8 h-8 rounded-full bg-(--color-badge-bg) text-(--color-text-muted) flex items-center justify-center text-[11px] font-semibold">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-(--color-badge-bg) text-[11px] font-semibold text-(--color-text-muted)">
                       {getNameInitials(entry.name)}
                     </div>
-                    <div className="flex flex-col min-w-0">
-                      <span className="font-semibold text-sm text-(--color-text-primary) truncate">
+                    <div className="flex min-w-0 flex-col">
+                      <span className="truncate text-sm font-semibold text-(--color-text-primary)">
                         {entry.name}
                       </span>
                       {entry.headline && (
-                        <span className="text-xs text-(--color-text-muted) truncate">
+                        <span className="truncate text-xs text-(--color-text-muted)">
                           {entry.headline}
                         </span>
                       )}
@@ -267,11 +267,11 @@ export default function LeaderboardManagementPage() {
                       {entry.points.toLocaleString()} pts
                     </span>
                     <span className="inline-flex items-center gap-1">
-                      <Award className="w-3.5 h-3.5 shrink-0" />
+                      <Award className="h-3.5 w-3.5 shrink-0" />
                       {entry.assessmentsCompleted}
                     </span>
                     <span className="inline-flex items-center gap-1">
-                      <Flame className="w-3.5 h-3.5 shrink-0" />
+                      <Flame className="h-3.5 w-3.5 shrink-0" />
                       {entry.streakDays}d
                     </span>
                   </div>
@@ -325,10 +325,10 @@ export default function LeaderboardManagementPage() {
                       key={badge}
                       type="button"
                       onClick={() => toggleBadge(badge)}
-                      className={`px-2.5 py-1 rounded-(--radius-full) border text-[11px] font-medium transition-colors cursor-pointer ${
+                      className={`cursor-pointer rounded-(--radius-full) border px-2.5 py-1 text-[11px] font-medium transition-colors ${
                         active
-                          ? 'bg-(--color-accent-soft) text-(--color-accent) border-transparent'
-                          : 'bg-(--color-bg) text-(--color-text-muted) border-(--color-border-subtle) hover:text-(--color-text-primary)'
+                          ? 'border-transparent bg-(--color-accent-soft) text-(--color-accent)'
+                          : 'border-(--color-border-subtle) bg-(--color-bg) text-(--color-text-muted) hover:text-(--color-text-primary)'
                       }`}
                     >
                       {badge}
@@ -338,7 +338,7 @@ export default function LeaderboardManagementPage() {
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-(--color-border-subtle)">
+            <div className="flex items-center justify-end gap-2 border-t border-(--color-border-subtle) pt-2">
               <Button type="button" variant="secondary" onClick={closeAdjust} disabled={saving}>
                 Cancel
               </Button>

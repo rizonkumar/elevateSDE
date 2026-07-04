@@ -48,11 +48,11 @@ export function RadialProgress({
         </ResponsiveContainer>
       )}
       <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-        <div className="font-display text-2xl font-semibold leading-none text-(--color-text-primary)">
+        <div className="font-display text-2xl leading-none font-semibold text-(--color-text-primary)">
           {primary}
         </div>
         {secondary && (
-          <div className="mt-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-(--color-text-muted)">
+          <div className="mt-1 text-[11px] font-semibold tracking-[0.12em] text-(--color-text-muted) uppercase">
             {secondary}
           </div>
         )}

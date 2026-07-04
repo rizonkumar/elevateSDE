@@ -171,7 +171,10 @@ export const useBadgesStore = create<BadgesState>((set, get) => ({
     }
     set({ togglingId: id });
     try {
-      const saved = await updateBadgeRequest(id, { ...fromBadge(target), isActive: !target.isActive });
+      const saved = await updateBadgeRequest(id, {
+        ...fromBadge(target),
+        isActive: !target.isActive,
+      });
       set((state) => ({ badges: upsert(state.badges, saved), togglingId: null }));
       notify(saved.isActive ? 'Badge activated.' : 'Badge deactivated.', 'success');
     } catch (error) {

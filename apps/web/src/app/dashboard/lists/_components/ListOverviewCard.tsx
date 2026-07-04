@@ -46,11 +46,7 @@ export function ListOverviewCard({
       </div>
 
       <div className="flex flex-col items-center gap-6 sm:flex-row sm:gap-8">
-        <RadialProgress
-          value={percent}
-          primary={`${solvedCount}/${total}`}
-          secondary="Solved"
-        />
+        <RadialProgress value={percent} primary={`${solvedCount}/${total}`} secondary="Solved" />
         <div className="grid w-full flex-1 grid-cols-3 gap-3">
           {breakdown.map((group) => (
             <div
@@ -58,7 +54,7 @@ export function ListOverviewCard({
               className="flex min-h-[92px] flex-col items-center justify-center rounded-(--radius-md) border border-(--color-border-subtle) bg-(--color-bg-soft) px-3 py-4 text-center"
             >
               <div
-                className={`text-[11px] font-semibold uppercase tracking-[0.1em] ${DIFFICULTY_TEXT[group.difficulty]}`}
+                className={`text-[11px] font-semibold tracking-[0.1em] uppercase ${DIFFICULTY_TEXT[group.difficulty]}`}
               >
                 {DIFFICULTY_LABEL[group.difficulty]}
               </div>

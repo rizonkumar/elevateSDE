@@ -44,8 +44,7 @@ class FakeReviewRepository implements IReviewRepository {
   async findDueViews(userId: string, dueBefore: Date, limit: number): Promise<ReviewItemView[]> {
     return [...this.items.values()]
       .filter(
-        (item) =>
-          item.getUserId() === userId && item.getDueAt().getTime() <= dueBefore.getTime(),
+        (item) => item.getUserId() === userId && item.getDueAt().getTime() <= dueBefore.getTime(),
       )
       .sort((a, b) => a.getDueAt().getTime() - b.getDueAt().getTime())
       .slice(0, limit)

@@ -83,7 +83,7 @@ export function TimerControl() {
           onClick={() => setOpen((prev) => !prev)}
           aria-label="Timer settings"
           aria-expanded={open}
-          className="inline-flex items-center gap-1.5 rounded-(--radius-sm) px-1.5 py-1 text-sm font-semibold tabular-nums hover:bg-(--color-badge-bg) cursor-pointer"
+          className="inline-flex cursor-pointer items-center gap-1.5 rounded-(--radius-sm) px-1.5 py-1 text-sm font-semibold tabular-nums hover:bg-(--color-badge-bg)"
         >
           <Clock className="h-4 w-4 shrink-0" />
           <span>{format(displaySeconds)}</span>
@@ -92,7 +92,7 @@ export function TimerControl() {
           type="button"
           onClick={togglePlay}
           aria-label={running ? 'Pause timer' : 'Start timer'}
-          className="inline-flex h-7 w-7 items-center justify-center rounded-(--radius-sm) text-(--color-text-primary) hover:bg-(--color-badge-bg) cursor-pointer"
+          className="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-(--radius-sm) text-(--color-text-primary) hover:bg-(--color-badge-bg)"
         >
           {running ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
         </button>
@@ -106,7 +106,7 @@ export function TimerControl() {
                 key={mode}
                 type="button"
                 onClick={() => setTimerMode(mode)}
-                className={`rounded-[calc(var(--radius-sm)-2px)] px-3 py-1.5 text-sm font-medium capitalize transition-colors cursor-pointer ${
+                className={`cursor-pointer rounded-[calc(var(--radius-sm)-2px)] px-3 py-1.5 text-sm font-medium capitalize transition-colors ${
                   timerMode === mode
                     ? 'bg-(--color-tab-active) text-(--color-text-primary) shadow-(--shadow-card)'
                     : 'text-(--color-text-muted) hover:text-(--color-text-primary)'
@@ -117,7 +117,7 @@ export function TimerControl() {
             ))}
           </div>
 
-          <div className="my-4 text-center font-display text-4xl font-semibold tabular-nums tracking-tight text-(--color-text-primary)">
+          <div className="my-4 text-center font-display text-4xl font-semibold tracking-tight text-(--color-text-primary) tabular-nums">
             {format(displaySeconds)}
           </div>
 
@@ -127,7 +127,7 @@ export function TimerControl() {
                 type="button"
                 onClick={() => setCountdownMinutes(countdownMinutes - 5)}
                 aria-label="Decrease minutes"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-(--color-border-subtle) text-(--color-text-primary) hover:bg-(--color-badge-bg) cursor-pointer"
+                className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-(--color-border-subtle) text-(--color-text-primary) hover:bg-(--color-badge-bg)"
               >
                 <Minus className="h-4 w-4" />
               </button>
@@ -138,7 +138,7 @@ export function TimerControl() {
                 type="button"
                 onClick={() => setCountdownMinutes(countdownMinutes + 5)}
                 aria-label="Increase minutes"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-(--color-border-subtle) text-(--color-text-primary) hover:bg-(--color-badge-bg) cursor-pointer"
+                className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-(--color-border-subtle) text-(--color-text-primary) hover:bg-(--color-badge-bg)"
               >
                 <Plus className="h-4 w-4" />
               </button>
@@ -149,7 +149,7 @@ export function TimerControl() {
             <button
               type="button"
               onClick={togglePlay}
-              className="inline-flex flex-1 items-center justify-center gap-2 rounded-(--radius-sm) bg-(--color-text-primary) px-4 py-2 text-sm font-semibold text-(--color-bg) transition-all hover:opacity-90 cursor-pointer"
+              className="inline-flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-(--radius-sm) bg-(--color-text-primary) px-4 py-2 text-sm font-semibold text-(--color-bg) transition-all hover:opacity-90"
             >
               {running ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
               {actionLabel}
@@ -158,7 +158,7 @@ export function TimerControl() {
               type="button"
               onClick={resetTimer}
               aria-label="Reset timer"
-              className="inline-flex items-center justify-center gap-2 rounded-(--radius-sm) border border-(--color-border) px-4 py-2 text-sm font-semibold text-(--color-text-primary) transition-colors hover:bg-(--color-badge-bg) cursor-pointer"
+              className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-(--radius-sm) border border-(--color-border) px-4 py-2 text-sm font-semibold text-(--color-text-primary) transition-colors hover:bg-(--color-badge-bg)"
             >
               <RotateCcw className="h-4 w-4" />
               Reset

@@ -55,7 +55,7 @@ export function AnalysisOverview({ analysis, isAnalyzing, onFile }: AnalysisOver
             <Badge variant={band.badgeVariant}>{band.label}</Badge>
             <span className="text-xs text-(--color-text-muted)">Applicant tracking readiness</span>
           </div>
-          <p className="mb-0 text-base font-medium leading-relaxed text-(--color-text-primary)">
+          <p className="mb-0 text-base leading-relaxed font-medium text-(--color-text-primary)">
             {analysis.summary}
           </p>
         </div>
@@ -69,10 +69,10 @@ export function AnalysisOverview({ analysis, isAnalyzing, onFile }: AnalysisOver
                 className="flex flex-col gap-1 rounded-(--radius-md) border border-(--color-border-subtle) bg-(--color-badge-bg) px-3.5 py-3"
               >
                 <Icon className={`h-4 w-4 ${stat.tone}`} />
-                <span className="font-display text-2xl font-semibold leading-none text-(--color-text-primary)">
+                <span className="font-display text-2xl leading-none font-semibold text-(--color-text-primary)">
                   {stat.value}
                 </span>
-                <span className="text-[11px] font-medium uppercase tracking-wider text-(--color-text-muted)">
+                <span className="text-[11px] font-medium tracking-wider text-(--color-text-muted) uppercase">
                   {stat.label}
                 </span>
               </div>

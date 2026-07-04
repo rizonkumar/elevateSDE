@@ -15,7 +15,7 @@ export function DashboardTopbar({ onOpenSidebar }: DashboardTopbarProps) {
         type="button"
         onClick={onOpenSidebar}
         aria-label="Open menu"
-        className="rounded-full border border-(--color-border-subtle) p-2 text-(--color-text-primary) transition-colors hover:bg-(--color-badge-bg) lg:hidden cursor-pointer"
+        className="cursor-pointer rounded-full border border-(--color-border-subtle) p-2 text-(--color-text-primary) transition-colors hover:bg-(--color-badge-bg) lg:hidden"
       >
         <Menu className="h-4 w-4" />
       </button>

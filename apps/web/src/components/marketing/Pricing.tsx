@@ -70,7 +70,7 @@ export function Pricing() {
 
       <Reveal delay={0.08} className="mt-8">
         <div className="flex justify-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-(--color-border-subtle) bg-(--color-bg-soft) px-4 py-2 font-mono text-xs font-medium uppercase tracking-widest text-(--color-accent)">
+          <span className="inline-flex items-center gap-2 rounded-full border border-(--color-border-subtle) bg-(--color-bg-soft) px-4 py-2 font-mono text-xs font-medium tracking-widest text-(--color-accent) uppercase">
             <span className="h-1.5 w-1.5 rounded-full bg-(--color-accent)" />
             <span>Early access · Free for everyone</span>
           </span>
@@ -92,11 +92,11 @@ export function Pricing() {
                 <div className="flex items-center gap-2">
                   <h3 className="text-lg font-semibold text-(--color-text-primary)">{tier.name}</h3>
                   {tier.available ? (
-                    <span className="rounded-full bg-(--color-accent-soft) px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-(--color-accent)">
+                    <span className="rounded-full bg-(--color-accent-soft) px-2.5 py-0.5 font-mono text-[10px] font-semibold tracking-wider text-(--color-accent) uppercase">
                       Available now
                     </span>
                   ) : (
-                    <span className="rounded-full border border-(--color-border-subtle) px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-(--color-text-muted)">
+                    <span className="rounded-full border border-(--color-border-subtle) px-2.5 py-0.5 font-mono text-[10px] font-semibold tracking-wider text-(--color-text-muted) uppercase">
                       Coming soon
                     </span>
                   )}
@@ -110,7 +110,7 @@ export function Pricing() {
                     <span className="font-display text-4xl font-bold tracking-tight text-(--color-text-primary)">
                       {tier.priceLabel}
                     </span>
-                    <span className="font-mono text-xs uppercase tracking-wider text-(--color-text-muted)">
+                    <span className="font-mono text-xs tracking-wider text-(--color-text-muted) uppercase">
                       {tier.unit}
                     </span>
                   </>
@@ -148,7 +148,7 @@ export function Pricing() {
         </div>
       </Reveal>
 
-      <p className="mt-8 text-center font-mono text-xs uppercase tracking-widest text-(--color-text-muted)">
+      <p className="mt-8 text-center font-mono text-xs tracking-widest text-(--color-text-muted) uppercase">
         No credit card required · Everything free during early access
       </p>
     </SectionShell>

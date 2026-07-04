@@ -22,7 +22,7 @@ export function JobColumn({ column, applications, onEdit, onDelete }: JobColumnP
       <div className="flex h-9 items-center justify-between gap-2 px-1">
         <div className="flex min-w-0 items-center gap-2">
           <span className={`h-2 w-2 shrink-0 rounded-full ${column.dotClass}`} />
-          <span className="truncate text-xs font-semibold uppercase tracking-wider text-(--color-text-primary)">
+          <span className="truncate text-xs font-semibold tracking-wider text-(--color-text-primary) uppercase">
             {column.label}
           </span>
         </div>

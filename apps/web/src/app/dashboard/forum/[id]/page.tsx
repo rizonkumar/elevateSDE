@@ -65,7 +65,7 @@ export default function ForumPostPage() {
 
         {post ? (
           <>
-            <article className="rounded-md border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-card) p-5 sm:p-6">
+            <article className="rounded-md border border-(--color-border-subtle) bg-(--color-surface) p-5 shadow-(--shadow-card) sm:p-6">
               <div className="flex gap-4">
                 <UpvoteButton
                   count={post.upvotes}
@@ -90,7 +90,7 @@ export default function ForumPostPage() {
                       {post.viewCount.toLocaleString()}
                     </span>
                   </div>
-                  <p className="mt-4 mb-0 whitespace-pre-wrap text-sm leading-relaxed text-(--color-text-primary)">
+                  <p className="mt-4 mb-0 text-sm leading-relaxed whitespace-pre-wrap text-(--color-text-primary)">
                     {post.body}
                   </p>
                   {post.tags.length > 0 && (
@@ -106,7 +106,7 @@ export default function ForumPostPage() {
               </div>
             </article>
 
-            <section className="rounded-md border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-card) p-5 sm:p-6">
+            <section className="rounded-md border border-(--color-border-subtle) bg-(--color-surface) p-5 shadow-(--shadow-card) sm:p-6">
               <h2 className="m-0 mb-4 text-sm font-semibold text-(--color-text-primary)">
                 {comments.length} {comments.length === 1 ? 'reply' : 'replies'}
               </h2>

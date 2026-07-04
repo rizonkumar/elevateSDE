@@ -121,21 +121,21 @@ export default function OrgDashboardPage() {
         <motion.section variants={itemVariants}>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <div className="text-xs font-semibold uppercase tracking-[0.12em] text-(--color-accent) mb-2">
+              <div className="mb-2 text-xs font-semibold tracking-[0.12em] text-(--color-accent) uppercase">
                 Organization workspace
               </div>
-              <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tight">
+              <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
                 {company.name}
               </h1>
-              <p className="text-(--color-text-muted) mt-2 mb-0">
+              <p className="mt-2 mb-0 text-(--color-text-muted)">
                 Monitor seat usage, team performance, and member invitations.
               </p>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <span className="text-xs px-3 py-1.5 rounded-full border border-(--color-border-subtle) bg-(--color-badge-bg) text-(--color-text-muted) font-medium">
+            <div className="flex shrink-0 items-center gap-2">
+              <span className="rounded-full border border-(--color-border-subtle) bg-(--color-badge-bg) px-3 py-1.5 text-xs font-medium text-(--color-text-muted)">
                 {company.plan} plan
               </span>
-              <span className="text-xs px-3 py-1.5 rounded-full border border-(--color-border-subtle) bg-(--color-badge-bg) text-(--color-text-muted) font-medium">
+              <span className="rounded-full border border-(--color-border-subtle) bg-(--color-badge-bg) px-3 py-1.5 text-xs font-medium text-(--color-text-muted)">
                 {seats.used} of {seats.total} seats
               </span>
             </div>
@@ -143,10 +143,10 @@ export default function OrgDashboardPage() {
         </motion.section>
 
         <motion.section variants={itemVariants}>
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-            <div className="card lg:col-span-2 flex flex-col">
-              <div className="flex items-center gap-2 mb-2">
-                <Users className="w-4 h-4 text-(--color-accent)" />
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
+            <div className="card flex flex-col lg:col-span-2">
+              <div className="mb-2 flex items-center gap-2">
+                <Users className="h-4 w-4 text-(--color-accent)" />
                 <h2 className="text-sm font-semibold text-(--color-text-primary)">Seat usage</h2>
               </div>
               <div className="relative h-60 w-full">
@@ -175,20 +175,20 @@ export default function OrgDashboardPage() {
                     </RadialBarChart>
                   </ResponsiveContainer>
                 )}
-                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
                   <div className="font-display text-3xl font-bold text-(--color-text-primary)">
                     {seats.used} / {seats.total}
                   </div>
-                  <div className="text-xs text-(--color-text-muted) uppercase tracking-wider">
+                  <div className="text-xs tracking-wider text-(--color-text-muted) uppercase">
                     Seats · {seatPercent}%
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="card lg:col-span-3 flex flex-col">
-              <div className="flex items-center gap-2 mb-2">
-                <TrendingUp className="w-4 h-4 text-(--color-accent)" />
+            <div className="card flex flex-col lg:col-span-3">
+              <div className="mb-2 flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-(--color-accent)" />
                 <h2 className="text-sm font-semibold text-(--color-text-primary)">
                   Team performance
                 </h2>
@@ -236,10 +236,10 @@ export default function OrgDashboardPage() {
         </motion.section>
 
         <motion.section variants={itemVariants}>
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
             <div className="card lg:col-span-2">
-              <div className="flex items-center gap-2 mb-4">
-                <Mail className="w-4 h-4 text-(--color-accent)" />
+              <div className="mb-4 flex items-center gap-2">
+                <Mail className="h-4 w-4 text-(--color-accent)" />
                 <h2 className="text-sm font-semibold text-(--color-text-primary)">
                   Invite a member
                 </h2>
@@ -251,7 +251,7 @@ export default function OrgDashboardPage() {
                   placeholder="teammate@company.com"
                   value={email}
                   error={error}
-                  icon={<Mail className="w-4 h-4" />}
+                  icon={<Mail className="h-4 w-4" />}
                   onChange={(e) => {
                     setEmail(e.target.value);
                     if (error) setError('');
@@ -260,7 +260,7 @@ export default function OrgDashboardPage() {
                 <Button type="submit" className="w-full" disabled={submitting}>
                   {submitting ? 'Generating link…' : 'Generate invite link'}
                 </Button>
-                <p className="text-xs text-(--color-text-muted) mb-0">
+                <p className="mb-0 text-xs text-(--color-text-muted)">
                   {seats.total - seats.used} seat{seats.total - seats.used === 1 ? '' : 's'}{' '}
                   remaining on your plan.
                 </p>
@@ -268,7 +268,7 @@ export default function OrgDashboardPage() {
 
               {lastInviteUrl && (
                 <div className="mt-4 rounded-lg border border-(--color-border-subtle) bg-(--color-badge-bg) p-3">
-                  <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="mb-2 flex items-center justify-between gap-2">
                     <span className="text-xs font-semibold text-(--color-text-primary)">
                       Share this invite link
                     </span>
@@ -290,7 +290,7 @@ export default function OrgDashboardPage() {
                       aria-label="Copy invite link"
                       className="shrink-0 rounded-md border border-(--color-border-subtle) p-1.5 text-(--color-text-muted) hover:text-(--color-accent)"
                     >
-                      {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                      {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                     </button>
                   </div>
                 </div>
@@ -298,7 +298,7 @@ export default function OrgDashboardPage() {
             </div>
 
             <div className="card lg:col-span-3">
-              <div className="flex items-center justify-between mb-4">
+              <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-sm font-semibold text-(--color-text-primary)">Members</h2>
                 <span className="text-xs text-(--color-text-muted)">{members.length} total</span>
               </div>
@@ -306,10 +306,10 @@ export default function OrgDashboardPage() {
                 {members.map((member) => (
                   <div
                     key={member.id}
-                    className="py-3 first:pt-0 last:pb-0 flex items-center justify-between gap-3"
+                    className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
                   >
                     <div className="min-w-0">
-                      <div className="text-sm font-medium text-(--color-text-primary) truncate">
+                      <div className="truncate text-sm font-medium text-(--color-text-primary)">
                         {member.email}
                       </div>
                       <div className="text-xs text-(--color-text-muted)">
@@ -319,7 +319,7 @@ export default function OrgDashboardPage() {
                       </div>
                     </div>
                     <span
-                      className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border shrink-0 ${
+                      className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase ${
                         member.status === 'active'
                           ? 'border-(--color-border-subtle) bg-(--color-badge-bg) text-(--color-text-muted)'
                           : 'border-(--color-accent) text-(--color-accent)'

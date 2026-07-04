@@ -114,7 +114,8 @@ export interface MicAnalyser {
 export async function createMicAnalyser(): Promise<MicAnalyser> {
   const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
   const AudioContextCtor =
-    globalThis.window.AudioContext ?? (globalThis.window as unknown as LegacyWindow).webkitAudioContext;
+    globalThis.window.AudioContext ??
+    (globalThis.window as unknown as LegacyWindow).webkitAudioContext;
   if (!AudioContextCtor) {
     stream.getTracks().forEach((track) => track.stop());
     throw new Error('AudioContext is not supported in this browser.');

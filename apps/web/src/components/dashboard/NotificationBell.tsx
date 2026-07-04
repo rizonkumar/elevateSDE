@@ -53,11 +53,11 @@ export function NotificationBell() {
         aria-label="Notifications"
         aria-haspopup="menu"
         aria-expanded={open}
-        className="relative rounded-full border border-(--color-border-subtle) p-2 text-(--color-text-primary) transition-colors hover:bg-(--color-badge-bg) cursor-pointer"
+        className="relative cursor-pointer rounded-full border border-(--color-border-subtle) p-2 text-(--color-text-primary) transition-colors hover:bg-(--color-badge-bg)"
       >
         <Bell className="h-4 w-4" />
         {unreadCount > 0 && (
-          <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-(--color-danger) px-1 text-[10px] font-semibold text-white">
+          <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-(--color-danger) px-1 text-[10px] font-semibold text-white">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
@@ -74,7 +74,7 @@ export function NotificationBell() {
               <button
                 type="button"
                 onClick={() => void markAllRead()}
-                className="text-xs font-medium text-(--color-accent) transition-opacity hover:opacity-80 cursor-pointer"
+                className="cursor-pointer text-xs font-medium text-(--color-accent) transition-opacity hover:opacity-80"
               >
                 Mark all read
               </button>

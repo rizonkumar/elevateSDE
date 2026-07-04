@@ -46,7 +46,10 @@ export class DailyChallengeManagementController {
   @ApiResponse({ status: 201, type: DailyChallengeScheduleResponseDto })
   @ApiResponse({ status: 409, description: 'A challenge is already scheduled for that date.' })
   async create(@Body() dto: CreateDailyChallengeDto): Promise<DailyChallengeScheduleResponseDto> {
-    const view = await this.dailyChallengeService.schedule(new Date(dto.challengeDate), dto.problemId);
+    const view = await this.dailyChallengeService.schedule(
+      new Date(dto.challengeDate),
+      dto.problemId,
+    );
     return DailyChallengePresentationMapper.toSchedule(view);
   }
 

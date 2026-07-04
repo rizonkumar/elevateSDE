@@ -77,7 +77,7 @@ export function CreatePostModal() {
                   key={tag.id}
                   type="button"
                   onClick={() => toggleTag(tag.id)}
-                  className={`rounded-(--radius-full) border px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer focus:outline-none focus-visible:shadow-[0_0_0_2px_var(--color-bg),0_0_0_4px_var(--color-accent)] ${
+                  className={`cursor-pointer rounded-(--radius-full) border px-3 py-1.5 text-xs font-medium transition-colors focus:outline-none focus-visible:shadow-[0_0_0_2px_var(--color-bg),0_0_0_4px_var(--color-accent)] ${
                     active
                       ? 'border-(--color-accent) bg-(--color-accent-soft) text-(--color-accent)'
                       : 'border-(--color-border-subtle) bg-(--color-surface) text-(--color-text-muted) hover:text-(--color-text-primary)'

@@ -18,10 +18,10 @@ export function Toggle({ checked, onChange, disabled, label }: ToggleProps) {
       aria-label={label}
       disabled={disabled}
       onClick={() => onChange(!checked)}
-      className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-(--color-accent)/40 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${
+      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors focus:ring-2 focus:ring-(--color-accent)/40 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${
         checked
           ? 'bg-(--color-accent)'
-          : 'bg-(--color-badge-bg) border border-(--color-border-subtle)'
+          : 'border border-(--color-border-subtle) bg-(--color-badge-bg)'
       }`}
     >
       <span

@@ -102,7 +102,9 @@ export const useResumeStore = create<ResumeState>((set) => ({
         ),
         isAnalyzing: false,
       }));
-      useToastStore.getState().addToast('Could not analyze this resume. Try another file.', 'error');
+      useToastStore
+        .getState()
+        .addToast('Could not analyze this resume. Try another file.', 'error');
     }
   },
 

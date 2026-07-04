@@ -64,7 +64,7 @@ export function UserMenu() {
         onClick={() => setOpen((prev) => !prev)}
         aria-haspopup="menu"
         aria-expanded={open}
-        className="flex items-center gap-2 rounded-full border border-(--color-border-subtle) py-1 pl-1 pr-2.5 transition-colors hover:bg-(--color-badge-bg) cursor-pointer"
+        className="flex cursor-pointer items-center gap-2 rounded-full border border-(--color-border-subtle) py-1 pr-2.5 pl-1 transition-colors hover:bg-(--color-badge-bg)"
       >
         <span className="flex h-8 w-8 items-center justify-center rounded-full bg-(--color-accent) text-sm font-semibold text-white">
           {initial}
@@ -101,7 +101,7 @@ export function UserMenu() {
           <button
             type="button"
             onClick={handleLogout}
-            className="flex w-full items-center gap-2.5 px-4 py-3 text-left text-sm font-medium text-(--color-text-primary) transition-colors hover:bg-(--color-badge-bg) cursor-pointer"
+            className="flex w-full cursor-pointer items-center gap-2.5 px-4 py-3 text-left text-sm font-medium text-(--color-text-primary) transition-colors hover:bg-(--color-badge-bg)"
           >
             <LogOut className="h-4 w-4" />
             Log out

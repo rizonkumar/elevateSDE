@@ -4,10 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { CheckCircle2, AlertCircle, Info, X } from 'lucide-react';
 import { useToastStore, Toast } from '../store/toast.store';
 
-const TOAST_CONFIG: Record<
-  Toast['type'],
-  { Icon: typeof Info; chip: string }
-> = {
+const TOAST_CONFIG: Record<Toast['type'], { Icon: typeof Info; chip: string }> = {
   success: { Icon: CheckCircle2, chip: 'bg-emerald-500/15 text-emerald-500' },
   error: { Icon: AlertCircle, chip: 'bg-rose-500/15 text-rose-500' },
   info: { Icon: Info, chip: 'bg-teal-500/15 text-teal-500' },
@@ -34,14 +31,14 @@ export function ToastContainer() {
               >
                 <Icon className="h-4 w-4" />
               </span>
-              <p className="flex-1 text-sm font-medium leading-snug text-(--color-text-primary)">
+              <p className="flex-1 text-sm leading-snug font-medium text-(--color-text-primary)">
                 {toast.message}
               </p>
               <button
                 type="button"
                 aria-label="Dismiss"
                 onClick={() => removeToast(toast.id)}
-                className="-mr-1 shrink-0 rounded-md p-1 text-(--color-text-muted) transition-colors hover:bg-(--color-badge-bg) hover:text-(--color-text-primary) cursor-pointer"
+                className="-mr-1 shrink-0 cursor-pointer rounded-md p-1 text-(--color-text-muted) transition-colors hover:bg-(--color-badge-bg) hover:text-(--color-text-primary)"
               >
                 <X className="h-4 w-4" />
               </button>

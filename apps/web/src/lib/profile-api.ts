@@ -1,8 +1,4 @@
-import type {
-  StreakSummaryDto,
-  SubmissionHeatmapDto,
-  UserDto,
-} from '@elevatesde/shared-types';
+import type { StreakSummaryDto, SubmissionHeatmapDto, UserDto } from '@elevatesde/shared-types';
 import { api } from './api';
 
 export async function getMe(): Promise<UserDto> {

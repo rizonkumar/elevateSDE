@@ -21,7 +21,7 @@ export function Hero() {
       <div className="flex flex-col items-center text-center">
         <motion.span
           {...rise(0)}
-          className="inline-flex items-center gap-2 rounded-(--radius-full) border border-(--color-border-subtle) bg-(--color-bg-soft) px-3.5 py-1.5 font-mono text-xs font-medium uppercase tracking-[0.18em] text-(--color-accent)"
+          className="inline-flex items-center gap-2 rounded-(--radius-full) border border-(--color-border-subtle) bg-(--color-bg-soft) px-3.5 py-1.5 font-mono text-xs font-medium tracking-[0.18em] text-(--color-accent) uppercase"
         >
           <span className="h-1.5 w-1.5 rounded-full bg-(--color-accent)" />
           <span>Enterprise AI interview prep</span>
@@ -29,7 +29,7 @@ export function Hero() {
 
         <motion.h1
           {...rise(0.08)}
-          className="mt-6 max-w-4xl font-display text-4xl font-bold leading-[1.04] tracking-tight text-(--color-text-primary) sm:text-6xl lg:text-7xl"
+          className="mt-6 max-w-4xl font-display text-4xl leading-[1.04] font-bold tracking-tight text-(--color-text-primary) sm:text-6xl lg:text-7xl"
         >
           Elevate your software engineering career
         </motion.h1>
@@ -38,11 +38,14 @@ export function Hero() {
           {...rise(0.16)}
           className="mt-6 max-w-2xl text-base leading-relaxed text-(--color-text-muted) sm:text-lg"
         >
-          Timed coding assessments, real-time AI mock interviews, resume analysis, and a job
-          tracker — one platform for individual engineers and the teams that hire them.
+          Timed coding assessments, real-time AI mock interviews, resume analysis, and a job tracker
+          — one platform for individual engineers and the teams that hire them.
         </motion.p>
 
-        <motion.div {...rise(0.24)} className="mt-9 flex flex-wrap items-center justify-center gap-3">
+        <motion.div
+          {...rise(0.24)}
+          className="mt-9 flex flex-wrap items-center justify-center gap-3"
+        >
           <Link
             href="/register"
             className="inline-flex items-center gap-2 rounded-(--radius-full) bg-(--color-accent) px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
@@ -60,7 +63,7 @@ export function Hero() {
 
         <motion.ul
           {...rise(0.32)}
-          className="mt-7 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 font-mono text-xs uppercase tracking-widest text-(--color-text-muted)"
+          className="mt-7 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 font-mono text-xs tracking-widest text-(--color-text-muted) uppercase"
         >
           {SIGNALS.map((signal) => (
             <li key={signal} className="flex items-center gap-2">

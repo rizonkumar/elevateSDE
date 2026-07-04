@@ -3,10 +3,7 @@
 import * as React from 'react';
 import { ArrowLeft, MessageSquare, MessagesSquare, Plus } from 'lucide-react';
 import { Button, Textarea } from '@elevatesde/ui';
-import type {
-  ProblemDiscussionCommentDto,
-  ProblemDiscussionDto,
-} from '@elevatesde/shared-types';
+import type { ProblemDiscussionCommentDto, ProblemDiscussionDto } from '@elevatesde/shared-types';
 import { AuthorAvatar } from '@/components/dashboard/AuthorAvatar';
 import { UpvoteButton } from '@/components/dashboard/forum/UpvoteButton';
 import { CommentItem } from '@/components/dashboard/forum/CommentItem';
@@ -27,9 +24,7 @@ export function DiscussionTab({ problemId }: Readonly<DiscussionTabProps>) {
   );
   const isLoading = useProblemSocialStore((state) => state.isLoadingDiscussions);
   const fetchDiscussions = useProblemSocialStore((state) => state.fetchDiscussions);
-  const fetchDiscussionComments = useProblemSocialStore(
-    (state) => state.fetchDiscussionComments,
-  );
+  const fetchDiscussionComments = useProblemSocialStore((state) => state.fetchDiscussionComments);
   const addDiscussionComment = useProblemSocialStore((state) => state.addDiscussionComment);
   const toggleDiscussionUpvote = useProblemSocialStore((state) => state.toggleDiscussionUpvote);
   const toggleDiscussionCommentUpvote = useProblemSocialStore(
@@ -76,7 +71,7 @@ export function DiscussionTab({ problemId }: Readonly<DiscussionTabProps>) {
         <button
           type="button"
           onClick={() => setSelectedId(null)}
-          className="inline-flex w-fit items-center gap-2 text-sm font-medium text-(--color-text-muted) transition-colors hover:text-(--color-text-primary) cursor-pointer"
+          className="inline-flex w-fit cursor-pointer items-center gap-2 text-sm font-medium text-(--color-text-muted) transition-colors hover:text-(--color-text-primary)"
         >
           <ArrowLeft className="h-4 w-4" />
           All discussions
@@ -100,7 +95,7 @@ export function DiscussionTab({ problemId }: Readonly<DiscussionTabProps>) {
               {selected.author.headline && <span>· {selected.author.headline}</span>}
               <span>· {formatRelativeTime(selected.createdAt)}</span>
             </div>
-            <p className="mt-3 mb-0 whitespace-pre-wrap text-sm leading-relaxed text-(--color-text-primary)">
+            <p className="mt-3 mb-0 text-sm leading-relaxed whitespace-pre-wrap text-(--color-text-primary)">
               {selected.body}
             </p>
           </div>
@@ -181,7 +176,7 @@ export function DiscussionTab({ problemId }: Readonly<DiscussionTabProps>) {
               <button
                 type="button"
                 onClick={() => setSelectedId(discussion.id)}
-                className="min-w-0 flex-1 text-left cursor-pointer"
+                className="min-w-0 flex-1 cursor-pointer text-left"
               >
                 <p className="m-0 truncate text-sm font-semibold text-(--color-text-primary)">
                   {discussion.title}

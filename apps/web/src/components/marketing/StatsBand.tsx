@@ -17,7 +17,7 @@ export function StatsBand() {
               <dt className="font-display text-3xl font-bold tracking-tight text-(--color-text-primary) sm:text-4xl">
                 {stat.value}
               </dt>
-              <dd className="font-mono text-xs uppercase tracking-[0.08em] text-(--color-text-muted)">
+              <dd className="font-mono text-xs tracking-[0.08em] text-(--color-text-muted) uppercase">
                 {stat.label}
               </dd>
             </div>

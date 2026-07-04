@@ -6,10 +6,7 @@ import { RadialBarChart, RadialBar, PolarAngleAxis, ResponsiveContainer } from '
 import { CheckCircle2, ArrowUpRight, RotateCcw } from 'lucide-react';
 import { Badge, Button } from '@elevatesde/ui';
 import type { BadgeVariant } from '@elevatesde/ui';
-import type {
-  InterviewCompetencySeverity,
-  MockInterviewFeedback,
-} from '@elevatesde/shared-types';
+import type { InterviewCompetencySeverity, MockInterviewFeedback } from '@elevatesde/shared-types';
 import { scoreBand } from '@/lib/resume-analyzer';
 import { useMockInterviewStore } from '@/store/mock-interview.store';
 
@@ -64,10 +61,10 @@ export function FeedbackReport({ feedback }: FeedbackReportProps) {
             </ResponsiveContainer>
           )}
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-            <div className="font-display text-4xl font-semibold leading-none text-(--color-text-primary)">
+            <div className="font-display text-4xl leading-none font-semibold text-(--color-text-primary)">
               {feedback.overallScore}
             </div>
-            <div className="mt-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-(--color-text-muted)">
+            <div className="mt-1 text-[11px] font-semibold tracking-[0.14em] text-(--color-text-muted) uppercase">
               Overall
             </div>
           </div>
@@ -80,7 +77,9 @@ export function FeedbackReport({ feedback }: FeedbackReportProps) {
             </h2>
             <Badge variant={band.badgeVariant}>{band.label}</Badge>
           </div>
-          <p className="m-0 text-sm leading-relaxed text-(--color-text-muted)">{feedback.summary}</p>
+          <p className="m-0 text-sm leading-relaxed text-(--color-text-muted)">
+            {feedback.summary}
+          </p>
           <Button className="mt-1 self-center sm:self-start" onClick={reset}>
             <span className="inline-flex items-center gap-2">
               <RotateCcw className="h-4 w-4" />
@@ -91,7 +90,7 @@ export function FeedbackReport({ feedback }: FeedbackReportProps) {
       </div>
 
       <div className="card flex flex-col gap-4">
-        <h3 className="m-0 text-sm font-semibold uppercase tracking-wider text-(--color-text-muted)">
+        <h3 className="m-0 text-sm font-semibold tracking-wider text-(--color-text-muted) uppercase">
           Competency breakdown
         </h3>
         <div className="flex flex-col gap-4">
@@ -116,7 +115,7 @@ export function FeedbackReport({ feedback }: FeedbackReportProps) {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="card flex flex-col gap-3">
-          <h3 className="m-0 text-sm font-semibold uppercase tracking-wider text-(--color-text-muted)">
+          <h3 className="m-0 text-sm font-semibold tracking-wider text-(--color-text-muted) uppercase">
             Strengths
           </h3>
           <ul className="m-0 flex flex-col gap-3 p-0">
@@ -130,7 +129,7 @@ export function FeedbackReport({ feedback }: FeedbackReportProps) {
         </div>
 
         <div className="card flex flex-col gap-3">
-          <h3 className="m-0 text-sm font-semibold uppercase tracking-wider text-(--color-text-muted)">
+          <h3 className="m-0 text-sm font-semibold tracking-wider text-(--color-text-muted) uppercase">
             Where to improve
           </h3>
           <ul className="m-0 flex flex-col gap-3 p-0">

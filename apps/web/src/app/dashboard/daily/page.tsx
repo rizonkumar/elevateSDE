@@ -89,21 +89,20 @@ export default function DailyChallengePage() {
                 <Flame className="h-5 w-5" />
               </span>
               <div>
-                <div className="font-display text-2xl font-semibold leading-none">
+                <div className="font-display text-2xl leading-none font-semibold">
                   {streak?.current ?? 0}
                 </div>
                 <div className="text-xs text-(--color-text-muted)">day streak</div>
               </div>
             </div>
             <div className="mt-4 text-sm text-(--color-text-muted)">
-              Longest streak{' '}
-              <span className="font-semibold">{streak?.longest ?? 0} days</span>
+              Longest streak <span className="font-semibold">{streak?.longest ?? 0} days</span>
             </div>
           </div>
         </div>
 
         <div className={cardClass}>
-          <h3 className="m-0 mb-4 font-display text-xs font-semibold uppercase tracking-wider text-(--color-text-muted)">
+          <h3 className="m-0 mb-4 font-display text-xs font-semibold tracking-wider text-(--color-text-muted) uppercase">
             Activity
           </h3>
           {streak && streak.calendar.length > 0 ? (

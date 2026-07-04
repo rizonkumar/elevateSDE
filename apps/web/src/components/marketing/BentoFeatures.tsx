@@ -33,7 +33,7 @@ function Tile({ icon: Icon, meta, title, body, preview, className = '' }: Readon
         <span className="flex h-10 w-10 items-center justify-center rounded-md bg-(--color-accent-soft) text-(--color-accent)">
           <Icon className="h-5 w-5" />
         </span>
-        <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-(--color-text-muted)">
+        <span className="font-mono text-[11px] tracking-[0.12em] text-(--color-text-muted) uppercase">
           {meta}
         </span>
       </div>
@@ -71,7 +71,7 @@ function InterviewPreview() {
         </p>
       </div>
       <div className="flex items-center justify-between rounded-sm border border-(--color-border-subtle) bg-(--color-surface) px-3 py-2">
-        <span className="font-mono text-[11px] uppercase tracking-wider text-(--color-text-muted)">
+        <span className="font-mono text-[11px] tracking-wider text-(--color-text-muted) uppercase">
           Round score
         </span>
         <span className="text-sm font-semibold text-(--color-text-primary)">8.2 / 10</span>
@@ -95,8 +95,8 @@ function CodePreview() {
     <MiniPanel className="flex flex-col gap-3">
       <pre className="overflow-hidden font-mono text-[11px] leading-relaxed text-(--color-text-muted)">
         <span className="text-(--color-accent)">function</span> twoSum(nums, target) {'{'}
-        {'\n'}  <span className="text-(--color-accent)">const</span> seen = new Map();
-        {'\n'}  ...
+        {'\n'} <span className="text-(--color-accent)">const</span> seen = new Map();
+        {'\n'} ...
         {'\n'}
         {'}'}
       </pre>
@@ -114,7 +114,7 @@ function ResumePreview() {
   return (
     <MiniPanel className="flex flex-col gap-3">
       <div className="flex items-baseline justify-between">
-        <span className="font-mono text-[11px] uppercase tracking-wider text-(--color-text-muted)">
+        <span className="font-mono text-[11px] tracking-wider text-(--color-text-muted) uppercase">
           ATS score
         </span>
         <span className="text-lg font-bold text-(--color-text-primary)">86</span>
@@ -147,7 +147,7 @@ function KanbanPreview() {
       {columns.map((col) => (
         <div key={col.label} className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-(--color-text-muted)">
+            <span className="font-mono text-[10px] tracking-wider text-(--color-text-muted) uppercase">
               {col.label}
             </span>
             <span className="text-[10px] text-(--color-text-muted)">{col.count}</span>
@@ -211,7 +211,7 @@ function EnterprisePreview() {
   return (
     <MiniPanel className="flex flex-wrap items-center justify-between gap-4">
       <div className="flex flex-col gap-1">
-        <span className="font-mono text-[11px] uppercase tracking-wider text-(--color-text-muted)">
+        <span className="font-mono text-[11px] tracking-wider text-(--color-text-muted) uppercase">
           Seat usage
         </span>
         <span className="text-lg font-bold text-(--color-text-primary)">
@@ -229,7 +229,7 @@ function EnterprisePreview() {
         ))}
       </div>
       <div className="flex items-center gap-2">
-        <span className="font-mono text-[11px] uppercase tracking-wider text-(--color-text-muted)">
+        <span className="font-mono text-[11px] tracking-wider text-(--color-text-muted) uppercase">
           Plan
         </span>
         <span className="rounded-(--radius-full) border border-(--color-border-subtle) px-2 py-0.5 text-[11px] font-medium text-(--color-text-primary)">

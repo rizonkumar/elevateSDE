@@ -30,14 +30,14 @@ export function RangeSlider({
   const pct = Math.min(100, Math.max(0, ((local - min) / (max - min)) * 100));
 
   return (
-    <div className={`relative h-4 flex items-center ${className}`}>
-      <div className="relative w-full h-1.5 rounded-full bg-(--color-badge-bg)">
+    <div className={`relative flex h-4 items-center ${className}`}>
+      <div className="relative h-1.5 w-full rounded-full bg-(--color-badge-bg)">
         <div
-          className="absolute left-0 top-0 h-full rounded-full bg-(--color-accent)"
+          className="absolute top-0 left-0 h-full rounded-full bg-(--color-accent)"
           style={{ width: `${pct}%` }}
         />
         <span
-          className={`absolute top-1/2 h-3.5 w-3.5 -translate-y-1/2 -translate-x-1/2 rounded-full bg-white border-2 border-(--color-accent) shadow-sm pointer-events-none ${
+          className={`pointer-events-none absolute top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-(--color-accent) bg-white shadow-sm ${
             disabled ? 'opacity-50' : ''
           }`}
           style={{ left: `${pct}%` }}
@@ -57,7 +57,7 @@ export function RangeSlider({
         onMouseUp={(event) => onCommit?.(Number((event.target as HTMLInputElement).value))}
         onTouchEnd={(event) => onCommit?.(Number((event.target as HTMLInputElement).value))}
         onKeyUp={(event) => onCommit?.(Number((event.target as HTMLInputElement).value))}
-        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+        className="absolute inset-0 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
         aria-label="Rollout percentage"
       />
     </div>

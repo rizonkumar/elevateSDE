@@ -31,7 +31,7 @@ function SidebarEntry({
     <button
       type="button"
       onClick={onSelect}
-      className={`flex w-full items-center justify-between gap-3 rounded-(--radius-md) border px-3.5 py-3 text-left transition-colors cursor-pointer ${
+      className={`flex w-full cursor-pointer items-center justify-between gap-3 rounded-(--radius-md) border px-3.5 py-3 text-left transition-colors ${
         active
           ? 'border-(--color-accent) bg-(--color-accent-soft)'
           : 'border-(--color-border-subtle) bg-(--color-surface) hover:border-(--color-accent)'
@@ -133,7 +133,7 @@ export default function ListsPage() {
         type="button"
         onClick={submitRename}
         aria-label="Save name"
-        className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-(--color-border-subtle) text-(--color-accent) transition-colors hover:bg-(--color-accent-soft) cursor-pointer"
+        className="inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full border border-(--color-border-subtle) text-(--color-accent) transition-colors hover:bg-(--color-accent-soft)"
       >
         <Check className="h-4 w-4" />
       </button>
@@ -141,7 +141,7 @@ export default function ListsPage() {
         type="button"
         onClick={() => setRenaming(false)}
         aria-label="Cancel rename"
-        className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-(--color-border-subtle) text-(--color-text-muted) transition-colors hover:bg-(--color-badge-bg) cursor-pointer"
+        className="inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full border border-(--color-border-subtle) text-(--color-text-muted) transition-colors hover:bg-(--color-badge-bg)"
       >
         <X className="h-4 w-4" />
       </button>
@@ -245,7 +245,7 @@ export default function ListsPage() {
                             setRenaming(true);
                           }}
                           aria-label="Rename list"
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-(--color-border-subtle) text-(--color-text-muted) transition-colors hover:border-(--color-accent) hover:text-(--color-accent) cursor-pointer"
+                          className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-(--color-border-subtle) text-(--color-text-muted) transition-colors hover:border-(--color-accent) hover:text-(--color-accent)"
                         >
                           <Pencil className="h-4 w-4" />
                         </button>
@@ -253,7 +253,7 @@ export default function ListsPage() {
                           type="button"
                           onClick={() => setConfirmDelete(true)}
                           aria-label="Delete list"
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-(--color-border-subtle) text-(--color-text-muted) transition-colors hover:border-(--color-danger) hover:text-(--color-danger) cursor-pointer"
+                          className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-(--color-border-subtle) text-(--color-text-muted) transition-colors hover:border-(--color-danger) hover:text-(--color-danger)"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>

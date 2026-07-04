@@ -17,8 +17,12 @@ function chipClasses(active: boolean): string {
 
 export function TagFilter({ activeTag, onChange }: Readonly<TagFilterProps>) {
   return (
-    <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none [&::-webkit-scrollbar]:hidden">
-      <button type="button" className={chipClasses(activeTag === null)} onClick={() => onChange(null)}>
+    <div className="flex scrollbar-none gap-2 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden">
+      <button
+        type="button"
+        className={chipClasses(activeTag === null)}
+        onClick={() => onChange(null)}
+      >
         All topics
       </button>
       {FORUM_TAGS.map((tag) => (

@@ -73,7 +73,9 @@ export function QuestionsPanel({
       return [...arr].sort((a, b) => a.title.localeCompare(b.title));
     }
     if (sort === 'difficulty') {
-      return [...arr].sort((a, b) => DIFFICULTY_ORDER[a.difficulty] - DIFFICULTY_ORDER[b.difficulty]);
+      return [...arr].sort(
+        (a, b) => DIFFICULTY_ORDER[a.difficulty] - DIFFICULTY_ORDER[b.difficulty],
+      );
     }
     if (sort === 'unsolved') {
       return [...arr].sort((a, b) => Number(solvedSet.has(a.id)) - Number(solvedSet.has(b.id)));

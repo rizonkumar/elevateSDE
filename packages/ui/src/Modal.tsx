@@ -37,7 +37,7 @@ export function Modal({ open, onClose, title, description, children }: ModalProp
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-6"
+      className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-6"
       role="dialog"
       aria-modal="true"
       aria-label={title}
@@ -51,24 +51,22 @@ export function Modal({ open, onClose, title, description, children }: ModalProp
       <div
         ref={panelRef}
         tabIndex={-1}
-        className="relative w-full sm:max-w-lg max-h-[92vh] overflow-y-auto bg-(--color-surface) border border-(--color-border-subtle) rounded-t-(--radius-md) sm:rounded-(--radius-md) shadow-(--shadow-modal) focus:outline-none"
+        className="relative max-h-[92vh] w-full overflow-y-auto rounded-t-(--radius-md) border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-modal) focus:outline-none sm:max-w-lg sm:rounded-(--radius-md)"
       >
-        <div className="flex items-start justify-between gap-4 px-5 sm:px-6 pt-5 pb-4 border-b border-(--color-border-subtle)">
+        <div className="flex items-start justify-between gap-4 border-b border-(--color-border-subtle) px-5 pt-5 pb-4 sm:px-6">
           <div className="flex flex-col gap-1">
             <h2 className="text-lg font-semibold tracking-tight text-(--color-text-primary)">
               {title}
             </h2>
-            {description && (
-              <p className="text-sm text-(--color-text-muted)">{description}</p>
-            )}
+            {description && <p className="text-sm text-(--color-text-muted)">{description}</p>}
           </div>
           <button
             type="button"
             aria-label="Close dialog"
             onClick={onClose}
-            className="shrink-0 -mr-1 -mt-1 p-2 rounded-full text-(--color-text-muted) hover:bg-(--color-badge-bg) hover:text-(--color-text-primary) transition cursor-pointer"
+            className="-mt-1 -mr-1 shrink-0 cursor-pointer rounded-full p-2 text-(--color-text-muted) transition hover:bg-(--color-badge-bg) hover:text-(--color-text-primary)"
           >
-            <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4">
+            <svg viewBox="0 0 20 20" fill="none" className="h-4 w-4">
               <path
                 d="M5 5l10 10M15 5L5 15"
                 stroke="currentColor"
@@ -78,7 +76,7 @@ export function Modal({ open, onClose, title, description, children }: ModalProp
             </svg>
           </button>
         </div>
-        <div className="px-5 sm:px-6 py-5">{children}</div>
+        <div className="px-5 py-5 sm:px-6">{children}</div>
       </div>
     </div>
   );

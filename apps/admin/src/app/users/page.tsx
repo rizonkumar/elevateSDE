@@ -76,8 +76,8 @@ export default function UsersPage() {
   return (
     <AdminLayout>
       {loading ? (
-        <div className="flex items-center justify-center min-h-[300px]">
-          <span className="text-sm text-(--color-text-muted) animate-pulse">
+        <div className="flex min-h-[300px] items-center justify-center">
+          <span className="animate-pulse text-sm text-(--color-text-muted)">
             Retrieving account records...
           </span>
         </div>
@@ -87,15 +87,15 @@ export default function UsersPage() {
             <p className="text-sm text-(--color-text-muted)">
               Manage roles across all system accounts.
             </p>
-            <span className="text-xs font-semibold text-(--color-text-muted) px-2.5 py-1 rounded-full border border-(--color-border-subtle) bg-(--color-badge-bg)">
+            <span className="rounded-full border border-(--color-border-subtle) bg-(--color-badge-bg) px-2.5 py-1 text-xs font-semibold text-(--color-text-muted)">
               {users.length} users
             </span>
           </div>
 
-          <div className="hidden md:block overflow-visible rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-sm">
+          <div className="hidden overflow-visible rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-sm md:block">
             <table className="w-full border-collapse text-left text-sm">
               <thead>
-                <tr className="border-b border-(--color-border-subtle) bg-(--color-bg-soft) text-xs font-semibold text-(--color-text-muted) uppercase tracking-wider">
+                <tr className="border-b border-(--color-border-subtle) bg-(--color-bg-soft) text-xs font-semibold tracking-wider text-(--color-text-muted) uppercase">
                   <th className="px-6 py-4">User ID</th>
                   <th className="px-6 py-4">Email Address</th>
                   <th className="px-6 py-4">Tenant ID</th>
@@ -105,7 +105,7 @@ export default function UsersPage() {
               </thead>
               <tbody className="divide-y divide-(--color-border-subtle)">
                 {users.map((user) => (
-                  <tr key={user.id} className="hover:bg-(--color-bg-soft)/50 transition-colors">
+                  <tr key={user.id} className="transition-colors hover:bg-(--color-bg-soft)/50">
                     <td className="px-6 py-4 font-mono text-xs text-(--color-text-muted)">
                       <span className="block max-w-[200px] truncate" title={user.id}>
                         {user.id}
@@ -115,7 +115,10 @@ export default function UsersPage() {
                       {user.email}
                     </td>
                     <td className="px-6 py-4 font-mono text-xs text-(--color-text-muted)">
-                      <span className="block max-w-[180px] truncate" title={user.tenantId || 'B2C Account'}>
+                      <span
+                        className="block max-w-[180px] truncate"
+                        title={user.tenantId || 'B2C Account'}
+                      >
                         {user.tenantId || 'B2C Account'}
                       </span>
                     </td>
@@ -136,19 +139,19 @@ export default function UsersPage() {
             </table>
           </div>
 
-          <div className="md:hidden flex flex-col gap-4">
+          <div className="flex flex-col gap-4 md:hidden">
             {users.map((user) => (
               <div
                 key={user.id}
-                className="rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-sm p-4 flex flex-col gap-3"
+                className="flex flex-col gap-3 rounded-xl border border-(--color-border-subtle) bg-(--color-surface) p-4 shadow-sm"
               >
                 <div className="flex items-start justify-between gap-3">
-                  <span className="font-semibold text-(--color-text-primary) break-all">
+                  <span className="font-semibold break-all text-(--color-text-primary)">
                     {user.email}
                   </span>
                   <Badge variant={roleVariant(user.role)}>{roleLabel(user.role)}</Badge>
                 </div>
-                <div className="text-xs text-(--color-text-muted) font-mono break-all">
+                <div className="font-mono text-xs break-all text-(--color-text-muted)">
                   {user.tenantId || 'B2C Account'}
                 </div>
                 <Select

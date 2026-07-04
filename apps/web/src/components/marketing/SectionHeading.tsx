@@ -15,15 +15,16 @@ export function SectionHeading({
   align = 'left',
   className = '',
 }: Readonly<SectionHeadingProps>) {
-  const alignment = align === 'center' ? 'mx-auto items-center text-center' : 'items-start text-left';
+  const alignment =
+    align === 'center' ? 'mx-auto items-center text-center' : 'items-start text-left';
   return (
     <div className={`flex max-w-2xl flex-col gap-4 ${alignment} ${className}`}>
       {kicker ? (
-        <span className="font-mono text-xs font-medium uppercase tracking-[0.2em] text-(--color-accent)">
+        <span className="font-mono text-xs font-medium tracking-[0.2em] text-(--color-accent) uppercase">
           {kicker}
         </span>
       ) : null}
-      <h2 className="font-display text-3xl font-bold leading-[1.1] tracking-tight text-(--color-text-primary) sm:text-4xl">
+      <h2 className="font-display text-3xl leading-[1.1] font-bold tracking-tight text-(--color-text-primary) sm:text-4xl">
         {title}
       </h2>
       {description ? (

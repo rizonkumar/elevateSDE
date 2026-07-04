@@ -1,7 +1,4 @@
-import {
-  ForumComment as PrismaForumComment,
-  ForumPost as PrismaForumPost,
-} from '@prisma/client';
+import { ForumComment as PrismaForumComment, ForumPost as PrismaForumPost } from '@prisma/client';
 import { ForumPost } from '../../domain/entities/forum-post';
 import { ForumComment } from '../../domain/entities/forum-comment';
 

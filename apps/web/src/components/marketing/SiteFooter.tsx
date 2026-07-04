@@ -55,7 +55,7 @@ export function SiteFooter() {
           <p className="max-w-xs text-sm leading-relaxed text-(--color-text-muted)">
             Enterprise-grade AI interview preparation for engineers and the teams that hire them.
           </p>
-          <span className="mt-2 inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.12em] text-(--color-text-muted)">
+          <span className="mt-2 inline-flex items-center gap-2 font-mono text-[11px] tracking-[0.12em] text-(--color-text-muted) uppercase">
             <span className="h-1.5 w-1.5 rounded-full bg-(--color-success)" />
             <span>All systems normal</span>
           </span>
@@ -63,7 +63,7 @@ export function SiteFooter() {
 
         {COLUMNS.map((column) => (
           <div key={column.heading} className="flex flex-col gap-4">
-            <h3 className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-(--color-text-muted)">
+            <h3 className="font-mono text-[11px] font-semibold tracking-[0.14em] text-(--color-text-muted) uppercase">
               {column.heading}
             </h3>
             <ul className="flex flex-col gap-3">
@@ -85,7 +85,7 @@ export function SiteFooter() {
       <div className="border-t border-(--color-border-subtle)">
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-3 px-4 py-6 text-xs text-(--color-text-muted) sm:flex-row sm:px-6 lg:px-8">
           <span>© 2026 ElevateSDE. All rights reserved.</span>
-          <span className="font-mono uppercase tracking-widest">Built for software engineers</span>
+          <span className="font-mono tracking-widest uppercase">Built for software engineers</span>
         </div>
       </div>
     </footer>

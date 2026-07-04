@@ -4,7 +4,15 @@ import * as React from 'react';
 import { AdminLayout } from '../components/AdminLayout';
 import { api } from '../lib/api';
 import { useToastStore } from '../store/toast.store';
-import { Users, Building2, ToggleLeft, Activity, ArrowRight, Gauge, ShieldCheck } from 'lucide-react';
+import {
+  Users,
+  Building2,
+  ToggleLeft,
+  Activity,
+  ArrowRight,
+  Gauge,
+  ShieldCheck,
+} from 'lucide-react';
 import { AdminStatsDto, AuditLogDto, FeatureFlagDto } from '@elevatesde/shared-types';
 import Link from 'next/link';
 
@@ -96,32 +104,32 @@ export default function DashboardPage() {
   return (
     <AdminLayout>
       {loading ? (
-        <div className="flex items-center justify-center min-h-[300px]">
-          <span className="text-sm text-(--color-text-muted) animate-pulse">
+        <div className="flex min-h-[300px] items-center justify-center">
+          <span className="animate-pulse text-sm text-(--color-text-muted)">
             Loading dashboard analytics...
           </span>
         </div>
       ) : (
         <div className="flex flex-col gap-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             {cards.map((card, idx) => {
               const Icon = card.icon;
               return (
                 <div
                   key={idx}
-                  className="p-6 rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-sm flex flex-col gap-4"
+                  className="flex flex-col gap-4 rounded-xl border border-(--color-border-subtle) bg-(--color-surface) p-6 shadow-sm"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-(--color-text-muted) uppercase tracking-wider">
+                    <span className="text-xs font-semibold tracking-wider text-(--color-text-muted) uppercase">
                       {card.name}
                     </span>
-                    <Icon className="w-5 h-5 text-(--color-accent) shrink-0" />
+                    <Icon className="h-5 w-5 shrink-0 text-(--color-accent)" />
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-3xl font-bold font-display tracking-tight text-(--color-text-primary)">
+                    <span className="font-display text-3xl font-bold tracking-tight text-(--color-text-primary)">
                       {card.value}
                     </span>
-                    <span className="text-xs text-(--color-text-muted) mt-1">
+                    <span className="mt-1 text-xs text-(--color-text-muted)">
                       {card.description}
                     </span>
                   </div>
@@ -131,28 +139,28 @@ export default function DashboardPage() {
           </div>
 
           <div>
-            <h2 className="text-xs font-semibold text-(--color-text-muted) uppercase tracking-wider mb-4">
+            <h2 className="mb-4 text-xs font-semibold tracking-wider text-(--color-text-muted) uppercase">
               System Operations
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
               {opsCards.map((card, idx) => {
                 const Icon = card.icon;
                 return (
                   <div
                     key={idx}
-                    className="p-6 rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-sm flex flex-col gap-4"
+                    className="flex flex-col gap-4 rounded-xl border border-(--color-border-subtle) bg-(--color-surface) p-6 shadow-sm"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-(--color-text-muted) uppercase tracking-wider">
+                      <span className="text-xs font-semibold tracking-wider text-(--color-text-muted) uppercase">
                         {card.name}
                       </span>
-                      <Icon className="w-5 h-5 text-(--color-accent) shrink-0" />
+                      <Icon className="h-5 w-5 shrink-0 text-(--color-accent)" />
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-2xl font-bold font-display tracking-tight text-(--color-text-primary)">
+                      <span className="font-display text-2xl font-bold tracking-tight text-(--color-text-primary)">
                         {card.value}
                       </span>
-                      <span className="text-xs text-(--color-text-muted) mt-1">
+                      <span className="mt-1 text-xs text-(--color-text-muted)">
                         {card.description}
                       </span>
                     </div>
@@ -163,25 +171,25 @@ export default function DashboardPage() {
           </div>
 
           <div className="grid grid-cols-1 gap-6">
-            <div className="p-6 rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-sm flex flex-col gap-6">
+            <div className="flex flex-col gap-6 rounded-xl border border-(--color-border-subtle) bg-(--color-surface) p-6 shadow-sm">
               <div className="flex items-center justify-between border-b border-(--color-border-subtle) pb-4">
                 <div className="flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-(--color-accent) shrink-0" />
+                  <Activity className="h-4 w-4 shrink-0 text-(--color-accent)" />
                   <h2 className="text-sm font-semibold text-(--color-text-primary)">
                     Recent System Actions & Audit Trails
                   </h2>
                 </div>
                 <Link
                   href="/audit-logs"
-                  className="text-xs font-semibold text-(--color-accent) hover:opacity-80 flex items-center gap-1"
+                  className="flex items-center gap-1 text-xs font-semibold text-(--color-accent) hover:opacity-80"
                 >
                   View full history
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </div>
 
               {logs.length === 0 ? (
-                <div className="text-center py-8 text-xs text-(--color-text-muted)">
+                <div className="py-8 text-center text-xs text-(--color-text-muted)">
                   No system events recorded yet.
                 </div>
               ) : (
@@ -189,19 +197,19 @@ export default function DashboardPage() {
                   {logs.map((log) => (
                     <div
                       key={log.id}
-                      className="py-4 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
+                      className="flex flex-col gap-2 py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between"
                     >
-                      <div className="flex flex-col gap-1 min-w-0">
-                        <span className="text-xs font-semibold uppercase tracking-wider font-mono text-(--color-text-primary)">
+                      <div className="flex min-w-0 flex-col gap-1">
+                        <span className="font-mono text-xs font-semibold tracking-wider text-(--color-text-primary) uppercase">
                           {log.action}
                         </span>
                         {log.metadata && (
-                          <pre className="text-[10px] bg-(--color-bg-soft) p-2 rounded border border-(--color-border-subtle) font-mono text-(--color-text-muted) overflow-x-auto max-w-full">
+                          <pre className="max-w-full overflow-x-auto rounded border border-(--color-border-subtle) bg-(--color-bg-soft) p-2 font-mono text-[10px] text-(--color-text-muted)">
                             {JSON.stringify(log.metadata)}
                           </pre>
                         )}
                       </div>
-                      <div className="flex flex-col sm:items-end text-[10px] text-(--color-text-muted) font-mono shrink-0">
+                      <div className="flex shrink-0 flex-col font-mono text-[10px] text-(--color-text-muted) sm:items-end">
                         <span>User ID: {log.userId || 'system'}</span>
                         <span>{new Date(log.createdAt).toLocaleString()}</span>
                       </div>

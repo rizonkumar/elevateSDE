@@ -49,7 +49,7 @@ export function NotificationItem({ notification, onSelect }: NotificationItemPro
     <button
       type="button"
       onClick={handleClick}
-      className="flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-(--color-badge-bg) cursor-pointer"
+      className="flex w-full cursor-pointer items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-(--color-badge-bg)"
     >
       <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-(--color-accent-soft) text-(--color-accent)">
         <Icon className="h-4 w-4" />
@@ -60,7 +60,10 @@ export function NotificationItem({ notification, onSelect }: NotificationItemPro
             {notification.title}
           </span>
           {!notification.isRead && (
-            <span className="h-2 w-2 shrink-0 rounded-full bg-(--color-accent)" aria-label="Unread" />
+            <span
+              className="h-2 w-2 shrink-0 rounded-full bg-(--color-accent)"
+              aria-label="Unread"
+            />
           )}
         </span>
         <span className="line-clamp-2 text-xs text-(--color-text-muted)">{notification.body}</span>

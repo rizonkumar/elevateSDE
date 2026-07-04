@@ -10,5 +10,9 @@ export abstract class INotificationRepository {
   abstract markAllRead(userId: string): Promise<void>;
   abstract listPreferences(userId: string): Promise<NotificationPreferenceView[]>;
   abstract findPreference(userId: string, type: NotificationType): Promise<boolean | null>;
-  abstract upsertPreference(userId: string, type: NotificationType, inAppEnabled: boolean): Promise<void>;
+  abstract upsertPreference(
+    userId: string,
+    type: NotificationType,
+    inAppEnabled: boolean,
+  ): Promise<void>;
 }

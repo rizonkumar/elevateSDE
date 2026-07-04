@@ -10,7 +10,7 @@ export function BadgeChip({ badge }: BadgeChipProps) {
   const Icon = resolveBadgeIcon(badge.icon);
   return (
     <div
-      className="flex items-center gap-2 rounded-(--radius-full) border border-(--color-border-subtle) bg-(--color-bg-soft) py-1 pl-1.5 pr-3"
+      className="flex items-center gap-2 rounded-(--radius-full) border border-(--color-border-subtle) bg-(--color-bg-soft) py-1 pr-3 pl-1.5"
       title={badge.description}
     >
       <span className="inline-flex h-7 w-7 items-center justify-center rounded-(--radius-full) bg-(--color-accent-soft) text-(--color-accent)">

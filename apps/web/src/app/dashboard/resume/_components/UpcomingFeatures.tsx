@@ -36,10 +36,10 @@ export function UpcomingFeatures() {
   return (
     <section className="mt-12 border-t border-(--color-border-subtle) pt-10">
       <div className="mb-5">
-        <div className="text-xs font-semibold uppercase tracking-[0.12em] text-(--color-accent)">
+        <div className="text-xs font-semibold tracking-[0.12em] text-(--color-accent) uppercase">
           On the roadmap
         </div>
-        <p className="mb-0 mt-1 text-sm text-(--color-text-muted)">
+        <p className="mt-1 mb-0 text-sm text-(--color-text-muted)">
           What we&apos;re building next for the resume analyzer.
         </p>
       </div>
@@ -48,7 +48,7 @@ export function UpcomingFeatures() {
           const Icon = item.icon;
           return (
             <div key={item.title} className="card relative flex flex-col gap-3">
-              <span className="absolute right-3 top-3 rounded-(--radius-full) border border-(--color-border-subtle) bg-(--color-badge-bg) px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-(--color-text-muted)">
+              <span className="absolute top-3 right-3 rounded-(--radius-full) border border-(--color-border-subtle) bg-(--color-badge-bg) px-2 py-0.5 text-[10px] font-semibold tracking-wider text-(--color-text-muted) uppercase">
                 Soon
               </span>
               <span className="flex h-10 w-10 items-center justify-center rounded-(--radius-md) bg-(--color-accent-soft) text-(--color-accent)">

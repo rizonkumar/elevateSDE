@@ -13,10 +13,7 @@ export function ThemeToggle({ withLabel = false }: ThemeToggleProps) {
 
   React.useEffect(() => {
     setMounted(true);
-    const current = document.documentElement.getAttribute('data-theme') as
-      | 'light'
-      | 'dark'
-      | null;
+    const current = document.documentElement.getAttribute('data-theme') as 'light' | 'dark' | null;
     if (current) {
       setTheme(current);
     } else {
@@ -40,7 +37,7 @@ export function ThemeToggle({ withLabel = false }: ThemeToggleProps) {
         type="button"
         onClick={toggle}
         aria-label="Toggle theme"
-        className="flex w-full items-center gap-3 rounded-(--radius-sm) px-3 py-2 text-sm font-medium text-(--color-text-muted) transition-colors hover:bg-(--color-badge-bg) hover:text-(--color-text-primary) cursor-pointer"
+        className="flex w-full cursor-pointer items-center gap-3 rounded-(--radius-sm) px-3 py-2 text-sm font-medium text-(--color-text-muted) transition-colors hover:bg-(--color-badge-bg) hover:text-(--color-text-primary)"
       >
         {mounted ? <Icon className="h-4 w-4" /> : <span className="h-4 w-4" />}
         {mounted ? label : 'Theme'}
@@ -53,7 +50,7 @@ export function ThemeToggle({ withLabel = false }: ThemeToggleProps) {
       type="button"
       onClick={toggle}
       aria-label="Toggle theme"
-      className="rounded-full border border-(--color-border-subtle) p-2 text-(--color-text-primary) transition-colors hover:bg-(--color-badge-bg) cursor-pointer"
+      className="cursor-pointer rounded-full border border-(--color-border-subtle) p-2 text-(--color-text-primary) transition-colors hover:bg-(--color-badge-bg)"
     >
       {mounted ? <Icon className="h-4 w-4" /> : <span className="block h-4 w-4" />}
     </button>

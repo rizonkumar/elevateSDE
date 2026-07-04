@@ -22,10 +22,11 @@ export default function NotificationsPage() {
   }, [fetchNotifications]);
 
   const visible =
-    filter === 'unread' ? notifications.filter((notification) => !notification.isRead) : notifications;
+    filter === 'unread'
+      ? notifications.filter((notification) => !notification.isRead)
+      : notifications;
 
-  const emptyLabel =
-    filter === 'unread' ? 'No unread notifications.' : 'No notifications yet.';
+  const emptyLabel = filter === 'unread' ? 'No unread notifications.' : 'No notifications yet.';
 
   return (
     <PageContainer>

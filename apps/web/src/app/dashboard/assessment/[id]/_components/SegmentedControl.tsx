@@ -32,7 +32,7 @@ export function SegmentedControl<T extends string | number>({
             type="button"
             aria-pressed={active}
             onClick={() => onChange(option.value)}
-            className={`rounded-[calc(var(--radius-sm)-2px)] px-3 py-1 text-sm font-medium transition-colors cursor-pointer ${
+            className={`cursor-pointer rounded-[calc(var(--radius-sm)-2px)] px-3 py-1 text-sm font-medium transition-colors ${
               active
                 ? 'bg-(--color-surface) text-(--color-text-primary) shadow-(--shadow-card)'
                 : 'text-(--color-text-muted) hover:text-(--color-text-primary)'

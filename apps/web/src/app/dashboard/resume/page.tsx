@@ -2,15 +2,7 @@
 
 import * as React from 'react';
 import { motion } from 'framer-motion';
-import {
-  FileText,
-  Loader2,
-  AlertCircle,
-  X,
-  UploadCloud,
-  Gauge,
-  ListChecks,
-} from 'lucide-react';
+import { FileText, Loader2, AlertCircle, X, UploadCloud, Gauge, ListChecks } from 'lucide-react';
 import { useResumeStore } from '@/store/resume.store';
 import { ResumeDropzone } from './_components/ResumeDropzone';
 import { AnalysisOverview } from './_components/AnalysisOverview';
@@ -72,7 +64,7 @@ export default function ResumeAnalyzerPage() {
       <div className="flex flex-col gap-6">
         {hasHistory && (
           <div className="flex items-center gap-2 overflow-x-auto pb-1">
-            <span className="shrink-0 text-xs font-semibold uppercase tracking-wider text-(--color-text-muted)">
+            <span className="shrink-0 text-xs font-semibold tracking-wider text-(--color-text-muted) uppercase">
               Recent
             </span>
             {analyses.map((item) => {
@@ -89,7 +81,7 @@ export default function ResumeAnalyzerPage() {
                   <button
                     type="button"
                     onClick={() => select(item.id)}
-                    className="flex max-w-40 items-center gap-1.5 cursor-pointer"
+                    className="flex max-w-40 cursor-pointer items-center gap-1.5"
                   >
                     <FileText className="h-3.5 w-3.5 shrink-0" />
                     <span className="truncate">{item.fileName}</span>
@@ -101,7 +93,7 @@ export default function ResumeAnalyzerPage() {
                     type="button"
                     aria-label="Remove"
                     onClick={() => remove(item.id)}
-                    className="opacity-60 transition-opacity hover:opacity-100 cursor-pointer"
+                    className="cursor-pointer opacity-60 transition-opacity hover:opacity-100"
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -162,7 +154,9 @@ export default function ResumeAnalyzerPage() {
         />
       </motion.div>
 
-      {mounted ? renderContent() : (
+      {mounted ? (
+        renderContent()
+      ) : (
         <div className="flex items-center justify-center py-24 text-sm text-(--color-text-muted)">
           Loading…
         </div>

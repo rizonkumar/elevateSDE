@@ -71,21 +71,21 @@ export default function LoginPage() {
         className="w-full"
       >
         <div className="mb-8">
-          <span className="lg:hidden flex items-center justify-center w-12 h-12 rounded-full bg-(--color-accent-soft) text-(--color-accent) mb-4">
-            <ShieldCheck className="w-6 h-6" />
+          <span className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-(--color-accent-soft) text-(--color-accent) lg:hidden">
+            <ShieldCheck className="h-6 w-6" />
           </span>
-          <div className="lg:hidden flex items-center gap-2 select-none mb-4">
+          <div className="mb-4 flex items-center gap-2 select-none lg:hidden">
             <span className="text-lg font-bold tracking-tight text-(--color-text-primary)">
               Elevate<span className="text-(--color-accent)">SDE</span>
             </span>
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-(--color-badge-bg) border border-(--color-border-subtle) text-[10px] font-bold uppercase tracking-widest text-(--color-text-muted)">
+            <span className="inline-flex items-center rounded-full border border-(--color-border-subtle) bg-(--color-badge-bg) px-2 py-0.5 text-[10px] font-bold tracking-widest text-(--color-text-muted) uppercase">
               Admin
             </span>
           </div>
           <h2 className="text-xl font-semibold text-(--color-text-primary)">
             Sign in to Admin Console
           </h2>
-          <p className="text-xs text-(--color-text-muted) mt-1.5">
+          <p className="mt-1.5 text-xs text-(--color-text-muted)">
             System administration & backoffice operations
           </p>
         </div>
@@ -101,7 +101,7 @@ export default function LoginPage() {
             required
             autoComplete="email"
             className="bg-(--color-surface)"
-            icon={<Mail className="w-4 h-4 text-(--color-text-muted)" />}
+            icon={<Mail className="h-4 w-4 text-(--color-text-muted)" />}
           />
 
           <Input
@@ -114,23 +114,23 @@ export default function LoginPage() {
             required
             autoComplete="current-password"
             className="bg-(--color-surface)"
-            icon={<Lock className="w-4 h-4 text-(--color-text-muted)" />}
+            icon={<Lock className="h-4 w-4 text-(--color-text-muted)" />}
           />
 
           <Button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 font-medium cursor-pointer mt-1"
+            className="mt-1 w-full cursor-pointer py-2.5 font-medium"
           >
             {loading ? 'Authenticating...' : 'Sign In'}
           </Button>
         </form>
 
-        <div className="border-t border-(--color-border-subtle) mt-6 pt-4 text-center text-xs text-(--color-text-muted)">
+        <div className="mt-6 border-t border-(--color-border-subtle) pt-4 text-center text-xs text-(--color-text-muted)">
           Not an administrator?{' '}
           <a
             href="/login"
-            className="font-semibold text-(--color-text-primary) underline underline-offset-4 decoration-(--color-border-subtle) hover:decoration-(--color-text-primary) transition-colors"
+            className="font-semibold text-(--color-text-primary) underline decoration-(--color-border-subtle) underline-offset-4 transition-colors hover:decoration-(--color-text-primary)"
           >
             Back to standard sign in
           </a>

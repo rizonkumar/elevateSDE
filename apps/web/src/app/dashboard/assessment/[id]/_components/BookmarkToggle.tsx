@@ -28,7 +28,7 @@ export function BookmarkToggle({ problemId }: Readonly<BookmarkToggleProps>) {
       aria-pressed={bookmarked}
       aria-label={bookmarked ? 'Remove bookmark' : 'Bookmark this problem'}
       title={bookmarked ? 'Bookmarked' : 'Bookmark'}
-      className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-colors cursor-pointer focus:outline-none focus-visible:shadow-[0_0_0_2px_var(--color-bg),0_0_0_4px_var(--color-accent)] ${
+      className={`inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full border transition-colors focus:outline-none focus-visible:shadow-[0_0_0_2px_var(--color-bg),0_0_0_4px_var(--color-accent)] ${
         bookmarked
           ? 'border-(--color-accent) bg-(--color-accent-soft) text-(--color-accent)'
           : 'border-(--color-border-subtle) text-(--color-text-muted) hover:border-(--color-accent) hover:text-(--color-accent)'

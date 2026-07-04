@@ -48,7 +48,10 @@ export class BadgeManagementController {
   @ApiOperation({ summary: 'Update a badge definition' })
   @ApiResponse({ status: 200, type: AdminBadgeResponseDto })
   @ApiResponse({ status: 404, description: 'Not found.' })
-  async update(@Param('id') id: string, @Body() dto: CreateBadgeDto): Promise<AdminBadgeResponseDto> {
+  async update(
+    @Param('id') id: string,
+    @Body() dto: CreateBadgeDto,
+  ): Promise<AdminBadgeResponseDto> {
     const view = await this.achievementService.update(id, dto);
     return AchievementPresentationMapper.toAdminBadge(view);
   }

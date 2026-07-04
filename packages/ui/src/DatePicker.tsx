@@ -171,10 +171,16 @@ export function DatePicker({
           type="button"
           aria-label="Previous month"
           onClick={() => setView(new Date(year, month - 1, 1))}
-          className="rounded-md p-1.5 text-(--color-text-muted) transition-colors hover:bg-(--color-badge-bg) hover:text-(--color-text-primary) cursor-pointer"
+          className="cursor-pointer rounded-md p-1.5 text-(--color-text-muted) transition-colors hover:bg-(--color-badge-bg) hover:text-(--color-text-primary)"
         >
           <svg viewBox="0 0 20 20" fill="none" className="h-4 w-4">
-            <path d="M12 5l-5 5 5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              d="M12 5l-5 5 5 5"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
         </button>
         <span className="text-sm font-semibold text-(--color-text-primary)">
@@ -184,10 +190,16 @@ export function DatePicker({
           type="button"
           aria-label="Next month"
           onClick={() => setView(new Date(year, month + 1, 1))}
-          className="rounded-md p-1.5 text-(--color-text-muted) transition-colors hover:bg-(--color-badge-bg) hover:text-(--color-text-primary) cursor-pointer"
+          className="cursor-pointer rounded-md p-1.5 text-(--color-text-muted) transition-colors hover:bg-(--color-badge-bg) hover:text-(--color-text-primary)"
         >
           <svg viewBox="0 0 20 20" fill="none" className="h-4 w-4">
-            <path d="M8 5l5 5-5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              d="M8 5l5 5-5 5"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
         </button>
       </div>
@@ -196,7 +208,7 @@ export function DatePicker({
         {WEEKDAYS.map((weekday) => (
           <span
             key={weekday}
-            className="flex h-7 items-center justify-center text-[10px] font-semibold uppercase tracking-wider text-(--color-text-muted)"
+            className="flex h-7 items-center justify-center text-[10px] font-semibold tracking-wider text-(--color-text-muted) uppercase"
           >
             {weekday}
           </span>
@@ -214,7 +226,8 @@ export function DatePicker({
           if (isSelected) {
             dayClass += 'bg-(--color-accent) font-semibold text-white';
           } else if (isToday) {
-            dayClass += 'border border-(--color-accent) text-(--color-accent) hover:bg-(--color-accent-soft)';
+            dayClass +=
+              'border border-(--color-accent) text-(--color-accent) hover:bg-(--color-accent-soft)';
           } else {
             dayClass += 'text-(--color-text-primary) hover:bg-(--color-badge-bg)';
           }
@@ -228,15 +241,25 @@ export function DatePicker({
 
       {withTime && (
         <div className="mt-3 flex items-center gap-2 border-t border-(--color-border-subtle) pt-3">
-          <svg viewBox="0 0 20 20" fill="none" className="h-4 w-4 shrink-0 text-(--color-text-muted)">
+          <svg
+            viewBox="0 0 20 20"
+            fill="none"
+            className="h-4 w-4 shrink-0 text-(--color-text-muted)"
+          >
             <circle cx="10" cy="10" r="7" stroke="currentColor" strokeWidth="1.6" />
-            <path d="M10 6v4l2.5 2.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              d="M10 6v4l2.5 2.5"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
           <input
             type="time"
             value={timeValue}
             onChange={(event) => changeTime(event.target.value)}
-            className="flex-1 rounded-(--radius-sm) border border-(--color-border) bg-(--color-bg) px-3 py-1.5 text-sm text-(--color-text-primary) focus:border-(--color-accent) focus:outline-none focus:shadow-[0_0_0_2px_var(--color-bg),0_0_0_4px_var(--color-accent)]"
+            className="flex-1 rounded-(--radius-sm) border border-(--color-border) bg-(--color-bg) px-3 py-1.5 text-sm text-(--color-text-primary) focus:border-(--color-accent) focus:shadow-[0_0_0_2px_var(--color-bg),0_0_0_4px_var(--color-accent)] focus:outline-none"
           />
         </div>
       )}
@@ -248,7 +271,7 @@ export function DatePicker({
             onChange(null);
             setOpen(false);
           }}
-          className="rounded-md px-2 py-1 text-xs font-medium text-(--color-text-muted) transition-colors hover:text-(--color-text-primary) cursor-pointer"
+          className="cursor-pointer rounded-md px-2 py-1 text-xs font-medium text-(--color-text-muted) transition-colors hover:text-(--color-text-primary)"
         >
           Clear
         </button>
@@ -257,12 +280,14 @@ export function DatePicker({
           onClick={() => {
             const now = new Date();
             emit(
-              withTime ? now : new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0),
+              withTime
+                ? now
+                : new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0),
             );
             setView(now);
             if (!withTime) setOpen(false);
           }}
-          className="rounded-md px-2 py-1 text-xs font-semibold text-(--color-accent) transition-opacity hover:opacity-80 cursor-pointer"
+          className="cursor-pointer rounded-md px-2 py-1 text-xs font-semibold text-(--color-accent) transition-opacity hover:opacity-80"
         >
           Today
         </button>
@@ -273,7 +298,7 @@ export function DatePicker({
   return (
     <div className="flex w-full flex-col gap-2">
       {label && (
-        <span className="select-none text-[13px] font-medium text-(--color-text-primary)">
+        <span className="text-[13px] font-medium text-(--color-text-primary) select-none">
           {label}
         </span>
       )}
@@ -284,7 +309,7 @@ export function DatePicker({
         onClick={toggle}
         aria-haspopup="dialog"
         aria-expanded={open}
-        className="flex h-10 w-full items-center justify-between gap-2 rounded-(--radius-sm) border border-(--color-border) bg-(--color-bg) px-3 text-sm font-medium text-(--color-text-primary) transition focus:border-(--color-accent) focus:outline-none focus:shadow-[0_0_0_2px_var(--color-bg),0_0_0_4px_var(--color-accent)] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+        className="flex h-10 w-full cursor-pointer items-center justify-between gap-2 rounded-(--radius-sm) border border-(--color-border) bg-(--color-bg) px-3 text-sm font-medium text-(--color-text-primary) transition focus:border-(--color-accent) focus:shadow-[0_0_0_2px_var(--color-bg),0_0_0_4px_var(--color-accent)] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
       >
         <span className={selected ? 'truncate' : 'truncate text-(--color-text-muted)'}>
           {display}

@@ -10,11 +10,11 @@ export function ToastContainer() {
   const getIcon = (type: Toast['type']) => {
     switch (type) {
       case 'success':
-        return <CheckCircle className="w-5 h-5 text-(--color-success) shrink-0" />;
+        return <CheckCircle className="h-5 w-5 shrink-0 text-(--color-success)" />;
       case 'error':
-        return <AlertCircle className="w-5 h-5 text-(--color-danger) shrink-0" />;
+        return <AlertCircle className="h-5 w-5 shrink-0 text-(--color-danger)" />;
       case 'info':
-        return <Info className="w-5 h-5 text-(--color-accent) shrink-0" />;
+        return <Info className="h-5 w-5 shrink-0 text-(--color-accent)" />;
     }
   };
 
@@ -30,7 +30,7 @@ export function ToastContainer() {
   };
 
   return (
-    <div className="fixed top-4 right-4 z-50 flex flex-col gap-3 w-full max-w-sm pointer-events-none">
+    <div className="pointer-events-none fixed top-4 right-4 z-50 flex w-full max-w-sm flex-col gap-3">
       <AnimatePresence>
         {toasts.map((toast) => (
           <motion.div
@@ -38,17 +38,17 @@ export function ToastContainer() {
             initial={{ opacity: 0, y: -20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.15 } }}
-            className={`pointer-events-auto flex gap-3 p-4 rounded-lg border border-l-4 shadow-lg ${getStyles(
+            className={`pointer-events-auto flex gap-3 rounded-lg border border-l-4 p-4 shadow-lg ${getStyles(
               toast.type,
             )}`}
           >
             {getIcon(toast.type)}
-            <p className="text-sm font-semibold leading-5 flex-1">{toast.message}</p>
+            <p className="flex-1 text-sm leading-5 font-semibold">{toast.message}</p>
             <button
               onClick={() => removeToast(toast.id)}
-              className="hover:opacity-70 shrink-0 cursor-pointer"
+              className="shrink-0 cursor-pointer hover:opacity-70"
             >
-              <X className="w-4 h-4 text-zinc-400 dark:text-zinc-500" />
+              <X className="h-4 w-4 text-zinc-400 dark:text-zinc-500" />
             </button>
           </motion.div>
         ))}

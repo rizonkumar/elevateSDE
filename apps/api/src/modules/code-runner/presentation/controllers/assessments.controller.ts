@@ -47,7 +47,12 @@ export class AssessmentsController {
   @ApiOperation({ summary: 'Run candidate code against the visible test cases' })
   @ApiResponse({ status: 201, type: AssessmentRunResponseDto })
   async run(@Body() dto: RunAssessmentDto): Promise<AssessmentRunResponseDto> {
-    const outcome = await this.codeRunnerService.evaluate(dto.problemId, dto.language, dto.code, false);
+    const outcome = await this.codeRunnerService.evaluate(
+      dto.problemId,
+      dto.language,
+      dto.code,
+      false,
+    );
     return AssessmentPresentationMapper.toResponse(outcome, new Date().toISOString());
   }
 

@@ -103,25 +103,25 @@ export default function RegisterPage() {
         transition={{ duration: 0.35, ease: 'easeOut' }}
         className="w-full"
       >
-        <div className="text-center lg:text-left mb-8">
+        <div className="mb-8 text-center lg:text-left">
           <Link
             href="/"
-            className="lg:hidden text-xl font-bold tracking-tight text-(--color-text-primary) select-none"
+            className="text-xl font-bold tracking-tight text-(--color-text-primary) select-none lg:hidden"
           >
             Elevate<span className="text-(--color-accent)">SDE</span>
           </Link>
-          <h2 className="text-xl font-semibold text-(--color-text-primary) mt-4 lg:mt-0">
+          <h2 className="mt-4 text-xl font-semibold text-(--color-text-primary) lg:mt-0">
             Create your account
           </h2>
-          <p className="text-xs text-(--color-text-muted) mt-1.5">
+          <p className="mt-1.5 text-xs text-(--color-text-muted)">
             Start preparing with enterprise-grade AI mock interviews
           </p>
         </div>
 
-        <div className="relative flex p-1 bg-(--color-tab-bg) border border-(--color-border-subtle) rounded-full mb-6 select-none">
+        <div className="relative mb-6 flex rounded-full border border-(--color-border-subtle) bg-(--color-tab-bg) p-1 select-none">
           <button
             type="button"
-            className={`relative flex-1 py-1.5 text-xs font-semibold tracking-wider uppercase transition-colors duration-200 z-10 cursor-pointer ${
+            className={`relative z-10 flex-1 cursor-pointer py-1.5 text-xs font-semibold tracking-wider uppercase transition-colors duration-200 ${
               role === 'USER'
                 ? 'text-(--color-text-primary)'
                 : 'text-(--color-text-muted) hover:text-(--color-text-primary)'
@@ -131,7 +131,7 @@ export default function RegisterPage() {
             {role === 'USER' && (
               <motion.div
                 layoutId="active-tab"
-                className="absolute inset-0 bg-(--color-tab-active) border border-(--color-border-subtle) rounded-full shadow-sm animate-fade-in"
+                className="animate-fade-in absolute inset-0 rounded-full border border-(--color-border-subtle) bg-(--color-tab-active) shadow-sm"
                 transition={{ type: 'spring', stiffness: 380, damping: 30 }}
               />
             )}
@@ -139,7 +139,7 @@ export default function RegisterPage() {
           </button>
           <button
             type="button"
-            className={`relative flex-1 py-1.5 text-xs font-semibold tracking-wider uppercase transition-colors duration-200 z-10 cursor-pointer ${
+            className={`relative z-10 flex-1 cursor-pointer py-1.5 text-xs font-semibold tracking-wider uppercase transition-colors duration-200 ${
               role === 'TENANT_ADMIN'
                 ? 'text-(--color-text-primary)'
                 : 'text-(--color-text-muted) hover:text-(--color-text-primary)'
@@ -149,7 +149,7 @@ export default function RegisterPage() {
             {role === 'TENANT_ADMIN' && (
               <motion.div
                 layoutId="active-tab"
-                className="absolute inset-0 bg-(--color-tab-active) border border-(--color-border-subtle) rounded-full shadow-sm animate-fade-in"
+                className="animate-fade-in absolute inset-0 rounded-full border border-(--color-border-subtle) bg-(--color-tab-active) shadow-sm"
                 transition={{ type: 'spring', stiffness: 380, damping: 30 }}
               />
             )}
@@ -158,7 +158,7 @@ export default function RegisterPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Input
               type="text"
               label="First Name"
@@ -167,7 +167,7 @@ export default function RegisterPage() {
               onChange={(e) => setFirstName(e.target.value)}
               disabled={loading}
               autoComplete="given-name"
-              icon={<User className="w-4 h-4 text-(--color-text-muted)" />}
+              icon={<User className="h-4 w-4 text-(--color-text-muted)" />}
             />
             <Input
               type="text"
@@ -177,7 +177,7 @@ export default function RegisterPage() {
               onChange={(e) => setLastName(e.target.value)}
               disabled={loading}
               autoComplete="family-name"
-              icon={<User className="w-4 h-4 text-(--color-text-muted)" />}
+              icon={<User className="h-4 w-4 text-(--color-text-muted)" />}
             />
           </div>
 
@@ -190,7 +190,7 @@ export default function RegisterPage() {
             disabled={loading}
             required
             autoComplete="email"
-            icon={<Mail className="w-4 h-4 text-(--color-text-muted)" />}
+            icon={<Mail className="h-4 w-4 text-(--color-text-muted)" />}
           />
 
           <Input
@@ -202,7 +202,7 @@ export default function RegisterPage() {
             disabled={loading}
             required
             autoComplete="new-password"
-            icon={<Lock className="w-4 h-4 text-(--color-text-muted)" />}
+            icon={<Lock className="h-4 w-4 text-(--color-text-muted)" />}
           />
 
           <AnimatePresence initial={false}>
@@ -223,7 +223,7 @@ export default function RegisterPage() {
                     onChange={(e) => setCompanyName(e.target.value)}
                     disabled={loading}
                     required
-                    icon={<Building2 className="w-4 h-4 text-(--color-text-muted)" />}
+                    icon={<Building2 className="h-4 w-4 text-(--color-text-muted)" />}
                   />
                 </div>
               </motion.div>
@@ -233,22 +233,22 @@ export default function RegisterPage() {
           <Button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 font-medium cursor-pointer mt-2"
+            className="mt-2 w-full cursor-pointer py-2.5 font-medium"
           >
             {loading ? 'Creating account...' : 'Create Account'}
           </Button>
         </form>
 
-        <div className="text-center mt-6 flex flex-col gap-2.5 text-xs text-(--color-text-muted)">
+        <div className="mt-6 flex flex-col gap-2.5 text-center text-xs text-(--color-text-muted)">
           <div>
             Already have an account?{' '}
-            <Link href="/login" className="text-(--color-accent) font-medium hover:underline">
+            <Link href="/login" className="font-medium text-(--color-accent) hover:underline">
               Sign In
             </Link>
           </div>
-          <div className="border-t border-(--color-border-subtle) pt-3 mt-1">
+          <div className="mt-1 border-t border-(--color-border-subtle) pt-3">
             Are you a system administrator?{' '}
-            <a href="/admin/login" className="text-(--color-accent) font-semibold hover:underline">
+            <a href="/admin/login" className="font-semibold text-(--color-accent) hover:underline">
               Sign in to Admin Console
             </a>
           </div>

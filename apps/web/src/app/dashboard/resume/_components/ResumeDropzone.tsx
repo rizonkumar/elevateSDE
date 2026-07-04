@@ -86,7 +86,7 @@ export function ResumeDropzone({
           type="button"
           onClick={open}
           disabled={isAnalyzing}
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-(--radius-sm) border border-(--color-border) px-3 py-1.5 text-xs font-medium text-(--color-text-primary) transition-colors hover:bg-(--color-badge-bg) disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+          className="inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-(--radius-sm) border border-(--color-border) px-3 py-1.5 text-xs font-medium text-(--color-text-primary) transition-colors hover:bg-(--color-badge-bg) disabled:cursor-not-allowed disabled:opacity-50"
         >
           <RefreshCw className="h-3.5 w-3.5" />
           Replace

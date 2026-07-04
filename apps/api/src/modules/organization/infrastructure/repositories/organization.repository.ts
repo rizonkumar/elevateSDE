@@ -60,10 +60,7 @@ export class OrganizationRepository implements IOrganizationRepository {
     return record ? InvitationMapper.toDomain(record) : null;
   }
 
-  async findPendingInvitationByEmail(
-    tenantId: string,
-    email: string,
-  ): Promise<Invitation | null> {
+  async findPendingInvitationByEmail(tenantId: string, email: string): Promise<Invitation | null> {
     const record = await this.prisma.invitation.findFirst({
       where: { tenantId, email, status: InvitationStatus.PENDING },
     });

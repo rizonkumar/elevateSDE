@@ -23,7 +23,7 @@ function InviteNotFound() {
       <p className="text-sm text-(--color-text-muted)">
         This invite link is invalid or has been removed.
       </p>
-      <Link href="/login" className="text-sm text-(--color-accent) font-medium hover:underline">
+      <Link href="/login" className="text-sm font-medium text-(--color-accent) hover:underline">
         Go to sign in
       </Link>
     </div>
@@ -53,7 +53,7 @@ function AcceptBlock({ email, accepting, onAccept }: Readonly<AcceptBlockProps>)
           {accepting ? 'Joining…' : 'Accept & join'}
         </span>
       </Button>
-      <p className="text-xs text-(--color-text-muted) mb-0">
+      <p className="mb-0 text-xs text-(--color-text-muted)">
         Make sure you are signed in as {email} to accept.
       </p>
     </div>
@@ -73,7 +73,7 @@ function SignInBlock({ loginHref, onRegister }: Readonly<SignInBlockProps>) {
       </Button>
       <Link
         href={loginHref}
-        className="text-center text-sm text-(--color-accent) font-medium hover:underline"
+        className="text-center text-sm font-medium text-(--color-accent) hover:underline"
       >
         Already have an account? Sign in
       </Link>
@@ -116,7 +116,7 @@ function InviteDetails(props: Readonly<InviteDetailsProps>) {
           <Building2 className="h-5 w-5" />
         </span>
         <div>
-          <div className="text-xs font-semibold uppercase tracking-[0.12em] text-(--color-accent)">
+          <div className="text-xs font-semibold tracking-[0.12em] text-(--color-accent) uppercase">
             Team invitation
           </div>
           <h2 className="text-xl font-semibold text-(--color-text-primary)">
@@ -125,7 +125,7 @@ function InviteDetails(props: Readonly<InviteDetailsProps>) {
         </div>
       </div>
 
-      <p className="text-sm text-(--color-text-muted) mb-0">
+      <p className="mb-0 text-sm text-(--color-text-muted)">
         This invitation was sent to{' '}
         <span className="font-medium text-(--color-text-primary)">{preview.email}</span>.
       </p>

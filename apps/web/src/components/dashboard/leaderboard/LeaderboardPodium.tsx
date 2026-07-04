@@ -38,7 +38,9 @@ export function LeaderboardPodium({ entries }: Readonly<LeaderboardPodiumProps>)
             </div>
             <div className="flex items-center gap-2">
               <RankBadge rank={entry.rank} />
-              <span className="text-sm font-semibold text-(--color-text-primary)">{entry.name}</span>
+              <span className="text-sm font-semibold text-(--color-text-primary)">
+                {entry.name}
+              </span>
             </div>
             {entry.headline && (
               <span className="text-xs text-(--color-text-muted)">{entry.headline}</span>

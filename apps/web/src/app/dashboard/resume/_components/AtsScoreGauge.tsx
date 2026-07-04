@@ -41,10 +41,10 @@ export function AtsScoreGauge({ score }: AtsScoreGaugeProps) {
         </ResponsiveContainer>
       )}
       <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-        <div className="font-display text-5xl font-semibold leading-none text-(--color-text-primary)">
+        <div className="font-display text-5xl leading-none font-semibold text-(--color-text-primary)">
           {score}
         </div>
-        <div className="mt-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-(--color-text-muted)">
+        <div className="mt-1 text-[11px] font-semibold tracking-[0.14em] text-(--color-text-muted) uppercase">
           ATS Score
         </div>
       </div>

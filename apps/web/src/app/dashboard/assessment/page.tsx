@@ -156,13 +156,13 @@ export default function AssessmentIndexPage() {
 
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full sm:max-w-sm">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-(--color-text-muted)" />
+          <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-(--color-text-muted)" />
           <input
             type="search"
             value={searchInput}
             onChange={(event) => setSearchInput(event.target.value)}
             placeholder="Search problems…"
-            className="w-full rounded-md border border-(--color-border-subtle) bg-(--color-surface) py-2 pl-9 pr-3 text-sm text-(--color-text-primary) outline-none transition-colors focus:border-(--color-accent)"
+            className="w-full rounded-md border border-(--color-border-subtle) bg-(--color-surface) py-2 pr-3 pl-9 text-sm text-(--color-text-primary) transition-colors outline-none focus:border-(--color-accent)"
           />
         </div>
         <div className="flex flex-wrap items-center gap-1.5">
@@ -173,7 +173,7 @@ export default function AssessmentIndexPage() {
               setPage(1);
             }}
             aria-pressed={runnableOnly}
-            className={`inline-flex items-center gap-1.5 rounded-sm px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer ${
+            className={`inline-flex cursor-pointer items-center gap-1.5 rounded-sm px-3 py-1.5 text-sm font-medium transition-colors ${
               runnableOnly
                 ? 'bg-(--color-accent-soft) text-(--color-accent)'
                 : 'text-(--color-text-muted) hover:text-(--color-text-primary)'
@@ -192,7 +192,7 @@ export default function AssessmentIndexPage() {
                   setDifficulty(filter.value);
                   setPage(1);
                 }}
-                className={`rounded-sm px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer ${
+                className={`cursor-pointer rounded-sm px-3 py-1.5 text-sm font-medium transition-colors ${
                   active
                     ? 'bg-(--color-badge-bg) text-(--color-text-primary)'
                     : 'text-(--color-text-muted) hover:text-(--color-text-primary)'

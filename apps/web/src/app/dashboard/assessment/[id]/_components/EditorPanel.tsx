@@ -24,7 +24,7 @@ function ToolbarButton({ label, onClick, children }: Readonly<ToolbarButtonProps
       onClick={onClick}
       aria-label={label}
       title={label}
-      className="inline-flex h-8 w-8 items-center justify-center rounded-(--radius-sm) text-(--color-text-muted) transition-colors hover:bg-(--color-badge-bg) hover:text-(--color-text-primary) cursor-pointer"
+      className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-(--radius-sm) text-(--color-text-muted) transition-colors hover:bg-(--color-badge-bg) hover:text-(--color-text-primary)"
     >
       {children}
     </button>
@@ -91,14 +91,27 @@ export function EditorPanel() {
           <ToolbarButton label="Format code" onClick={handleFormat}>
             <WandSparkles className="h-4 w-4" />
           </ToolbarButton>
-          <ToolbarButton label="Copy code" onClick={() => { handleCopy(); }}>
-            {copied ? <Check className="h-4 w-4 text-(--color-success)" /> : <Copy className="h-4 w-4" />}
+          <ToolbarButton
+            label="Copy code"
+            onClick={() => {
+              handleCopy();
+            }}
+          >
+            {copied ? (
+              <Check className="h-4 w-4 text-(--color-success)" />
+            ) : (
+              <Copy className="h-4 w-4" />
+            )}
           </ToolbarButton>
           <ToolbarButton
             label={editorMaximized ? 'Restore layout' : 'Maximize editor'}
             onClick={toggleEditorMaximized}
           >
-            {editorMaximized ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+            {editorMaximized ? (
+              <Minimize2 className="h-4 w-4" />
+            ) : (
+              <Maximize2 className="h-4 w-4" />
+            )}
           </ToolbarButton>
         </div>
       </div>

@@ -71,7 +71,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
             type="button"
             onClick={onClose}
             aria-label="Close menu"
-            className="rounded-full p-1.5 text-(--color-text-muted) transition-colors hover:bg-(--color-badge-bg) hover:text-(--color-text-primary) cursor-pointer"
+            className="cursor-pointer rounded-full p-1.5 text-(--color-text-muted) transition-colors hover:bg-(--color-badge-bg) hover:text-(--color-text-primary)"
           >
             <X className="h-4 w-4" />
           </button>
@@ -133,7 +133,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
           type="button"
           onClick={toggleCollapsed}
           title={isRail ? 'Expand sidebar' : 'Collapse sidebar'}
-          className={`hidden items-center gap-3 rounded-(--radius-sm) py-2.5 text-sm font-medium text-(--color-text-muted) transition-colors hover:bg-(--color-badge-bg) hover:text-(--color-text-primary) cursor-pointer lg:flex ${
+          className={`hidden cursor-pointer items-center gap-3 rounded-(--radius-sm) py-2.5 text-sm font-medium text-(--color-text-muted) transition-colors hover:bg-(--color-badge-bg) hover:text-(--color-text-primary) lg:flex ${
             isRail ? 'justify-center px-2' : 'px-3'
           }`}
         >
@@ -163,7 +163,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
       {open && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-          <aside className="absolute left-0 top-0 flex h-full w-72 max-w-[80%] flex-col border-r border-(--color-border-subtle) bg-(--color-bg)">
+          <aside className="absolute top-0 left-0 flex h-full w-72 max-w-[80%] flex-col border-r border-(--color-border-subtle) bg-(--color-bg)">
             {renderContent(true, false)}
           </aside>
         </div>

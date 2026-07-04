@@ -33,7 +33,7 @@ function TagList({ tags }: Readonly<{ tags: string[] }>) {
       {tags.map((tag) => (
         <span
           key={tag}
-          className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-(--color-badge-bg) text-(--color-text-muted) border border-(--color-border-subtle)"
+          className="rounded-full border border-(--color-border-subtle) bg-(--color-badge-bg) px-2 py-0.5 text-[11px] font-medium text-(--color-text-muted)"
         >
           {tag}
         </span>
@@ -59,10 +59,10 @@ export function ProblemDirectory({
 
   return (
     <>
-      <div className="hidden md:block overflow-x-auto rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-sm">
+      <div className="hidden overflow-x-auto rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-sm md:block">
         <table className="w-full border-collapse text-left text-sm">
           <thead>
-            <tr className="border-b border-(--color-border-subtle) bg-(--color-bg-soft) text-xs font-semibold text-(--color-text-muted) uppercase tracking-wider">
+            <tr className="border-b border-(--color-border-subtle) bg-(--color-bg-soft) text-xs font-semibold tracking-wider text-(--color-text-muted) uppercase">
               <th className="px-6 py-4">Title</th>
               <th className="px-6 py-4">Difficulty</th>
               <th className="px-6 py-4">Tags</th>
@@ -73,7 +73,7 @@ export function ProblemDirectory({
           </thead>
           <tbody className="divide-y divide-(--color-border-subtle)">
             {problems.map((problem) => (
-              <tr key={problem.id} className="hover:bg-(--color-bg-soft)/50 transition-colors">
+              <tr key={problem.id} className="transition-colors hover:bg-(--color-bg-soft)/50">
                 <td className="px-6 py-4 font-semibold text-(--color-text-primary)">
                   {problem.title}
                 </td>
@@ -100,17 +100,17 @@ export function ProblemDirectory({
                       type="button"
                       aria-label={`Edit ${problem.title}`}
                       onClick={() => onEdit(problem.id)}
-                      className="p-2 rounded-md text-(--color-text-muted) hover:bg-(--color-badge-bg) hover:text-(--color-text-primary) transition-colors cursor-pointer"
+                      className="cursor-pointer rounded-md p-2 text-(--color-text-muted) transition-colors hover:bg-(--color-badge-bg) hover:text-(--color-text-primary)"
                     >
-                      <Pencil className="w-4 h-4 shrink-0" />
+                      <Pencil className="h-4 w-4 shrink-0" />
                     </button>
                     <button
                       type="button"
                       aria-label={`Delete ${problem.title}`}
                       onClick={() => onDelete(problem.id)}
-                      className="p-2 rounded-md text-(--color-text-muted) hover:bg-(--color-danger-soft) hover:text-(--color-danger) transition-colors cursor-pointer"
+                      className="cursor-pointer rounded-md p-2 text-(--color-text-muted) transition-colors hover:bg-(--color-danger-soft) hover:text-(--color-danger)"
                     >
-                      <Trash2 className="w-4 h-4 shrink-0" />
+                      <Trash2 className="h-4 w-4 shrink-0" />
                     </button>
                   </div>
                 </td>
@@ -120,11 +120,11 @@ export function ProblemDirectory({
         </table>
       </div>
 
-      <div className="md:hidden flex flex-col gap-4">
+      <div className="flex flex-col gap-4 md:hidden">
         {problems.map((problem) => (
           <div
             key={problem.id}
-            className="rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-sm p-4 flex flex-col gap-3"
+            className="flex flex-col gap-3 rounded-xl border border-(--color-border-subtle) bg-(--color-surface) p-4 shadow-sm"
           >
             <div className="flex items-start justify-between gap-3">
               <span className="font-semibold text-(--color-text-primary)">{problem.title}</span>
@@ -149,17 +149,17 @@ export function ProblemDirectory({
               <button
                 type="button"
                 onClick={() => onEdit(problem.id)}
-                className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold rounded-sm border border-(--color-border-subtle) text-(--color-text-primary) hover:bg-(--color-badge-bg) transition-colors cursor-pointer"
+                className="inline-flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-sm border border-(--color-border-subtle) px-3 py-2 text-xs font-semibold text-(--color-text-primary) transition-colors hover:bg-(--color-badge-bg)"
               >
-                <Pencil className="w-3.5 h-3.5 shrink-0" />
+                <Pencil className="h-3.5 w-3.5 shrink-0" />
                 Edit
               </button>
               <button
                 type="button"
                 onClick={() => onDelete(problem.id)}
-                className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold rounded-sm border border-(--color-border-subtle) text-(--color-text-muted) hover:bg-(--color-danger-soft) hover:text-(--color-danger) transition-colors cursor-pointer"
+                className="inline-flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-sm border border-(--color-border-subtle) px-3 py-2 text-xs font-semibold text-(--color-text-muted) transition-colors hover:bg-(--color-danger-soft) hover:text-(--color-danger)"
               >
-                <Trash2 className="w-3.5 h-3.5 shrink-0" />
+                <Trash2 className="h-3.5 w-3.5 shrink-0" />
                 Delete
               </button>
             </div>

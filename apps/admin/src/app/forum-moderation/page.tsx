@@ -139,7 +139,7 @@ export default function ForumModerationPage() {
   const renderCommentThread = () => {
     if (commentsLoading) {
       return (
-        <span className="text-xs text-(--color-text-muted) animate-pulse">Loading comments...</span>
+        <span className="animate-pulse text-xs text-(--color-text-muted)">Loading comments...</span>
       );
     }
     if (comments.length === 0) {
@@ -147,7 +147,7 @@ export default function ForumModerationPage() {
     }
     return comments.map((comment) => (
       <div key={comment.id} className="flex gap-3">
-        <div className="shrink-0 w-8 h-8 rounded-full bg-(--color-badge-bg) text-(--color-text-muted) flex items-center justify-center text-[11px] font-semibold">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-(--color-badge-bg) text-[11px] font-semibold text-(--color-text-muted)">
           {getNameInitials(comment.author.name)}
         </div>
         <div className="flex flex-col gap-0.5">
@@ -166,21 +166,21 @@ export default function ForumModerationPage() {
   return (
     <AdminLayout>
       {loading ? (
-        <div className="flex items-center justify-center min-h-[300px]">
-          <span className="text-sm text-(--color-text-muted) animate-pulse">
+        <div className="flex min-h-[300px] items-center justify-center">
+          <span className="animate-pulse text-sm text-(--color-text-muted)">
             Retrieving community posts...
           </span>
         </div>
       ) : (
         <div className="flex flex-col gap-5">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <div className="flex-1">
               <Input
                 type="text"
                 placeholder="Search by title or author email"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                icon={<Search className="w-4 h-4 text-(--color-text-muted)" />}
+                icon={<Search className="h-4 w-4 text-(--color-text-muted)" />}
               />
             </div>
             <Select
@@ -191,10 +191,10 @@ export default function ForumModerationPage() {
             />
           </div>
 
-          <div className="hidden md:block overflow-x-auto rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-sm">
+          <div className="hidden overflow-x-auto rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-sm md:block">
             <table className="w-full border-collapse text-left text-sm">
               <thead>
-                <tr className="border-b border-(--color-border-subtle) bg-(--color-bg-soft) text-xs font-semibold text-(--color-text-muted) uppercase tracking-wider">
+                <tr className="border-b border-(--color-border-subtle) bg-(--color-bg-soft) text-xs font-semibold tracking-wider text-(--color-text-muted) uppercase">
                   <th className="px-6 py-4">Post</th>
                   <th className="px-6 py-4">Status</th>
                   <th className="px-6 py-4 text-right">Upvotes</th>
@@ -216,19 +216,19 @@ export default function ForumModerationPage() {
                   </tr>
                 ) : (
                   matched.map((post) => (
-                    <tr key={post.id} className="hover:bg-(--color-bg-soft)/50 transition-colors">
-                      <td className="px-6 py-4 max-w-md">
-                        <div className="font-semibold text-(--color-text-primary) truncate">
+                    <tr key={post.id} className="transition-colors hover:bg-(--color-bg-soft)/50">
+                      <td className="max-w-md px-6 py-4">
+                        <div className="truncate font-semibold text-(--color-text-primary)">
                           {post.title}
                         </div>
-                        <div className="text-xs text-(--color-text-muted) font-mono truncate">
+                        <div className="truncate font-mono text-xs text-(--color-text-muted)">
                           {post.authorEmail}
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <Badge
                           variant={STATUS_VARIANT[post.status]}
-                          className="justify-center min-w-[84px]"
+                          className="min-w-[84px] justify-center"
                         >
                           {STATUS_LABEL[post.status]}
                         </Badge>
@@ -265,33 +265,33 @@ export default function ForumModerationPage() {
             </table>
           </div>
 
-          <div className="md:hidden flex flex-col gap-4">
+          <div className="flex flex-col gap-4 md:hidden">
             {matched.length === 0 ? (
-              <div className="rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-sm px-6 py-10 text-center text-xs text-(--color-text-muted)">
+              <div className="rounded-xl border border-(--color-border-subtle) bg-(--color-surface) px-6 py-10 text-center text-xs text-(--color-text-muted) shadow-sm">
                 No posts match the current filters.
               </div>
             ) : (
               matched.map((post) => (
                 <div
                   key={post.id}
-                  className="rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-sm p-4 flex flex-col gap-3"
+                  className="flex flex-col gap-3 rounded-xl border border-(--color-border-subtle) bg-(--color-surface) p-4 shadow-sm"
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <span className="font-semibold text-sm text-(--color-text-primary)">
+                    <span className="text-sm font-semibold text-(--color-text-primary)">
                       {post.title}
                     </span>
                     <Badge variant={STATUS_VARIANT[post.status]}>{STATUS_LABEL[post.status]}</Badge>
                   </div>
-                  <span className="text-xs text-(--color-text-muted) font-mono break-all">
+                  <span className="font-mono text-xs break-all text-(--color-text-muted)">
                     {post.authorEmail}
                   </span>
                   <div className="flex items-center gap-4 text-xs text-(--color-text-muted)">
                     <span className="inline-flex items-center gap-1">
-                      <ArrowBigUp className="w-3.5 h-3.5 shrink-0" />
+                      <ArrowBigUp className="h-3.5 w-3.5 shrink-0" />
                       {post.upvotes}
                     </span>
                     <span className="inline-flex items-center gap-1">
-                      <MessageSquare className="w-3.5 h-3.5 shrink-0" />
+                      <MessageSquare className="h-3.5 w-3.5 shrink-0" />
                       {post.replyCount}
                     </span>
                     <span
@@ -299,7 +299,7 @@ export default function ForumModerationPage() {
                         post.reportCount > 0 ? 'text-(--color-danger)' : ''
                       }`}
                     >
-                      <Flag className="w-3.5 h-3.5 shrink-0" />
+                      <Flag className="h-3.5 w-3.5 shrink-0" />
                       {post.reportCount}
                     </span>
                     <span className="ml-auto">{formatRelativeTime(post.createdAt)}</span>
@@ -329,7 +329,7 @@ export default function ForumModerationPage() {
       >
         {selectedPost && (
           <div className="flex flex-col gap-5">
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex flex-wrap items-center gap-2">
               <Badge variant={STATUS_VARIANT[selectedPost.status]}>
                 {STATUS_LABEL[selectedPost.status]}
               </Badge>
@@ -342,38 +342,38 @@ export default function ForumModerationPage() {
 
             <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-(--color-text-muted)">
               <span className="inline-flex items-center gap-1.5">
-                <ArrowBigUp className="w-4 h-4 shrink-0" />
+                <ArrowBigUp className="h-4 w-4 shrink-0" />
                 {selectedPost.upvotes.toLocaleString()} upvotes
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <MessageSquare className="w-4 h-4 shrink-0" />
+                <MessageSquare className="h-4 w-4 shrink-0" />
                 {selectedPost.replyCount} replies
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <Eye className="w-4 h-4 shrink-0" />
+                <Eye className="h-4 w-4 shrink-0" />
                 {selectedPost.viewCount.toLocaleString()} views
               </span>
               <span className="ml-auto">{formatRelativeTime(selectedPost.createdAt)}</span>
             </div>
 
-            <p className="text-sm leading-relaxed text-(--color-text-primary) whitespace-pre-line rounded-lg border border-(--color-border-subtle) bg-(--color-bg-soft) p-4">
+            <p className="rounded-lg border border-(--color-border-subtle) bg-(--color-bg-soft) p-4 text-sm leading-relaxed whitespace-pre-line text-(--color-text-primary)">
               {selectedPost.body}
             </p>
 
             {selectedPost.reports.length > 0 && (
-              <div className="rounded-lg border border-(--color-border-subtle) bg-(--color-bg-soft) p-4 flex flex-col gap-2">
-                <span className="text-xs font-semibold text-(--color-danger) uppercase tracking-wider flex items-center gap-2">
-                  <Flag className="w-3.5 h-3.5 shrink-0" />
+              <div className="flex flex-col gap-2 rounded-lg border border-(--color-border-subtle) bg-(--color-bg-soft) p-4">
+                <span className="flex items-center gap-2 text-xs font-semibold tracking-wider text-(--color-danger) uppercase">
+                  <Flag className="h-3.5 w-3.5 shrink-0" />
                   {selectedPost.reportCount} report{selectedPost.reportCount === 1 ? '' : 's'}
                 </span>
                 <ul className="flex flex-col gap-1.5">
                   {selectedPost.reports.map((report) => (
                     <li
                       key={report.id}
-                      className="text-xs text-(--color-text-muted) flex items-center justify-between gap-3"
+                      className="flex items-center justify-between gap-3 text-xs text-(--color-text-muted)"
                     >
                       <span className="text-(--color-text-primary)">{report.reason}</span>
-                      <span className="font-mono shrink-0">
+                      <span className="shrink-0 font-mono">
                         {formatRelativeTime(report.createdAt)}
                       </span>
                     </li>
@@ -383,13 +383,13 @@ export default function ForumModerationPage() {
             )}
 
             <div className="flex flex-col gap-3">
-              <span className="text-xs font-semibold text-(--color-text-muted) uppercase tracking-wider">
+              <span className="text-xs font-semibold tracking-wider text-(--color-text-muted) uppercase">
                 Comment thread
               </span>
               {renderCommentThread()}
             </div>
 
-            <div className="sticky bottom-0 -mx-5 sm:-mx-6 -mb-5 px-5 sm:px-6 py-4 bg-(--color-surface) border-t border-(--color-border-subtle) flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2">
+            <div className="sticky bottom-0 -mx-5 -mb-5 flex flex-col items-stretch justify-end gap-2 border-t border-(--color-border-subtle) bg-(--color-surface) px-5 py-4 sm:-mx-6 sm:flex-row sm:items-center sm:px-6">
               <Button
                 type="button"
                 variant="secondary"
@@ -397,7 +397,7 @@ export default function ForumModerationPage() {
                 onClick={() => handleFlag(selectedPost)}
                 className="inline-flex items-center justify-center gap-2"
               >
-                <Flag className="w-4 h-4 shrink-0" />
+                <Flag className="h-4 w-4 shrink-0" />
                 {selectedPost.status === 'FLAGGED' ? 'Flagged' : 'Flag'}
               </Button>
               <Button
@@ -408,12 +408,12 @@ export default function ForumModerationPage() {
               >
                 {selectedPost.status === 'PUBLISHED' ? (
                   <>
-                    <Check className="w-4 h-4 shrink-0" />
+                    <Check className="h-4 w-4 shrink-0" />
                     Approved
                   </>
                 ) : (
                   <>
-                    <ShieldCheck className="w-4 h-4 shrink-0" />
+                    <ShieldCheck className="h-4 w-4 shrink-0" />
                     Approve
                   </>
                 )}

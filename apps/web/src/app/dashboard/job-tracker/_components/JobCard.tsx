@@ -36,20 +36,18 @@ export const JobCardView = React.forwardRef<HTMLDivElement, JobCardViewProps>(
     return (
       <div
         ref={ref}
-        className={`rounded-(--radius-md) border border-(--color-border-subtle) bg-(--color-surface) p-3.5 shadow-xs transition-shadow hover:shadow-(--shadow-soft) touch-none ${className}`}
+        className={`touch-none rounded-(--radius-md) border border-(--color-border-subtle) bg-(--color-surface) p-3.5 shadow-xs transition-shadow hover:shadow-(--shadow-soft) ${className}`}
         {...rest}
       >
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-(--color-text-primary) truncate">
+            <p className="truncate text-sm font-semibold text-(--color-text-primary)">
               {application.company}
             </p>
-            <p className="text-xs text-(--color-text-muted) truncate mt-0.5">
-              {application.role}
-            </p>
+            <p className="mt-0.5 truncate text-xs text-(--color-text-muted)">{application.role}</p>
           </div>
-          <span className="shrink-0 -mr-1 -mt-1 p-1 text-(--color-text-muted) cursor-grab active:cursor-grabbing">
-            <GripVertical className="w-4 h-4" />
+          <span className="-mt-1 -mr-1 shrink-0 cursor-grab p-1 text-(--color-text-muted) active:cursor-grabbing">
+            <GripVertical className="h-4 w-4" />
           </span>
         </div>
 
@@ -57,20 +55,20 @@ export const JobCardView = React.forwardRef<HTMLDivElement, JobCardViewProps>(
           <div className="mt-3 flex flex-col gap-1.5">
             {application.salaryRange && (
               <span className="flex items-center gap-1.5 text-xs text-(--color-text-muted)">
-                <Wallet className="w-3.5 h-3.5 shrink-0" />
+                <Wallet className="h-3.5 w-3.5 shrink-0" />
                 <span className="truncate">{application.salaryRange}</span>
               </span>
             )}
             {interviewDate && (
               <span className="flex items-center gap-1.5 text-xs text-(--color-text-muted)">
-                <Calendar className="w-3.5 h-3.5 shrink-0" />
+                <Calendar className="h-3.5 w-3.5 shrink-0" />
                 {interviewDate}
               </span>
             )}
           </div>
         )}
 
-        <div className="mt-3 flex items-center justify-between gap-2 pt-3 border-t border-(--color-border-subtle)">
+        <div className="mt-3 flex items-center justify-between gap-2 border-t border-(--color-border-subtle) pt-3">
           {application.jobDescriptionUrl ? (
             <a
               href={application.jobDescriptionUrl}
@@ -79,7 +77,7 @@ export const JobCardView = React.forwardRef<HTMLDivElement, JobCardViewProps>(
               onPointerDown={(event) => event.stopPropagation()}
               className="flex items-center gap-1.5 text-xs font-medium text-(--color-accent) hover:underline"
             >
-              <ExternalLink className="w-3.5 h-3.5" />
+              <ExternalLink className="h-3.5 w-3.5" />
               Job post
             </a>
           ) : (
@@ -91,18 +89,18 @@ export const JobCardView = React.forwardRef<HTMLDivElement, JobCardViewProps>(
               aria-label="Edit application"
               onPointerDown={(event) => event.stopPropagation()}
               onClick={() => onEdit(application.id)}
-              className="p-1.5 rounded-(--radius-sm) text-(--color-text-muted) hover:bg-(--color-badge-bg) hover:text-(--color-text-primary) transition cursor-pointer"
+              className="cursor-pointer rounded-(--radius-sm) p-1.5 text-(--color-text-muted) transition hover:bg-(--color-badge-bg) hover:text-(--color-text-primary)"
             >
-              <Pencil className="w-3.5 h-3.5" />
+              <Pencil className="h-3.5 w-3.5" />
             </button>
             <button
               type="button"
               aria-label="Delete application"
               onPointerDown={(event) => event.stopPropagation()}
               onClick={() => onDelete(application.id)}
-              className="p-1.5 rounded-(--radius-sm) text-(--color-text-muted) hover:bg-(--color-danger-soft) hover:text-(--color-danger) transition cursor-pointer"
+              className="cursor-pointer rounded-(--radius-sm) p-1.5 text-(--color-text-muted) transition hover:bg-(--color-danger-soft) hover:text-(--color-danger)"
             >
-              <Trash2 className="w-3.5 h-3.5" />
+              <Trash2 className="h-3.5 w-3.5" />
             </button>
           </div>
         </div>

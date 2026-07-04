@@ -90,7 +90,7 @@ export function InterviewSetup() {
       </div>
 
       <div className="card flex flex-col gap-4">
-        <h3 className="m-0 text-sm font-semibold uppercase tracking-wider text-(--color-text-muted)">
+        <h3 className="m-0 text-sm font-semibold tracking-wider text-(--color-text-muted) uppercase">
           What to expect
         </h3>
         <ul className="m-0 flex flex-col gap-4 p-0">

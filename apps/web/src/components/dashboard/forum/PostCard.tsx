@@ -16,7 +16,7 @@ interface PostCardProps {
 
 export function PostCard({ post, onUpvote }: Readonly<PostCardProps>) {
   return (
-    <article className="rounded-md border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-card) p-4 transition-colors hover:border-(--color-accent) sm:p-5">
+    <article className="rounded-md border border-(--color-border-subtle) bg-(--color-surface) p-4 shadow-(--shadow-card) transition-colors hover:border-(--color-accent) sm:p-5">
       <div className="flex gap-4">
         <UpvoteButton
           count={post.upvotes}

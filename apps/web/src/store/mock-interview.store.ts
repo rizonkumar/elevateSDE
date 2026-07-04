@@ -13,11 +13,7 @@ import {
   type MicAnalyser,
   type SpeechSession,
 } from '@/lib/speech';
-import {
-  generateFeedback,
-  getFollowUp,
-  getOpeningQuestion,
-} from '@/lib/interview-engine';
+import { generateFeedback, getFollowUp, getOpeningQuestion } from '@/lib/interview-engine';
 
 interface MockInterviewState {
   status: InterviewSessionStatus;
@@ -273,7 +269,9 @@ export const useMockInterviewStore = create<MockInterviewState>((set, get) => {
         isMicActive: false,
         micLevel: 0,
       });
-      useToastStore.getState().addToast('Interview complete. Review your feedback below.', 'success');
+      useToastStore
+        .getState()
+        .addToast('Interview complete. Review your feedback below.', 'success');
     },
 
     reset: () => {

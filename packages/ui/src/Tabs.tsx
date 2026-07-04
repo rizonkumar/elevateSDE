@@ -43,13 +43,13 @@ export function Tabs({ items, value, onChange, variant = 'pill', className = '' 
             role="tab"
             aria-selected={active}
             onClick={() => onChange(item.id)}
-            className={`inline-flex items-center gap-2 text-sm transition-colors cursor-pointer focus:outline-none focus-visible:shadow-[0_0_0_2px_var(--color-bg),0_0_0_4px_var(--color-accent)] ${
-              isPlain ? 'rounded-none px-2.5 py-2 -mb-px' : 'rounded-(--radius-sm) px-3 py-1.5'
+            className={`inline-flex cursor-pointer items-center gap-2 text-sm transition-colors focus:outline-none focus-visible:shadow-[0_0_0_2px_var(--color-bg),0_0_0_4px_var(--color-accent)] ${
+              isPlain ? '-mb-px rounded-none px-2.5 py-2' : 'rounded-(--radius-sm) px-3 py-1.5'
             } ${active ? activeClasses : inactiveClasses}`}
           >
             {Icon && (
               <Icon
-                className={`w-4 h-4 shrink-0 ${isPlain && active ? 'text-(--color-accent)' : ''}`}
+                className={`h-4 w-4 shrink-0 ${isPlain && active ? 'text-(--color-accent)' : ''}`}
               />
             )}
             <span className="whitespace-nowrap">{item.label}</span>

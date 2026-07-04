@@ -188,7 +188,7 @@ export default function AssessmentPage() {
             <ArrowLeft className="h-4 w-4" />
           </Link>
           <div className="min-w-0">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-(--color-accent)">
+            <div className="text-[11px] font-semibold tracking-[0.12em] text-(--color-accent) uppercase">
               Coding assessment
             </div>
             <h1 className="m-0 truncate font-display text-lg font-semibold tracking-tight">
@@ -208,7 +208,7 @@ export default function AssessmentPage() {
             type="button"
             onClick={() => setSettingsOpen(true)}
             aria-label="Settings"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-(--color-border-subtle) text-(--color-text-primary) transition-colors hover:bg-(--color-badge-bg) cursor-pointer"
+            className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-(--color-border-subtle) text-(--color-text-primary) transition-colors hover:bg-(--color-badge-bg)"
           >
             <Settings className="h-4 w-4" />
           </button>

@@ -74,14 +74,14 @@ export default function DailyChallengesPage() {
             Schedule a published problem as the daily challenge candidates solve to build streaks.
           </p>
           <Button type="button" onClick={openModal}>
-            <Plus className="w-4 h-4 shrink-0" />
+            <Plus className="h-4 w-4 shrink-0" />
             Schedule a day
           </Button>
         </div>
 
         {loading && schedule.length === 0 ? (
-          <div className="flex items-center justify-center min-h-[300px]">
-            <span className="text-sm text-(--color-text-muted) animate-pulse">
+          <div className="flex min-h-[300px] items-center justify-center">
+            <span className="animate-pulse text-sm text-(--color-text-muted)">
               Loading schedule...
             </span>
           </div>
@@ -96,7 +96,7 @@ export default function DailyChallengesPage() {
           <div className="overflow-x-auto rounded-md border border-(--color-border-subtle) bg-(--color-surface)">
             <table className="w-full min-w-[640px] text-sm">
               <thead>
-                <tr className="border-b border-(--color-border-subtle) bg-(--color-bg-soft) text-xs font-semibold uppercase tracking-wider text-(--color-text-muted)">
+                <tr className="border-b border-(--color-border-subtle) bg-(--color-bg-soft) text-xs font-semibold tracking-wider text-(--color-text-muted) uppercase">
                   <th className="px-4 py-3 text-left">Date</th>
                   <th className="px-4 py-3 text-left">Problem</th>
                   <th className="px-4 py-3 text-left">Difficulty</th>
@@ -106,11 +106,16 @@ export default function DailyChallengesPage() {
               </thead>
               <tbody>
                 {schedule.map((entry) => (
-                  <tr key={entry.id} className="border-b border-(--color-border-subtle) last:border-0">
+                  <tr
+                    key={entry.id}
+                    className="border-b border-(--color-border-subtle) last:border-0"
+                  >
                     <td className="px-4 py-3 font-medium">{entry.challengeDate}</td>
                     <td className="px-4 py-3">{entry.problemTitle}</td>
                     <td className="px-4 py-3">
-                      <Badge variant={DIFFICULTY_VARIANT[entry.difficulty]}>{entry.difficulty}</Badge>
+                      <Badge variant={DIFFICULTY_VARIANT[entry.difficulty]}>
+                        {entry.difficulty}
+                      </Badge>
                     </td>
                     <td className="px-4 py-3 text-right tabular-nums">{entry.completionCount}</td>
                     <td className="px-4 py-3 text-right">
@@ -121,7 +126,7 @@ export default function DailyChallengesPage() {
                         disabled={deletingId === entry.id}
                         onClick={() => requestDelete(entry.id)}
                       >
-                        <Trash2 className="w-4 h-4 shrink-0" />
+                        <Trash2 className="h-4 w-4 shrink-0" />
                       </Button>
                     </td>
                   </tr>

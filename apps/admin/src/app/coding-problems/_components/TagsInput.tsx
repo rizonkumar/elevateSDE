@@ -41,26 +41,26 @@ export function TagsInput({ label, value, onChange, placeholder }: Readonly<Tags
   };
 
   return (
-    <div className="flex flex-col gap-2 w-full">
+    <div className="flex w-full flex-col gap-2">
       {label && (
         <label className="text-[13px] font-medium text-(--color-text-primary) select-none">
           {label}
         </label>
       )}
-      <div className="flex flex-wrap items-center gap-2 min-h-10 px-2 py-1.5 rounded-sm bg-(--color-bg) border border-(--color-border) focus-within:border-(--color-accent) focus-within:shadow-[0_0_0_2px_var(--color-bg),0_0_0_4px_var(--color-accent)] transition-all">
+      <div className="flex min-h-10 flex-wrap items-center gap-2 rounded-sm border border-(--color-border) bg-(--color-bg) px-2 py-1.5 transition-all focus-within:border-(--color-accent) focus-within:shadow-[0_0_0_2px_var(--color-bg),0_0_0_4px_var(--color-accent)]">
         {value.map((tag) => (
           <span
             key={tag}
-            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-(--color-badge-bg) text-(--color-text-primary) border border-(--color-border-subtle)"
+            className="inline-flex items-center gap-1 rounded-full border border-(--color-border-subtle) bg-(--color-badge-bg) px-2 py-0.5 text-xs font-medium text-(--color-text-primary)"
           >
             {tag}
             <button
               type="button"
               aria-label={`Remove ${tag}`}
               onClick={() => removeTag(tag)}
-              className="text-(--color-text-muted) hover:text-(--color-danger) cursor-pointer"
+              className="cursor-pointer text-(--color-text-muted) hover:text-(--color-danger)"
             >
-              <X className="w-3 h-3 shrink-0" />
+              <X className="h-3 w-3 shrink-0" />
             </button>
           </span>
         ))}
@@ -70,7 +70,7 @@ export function TagsInput({ label, value, onChange, placeholder }: Readonly<Tags
           onKeyDown={handleKeyDown}
           onBlur={commitDraft}
           placeholder={value.length === 0 ? placeholder : ''}
-          className="flex-1 min-w-[120px] bg-transparent text-sm text-(--color-text-primary) placeholder-(--color-text-disabled) focus:outline-none"
+          className="min-w-[120px] flex-1 bg-transparent text-sm text-(--color-text-primary) placeholder-(--color-text-disabled) focus:outline-none"
         />
       </div>
     </div>

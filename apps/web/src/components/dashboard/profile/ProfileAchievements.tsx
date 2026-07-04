@@ -25,7 +25,7 @@ export function ProfileAchievements() {
     <div className={cardClass}>
       <div className="mb-4 flex items-center justify-between gap-3">
         <div className="flex items-baseline gap-3">
-          <h3 className="m-0 font-display text-sm font-semibold uppercase tracking-wider text-(--color-text-muted)">
+          <h3 className="m-0 font-display text-sm font-semibold tracking-wider text-(--color-text-muted) uppercase">
             Achievements
           </h3>
           {total > 0 && (
@@ -51,9 +51,7 @@ export function ProfileAchievements() {
         </div>
       ) : (
         <p className="m-0 text-sm text-(--color-text-muted)">
-          {hasLoaded
-            ? 'No badges earned yet — solve a problem to get started.'
-            : 'Loading…'}
+          {hasLoaded ? 'No badges earned yet — solve a problem to get started.' : 'Loading…'}
         </p>
       )}
     </div>

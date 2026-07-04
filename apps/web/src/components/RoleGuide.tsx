@@ -13,15 +13,15 @@ export function RoleGuide({ defaultOpen = false }: RoleGuideProps) {
   const [open, setOpen] = React.useState(defaultOpen);
 
   return (
-    <div className="border-t border-(--color-border-subtle) pt-3 mt-1">
+    <div className="mt-1 border-t border-(--color-border-subtle) pt-3">
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
         aria-expanded={open}
-        className="flex items-center justify-center gap-1.5 w-full text-xs font-medium text-(--color-text-muted) hover:text-(--color-text-primary) transition-colors cursor-pointer"
+        className="flex w-full cursor-pointer items-center justify-center gap-1.5 text-xs font-medium text-(--color-text-muted) transition-colors hover:text-(--color-text-primary)"
       >
         Which account is right for me?
-        <ChevronDown className={`w-3.5 h-3.5 transition-transform ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
 
       <AnimatePresence initial={false}>

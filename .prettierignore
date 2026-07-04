@@ -1,0 +1,7 @@
+.next/
+dist/
+coverage/
+.turbo/
+pnpm-lock.yaml
+apps/api/prisma/migrations/
+*.tsbuildinfo

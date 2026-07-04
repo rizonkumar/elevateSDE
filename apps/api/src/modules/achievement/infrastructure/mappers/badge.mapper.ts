@@ -22,7 +22,15 @@ export class BadgeMapper {
     badge: Badge,
   ): Pick<
     PrismaBadge,
-    'id' | 'key' | 'name' | 'description' | 'icon' | 'criteriaType' | 'threshold' | 'tenantId' | 'isActive'
+    | 'id'
+    | 'key'
+    | 'name'
+    | 'description'
+    | 'icon'
+    | 'criteriaType'
+    | 'threshold'
+    | 'tenantId'
+    | 'isActive'
   > {
     return {
       id: badge.getId(),

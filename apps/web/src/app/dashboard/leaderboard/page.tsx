@@ -53,7 +53,7 @@ export default function LeaderboardPage() {
           <div className="rounded-md border border-(--color-accent) bg-(--color-accent-soft) p-5 sm:p-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <div className="text-xs font-semibold uppercase tracking-wider text-(--color-accent)">
+                <div className="text-xs font-semibold tracking-wider text-(--color-accent) uppercase">
                   Your standing
                 </div>
                 <div className="mt-1 font-display text-2xl font-semibold tracking-tight text-(--color-text-primary)">
@@ -99,7 +99,7 @@ export default function LeaderboardPage() {
           <div className="hidden overflow-x-auto md:block">
             <table className="w-full border-collapse text-left text-sm">
               <thead>
-                <tr className="border-b border-(--color-border-subtle) bg-(--color-bg-soft) text-xs font-semibold uppercase tracking-wider text-(--color-text-muted)">
+                <tr className="border-b border-(--color-border-subtle) bg-(--color-bg-soft) text-xs font-semibold tracking-wider text-(--color-text-muted) uppercase">
                   <th className="px-4 py-3 font-semibold">Rank</th>
                   <th className="px-4 py-3 font-semibold">Member</th>
                   <th className="px-4 py-3 text-right font-semibold">Points</th>

@@ -7,10 +7,10 @@ export function CtaSection() {
     <div className="mx-auto w-full max-w-6xl px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
       <Reveal>
         <div className="flex flex-col items-center gap-6 rounded-lg border border-(--color-border-subtle) bg-(--color-bg-soft) px-6 py-16 text-center sm:px-10">
-          <span className="font-mono text-xs font-medium uppercase tracking-[0.2em] text-(--color-accent)">
+          <span className="font-mono text-xs font-medium tracking-[0.2em] text-(--color-accent) uppercase">
             Get started
           </span>
-          <h2 className="max-w-2xl font-display text-3xl font-bold leading-[1.1] tracking-tight text-(--color-text-primary) sm:text-4xl">
+          <h2 className="max-w-2xl font-display text-3xl leading-[1.1] font-bold tracking-tight text-(--color-text-primary) sm:text-4xl">
             Ready to ace your next engineering interview?
           </h2>
           <p className="max-w-xl text-base text-(--color-text-muted)">

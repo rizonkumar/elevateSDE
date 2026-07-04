@@ -8,8 +8,8 @@ interface AuthLayoutProps {
 
 export function AuthLayout({ children }: AuthLayoutProps) {
   return (
-    <div className="min-h-screen grid lg:grid-cols-2 bg-(--color-bg) transition-colors duration-200">
-      <aside className="hidden lg:flex flex-col justify-between p-12 xl:p-16 bg-(--color-bg-soft) border-r border-(--color-border-subtle)">
+    <div className="grid min-h-screen bg-(--color-bg) transition-colors duration-200 lg:grid-cols-2">
+      <aside className="hidden flex-col justify-between border-r border-(--color-border-subtle) bg-(--color-bg-soft) p-12 lg:flex xl:p-16">
         <Link
           href="/"
           className="text-2xl font-bold tracking-tight text-(--color-text-primary) select-none"
@@ -17,19 +17,19 @@ export function AuthLayout({ children }: AuthLayoutProps) {
           Elevate<span className="text-(--color-accent)">SDE</span>
         </Link>
 
-        <div className="flex flex-col gap-8 max-w-md">
+        <div className="flex max-w-md flex-col gap-8">
           <div>
-            <h1 className="text-2xl xl:text-3xl font-bold font-display tracking-tight text-(--color-text-primary)">
+            <h1 className="font-display text-2xl font-bold tracking-tight text-(--color-text-primary) xl:text-3xl">
               Enterprise-grade interview preparation
             </h1>
-            <p className="text-sm text-(--color-text-muted) mt-3 leading-relaxed">
+            <p className="mt-3 text-sm leading-relaxed text-(--color-text-muted)">
               Pick the workspace that fits you. Your access is tailored to your role.
             </p>
           </div>
           <RoleList />
         </div>
 
-        <p className="text-xs text-(--color-text-muted) max-w-md leading-relaxed">
+        <p className="max-w-md text-xs leading-relaxed text-(--color-text-muted)">
           Your role is set when you register. Candidates and organizations sign in on the right;
           admins use the Admin Console.
         </p>

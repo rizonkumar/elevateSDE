@@ -70,7 +70,7 @@ export function FeedbackTabs({ analysis }: FeedbackTabsProps) {
       {tab === 'skills' && (
         <div className="flex flex-col gap-5">
           <div>
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-(--color-text-muted)">
+            <h3 className="mb-2 text-xs font-semibold tracking-wider text-(--color-text-muted) uppercase">
               Matched skills
             </h3>
             {analysis.parsedSkills.length > 0 ? (
@@ -89,7 +89,7 @@ export function FeedbackTabs({ analysis }: FeedbackTabsProps) {
           </div>
           {analysis.missingSkills.length > 0 && (
             <div>
-              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-(--color-text-muted)">
+              <h3 className="mb-2 text-xs font-semibold tracking-wider text-(--color-text-muted) uppercase">
                 Recommended to add
               </h3>
               <div className="flex flex-wrap gap-2">

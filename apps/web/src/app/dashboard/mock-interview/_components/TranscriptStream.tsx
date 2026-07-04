@@ -44,7 +44,7 @@ export function TranscriptStream({ transcript }: TranscriptStreamProps) {
                   isAi
                     ? 'bg-(--color-bg-soft) text-(--color-text-primary)'
                     : 'bg-(--color-accent-soft) text-(--color-text-primary)'
-                } ${entry.isFinal ? '' : 'italic text-(--color-text-muted)'}`}
+                } ${entry.isFinal ? '' : 'text-(--color-text-muted) italic'}`}
               >
                 {entry.text}
               </div>

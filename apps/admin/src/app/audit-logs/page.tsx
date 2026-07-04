@@ -37,8 +37,8 @@ export default function AuditLogsPage() {
   return (
     <AdminLayout>
       {loading ? (
-        <div className="flex items-center justify-center min-h-[300px]">
-          <span className="text-sm text-(--color-text-muted) animate-pulse">
+        <div className="flex min-h-[300px] items-center justify-center">
+          <span className="animate-pulse text-sm text-(--color-text-muted)">
             Loading system audit records...
           </span>
         </div>
@@ -47,7 +47,7 @@ export default function AuditLogsPage() {
           <div className="overflow-x-auto rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-sm">
             <table className="w-full border-collapse text-left text-sm">
               <thead>
-                <tr className="border-b border-(--color-border-subtle) bg-(--color-bg-soft) text-xs font-semibold text-(--color-text-muted) uppercase tracking-wider">
+                <tr className="border-b border-(--color-border-subtle) bg-(--color-bg-soft) text-xs font-semibold tracking-wider text-(--color-text-muted) uppercase">
                   <th className="px-6 py-4">Action</th>
                   <th className="px-6 py-4">Executor ID</th>
                   <th className="px-6 py-4">Event Metadata</th>
@@ -66,10 +66,7 @@ export default function AuditLogsPage() {
                   </tr>
                 ) : (
                   logs.map((log) => (
-                    <tr
-                      key={log.id}
-                      className="hover:bg-(--color-bg-soft)/50 transition-colors"
-                    >
+                    <tr key={log.id} className="transition-colors hover:bg-(--color-bg-soft)/50">
                       <td className="px-6 py-4 font-mono text-xs font-semibold tracking-wider text-(--color-text-primary)">
                         {log.action}
                       </td>
@@ -78,14 +75,14 @@ export default function AuditLogsPage() {
                       </td>
                       <td className="px-6 py-4">
                         {log.metadata ? (
-                          <pre className="text-[10px] bg-(--color-bg-soft) p-2.5 rounded border border-(--color-border-subtle) font-mono text-(--color-text-muted) max-w-md overflow-x-auto">
+                          <pre className="max-w-md overflow-x-auto rounded border border-(--color-border-subtle) bg-(--color-bg-soft) p-2.5 font-mono text-[10px] text-(--color-text-muted)">
                             {JSON.stringify(log.metadata, null, 2)}
                           </pre>
                         ) : (
                           <span className="text-xs text-(--color-text-muted)">None</span>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-xs text-(--color-text-muted) font-mono">
+                      <td className="px-6 py-4 font-mono text-xs text-(--color-text-muted)">
                         {new Date(log.createdAt).toLocaleString()}
                       </td>
                     </tr>

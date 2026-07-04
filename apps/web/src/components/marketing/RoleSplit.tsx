@@ -30,7 +30,7 @@ function RoleCard({
         <span className="flex h-10 w-10 items-center justify-center rounded-md bg-(--color-accent-soft) text-(--color-accent)">
           <Icon className="h-5 w-5" />
         </span>
-        <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-(--color-text-muted)">
+        <span className="font-mono text-[11px] tracking-[0.14em] text-(--color-text-muted) uppercase">
           {kicker}
         </span>
       </div>
@@ -74,7 +74,7 @@ function CandidatePreview() {
             className="rounded-sm border border-(--color-border-subtle) bg-(--color-surface) px-2.5 py-2"
           >
             <div className="text-sm font-bold text-(--color-text-primary)">{stat.value}</div>
-            <div className="font-mono text-[10px] uppercase tracking-wider text-(--color-text-muted)">
+            <div className="font-mono text-[10px] tracking-wider text-(--color-text-muted) uppercase">
               {stat.label}
             </div>
           </div>
@@ -102,7 +102,7 @@ function AdminPreview() {
   return (
     <div className="flex h-full flex-col gap-2 rounded-md border border-(--color-border-subtle) bg-(--color-bg-soft) p-4">
       <div className="flex items-center justify-between">
-        <span className="font-mono text-[10px] uppercase tracking-wider text-(--color-text-muted)">
+        <span className="font-mono text-[10px] tracking-wider text-(--color-text-muted) uppercase">
           Audit log
         </span>
         <span className="inline-flex items-center gap-1.5 rounded-(--radius-full) border border-(--color-border-subtle) px-2 py-0.5 text-[10px] font-medium text-(--color-text-primary)">

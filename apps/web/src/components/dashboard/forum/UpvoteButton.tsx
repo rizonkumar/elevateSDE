@@ -28,8 +28,8 @@ export function UpvoteButton({
       }}
       aria-pressed={active}
       aria-label={active ? 'Remove upvote' : 'Upvote'}
-      className={`inline-flex items-center justify-center gap-1 rounded-sm border font-semibold transition-colors cursor-pointer focus:outline-none focus-visible:shadow-[0_0_0_2px_var(--color-bg),0_0_0_4px_var(--color-accent)] ${
-        isVertical ? 'flex-col px-2.5 py-2 text-sm w-12' : 'px-2.5 py-1.5 text-xs'
+      className={`inline-flex cursor-pointer items-center justify-center gap-1 rounded-sm border font-semibold transition-colors focus:outline-none focus-visible:shadow-[0_0_0_2px_var(--color-bg),0_0_0_4px_var(--color-accent)] ${
+        isVertical ? 'w-12 flex-col px-2.5 py-2 text-sm' : 'px-2.5 py-1.5 text-xs'
       } ${
         active
           ? 'border-(--color-accent) bg-(--color-accent-soft) text-(--color-accent)'

@@ -12,6 +12,7 @@ import {
   Bell,
   ListChecks,
   UserRound,
+  Repeat,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -28,6 +29,7 @@ const BASE_LINKS: DashboardNavItem[] = [
   { href: '/dashboard/mock-interview', label: 'Mock Interview', icon: Mic2 },
   { href: '/dashboard/assessment', label: 'Code Editor', icon: Code2 },
   { href: '/dashboard/daily', label: 'Daily Challenge', icon: Flame },
+  { href: '/dashboard/review', label: 'Review', icon: Repeat },
   { href: '/dashboard/forum', label: 'Community', icon: MessagesSquare },
   { href: '/dashboard/lists', label: 'My Lists', icon: ListChecks },
   { href: '/dashboard/leaderboard', label: 'Leaderboard', icon: Trophy },

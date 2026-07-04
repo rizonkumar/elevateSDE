@@ -23,11 +23,7 @@ import { JobCardView } from './_components/JobCard';
 import { PageContainer } from '@/components/dashboard/PageContainer';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { JobFormModal } from './_components/JobFormModal';
-import {
-  BOARD_COLUMNS,
-  isColumnDroppableId,
-  statusFromDroppableId,
-} from './_components/board';
+import { BOARD_COLUMNS, isColumnDroppableId, statusFromDroppableId } from './_components/board';
 
 type GroupedApplications = Record<JobApplicationStatus, JobApplicationDto[]>;
 
@@ -79,13 +75,13 @@ export default function JobTrackerPage() {
 
   const grouped = React.useMemo(() => groupByStatus(applications), [applications]);
   const editingApplication = editingId
-    ? applications.find((application) => application.id === editingId) ?? null
+    ? (applications.find((application) => application.id === editingId) ?? null)
     : null;
   const activeApplication = activeId
-    ? applications.find((application) => application.id === activeId) ?? null
+    ? (applications.find((application) => application.id === activeId) ?? null)
     : null;
   const pendingDeleteApplication = pendingDeleteId
-    ? applications.find((application) => application.id === pendingDeleteId) ?? null
+    ? (applications.find((application) => application.id === pendingDeleteId) ?? null)
     : null;
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -145,7 +141,7 @@ export default function JobTrackerPage() {
             description="Drag applications across stages to keep your pipeline current."
             actions={
               <Button onClick={() => openModal()} className="flex items-center gap-2">
-                <Plus className="w-4 h-4" />
+                <Plus className="h-4 w-4" />
                 Add application
               </Button>
             }
@@ -163,7 +159,7 @@ export default function JobTrackerPage() {
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
           >
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-start">
+            <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-5">
               {BOARD_COLUMNS.map((column) => (
                 <JobColumn
                   key={column.status}
@@ -180,7 +176,7 @@ export default function JobTrackerPage() {
                   application={activeApplication}
                   onEdit={() => undefined}
                   onDelete={() => undefined}
-                  className="shadow-(--shadow-soft) cursor-grabbing"
+                  className="cursor-grabbing shadow-(--shadow-soft)"
                 />
               ) : null}
             </DragOverlay>

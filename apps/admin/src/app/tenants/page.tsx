@@ -44,8 +44,8 @@ export default function TenantsPage() {
   return (
     <AdminLayout>
       {loading ? (
-        <div className="flex items-center justify-center min-h-[300px]">
-          <span className="text-sm text-(--color-text-muted) animate-pulse">
+        <div className="flex min-h-[300px] items-center justify-center">
+          <span className="animate-pulse text-sm text-(--color-text-muted)">
             Retrieving tenant directories...
           </span>
         </div>
@@ -55,21 +55,21 @@ export default function TenantsPage() {
             <p className="text-sm text-(--color-text-muted)">
               Corporate workspaces purchasing seats on the platform.
             </p>
-            <span className="text-xs font-semibold text-(--color-text-muted) px-2.5 py-1 rounded-full border border-(--color-border-subtle) bg-(--color-badge-bg)">
+            <span className="rounded-full border border-(--color-border-subtle) bg-(--color-badge-bg) px-2.5 py-1 text-xs font-semibold text-(--color-text-muted)">
               {tenants.length} tenants
             </span>
           </div>
 
           {tenants.length === 0 ? (
-            <div className="rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-sm px-6 py-12 text-center text-sm text-(--color-text-muted)">
+            <div className="rounded-xl border border-(--color-border-subtle) bg-(--color-surface) px-6 py-12 text-center text-sm text-(--color-text-muted) shadow-sm">
               No corporate workspaces registered yet.
             </div>
           ) : (
             <>
-              <div className="hidden md:block overflow-x-auto rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-sm">
+              <div className="hidden overflow-x-auto rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-sm md:block">
                 <table className="w-full border-collapse text-left text-sm">
                   <thead>
-                    <tr className="border-b border-(--color-border-subtle) bg-(--color-bg-soft) text-xs font-semibold text-(--color-text-muted) uppercase tracking-wider">
+                    <tr className="border-b border-(--color-border-subtle) bg-(--color-bg-soft) text-xs font-semibold tracking-wider text-(--color-text-muted) uppercase">
                       <th className="px-6 py-4">Tenant ID</th>
                       <th className="px-6 py-4">Organization Name</th>
                       <th className="px-6 py-4">Stripe Customer ID</th>
@@ -81,7 +81,7 @@ export default function TenantsPage() {
                     {tenants.map((tenant) => (
                       <tr
                         key={tenant.id}
-                        className="hover:bg-(--color-bg-soft)/50 transition-colors"
+                        className="transition-colors hover:bg-(--color-bg-soft)/50"
                       >
                         <td className="px-6 py-4 font-mono text-xs text-(--color-text-muted)">
                           <span className="block max-w-[200px] truncate" title={tenant.id}>
@@ -99,7 +99,7 @@ export default function TenantsPage() {
                             {tenant.subscriptionPlan}
                           </Badge>
                         </td>
-                        <td className="px-6 py-4 text-xs text-(--color-text-muted) font-mono">
+                        <td className="px-6 py-4 font-mono text-xs text-(--color-text-muted)">
                           {new Date(tenant.createdAt).toLocaleString()}
                         </td>
                       </tr>
@@ -108,11 +108,11 @@ export default function TenantsPage() {
                 </table>
               </div>
 
-              <div className="md:hidden flex flex-col gap-4">
+              <div className="flex flex-col gap-4 md:hidden">
                 {tenants.map((tenant) => (
                   <div
                     key={tenant.id}
-                    className="rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-sm p-4 flex flex-col gap-3"
+                    className="flex flex-col gap-3 rounded-xl border border-(--color-border-subtle) bg-(--color-surface) p-4 shadow-sm"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <span className="font-semibold text-(--color-text-primary)">
@@ -122,7 +122,7 @@ export default function TenantsPage() {
                         {tenant.subscriptionPlan}
                       </Badge>
                     </div>
-                    <div className="flex flex-col gap-1 text-xs text-(--color-text-muted) font-mono">
+                    <div className="flex flex-col gap-1 font-mono text-xs text-(--color-text-muted)">
                       <span className="break-all">ID: {tenant.id}</span>
                       <span>Stripe: {tenant.stripeCustomerId || 'None'}</span>
                       <span>{new Date(tenant.createdAt).toLocaleString()}</span>

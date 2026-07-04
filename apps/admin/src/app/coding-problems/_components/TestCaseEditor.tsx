@@ -41,13 +41,13 @@ export function TestCaseEditor({ testCases, onChange }: Readonly<TestCaseEditorP
           onClick={addTestCase}
           className="h-8 px-2.5 text-xs"
         >
-          <Plus className="w-3.5 h-3.5 shrink-0" />
+          <Plus className="h-3.5 w-3.5 shrink-0" />
           Add case
         </Button>
       </div>
 
       {testCases.length === 0 ? (
-        <p className="text-xs text-(--color-text-muted) rounded-sm border border-dashed border-(--color-border-subtle) px-3 py-4 text-center">
+        <p className="rounded-sm border border-dashed border-(--color-border-subtle) px-3 py-4 text-center text-xs text-(--color-text-muted)">
           No test cases yet. Add at least one to evaluate submissions.
         </p>
       ) : (
@@ -58,7 +58,7 @@ export function TestCaseEditor({ testCases, onChange }: Readonly<TestCaseEditorP
               className="flex flex-col gap-3 rounded-sm border border-(--color-border-subtle) bg-(--color-bg-soft) p-3"
             >
               <div className="flex items-center justify-between gap-3">
-                <span className="text-xs font-semibold text-(--color-text-muted) uppercase tracking-wider">
+                <span className="text-xs font-semibold tracking-wider text-(--color-text-muted) uppercase">
                   Case {index + 1}
                 </span>
                 <div className="flex items-center gap-3">
@@ -74,9 +74,9 @@ export function TestCaseEditor({ testCases, onChange }: Readonly<TestCaseEditorP
                     type="button"
                     aria-label={`Remove case ${index + 1}`}
                     onClick={() => removeTestCase(testCase.id)}
-                    className="p-1.5 rounded-md text-(--color-text-muted) hover:bg-(--color-danger-soft) hover:text-(--color-danger) transition-colors cursor-pointer"
+                    className="cursor-pointer rounded-md p-1.5 text-(--color-text-muted) transition-colors hover:bg-(--color-danger-soft) hover:text-(--color-danger)"
                   >
-                    <Trash2 className="w-4 h-4 shrink-0" />
+                    <Trash2 className="h-4 w-4 shrink-0" />
                   </button>
                 </div>
               </div>
