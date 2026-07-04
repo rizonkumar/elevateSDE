@@ -642,3 +642,18 @@ export interface ProblemCollectionDto {
   items: ProblemCollectionItemDto[];
   createdAt: string;
 }
+
+export type ReviewQuality = 0 | 1 | 2 | 3 | 4 | 5;
+
+export interface ReviewItemDto {
+  problem: ProblemSummaryDto;
+  ease: number;
+  intervalDays: number;
+  repetitions: number;
+  dueAt: string;
+  lastReviewedAt: string | null;
+}
+
+export interface GradeReviewDto {
+  quality: ReviewQuality;
+}

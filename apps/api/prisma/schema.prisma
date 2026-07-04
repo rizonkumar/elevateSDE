@@ -130,6 +130,7 @@ model User {
   bookmarks                     Bookmark[]
   problemNotes                  ProblemNote[]
   problemLists                  ProblemList[]
+  reviewItems                   ReviewItem[]
 }
 
 model RefreshToken {
@@ -202,6 +203,7 @@ model Problem {
   bookmarks         Bookmark[]
   notes             ProblemNote[]
   listItems         ProblemListItem[]
+  reviewItems       ReviewItem[]
 
   @@index([difficulty, isPublished])
 }
@@ -533,4 +535,21 @@ model ProblemListItem {
 
   @@unique([listId, problemId])
   @@index([listId, ordinal])
+}
+
+model ReviewItem {
+  id             String    @id @default(uuid())
+  userId         String
+  problemId      String
+  ease           Float     @default(2.5)
+  intervalDays   Int       @default(0)
+  repetitions    Int       @default(0)
+  dueAt          DateTime
+  lastReviewedAt DateTime?
+  createdAt      DateTime  @default(now())
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem        Problem   @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, problemId])
+  @@index([userId, dueAt])
 }
