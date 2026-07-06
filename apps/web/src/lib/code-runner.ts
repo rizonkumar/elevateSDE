@@ -88,7 +88,8 @@ export function runCode(
       (item, position) => !item.isHidden && position <= index,
     ).length;
     const customInput = testCase.isHidden ? undefined : customVisibleInputs?.[visibleIndex - 1];
-    const displayedInput = customInput && customInput.trim().length > 0 ? customInput : testCase.input;
+    const displayedInput =
+      customInput && customInput.trim().length > 0 ? customInput : testCase.input;
     return {
       testCaseId: testCase.id,
       label: testCase.isHidden ? `Hidden case ${index + 1}` : `Case ${visibleIndex}`,

@@ -3,10 +3,7 @@
 import * as React from 'react';
 import { ArrowLeft, MessageSquare, MessagesSquare, Plus } from 'lucide-react';
 import { Button, Textarea } from '@elevatesde/ui';
-import type {
-  ProblemDiscussionCommentDto,
-  ProblemDiscussionDto,
-} from '@elevatesde/shared-types';
+import type { ProblemDiscussionCommentDto, ProblemDiscussionDto } from '@elevatesde/shared-types';
 import { AuthorAvatar } from '@/components/dashboard/AuthorAvatar';
 import { UpvoteButton } from '@/components/dashboard/forum/UpvoteButton';
 import { CommentItem } from '@/components/dashboard/forum/CommentItem';
@@ -27,9 +24,7 @@ export function DiscussionTab({ problemId }: Readonly<DiscussionTabProps>) {
   );
   const isLoading = useProblemSocialStore((state) => state.isLoadingDiscussions);
   const fetchDiscussions = useProblemSocialStore((state) => state.fetchDiscussions);
-  const fetchDiscussionComments = useProblemSocialStore(
-    (state) => state.fetchDiscussionComments,
-  );
+  const fetchDiscussionComments = useProblemSocialStore((state) => state.fetchDiscussionComments);
   const addDiscussionComment = useProblemSocialStore((state) => state.addDiscussionComment);
   const toggleDiscussionUpvote = useProblemSocialStore((state) => state.toggleDiscussionUpvote);
   const toggleDiscussionCommentUpvote = useProblemSocialStore(

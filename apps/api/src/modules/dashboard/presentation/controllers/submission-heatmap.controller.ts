@@ -31,7 +31,9 @@ export class SubmissionHeatmapController {
     @Req() req: RequestWithUser,
   ): Promise<SubmissionHeatmapResponseDto> {
     const to = query.to ? new Date(query.to) : new Date();
-    const from = query.from ? new Date(query.from) : new Date(to.getTime() - DEFAULT_WINDOW_DAYS * DAY_MS);
+    const from = query.from
+      ? new Date(query.from)
+      : new Date(to.getTime() - DEFAULT_WINDOW_DAYS * DAY_MS);
     const cells = await this.dashboardService.getSubmissionHeatmap(req.user.getId(), from, to);
     const response = new SubmissionHeatmapResponseDto();
     response.cells = cells.map((cell) => {

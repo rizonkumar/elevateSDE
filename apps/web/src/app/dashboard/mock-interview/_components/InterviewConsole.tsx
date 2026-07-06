@@ -77,10 +77,7 @@ export function InterviewConsole() {
 
         {speechSupported ? (
           <div className="flex flex-wrap items-center justify-center gap-3">
-            <Button
-              variant={isMicActive ? 'secondary' : 'primary'}
-              onClick={handleMicToggle}
-            >
+            <Button variant={isMicActive ? 'secondary' : 'primary'} onClick={handleMicToggle}>
               <span className="inline-flex items-center gap-2">
                 {isMicActive ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
                 {isMicActive ? 'Stop microphone' : 'Start microphone'}

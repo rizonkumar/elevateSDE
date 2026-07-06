@@ -23,6 +23,7 @@ Mirror the `modules/leaderboard/` layout exactly:
 ### Streak hook (decision: direct service call)
 
 `code-runner` records submissions but never touches `UserStats` today. In `code-runner.service.ts` (or `assessments.controller.ts` after `SubmissionService.record()`), when a submission resolves to `ACCEPTED` **and** its `problemId` matches today's `DailyChallenge`, call `DailyChallengeService.registerCompletion(...)`. Streak rules in `streak-state.ts`:
+
 - `lastActiveDate == today` → no-op (already counted).
 - `lastActiveDate == yesterday` → `streakDays += 1`.
 - otherwise → `streakDays = 1`.
@@ -33,10 +34,12 @@ This mirrors the "stats written synchronously" reality. An `@nestjs/event-emitte
 ## Endpoints
 
 Candidate (`@UseGuards(JwtAuthGuard)`):
+
 - `GET /v1/daily-challenge/today` → today's problem summary + whether the viewer completed it.
 - `GET /v1/daily-challenge/streak` → `{ current, longest, lastActiveDate, calendar: { date, completed }[] }` for the last ~120 days.
 
 Admin (`@UseGuards(JwtAuthGuard, RolesGuard)` + `@Roles(UserRole.ADMIN)`, path `admin/daily-challenges`):
+
 - `GET /v1/admin/daily-challenges?from=&to=` list schedule with participation counts.
 - `POST /v1/admin/daily-challenges` `{ challengeDate, problemId }`.
 - `DELETE /v1/admin/daily-challenges/:id`.
@@ -48,9 +51,11 @@ Admin (`@UseGuards(JwtAuthGuard, RolesGuard)` + `@Roles(UserRole.ADMIN)`, path `
 ## Verification Plan
 
 ### Automated Checks
+
 - `pnpm --filter @elevatesde/api type-check && pnpm --filter @elevatesde/api lint`
 - Unit spec `daily-challenge.service.spec.ts` mirroring `leaderboard.service.spec.ts`: covers same-day no-op, consecutive-day increment, gap reset, `longestStreak` tracking.
 
 ### Manual Verification
+
 - Run the Prisma migration; confirm `DailyChallenge`, `DailyChallengeCompletion` tables and `UserStats.longestStreak` / `lastActiveDate` columns exist.
 - Seed today's `DailyChallenge`, submit an ACCEPTED solution as a USER, confirm `streakDays` → 1 and a completion row is written; resubmit and confirm no double-count.

@@ -13,10 +13,7 @@ export function ThemeToggle({ withLabel = false }: ThemeToggleProps) {
 
   React.useEffect(() => {
     setMounted(true);
-    const current = document.documentElement.getAttribute('data-theme') as
-      | 'light'
-      | 'dark'
-      | null;
+    const current = document.documentElement.getAttribute('data-theme') as 'light' | 'dark' | null;
     if (current) {
       setTheme(current);
     } else {

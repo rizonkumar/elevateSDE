@@ -53,7 +53,11 @@ class FakeNotificationRepository implements INotificationRepository {
     return value ?? null;
   }
 
-  async upsertPreference(userId: string, type: NotificationType, inAppEnabled: boolean): Promise<void> {
+  async upsertPreference(
+    userId: string,
+    type: NotificationType,
+    inAppEnabled: boolean,
+  ): Promise<void> {
     this.preferences.set(`${userId}::${type}`, inAppEnabled);
   }
 }
@@ -150,7 +154,9 @@ describe('NotificationService', () => {
       const preferences = await service.getPreferences('user-1');
       expect(preferences).toHaveLength(6);
 
-      const submission = preferences.find((preference) => preference.type === 'SUBMISSION_ACCEPTED');
+      const submission = preferences.find(
+        (preference) => preference.type === 'SUBMISSION_ACCEPTED',
+      );
       const badge = preferences.find((preference) => preference.type === 'BADGE_AWARDED');
       expect(submission?.inAppEnabled).toBe(true);
       expect(badge?.inAppEnabled).toBe(true);

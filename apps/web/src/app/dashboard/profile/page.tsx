@@ -71,7 +71,11 @@ export default function ProfilePage() {
   const tiles = [
     { icon: Zap, label: 'Points', value: leaderboard.points.toLocaleString() },
     { icon: Trophy, label: 'Global rank', value: leaderboard.rank ? `#${leaderboard.rank}` : '—' },
-    { icon: Flame, label: 'Current streak', value: `${streak?.current ?? leaderboard.streakDays} d` },
+    {
+      icon: Flame,
+      label: 'Current streak',
+      value: `${streak?.current ?? leaderboard.streakDays} d`,
+    },
     { icon: Award, label: 'Longest streak', value: `${streak?.longest ?? 0} d` },
   ];
 
@@ -117,7 +121,12 @@ export default function ProfilePage() {
                       startAngle={90}
                       endAngle={-270}
                     >
-                      <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
+                      <PolarAngleAxis
+                        type="number"
+                        domain={[0, 100]}
+                        angleAxisId={0}
+                        tick={false}
+                      />
                       <RadialBar
                         background={{ fill: 'var(--color-badge-bg)' }}
                         dataKey="value"

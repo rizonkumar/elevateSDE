@@ -37,7 +37,8 @@ const TABS: ShowcaseTab[] = [
     icon: Code2,
     shot: 'assessment',
     route: 'app.elevatesde.dev/assessment',
-    caption: 'A full Monaco IDE with the problem, your solution, and live test results side by side.',
+    caption:
+      'A full Monaco IDE with the problem, your solution, and live test results side by side.',
     alt: 'Coding assessment editor with problem statement and Monaco editor',
   },
   {

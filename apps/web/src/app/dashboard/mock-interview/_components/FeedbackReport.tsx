@@ -6,10 +6,7 @@ import { RadialBarChart, RadialBar, PolarAngleAxis, ResponsiveContainer } from '
 import { CheckCircle2, ArrowUpRight, RotateCcw } from 'lucide-react';
 import { Badge, Button } from '@elevatesde/ui';
 import type { BadgeVariant } from '@elevatesde/ui';
-import type {
-  InterviewCompetencySeverity,
-  MockInterviewFeedback,
-} from '@elevatesde/shared-types';
+import type { InterviewCompetencySeverity, MockInterviewFeedback } from '@elevatesde/shared-types';
 import { scoreBand } from '@/lib/resume-analyzer';
 import { useMockInterviewStore } from '@/store/mock-interview.store';
 
@@ -80,7 +77,9 @@ export function FeedbackReport({ feedback }: FeedbackReportProps) {
             </h2>
             <Badge variant={band.badgeVariant}>{band.label}</Badge>
           </div>
-          <p className="m-0 text-sm leading-relaxed text-(--color-text-muted)">{feedback.summary}</p>
+          <p className="m-0 text-sm leading-relaxed text-(--color-text-muted)">
+            {feedback.summary}
+          </p>
           <Button className="mt-1 self-center sm:self-start" onClick={reset}>
             <span className="inline-flex items-center gap-2">
               <RotateCcw className="h-4 w-4" />

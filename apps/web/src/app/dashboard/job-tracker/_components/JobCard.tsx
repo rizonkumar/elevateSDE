@@ -44,9 +44,7 @@ export const JobCardView = React.forwardRef<HTMLDivElement, JobCardViewProps>(
             <p className="text-sm font-semibold text-(--color-text-primary) truncate">
               {application.company}
             </p>
-            <p className="text-xs text-(--color-text-muted) truncate mt-0.5">
-              {application.role}
-            </p>
+            <p className="text-xs text-(--color-text-muted) truncate mt-0.5">{application.role}</p>
           </div>
           <span className="shrink-0 -mr-1 -mt-1 p-1 text-(--color-text-muted) cursor-grab active:cursor-grabbing">
             <GripVertical className="w-4 h-4" />

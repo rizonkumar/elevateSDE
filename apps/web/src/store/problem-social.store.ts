@@ -418,10 +418,9 @@ export const useProblemSocialStore = create<ProblemSocialState>((set, get) => ({
       ),
     });
     try {
-      const { data } = await api.patch<ProblemCollectionDto>(
-        `/api/v1/me/lists/${listId}/reorder`,
-        { orderedProblemIds },
-      );
+      const { data } = await api.patch<ProblemCollectionDto>(`/api/v1/me/lists/${listId}/reorder`, {
+        orderedProblemIds,
+      });
       set((state) => ({ lists: state.lists.map((list) => (list.id === listId ? data : list)) }));
     } catch {
       set({ lists: previous });

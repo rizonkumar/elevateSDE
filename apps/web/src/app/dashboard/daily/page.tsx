@@ -96,8 +96,7 @@ export default function DailyChallengePage() {
               </div>
             </div>
             <div className="mt-4 text-sm text-(--color-text-muted)">
-              Longest streak{' '}
-              <span className="font-semibold">{streak?.longest ?? 0} days</span>
+              Longest streak <span className="font-semibold">{streak?.longest ?? 0} days</span>
             </div>
           </div>
         </div>

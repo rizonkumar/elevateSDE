@@ -24,7 +24,9 @@ export class DailyChallengeRepository implements IDailyChallengeRepository {
     const challenge = await this.prisma.dailyChallenge.findFirst({
       where: { challengeDate, tenantId },
       include: {
-        problem: { select: { id: true, title: true, difficulty: true, tags: true, timeLimitMinutes: true } },
+        problem: {
+          select: { id: true, title: true, difficulty: true, tags: true, timeLimitMinutes: true },
+        },
         completions: { where: { userId }, select: { id: true }, take: 1 },
       },
     });

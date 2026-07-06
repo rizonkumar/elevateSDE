@@ -58,9 +58,7 @@ async function extractPdfText(file: File): Promise<string> {
   for (let pageNumber = 1; pageNumber <= document.numPages; pageNumber += 1) {
     const page = await document.getPage(pageNumber);
     const content = await page.getTextContent();
-    const pageText = content.items
-      .map((item) => ('str' in item ? item.str : ''))
-      .join(' ');
+    const pageText = content.items.map((item) => ('str' in item ? item.str : '')).join(' ');
     pages.push(pageText);
   }
   await loadingTask.destroy();
@@ -75,5 +73,8 @@ async function extractDocxText(file: File): Promise<string> {
 
 export async function extractResumeText(file: File): Promise<string> {
   const text = isPdf(file) ? await extractPdfText(file) : await extractDocxText(file);
-  return text.replace(/\s+\n/g, '\n').replace(/[ \t]{2,}/g, ' ').trim();
+  return text
+    .replace(/\s+\n/g, '\n')
+    .replace(/[ \t]{2,}/g, ' ')
+    .trim();
 }

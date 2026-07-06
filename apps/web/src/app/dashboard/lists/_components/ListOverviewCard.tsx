@@ -46,11 +46,7 @@ export function ListOverviewCard({
       </div>
 
       <div className="flex flex-col items-center gap-6 sm:flex-row sm:gap-8">
-        <RadialProgress
-          value={percent}
-          primary={`${solvedCount}/${total}`}
-          secondary="Solved"
-        />
+        <RadialProgress value={percent} primary={`${solvedCount}/${total}`} secondary="Solved" />
         <div className="grid w-full flex-1 grid-cols-3 gap-3">
           {breakdown.map((group) => (
             <div

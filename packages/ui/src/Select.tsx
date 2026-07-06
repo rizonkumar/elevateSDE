@@ -14,14 +14,7 @@ interface SelectProps {
   className?: string;
 }
 
-export function Select({
-  value,
-  options,
-  onChange,
-  label,
-  disabled,
-  className = '',
-}: SelectProps) {
+export function Select({ value, options, onChange, label, disabled, className = '' }: SelectProps) {
   const [open, setOpen] = React.useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
 
@@ -95,9 +88,7 @@ export function Select({
                     setOpen(false);
                   }}
                   className={`flex items-center justify-between gap-2 w-full text-left text-sm px-3.5 py-2 transition-colors hover:bg-(--color-badge-bg) cursor-pointer ${
-                    active
-                      ? 'text-(--color-accent) font-semibold'
-                      : 'text-(--color-text-primary)'
+                    active ? 'text-(--color-accent) font-semibold' : 'text-(--color-text-primary)'
                   }`}
                 >
                   <span className="truncate">{option.label}</span>

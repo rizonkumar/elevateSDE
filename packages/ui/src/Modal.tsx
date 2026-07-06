@@ -58,9 +58,7 @@ export function Modal({ open, onClose, title, description, children }: ModalProp
             <h2 className="text-lg font-semibold tracking-tight text-(--color-text-primary)">
               {title}
             </h2>
-            {description && (
-              <p className="text-sm text-(--color-text-muted)">{description}</p>
-            )}
+            {description && <p className="text-sm text-(--color-text-muted)">{description}</p>}
           </div>
           <button
             type="button"

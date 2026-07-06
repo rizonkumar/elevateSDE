@@ -61,7 +61,8 @@ export function CodeEditor({
         cursorBlinking: 'smooth',
         renderLineHighlight: 'all',
         scrollbar: { verticalScrollbarSize: 10, horizontalScrollbarSize: 10 },
-        fontFamily: 'var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, monospace',
+        fontFamily:
+          'var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, monospace',
       }}
     />
   );

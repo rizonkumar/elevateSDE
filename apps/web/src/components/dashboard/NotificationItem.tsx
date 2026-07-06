@@ -60,7 +60,10 @@ export function NotificationItem({ notification, onSelect }: NotificationItemPro
             {notification.title}
           </span>
           {!notification.isRead && (
-            <span className="h-2 w-2 shrink-0 rounded-full bg-(--color-accent)" aria-label="Unread" />
+            <span
+              className="h-2 w-2 shrink-0 rounded-full bg-(--color-accent)"
+              aria-label="Unread"
+            />
           )}
         </span>
         <span className="line-clamp-2 text-xs text-(--color-text-muted)">{notification.body}</span>

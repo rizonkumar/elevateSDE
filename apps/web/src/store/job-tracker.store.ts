@@ -112,7 +112,10 @@ export const useJobTrackerStore = create<JobTrackerState>((set, get) => ({
 
   update: async (id, input) => {
     try {
-      const response = await api.patch<JobApplicationDto>(`${ENDPOINT}/${id}`, toRequestBody(input));
+      const response = await api.patch<JobApplicationDto>(
+        `${ENDPOINT}/${id}`,
+        toRequestBody(input),
+      );
       set((state) => ({
         applications: state.applications.map((application) =>
           application.id === id ? response.data : application,

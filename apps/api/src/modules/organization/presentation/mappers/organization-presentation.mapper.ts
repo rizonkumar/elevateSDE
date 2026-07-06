@@ -1,9 +1,6 @@
 import { Invitation } from '../../domain/entities/invitation';
 import { InvitePreviewView, OrgOverviewView } from '../../application/organization.service';
-import {
-  InvitationResponseDto,
-  InviteCreatedResponseDto,
-} from '../dtos/invitation-response.dto';
+import { InvitationResponseDto, InviteCreatedResponseDto } from '../dtos/invitation-response.dto';
 import {
   OrgCompanyResponseDto,
   OrgMemberResponseDto,

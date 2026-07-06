@@ -21,7 +21,8 @@ class FakeDailyChallengeRepository implements IDailyChallengeRepository {
   scheduled: ScheduledChallengeRef | null = null;
   dailyView: DailyChallengeView | null = null;
   completed = new Set<string>();
-  recordedCompletions: Array<{ userId: string; dailyChallengeId: string; submissionId: string }> = [];
+  recordedCompletions: Array<{ userId: string; dailyChallengeId: string; submissionId: string }> =
+    [];
   streak: StreakState | null = null;
   savedStreak: StreakState | null = null;
   completionDates: Date[] = [];
@@ -116,7 +117,10 @@ describe('DailyChallengeService', () => {
       expect(summary.current).toBe(3);
       expect(summary.longest).toBe(9);
       expect(summary.calendar).toHaveLength(119);
-      expect(summary.calendar[summary.calendar.length - 1]).toEqual({ date: today, completed: true });
+      expect(summary.calendar[summary.calendar.length - 1]).toEqual({
+        date: today,
+        completed: true,
+      });
     });
 
     it('defaults to a zeroed streak when no stats exist', async () => {
@@ -172,7 +176,9 @@ describe('DailyChallengeService', () => {
   describe('schedule', () => {
     it('rejects a date that already has a challenge', async () => {
       repository.scheduled = { id: CHALLENGE_ID, problemId: PROBLEM_ID };
-      await expect(service.schedule(new Date(), PROBLEM_ID)).rejects.toBeInstanceOf(ConflictException);
+      await expect(service.schedule(new Date(), PROBLEM_ID)).rejects.toBeInstanceOf(
+        ConflictException,
+      );
     });
 
     it('rejects a problem that is not published', async () => {

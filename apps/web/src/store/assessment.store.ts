@@ -143,7 +143,9 @@ function buildInitialCode(problem: CodingProblemDto): Record<AssessmentLanguage,
 }
 
 function visibleInputs(problem: CodingProblemDto): string[] {
-  return problem.testCases.filter((testCase) => !testCase.isHidden).map((testCase) => testCase.input);
+  return problem.testCases
+    .filter((testCase) => !testCase.isHidden)
+    .map((testCase) => testCase.input);
 }
 
 function clearTimer(): void {
@@ -218,10 +220,7 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => {
     }
     useToastStore
       .getState()
-      .addToast(
-        `Submission failed — ${detail.passedCount}/${detail.totalCount} passed.`,
-        'error',
-      );
+      .addToast(`Submission failed — ${detail.passedCount}/${detail.totalCount} passed.`, 'error');
   };
 
   const pollSubmission = (submissionId: string) => {
@@ -233,7 +232,9 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => {
           detail = await getSubmission(submissionId);
         } catch {
           set({ isSubmitting: false, submissionPhase: null });
-          useToastStore.getState().addToast('Lost track of your submission. Please retry.', 'error');
+          useToastStore
+            .getState()
+            .addToast('Lost track of your submission. Please retry.', 'error');
           return;
         }
         if (!get().isSubmitting) return;
@@ -421,7 +422,12 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => {
         return;
       }
       clearSubmissionPoll();
-      set({ isSubmitting: true, submissionPhase: 'QUEUED', lastResult: null, testcaseTab: 'result' });
+      set({
+        isSubmitting: true,
+        submissionPhase: 'QUEUED',
+        lastResult: null,
+        testcaseTab: 'result',
+      });
       try {
         const accepted = await submitAssessment({
           problemId: problem.id,

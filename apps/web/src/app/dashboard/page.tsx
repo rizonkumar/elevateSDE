@@ -246,7 +246,11 @@ function ProgressRow({ label, value }: Readonly<{ label: string; value: number }
   );
 }
 
-function HeroHeader({ name, role, streakDays }: Readonly<{ name: string; role: string; streakDays: number }>) {
+function HeroHeader({
+  name,
+  role,
+  streakDays,
+}: Readonly<{ name: string; role: string; streakDays: number }>) {
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div>
@@ -389,7 +393,9 @@ function RecentActivity({ items }: Readonly<{ items: ActivityItem[] }>) {
                     <div className="text-sm font-semibold text-(--color-text-primary) truncate">
                       {item.label}
                     </div>
-                    <div className="text-xs text-(--color-text-muted) capitalize">{item.detail}</div>
+                    <div className="text-xs text-(--color-text-muted) capitalize">
+                      {item.detail}
+                    </div>
                   </div>
                   <span className="text-xs text-(--color-text-muted) shrink-0">
                     {formatRelative(item.timestamp)}
@@ -416,7 +422,9 @@ function PreparationInsights({
   const hasReadinessSignal = resumeAts !== null || interviewScore !== null;
   return (
     <div className="rounded-md border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-card) p-5 sm:p-6">
-      <h2 className="text-sm font-semibold text-(--color-text-primary) mb-5">Preparation insights</h2>
+      <h2 className="text-sm font-semibold text-(--color-text-primary) mb-5">
+        Preparation insights
+      </h2>
       <div className="flex flex-col gap-5">
         <ProgressRow label="Code acceptance rate" value={acceptanceRate} />
         {resumeAts !== null && <ProgressRow label="Resume ATS readiness" value={resumeAts} />}
@@ -433,9 +441,7 @@ function PreparationInsights({
   );
 }
 
-function CommunityCard({
-  forum,
-}: Readonly<{ forum: DashboardStatsDto['forum'] }>) {
+function CommunityCard({ forum }: Readonly<{ forum: DashboardStatsDto['forum'] }>) {
   const rows = [
     { label: 'Posts', value: forum.postsCreated, icon: MessagesSquare },
     { label: 'Comments', value: forum.commentsPosted, icon: MessagesSquare },
@@ -569,7 +575,9 @@ export default function DashboardPage() {
   const statCards = buildStatCards(data);
   const activity = buildActivity(data, resumeAnalyses, mounted);
   const latestResume = mounted
-    ? resumeAnalyses.find((analysis) => analysis.status === 'COMPLETED' && analysis.atsScore !== null)
+    ? resumeAnalyses.find(
+        (analysis) => analysis.status === 'COMPLETED' && analysis.atsScore !== null,
+      )
     : undefined;
   const resumeAts = latestResume?.atsScore ?? null;
   const interviewScore = mounted ? (interviewFeedback?.overallScore ?? null) : null;

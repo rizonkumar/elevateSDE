@@ -440,6 +440,56 @@ export interface CreateDailyChallengeDto {
   problemId: string;
 }
 
+export type ContestStatus = 'DRAFT' | 'SCHEDULED' | 'LIVE' | 'ENDED';
+
+export interface ContestProblemDto {
+  id: string;
+  problemId: string;
+  title: string;
+  difficulty: AssessmentDifficulty;
+  ordinal: number;
+  points: number;
+}
+
+export interface AdminContestSummaryDto {
+  id: string;
+  slug: string;
+  title: string;
+  status: ContestStatus;
+  startsAt: string;
+  endsAt: string;
+  problemCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminContestListDto {
+  items: AdminContestSummaryDto[];
+  total: number;
+}
+
+export interface AdminContestDetailDto extends AdminContestSummaryDto {
+  description: string;
+  problems: ContestProblemDto[];
+}
+
+export interface ContestProblemInput {
+  problemId: string;
+  points: number;
+}
+
+export interface AdminContestInput {
+  title: string;
+  slug: string;
+  description: string;
+  startsAt: string;
+  endsAt: string;
+}
+
+export interface SetContestProblemsInput {
+  problems: ContestProblemInput[];
+}
+
 export interface SubmissionHeatmapCellDto {
   date: string;
   count: number;

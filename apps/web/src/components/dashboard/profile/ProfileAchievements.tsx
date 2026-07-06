@@ -51,9 +51,7 @@ export function ProfileAchievements() {
         </div>
       ) : (
         <p className="m-0 text-sm text-(--color-text-muted)">
-          {hasLoaded
-            ? 'No badges earned yet — solve a problem to get started.'
-            : 'Loading…'}
+          {hasLoaded ? 'No badges earned yet — solve a problem to get started.' : 'Loading…'}
         </p>
       )}
     </div>

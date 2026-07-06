@@ -1,5 +1,9 @@
 import { create } from 'zustand';
-import type { NotificationDto, NotificationsViewDto, UnreadCountDto } from '@elevatesde/shared-types';
+import type {
+  NotificationDto,
+  NotificationsViewDto,
+  UnreadCountDto,
+} from '@elevatesde/shared-types';
 import { api } from '@/lib/api';
 
 const POLL_INTERVAL_MS = 45000;

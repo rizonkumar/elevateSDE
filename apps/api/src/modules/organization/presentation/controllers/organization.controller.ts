@@ -19,10 +19,7 @@ import { User } from '../../../users/domain/entities/user';
 import { OrganizationService } from '../../application/organization.service';
 import { InviteMemberDto } from '../dtos/invite-member.dto';
 import { OrgOverviewResponseDto } from '../dtos/org-overview-response.dto';
-import {
-  InvitationResponseDto,
-  InviteCreatedResponseDto,
-} from '../dtos/invitation-response.dto';
+import { InvitationResponseDto, InviteCreatedResponseDto } from '../dtos/invitation-response.dto';
 import { InvitePreviewResponseDto } from '../dtos/invite-preview-response.dto';
 import { OrganizationPresentationMapper } from '../mappers/organization-presentation.mapper';
 
@@ -59,11 +56,7 @@ export class OrganizationController {
     @Req() req: RequestWithUser,
   ): Promise<InviteCreatedResponseDto> {
     const tenantId = this.requireTenant(req.user);
-    const invitation = await this.organizationService.invite(
-      tenantId,
-      req.user.getId(),
-      dto.email,
-    );
+    const invitation = await this.organizationService.invite(tenantId, req.user.getId(), dto.email);
     return OrganizationPresentationMapper.toInviteCreated(invitation);
   }
 
