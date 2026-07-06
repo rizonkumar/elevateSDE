@@ -10,7 +10,9 @@ import { HIDDEN_PLACEHOLDER } from './assessment-presentation.mapper';
 
 export class SubmissionDetailPresentationMapper {
   static toResponse(submission: Submission, problem: Problem): SubmissionDetailResponseDto {
-    const caseById = new Map(problem.getTestCases().map((testCase) => [testCase.getId(), testCase]));
+    const caseById = new Map(
+      problem.getTestCases().map((testCase) => [testCase.getId(), testCase]),
+    );
     const dto = new SubmissionDetailResponseDto();
     dto.id = submission.getId();
     dto.problemId = submission.getProblemId();

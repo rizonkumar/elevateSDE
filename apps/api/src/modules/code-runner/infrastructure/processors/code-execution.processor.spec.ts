@@ -104,7 +104,11 @@ describe('CodeExecutionProcessor', () => {
 
   it('does not mark failed while retries remain', async () => {
     const { processor, markFailed } = buildProcessor();
-    const job = { data: JOB_DATA, attemptsMade: 1, opts: { attempts: 3 } } as Job<CodeExecutionJobData>;
+    const job = {
+      data: JOB_DATA,
+      attemptsMade: 1,
+      opts: { attempts: 3 },
+    } as Job<CodeExecutionJobData>;
 
     await processor.onFailed(job);
 
@@ -113,7 +117,11 @@ describe('CodeExecutionProcessor', () => {
 
   it('marks the submission failed once retries are exhausted', async () => {
     const { processor, markFailed } = buildProcessor();
-    const job = { data: JOB_DATA, attemptsMade: 3, opts: { attempts: 3 } } as Job<CodeExecutionJobData>;
+    const job = {
+      data: JOB_DATA,
+      attemptsMade: 3,
+      opts: { attempts: 3 },
+    } as Job<CodeExecutionJobData>;
 
     await processor.onFailed(job);
 

@@ -53,9 +53,9 @@ describe('AssessmentPresentationMapper', () => {
   });
 
   it('collapses richer submission statuses to the three run statuses', () => {
-    expect(AssessmentPresentationMapper.toResponse(outcome(SubmissionStatus.ACCEPTED), 't').status).toBe(
-      'ACCEPTED',
-    );
+    expect(
+      AssessmentPresentationMapper.toResponse(outcome(SubmissionStatus.ACCEPTED), 't').status,
+    ).toBe('ACCEPTED');
     expect(
       AssessmentPresentationMapper.toResponse(outcome(SubmissionStatus.WRONG_ANSWER), 't').status,
     ).toBe('WRONG_ANSWER');

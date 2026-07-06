@@ -81,7 +81,11 @@ export class DockerSandboxRunner extends ISandboxRunner {
     }
   }
 
-  private exec(args: string[], timeoutMs: number, containerName: string): Promise<DockerExecResult> {
+  private exec(
+    args: string[],
+    timeoutMs: number,
+    containerName: string,
+  ): Promise<DockerExecResult> {
     return new Promise((resolve) => {
       const start = Date.now();
       const child = spawn('docker', args);
