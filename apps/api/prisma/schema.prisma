@@ -84,6 +84,13 @@ enum NotificationType {
   SYSTEM
 }
 
+enum ContestStatus {
+  DRAFT
+  SCHEDULED
+  LIVE
+  ENDED
+}
+
 model Tenant {
   id               String       @id @default(uuid())
   name             String
@@ -204,6 +211,7 @@ model Problem {
   notes             ProblemNote[]
   listItems         ProblemListItem[]
   reviewItems       ReviewItem[]
+  contestProblems   ContestProblem[]
 
   @@index([difficulty, isPublished])
 }
@@ -378,6 +386,35 @@ model DailyChallengeCompletion {
 
   @@unique([userId, dailyChallengeId])
   @@index([dailyChallengeId])
+}
+
+model Contest {
+  id          String           @id @default(uuid())
+  slug        String           @unique
+  title       String
+  description String
+  startsAt    DateTime
+  endsAt      DateTime
+  status      ContestStatus    @default(DRAFT)
+  tenantId    String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  problems    ContestProblem[]
+
+  @@index([status, startsAt])
+}
+
+model ContestProblem {
+  id        String  @id @default(uuid())
+  contestId String
+  problemId String
+  ordinal   Int
+  points    Int     @default(100)
+  contest   Contest @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  problem   Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@unique([contestId, problemId])
+  @@index([contestId])
 }
 
 model Badge {

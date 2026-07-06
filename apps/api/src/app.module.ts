@@ -20,6 +20,7 @@ import { AchievementModule } from './modules/achievement/achievement.module';
 import { NotificationModule } from './modules/notification/notification.module';
 import { ProblemSocialModule } from './modules/problem-social/problem-social.module';
 import { ReviewModule } from './modules/review/review.module';
+import { ContestModule } from './modules/contest/contest.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { ReviewModule } from './modules/review/review.module';
     NotificationModule,
     ProblemSocialModule,
     ReviewModule,
+    ContestModule,
   ],
   controllers: [AppController],
   providers: [AppService],

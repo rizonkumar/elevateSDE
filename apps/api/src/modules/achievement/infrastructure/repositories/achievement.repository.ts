@@ -4,7 +4,11 @@ import { SubmissionStatus } from '@prisma/client';
 import { PrismaService } from '../../../../infrastructure/prisma/prisma.service';
 import { IAchievementRepository } from '../../domain/interfaces/achievement-repository.interface';
 import { Badge } from '../../domain/entities/badge';
-import { AdminBadgeView, EarnedBadgeView, UserMetrics } from '../../domain/read-models/achievement-view';
+import {
+  AdminBadgeView,
+  EarnedBadgeView,
+  UserMetrics,
+} from '../../domain/read-models/achievement-view';
 import { BadgeMapper } from '../mappers/badge.mapper';
 
 @Injectable()

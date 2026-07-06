@@ -3,7 +3,11 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { AchievementService } from './achievement.service';
 import { IAchievementRepository } from '../domain/interfaces/achievement-repository.interface';
 import { Badge } from '../domain/entities/badge';
-import { AdminBadgeView, EarnedBadgeView, UserMetrics } from '../domain/read-models/achievement-view';
+import {
+  AdminBadgeView,
+  EarnedBadgeView,
+  UserMetrics,
+} from '../domain/read-models/achievement-view';
 
 const USER_ID = 'user-1';
 
