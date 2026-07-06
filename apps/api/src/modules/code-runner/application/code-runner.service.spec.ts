@@ -108,7 +108,9 @@ function buildService(run: (spec: RunSpec) => Promise<RawRunOutput>): {
   runSpy: jest.Mock;
 } {
   const problem = buildProblem();
-  const problemService = { getById: jest.fn().mockResolvedValue(problem) } as unknown as ProblemService;
+  const problemService = {
+    getById: jest.fn().mockResolvedValue(problem),
+  } as unknown as ProblemService;
   const runSpy = jest.fn(run);
   const sandboxRunner = { run: runSpy } as unknown as ISandboxRunner;
   return {

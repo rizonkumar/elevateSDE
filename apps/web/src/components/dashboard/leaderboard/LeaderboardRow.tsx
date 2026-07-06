@@ -58,7 +58,9 @@ export function LeaderboardRow({ entry }: Readonly<LeaderboardRowProps>) {
       <td className="px-4 py-3 text-right font-semibold text-(--color-text-primary)">
         {entry.points.toLocaleString()}
       </td>
-      <td className="px-4 py-3 text-right text-(--color-text-muted)">{entry.assessmentsCompleted}</td>
+      <td className="px-4 py-3 text-right text-(--color-text-muted)">
+        {entry.assessmentsCompleted}
+      </td>
       <td className="px-4 py-3 text-right">
         <span className="inline-flex items-center gap-1 text-(--color-text-muted)">
           <Flame className="h-3.5 w-3.5 text-(--color-warning)" />

@@ -64,7 +64,9 @@ export class SubmissionRepository implements ISubmissionRepository {
     return records.map((record) => SubmissionMapper.toDomain(record));
   }
 
-  private toResultRows(submission: Submission): Prisma.SubmissionResultCreateWithoutSubmissionInput[] {
+  private toResultRows(
+    submission: Submission,
+  ): Prisma.SubmissionResultCreateWithoutSubmissionInput[] {
     return submission.getResults().map((result) => ({
       id: result.getId(),
       testCaseId: result.getTestCaseId(),

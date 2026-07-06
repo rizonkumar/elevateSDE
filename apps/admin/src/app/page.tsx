@@ -4,7 +4,15 @@ import * as React from 'react';
 import { AdminLayout } from '../components/AdminLayout';
 import { api } from '../lib/api';
 import { useToastStore } from '../store/toast.store';
-import { Users, Building2, ToggleLeft, Activity, ArrowRight, Gauge, ShieldCheck } from 'lucide-react';
+import {
+  Users,
+  Building2,
+  ToggleLeft,
+  Activity,
+  ArrowRight,
+  Gauge,
+  ShieldCheck,
+} from 'lucide-react';
 import { AdminStatsDto, AuditLogDto, FeatureFlagDto } from '@elevatesde/shared-types';
 import Link from 'next/link';
 

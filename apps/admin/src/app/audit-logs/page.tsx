@@ -66,10 +66,7 @@ export default function AuditLogsPage() {
                   </tr>
                 ) : (
                   logs.map((log) => (
-                    <tr
-                      key={log.id}
-                      className="hover:bg-(--color-bg-soft)/50 transition-colors"
-                    >
+                    <tr key={log.id} className="hover:bg-(--color-bg-soft)/50 transition-colors">
                       <td className="px-6 py-4 font-mono text-xs font-semibold tracking-wider text-(--color-text-primary)">
                         {log.action}
                       </td>

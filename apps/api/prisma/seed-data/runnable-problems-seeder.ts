@@ -48,7 +48,10 @@ function randArray(rng: () => number, length: number, min: number, max: number):
   return Array.from({ length }, () => randInt(rng, min, max));
 }
 
-function buildCases(args: unknown[][], reference: (...args: number[]) => unknown): GeneratedTestCase[] {
+function buildCases(
+  args: unknown[][],
+  reference: (...args: number[]) => unknown,
+): GeneratedTestCase[] {
   const visibleCount = Math.ceil(args.length / 2);
   return args.map((tuple, index) => ({
     input: toInput(tuple),
@@ -317,7 +320,8 @@ function buildAllProblems(): GeneratedProblem[] {
         tags: ['Math', 'Number Theory'],
         fn: 'gcdWithK',
         params: [6, 8, 12, 15, 18, 24, 30, 100],
-        describe: (p) => `Given a non-negative integer x, return the greatest common divisor of x and ${p}.`,
+        describe: (p) =>
+          `Given a non-negative integer x, return the greatest common divisor of x and ${p}.`,
         reference: (p, x) => gcd(x, p),
         xs: (_p, rng) => nonNegativeDomain(rng),
       },
@@ -345,7 +349,8 @@ function buildAllProblems(): GeneratedProblem[] {
         tags: ['Array', 'Math'],
         fn: 'countMultiples',
         params: [2, 3, 4, 5, 6, 7, 8, 9],
-        describe: (p) => `Given an array of integers, return how many elements are divisible by ${p}.`,
+        describe: (p) =>
+          `Given an array of integers, return how many elements are divisible by ${p}.`,
         reference: (p, a) => a.filter((value) => value % p === 0).length,
         arrays: (_p, rng) => arrayDomain(rng),
       },
@@ -359,8 +364,10 @@ function buildAllProblems(): GeneratedProblem[] {
         tags: ['Array', 'Math'],
         fn: 'sumMultiples',
         params: [2, 3, 4, 5, 6, 7, 10, 12],
-        describe: (p) => `Given an array of integers, return the sum of elements divisible by ${p}.`,
-        reference: (p, a) => a.filter((value) => value % p === 0).reduce((acc, value) => acc + value, 0),
+        describe: (p) =>
+          `Given an array of integers, return the sum of elements divisible by ${p}.`,
+        reference: (p, a) =>
+          a.filter((value) => value % p === 0).reduce((acc, value) => acc + value, 0),
         arrays: (_p, rng) => arrayDomain(rng),
       },
       7,
@@ -373,7 +380,8 @@ function buildAllProblems(): GeneratedProblem[] {
         tags: ['Array'],
         fn: 'countGreater',
         params: [0, 3, 5, 10, 20, 30, -5, 40],
-        describe: (p) => `Given an array of integers, return how many elements are strictly greater than ${p}.`,
+        describe: (p) =>
+          `Given an array of integers, return how many elements are strictly greater than ${p}.`,
         reference: (p, a) => a.filter((value) => value > p).length,
         arrays: (_p, rng) => arrayDomain(rng),
       },
@@ -387,7 +395,8 @@ function buildAllProblems(): GeneratedProblem[] {
         tags: ['Array'],
         fn: 'clampMax',
         params: [5, 10, 0, 7, 20, 3, 50, 15],
-        describe: (p) => `Given an array of integers, return a new array where each element is capped at ${p}.`,
+        describe: (p) =>
+          `Given an array of integers, return a new array where each element is capped at ${p}.`,
         reference: (p, a) => a.map((value) => Math.min(value, p)),
         arrays: (_p, rng) => arrayDomain(rng),
       },
@@ -401,7 +410,8 @@ function buildAllProblems(): GeneratedProblem[] {
         tags: ['Array'],
         fn: 'addKEach',
         params: [1, 2, 3, 5, 10, 100, 7, 25],
-        describe: (p) => `Given an array of integers, return a new array with ${p} added to each element.`,
+        describe: (p) =>
+          `Given an array of integers, return a new array with ${p} added to each element.`,
         reference: (p, a) => a.map((value) => value + p),
         arrays: (_p, rng) => arrayDomain(rng),
       },

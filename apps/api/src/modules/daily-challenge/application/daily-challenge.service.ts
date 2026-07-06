@@ -1,4 +1,9 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { IDailyChallengeRepository } from '../domain/interfaces/daily-challenge-repository.interface';
 import { DailyChallenge } from '../domain/entities/daily-challenge';
@@ -89,7 +94,11 @@ export class DailyChallengeService {
     if (!problem) {
       throw new BadRequestException('Problem not found or not published');
     }
-    const challenge = DailyChallenge.create({ challengeDate: day, problemId, tenantId: GLOBAL_SCOPE });
+    const challenge = DailyChallenge.create({
+      challengeDate: day,
+      problemId,
+      tenantId: GLOBAL_SCOPE,
+    });
     await this.repository.schedule(challenge);
     return {
       id: challenge.getId(),

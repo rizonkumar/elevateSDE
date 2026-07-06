@@ -10,8 +10,9 @@ interface InterviewerWaveformProps {
 }
 
 const BAR_COUNT = 28;
-const MULTIPLIERS = Array.from({ length: BAR_COUNT }, (_, index) =>
-  0.4 + 0.6 * Math.abs(Math.sin(index * 1.7)),
+const MULTIPLIERS = Array.from(
+  { length: BAR_COUNT },
+  (_, index) => 0.4 + 0.6 * Math.abs(Math.sin(index * 1.7)),
 );
 
 export function InterviewerWaveform({

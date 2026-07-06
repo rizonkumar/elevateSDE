@@ -174,7 +174,13 @@ export function DatePicker({
           className="rounded-md p-1.5 text-(--color-text-muted) transition-colors hover:bg-(--color-badge-bg) hover:text-(--color-text-primary) cursor-pointer"
         >
           <svg viewBox="0 0 20 20" fill="none" className="h-4 w-4">
-            <path d="M12 5l-5 5 5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              d="M12 5l-5 5 5 5"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
         </button>
         <span className="text-sm font-semibold text-(--color-text-primary)">
@@ -187,7 +193,13 @@ export function DatePicker({
           className="rounded-md p-1.5 text-(--color-text-muted) transition-colors hover:bg-(--color-badge-bg) hover:text-(--color-text-primary) cursor-pointer"
         >
           <svg viewBox="0 0 20 20" fill="none" className="h-4 w-4">
-            <path d="M8 5l5 5-5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              d="M8 5l5 5-5 5"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
         </button>
       </div>
@@ -214,7 +226,8 @@ export function DatePicker({
           if (isSelected) {
             dayClass += 'bg-(--color-accent) font-semibold text-white';
           } else if (isToday) {
-            dayClass += 'border border-(--color-accent) text-(--color-accent) hover:bg-(--color-accent-soft)';
+            dayClass +=
+              'border border-(--color-accent) text-(--color-accent) hover:bg-(--color-accent-soft)';
           } else {
             dayClass += 'text-(--color-text-primary) hover:bg-(--color-badge-bg)';
           }
@@ -228,9 +241,19 @@ export function DatePicker({
 
       {withTime && (
         <div className="mt-3 flex items-center gap-2 border-t border-(--color-border-subtle) pt-3">
-          <svg viewBox="0 0 20 20" fill="none" className="h-4 w-4 shrink-0 text-(--color-text-muted)">
+          <svg
+            viewBox="0 0 20 20"
+            fill="none"
+            className="h-4 w-4 shrink-0 text-(--color-text-muted)"
+          >
             <circle cx="10" cy="10" r="7" stroke="currentColor" strokeWidth="1.6" />
-            <path d="M10 6v4l2.5 2.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              d="M10 6v4l2.5 2.5"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
           <input
             type="time"
@@ -257,7 +280,9 @@ export function DatePicker({
           onClick={() => {
             const now = new Date();
             emit(
-              withTime ? now : new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0),
+              withTime
+                ? now
+                : new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0),
             );
             setView(now);
             if (!withTime) setOpen(false);

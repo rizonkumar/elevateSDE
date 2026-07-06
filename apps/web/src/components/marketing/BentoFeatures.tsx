@@ -95,8 +95,8 @@ function CodePreview() {
     <MiniPanel className="flex flex-col gap-3">
       <pre className="overflow-hidden font-mono text-[11px] leading-relaxed text-(--color-text-muted)">
         <span className="text-(--color-accent)">function</span> twoSum(nums, target) {'{'}
-        {'\n'}  <span className="text-(--color-accent)">const</span> seen = new Map();
-        {'\n'}  ...
+        {'\n'} <span className="text-(--color-accent)">const</span> seen = new Map();
+        {'\n'} ...
         {'\n'}
         {'}'}
       </pre>

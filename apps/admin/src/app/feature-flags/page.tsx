@@ -137,10 +137,7 @@ export default function FeatureFlagsPage() {
                     </tr>
                   ) : (
                     flags.map((flag) => (
-                      <tr
-                        key={flag.id}
-                        className="hover:bg-(--color-bg-soft)/50 transition-colors"
-                      >
+                      <tr key={flag.id} className="hover:bg-(--color-bg-soft)/50 transition-colors">
                         <td className="px-6 py-4 font-mono text-xs font-bold text-(--color-text-primary)">
                           {flag.flagKey}
                         </td>

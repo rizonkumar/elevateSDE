@@ -63,7 +63,11 @@ export class NotificationRepository implements INotificationRepository {
     return record ? record.inAppEnabled : null;
   }
 
-  async upsertPreference(userId: string, type: NotificationType, inAppEnabled: boolean): Promise<void> {
+  async upsertPreference(
+    userId: string,
+    type: NotificationType,
+    inAppEnabled: boolean,
+  ): Promise<void> {
     await this.prisma.notificationPreference.upsert({
       where: { userId_type: { userId, type } },
       update: { inAppEnabled },

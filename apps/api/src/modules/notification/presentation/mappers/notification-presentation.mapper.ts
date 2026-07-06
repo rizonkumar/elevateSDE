@@ -1,5 +1,8 @@
 import { Notification } from '../../domain/entities/notification';
-import { NotificationPreferenceView, NotificationsView } from '../../domain/read-models/notification-view';
+import {
+  NotificationPreferenceView,
+  NotificationsView,
+} from '../../domain/read-models/notification-view';
 import { NotificationPreferenceResponseDto } from '../dtos/notification-preference-response.dto';
 import { NotificationResponseDto } from '../dtos/notification-response.dto';
 import { NotificationsViewResponseDto } from '../dtos/notifications-view-response.dto';

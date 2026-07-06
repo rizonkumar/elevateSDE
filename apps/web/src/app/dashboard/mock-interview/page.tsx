@@ -25,24 +25,26 @@ export default function MockInterviewPage() {
 
   return (
     <PageContainer>
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: 'easeOut' }}
-          className="mb-8"
-        >
-          <PageHeader
-            kicker="Mock interview"
-            title="AI Interview Console"
-            description="Practice realistic technical and behavioral rounds with an AI interviewer, then review a scored breakdown of your performance."
-          />
-        </motion.div>
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: 'easeOut' }}
+        className="mb-8"
+      >
+        <PageHeader
+          kicker="Mock interview"
+          title="AI Interview Console"
+          description="Practice realistic technical and behavioral rounds with an AI interviewer, then review a scored breakdown of your performance."
+        />
+      </motion.div>
 
-        {mounted ? renderContent() : (
-          <div className="flex items-center justify-center py-24 text-sm text-(--color-text-muted)">
-            Loading…
-          </div>
-        )}
+      {mounted ? (
+        renderContent()
+      ) : (
+        <div className="flex items-center justify-center py-24 text-sm text-(--color-text-muted)">
+          Loading…
+        </div>
+      )}
     </PageContainer>
   );
 }

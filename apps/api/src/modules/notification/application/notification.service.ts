@@ -2,7 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { NotificationType } from '@prisma/client';
 import { INotificationRepository } from '../domain/interfaces/notification-repository.interface';
 import { Notification, NotificationDraft } from '../domain/entities/notification';
-import { NotificationPreferenceView, NotificationsView } from '../domain/read-models/notification-view';
+import {
+  NotificationPreferenceView,
+  NotificationsView,
+} from '../domain/read-models/notification-view';
 
 const LIST_LIMIT = 50;
 
@@ -50,14 +53,20 @@ export class NotificationService {
 
   async getPreferences(userId: string): Promise<NotificationPreferenceView[]> {
     const stored = await this.repository.listPreferences(userId);
-    const storedByType = new Map(stored.map((preference) => [preference.type, preference.inAppEnabled]));
+    const storedByType = new Map(
+      stored.map((preference) => [preference.type, preference.inAppEnabled]),
+    );
     return ALL_NOTIFICATION_TYPES.map((type) => ({
       type,
       inAppEnabled: storedByType.get(type) ?? this.defaultEnabled(type),
     }));
   }
 
-  async updatePreference(userId: string, type: NotificationType, inAppEnabled: boolean): Promise<NotificationPreferenceView[]> {
+  async updatePreference(
+    userId: string,
+    type: NotificationType,
+    inAppEnabled: boolean,
+  ): Promise<NotificationPreferenceView[]> {
     await this.repository.upsertPreference(userId, type, inAppEnabled);
     return this.getPreferences(userId);
   }

@@ -219,7 +219,9 @@ export function generateFeedback(
   if (communication >= 70) {
     strengths.push('You communicated your reasoning clearly and at a steady pace.');
   } else {
-    improvements.push('Expand on your answers — narrate your thinking before jumping to a conclusion.');
+    improvements.push(
+      'Expand on your answers — narrate your thinking before jumping to a conclusion.',
+    );
   }
 
   if (technicalDepth >= 70) {
@@ -233,7 +235,9 @@ export function generateFeedback(
   if (structure >= 70) {
     strengths.push('Your answers were well structured and easy to follow.');
   } else {
-    improvements.push('Frame answers with a clear structure: requirements, approach, then trade-offs.');
+    improvements.push(
+      'Frame answers with a clear structure: requirements, approach, then trade-offs.',
+    );
   }
 
   if (answerCount >= 4) {

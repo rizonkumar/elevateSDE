@@ -140,7 +140,8 @@ export function ConsolePanel() {
   const setCaseInput = useAssessmentStore((state) => state.setCaseInput);
 
   const busy = isRunning || isSubmitting;
-  const submitLabel = submissionPhase === 'RUNNING' ? 'Running test cases…' : 'Queued — waiting for a runner…';
+  const submitLabel =
+    submissionPhase === 'RUNNING' ? 'Running test cases…' : 'Queued — waiting for a runner…';
   const busyLabel = isSubmitting ? submitLabel : 'Running test cases…';
   const visibleResults = result?.results.filter((item) => !item.isHidden) ?? [];
   const hiddenResults = result?.results.filter((item) => item.isHidden) ?? [];

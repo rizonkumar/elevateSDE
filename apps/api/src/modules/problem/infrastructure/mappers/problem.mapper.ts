@@ -1,7 +1,4 @@
-import {
-  Problem as PrismaProblem,
-  ProblemTestCase as PrismaProblemTestCase,
-} from '@prisma/client';
+import { Problem as PrismaProblem, ProblemTestCase as PrismaProblemTestCase } from '@prisma/client';
 import {
   LanguageCodeMap,
   Problem,

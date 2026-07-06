@@ -38,11 +38,14 @@ export function Hero() {
           {...rise(0.16)}
           className="mt-6 max-w-2xl text-base leading-relaxed text-(--color-text-muted) sm:text-lg"
         >
-          Timed coding assessments, real-time AI mock interviews, resume analysis, and a job
-          tracker — one platform for individual engineers and the teams that hire them.
+          Timed coding assessments, real-time AI mock interviews, resume analysis, and a job tracker
+          — one platform for individual engineers and the teams that hire them.
         </motion.p>
 
-        <motion.div {...rise(0.24)} className="mt-9 flex flex-wrap items-center justify-center gap-3">
+        <motion.div
+          {...rise(0.24)}
+          className="mt-9 flex flex-wrap items-center justify-center gap-3"
+        >
           <Link
             href="/register"
             className="inline-flex items-center gap-2 rounded-(--radius-full) bg-(--color-accent) px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"

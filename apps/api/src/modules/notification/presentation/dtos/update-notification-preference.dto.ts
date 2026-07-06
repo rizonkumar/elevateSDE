@@ -1,6 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsBoolean, IsIn } from 'class-validator';
-import { NotificationType, UpdateNotificationPreferenceDto as IUpdateNotificationPreferenceDto } from '@elevatesde/shared-types';
+import {
+  NotificationType,
+  UpdateNotificationPreferenceDto as IUpdateNotificationPreferenceDto,
+} from '@elevatesde/shared-types';
 
 const NOTIFICATION_TYPES: NotificationType[] = [
   'BADGE_AWARDED',

@@ -2,15 +2,7 @@
 
 import * as React from 'react';
 import { motion } from 'framer-motion';
-import {
-  FileText,
-  Loader2,
-  AlertCircle,
-  X,
-  UploadCloud,
-  Gauge,
-  ListChecks,
-} from 'lucide-react';
+import { FileText, Loader2, AlertCircle, X, UploadCloud, Gauge, ListChecks } from 'lucide-react';
 import { useResumeStore } from '@/store/resume.store';
 import { ResumeDropzone } from './_components/ResumeDropzone';
 import { AnalysisOverview } from './_components/AnalysisOverview';
@@ -162,7 +154,9 @@ export default function ResumeAnalyzerPage() {
         />
       </motion.div>
 
-      {mounted ? renderContent() : (
+      {mounted ? (
+        renderContent()
+      ) : (
         <div className="flex items-center justify-center py-24 text-sm text-(--color-text-muted)">
           Loading…
         </div>

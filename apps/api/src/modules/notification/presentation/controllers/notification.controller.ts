@@ -1,4 +1,14 @@
-import { Body, Controller, Get, HttpCode, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Param,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
 import { User } from '../../../users/domain/entities/user';
@@ -52,7 +62,11 @@ export class NotificationController {
     @Req() req: RequestWithUser,
     @Body() dto: UpdateNotificationPreferenceDto,
   ): Promise<NotificationPreferenceResponseDto[]> {
-    const views = await this.notificationService.updatePreference(req.user.getId(), dto.type, dto.inAppEnabled);
+    const views = await this.notificationService.updatePreference(
+      req.user.getId(),
+      dto.type,
+      dto.inAppEnabled,
+    );
     return views.map((view) => NotificationPresentationMapper.toPreference(view));
   }
 

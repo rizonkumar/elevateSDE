@@ -106,11 +106,16 @@ export default function DailyChallengesPage() {
               </thead>
               <tbody>
                 {schedule.map((entry) => (
-                  <tr key={entry.id} className="border-b border-(--color-border-subtle) last:border-0">
+                  <tr
+                    key={entry.id}
+                    className="border-b border-(--color-border-subtle) last:border-0"
+                  >
                     <td className="px-4 py-3 font-medium">{entry.challengeDate}</td>
                     <td className="px-4 py-3">{entry.problemTitle}</td>
                     <td className="px-4 py-3">
-                      <Badge variant={DIFFICULTY_VARIANT[entry.difficulty]}>{entry.difficulty}</Badge>
+                      <Badge variant={DIFFICULTY_VARIANT[entry.difficulty]}>
+                        {entry.difficulty}
+                      </Badge>
                     </td>
                     <td className="px-4 py-3 text-right tabular-nums">{entry.completionCount}</td>
                     <td className="px-4 py-3 text-right">

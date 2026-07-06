@@ -48,7 +48,9 @@ describe('buildHarness', () => {
   });
 
   it('builds a Python harness with typing prelude and class/free resolution', () => {
-    const { files } = buildHarness(baseSpec({ language: 'python', userCode: 'def twoSum(): pass' }));
+    const { files } = buildHarness(
+      baseSpec({ language: 'python', userCode: 'def twoSum(): pass' }),
+    );
     const main = fileByName(files, 'main.py');
     expect(main).toContain('from typing import *');
     expect(main).toContain('def twoSum(): pass');

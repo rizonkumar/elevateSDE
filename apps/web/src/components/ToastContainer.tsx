@@ -4,10 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { CheckCircle2, AlertCircle, Info, X } from 'lucide-react';
 import { useToastStore, Toast } from '../store/toast.store';
 
-const TOAST_CONFIG: Record<
-  Toast['type'],
-  { Icon: typeof Info; chip: string }
-> = {
+const TOAST_CONFIG: Record<Toast['type'], { Icon: typeof Info; chip: string }> = {
   success: { Icon: CheckCircle2, chip: 'bg-emerald-500/15 text-emerald-500' },
   error: { Icon: AlertCircle, chip: 'bg-rose-500/15 text-rose-500' },
   info: { Icon: Info, chip: 'bg-teal-500/15 text-teal-500' },

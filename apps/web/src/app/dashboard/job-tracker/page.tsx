@@ -23,11 +23,7 @@ import { JobCardView } from './_components/JobCard';
 import { PageContainer } from '@/components/dashboard/PageContainer';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { JobFormModal } from './_components/JobFormModal';
-import {
-  BOARD_COLUMNS,
-  isColumnDroppableId,
-  statusFromDroppableId,
-} from './_components/board';
+import { BOARD_COLUMNS, isColumnDroppableId, statusFromDroppableId } from './_components/board';
 
 type GroupedApplications = Record<JobApplicationStatus, JobApplicationDto[]>;
 
@@ -79,13 +75,13 @@ export default function JobTrackerPage() {
 
   const grouped = React.useMemo(() => groupByStatus(applications), [applications]);
   const editingApplication = editingId
-    ? applications.find((application) => application.id === editingId) ?? null
+    ? (applications.find((application) => application.id === editingId) ?? null)
     : null;
   const activeApplication = activeId
-    ? applications.find((application) => application.id === activeId) ?? null
+    ? (applications.find((application) => application.id === activeId) ?? null)
     : null;
   const pendingDeleteApplication = pendingDeleteId
-    ? applications.find((application) => application.id === pendingDeleteId) ?? null
+    ? (applications.find((application) => application.id === pendingDeleteId) ?? null)
     : null;
 
   const handleDragStart = (event: DragStartEvent) => {

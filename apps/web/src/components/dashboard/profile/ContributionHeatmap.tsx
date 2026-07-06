@@ -37,8 +37,8 @@ export function ContributionHeatmap({ cells }: ContributionHeatmapProps) {
   return (
     <div className="flex flex-col gap-3">
       <div className="text-sm text-(--color-text-muted)">
-        <span className="font-semibold text-(--color-text-primary)">{total}</span> submissions in the
-        past year
+        <span className="font-semibold text-(--color-text-primary)">{total}</span> submissions in
+        the past year
       </div>
       <div className="overflow-x-auto">
         <div className="grid grid-flow-col grid-rows-7 gap-1" style={{ width: 'max-content' }}>

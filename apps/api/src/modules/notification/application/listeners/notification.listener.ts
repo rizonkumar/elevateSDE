@@ -76,7 +76,10 @@ export class NotificationListener {
     try {
       await this.notificationService.notify(draft);
     } catch (error) {
-      this.logger.error(`Failed to create ${draft.type} notification`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to create ${draft.type} notification`,
+        error instanceof Error ? error.stack : undefined,
+      );
     }
   }
 }

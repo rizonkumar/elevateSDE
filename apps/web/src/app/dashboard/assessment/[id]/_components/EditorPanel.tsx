@@ -91,14 +91,27 @@ export function EditorPanel() {
           <ToolbarButton label="Format code" onClick={handleFormat}>
             <WandSparkles className="h-4 w-4" />
           </ToolbarButton>
-          <ToolbarButton label="Copy code" onClick={() => { handleCopy(); }}>
-            {copied ? <Check className="h-4 w-4 text-(--color-success)" /> : <Copy className="h-4 w-4" />}
+          <ToolbarButton
+            label="Copy code"
+            onClick={() => {
+              handleCopy();
+            }}
+          >
+            {copied ? (
+              <Check className="h-4 w-4 text-(--color-success)" />
+            ) : (
+              <Copy className="h-4 w-4" />
+            )}
           </ToolbarButton>
           <ToolbarButton
             label={editorMaximized ? 'Restore layout' : 'Maximize editor'}
             onClick={toggleEditorMaximized}
           >
-            {editorMaximized ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+            {editorMaximized ? (
+              <Minimize2 className="h-4 w-4" />
+            ) : (
+              <Maximize2 className="h-4 w-4" />
+            )}
           </ToolbarButton>
         </div>
       </div>

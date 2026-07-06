@@ -51,7 +51,9 @@ function Row({
     <div className="flex items-center justify-between gap-4 py-3">
       <div className="min-w-0">
         <div className="text-sm font-medium text-(--color-text-primary)">{label}</div>
-        {description && <div className="mt-0.5 text-xs text-(--color-text-muted)">{description}</div>}
+        {description && (
+          <div className="mt-0.5 text-xs text-(--color-text-muted)">{description}</div>
+        )}
       </div>
       <div className="shrink-0">{children}</div>
     </div>
@@ -68,7 +70,12 @@ export function SettingsModal({ open, onClose }: Readonly<SettingsModalProps>) {
   const [section, setSection] = React.useState<Section>('editor');
 
   return (
-    <Modal open={open} onClose={onClose} title="Settings" description="Changes are saved automatically.">
+    <Modal
+      open={open}
+      onClose={onClose}
+      title="Settings"
+      description="Changes are saved automatically."
+    >
       <div className="space-y-3">
         <SegmentedControl
           value={section}
@@ -105,7 +112,11 @@ export function SettingsModal({ open, onClose }: Readonly<SettingsModalProps>) {
                 />
               </Row>
               <Row label="Word wrap">
-                <Toggle checked={settings.wordWrap} onChange={settings.setWordWrap} label="Word wrap" />
+                <Toggle
+                  checked={settings.wordWrap}
+                  onChange={settings.setWordWrap}
+                  label="Word wrap"
+                />
               </Row>
             </div>
           ) : (
@@ -119,7 +130,11 @@ export function SettingsModal({ open, onClose }: Readonly<SettingsModalProps>) {
                 />
               </Row>
               <Row label="Auto reset" description="Reset the timer when a submission is accepted.">
-                <Toggle checked={settings.autoReset} onChange={settings.setAutoReset} label="Auto reset" />
+                <Toggle
+                  checked={settings.autoReset}
+                  onChange={settings.setAutoReset}
+                  label="Auto reset"
+                />
               </Row>
             </div>
           )}
