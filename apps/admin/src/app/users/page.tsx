@@ -115,7 +115,10 @@ export default function UsersPage() {
                       {user.email}
                     </td>
                     <td className="px-6 py-4 font-mono text-xs text-(--color-text-muted)">
-                      <span className="block max-w-[180px] truncate" title={user.tenantId || 'B2C Account'}>
+                      <span
+                        className="block max-w-[180px] truncate"
+                        title={user.tenantId || 'B2C Account'}
+                      >
                         {user.tenantId || 'B2C Account'}
                       </span>
                     </td>

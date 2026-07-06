@@ -51,8 +51,7 @@ export function Select({
     const rect = trigger.getBoundingClientRect();
     const spaceBelow = window.innerHeight - rect.bottom;
     const placement: 'top' | 'bottom' =
-      menuPlacement ??
-      (spaceBelow < MENU_MAX_HEIGHT && rect.top > spaceBelow ? 'top' : 'bottom');
+      menuPlacement ?? (spaceBelow < MENU_MAX_HEIGHT && rect.top > spaceBelow ? 'top' : 'bottom');
     setCoords({
       top: placement === 'bottom' ? rect.bottom + 6 : rect.top - 6,
       left: rect.left,

@@ -153,6 +153,7 @@ The API requires a PostgreSQL database (and Redis for caching/queues). Both are 
 | Super-Admin backoffice   | `http://localhost:3001/admin`                  | `ADMIN` only           |
 | Coding problem bank      | `http://localhost:3001/admin/coding-problems`  | `ADMIN` only           |
 | Daily challenge schedule | `http://localhost:3001/admin/daily-challenges` | `ADMIN` only           |
+| Coding contests          | `http://localhost:3001/admin/contests`         | `ADMIN` only           |
 
 > Everything is reached through the single web origin on **port 3001**. The backoffice is a separate Next.js app (`apps/admin`) that runs internally on port `3002` with `basePath: '/admin'`; `apps/web/next.config.ts` rewrites `/admin/:path*` to it, so you always visit `localhost:3001/admin` (a reverse proxy does the same under one domain in production). Do not open port `3002` directly.
 
