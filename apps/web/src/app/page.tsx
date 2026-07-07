@@ -5,6 +5,7 @@ import { StatsBand } from '../components/marketing/StatsBand';
 import { BentoFeatures } from '../components/marketing/BentoFeatures';
 import { ProductShowcase } from '../components/marketing/ProductShowcase';
 import { RoleSplit } from '../components/marketing/RoleSplit';
+import { AdminShowcase } from '../components/marketing/AdminShowcase';
 import { HowItWorks } from '../components/marketing/HowItWorks';
 import { Pricing } from '../components/marketing/Pricing';
 import { CtaSection } from '../components/marketing/CtaSection';
@@ -28,6 +29,7 @@ export default function Home() {
         <BentoFeatures />
         <ProductShowcase />
         <RoleSplit />
+        <AdminShowcase />
         <HowItWorks />
         <Pricing />
         <CtaSection />

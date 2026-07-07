@@ -35,11 +35,11 @@ Requires PostgreSQL and Redis (see the root `docker-compose.yml`). Configure `ap
 
 ### Prisma & seeding
 
-| Command | Purpose |
-| ------- | ------- |
-| `pnpm run db:migrate` | Apply migrations (`prisma migrate deploy`) |
-| `pnpm run db:seed` | Full seed — demo users/tenants, problem bank + runnable problems, community, badges |
-| `pnpm run db:seed:problems` | Reseed only the problem catalogue |
-| `pnpm run db:setup` | `migrate deploy` + `db seed` in one step |
+| Command                     | Purpose                                                                             |
+| --------------------------- | ----------------------------------------------------------------------------------- |
+| `pnpm run db:migrate`       | Apply migrations (`prisma migrate deploy`)                                          |
+| `pnpm run db:seed`          | Full seed — demo users/tenants, problem bank + runnable problems, community, badges |
+| `pnpm run db:seed:problems` | Reseed only the problem catalogue                                                   |
+| `pnpm run db:setup`         | `migrate deploy` + `db seed` in one step                                            |
 
 Seeded demo logins (password `Password123!`): `admin@elevatesde.dev` (ADMIN), `org@elevatesde.dev` (TENANT_ADMIN), `candidate@elevatesde.dev` (USER).

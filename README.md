@@ -261,22 +261,22 @@ The API requires a PostgreSQL database (and Redis for caching/queues). Both are 
 
 ## Dashboards
 
-| Surface                  | URL                                            | Access                 |
-| ------------------------ | ---------------------------------------------- | ---------------------- |
-| Candidate dashboard      | `http://localhost:3001/dashboard`              | Any authenticated user |
-| Coding assessments       | `http://localhost:3001/dashboard/assessment`   | Any authenticated user |
-| Daily challenge & streak | `http://localhost:3001/dashboard/daily`        | Any authenticated user |
-| Profile & heatmap        | `http://localhost:3001/dashboard/profile`      | Any authenticated user |
-| Leaderboard              | `http://localhost:3001/dashboard/leaderboard`  | Any authenticated user |
-| Achievements & badges    | `http://localhost:3001/dashboard/achievements` | Any authenticated user |
-| Community forum          | `http://localhost:3001/dashboard/forum`        | Any authenticated user |
-| Notifications            | `http://localhost:3001/dashboard/notifications`| Any authenticated user |
-| Organization dashboard   | `http://localhost:3001/dashboard/org`          | `TENANT_ADMIN` only    |
-| Super-Admin backoffice   | `http://localhost:3001/admin`                  | `ADMIN` only           |
-| Coding problem bank      | `http://localhost:3001/admin/coding-problems`  | `ADMIN` only           |
-| Daily challenge schedule | `http://localhost:3001/admin/daily-challenges` | `ADMIN` only           |
-| Coding contests          | `http://localhost:3001/admin/contests`         | `ADMIN` only           |
-| Badge management         | `http://localhost:3001/admin/badges`           | `ADMIN` only           |
+| Surface                  | URL                                             | Access                 |
+| ------------------------ | ----------------------------------------------- | ---------------------- |
+| Candidate dashboard      | `http://localhost:3001/dashboard`               | Any authenticated user |
+| Coding assessments       | `http://localhost:3001/dashboard/assessment`    | Any authenticated user |
+| Daily challenge & streak | `http://localhost:3001/dashboard/daily`         | Any authenticated user |
+| Profile & heatmap        | `http://localhost:3001/dashboard/profile`       | Any authenticated user |
+| Leaderboard              | `http://localhost:3001/dashboard/leaderboard`   | Any authenticated user |
+| Achievements & badges    | `http://localhost:3001/dashboard/achievements`  | Any authenticated user |
+| Community forum          | `http://localhost:3001/dashboard/forum`         | Any authenticated user |
+| Notifications            | `http://localhost:3001/dashboard/notifications` | Any authenticated user |
+| Organization dashboard   | `http://localhost:3001/dashboard/org`           | `TENANT_ADMIN` only    |
+| Super-Admin backoffice   | `http://localhost:3001/admin`                   | `ADMIN` only           |
+| Coding problem bank      | `http://localhost:3001/admin/coding-problems`   | `ADMIN` only           |
+| Daily challenge schedule | `http://localhost:3001/admin/daily-challenges`  | `ADMIN` only           |
+| Coding contests          | `http://localhost:3001/admin/contests`          | `ADMIN` only           |
+| Badge management         | `http://localhost:3001/admin/badges`            | `ADMIN` only           |
 
 > Everything is reached through the single web origin on **port 3001**. The backoffice is a separate Next.js app (`apps/admin`) that runs internally on port `3002` with `basePath: '/admin'`; `apps/web/next.config.ts` rewrites `/admin/:path*` to it, so you always visit `localhost:3001/admin` (a reverse proxy does the same under one domain in production). Do not open port `3002` directly.
 

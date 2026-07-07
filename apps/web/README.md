@@ -6,20 +6,20 @@ For the full product, architecture, and diagrams, see the [root README](../../RE
 
 ## Key surfaces
 
-| Route | Purpose |
-| ----- | ------- |
-| `/` | Marketing landing page |
-| `/login`, `/register`, `/invite/[token]` | Auth and tenant-invitation acceptance |
-| `/dashboard` | Candidate home — solved stats, streak, job pipeline, progress charts |
-| `/dashboard/assessment`, `/dashboard/assessment/[id]` | Problem bank and the Monaco-based code runner (run/submit against test cases) |
-| `/dashboard/daily` | Daily challenge and streak calendar |
-| `/dashboard/profile` | Standing, badges, and a 365-day submission heatmap |
-| `/dashboard/leaderboard` | All-time / monthly / weekly rankings |
-| `/dashboard/achievements` | Badge showcase with unlock progress |
-| `/dashboard/forum`, `/dashboard/forum/[id]` | Community discussion board |
-| `/dashboard/lists`, `/dashboard/job-tracker`, `/dashboard/notifications` | Problem collections, job-application Kanban, notification center |
-| `/dashboard/resume`, `/dashboard/mock-interview` | Resume analyzer and AI mock interview (client-side mocks pending domain models) |
-| `/dashboard/org` | Organization dashboard (`TENANT_ADMIN` only) |
+| Route                                                                    | Purpose                                                                         |
+| ------------------------------------------------------------------------ | ------------------------------------------------------------------------------- |
+| `/`                                                                      | Marketing landing page                                                          |
+| `/login`, `/register`, `/invite/[token]`                                 | Auth and tenant-invitation acceptance                                           |
+| `/dashboard`                                                             | Candidate home — solved stats, streak, job pipeline, progress charts            |
+| `/dashboard/assessment`, `/dashboard/assessment/[id]`                    | Problem bank and the Monaco-based code runner (run/submit against test cases)   |
+| `/dashboard/daily`                                                       | Daily challenge and streak calendar                                             |
+| `/dashboard/profile`                                                     | Standing, badges, and a 365-day submission heatmap                              |
+| `/dashboard/leaderboard`                                                 | All-time / monthly / weekly rankings                                            |
+| `/dashboard/achievements`                                                | Badge showcase with unlock progress                                             |
+| `/dashboard/forum`, `/dashboard/forum/[id]`                              | Community discussion board                                                      |
+| `/dashboard/lists`, `/dashboard/job-tracker`, `/dashboard/notifications` | Problem collections, job-application Kanban, notification center                |
+| `/dashboard/resume`, `/dashboard/mock-interview`                         | Resume analyzer and AI mock interview (client-side mocks pending domain models) |
+| `/dashboard/org`                                                         | Organization dashboard (`TENANT_ADMIN` only)                                    |
 
 ## Stack
 
