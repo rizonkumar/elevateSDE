@@ -21,8 +21,8 @@ graph TD
 
         subgraph Domains["DDD Modules"]
             CoreMods["auth · users · organization · admin"]
-            LearnMods["problem · code-runner · daily-challenge · dashboard"]
-            CommMods["forum · leaderboard · job-application · problem-social"]
+            LearnMods["problem · code-runner · daily-challenge · contest · review · dashboard"]
+            CommMods["forum · leaderboard · achievement · notification · job-application · problem-social"]
             PlatMods["audit-log · feature-flag · queues"]
         end
 
@@ -66,6 +66,124 @@ graph TD
     App -.->|Trigger Audit Logs| PlatMods
     PlatMods --> Infra
 ```
+
+## Screenshots
+
+Every image below adapts to your GitHub theme — you see the dark capture in dark mode and the light capture in light mode. Both variants live in [`docs/images/`](./docs/images).
+
+### Candidate experience
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/candidate-dashboard-dark.png">
+  <img alt="Candidate dashboard — solved stats, leaderboard rank, streak, job pipeline, and progress charts" src="docs/images/candidate-dashboard-light.png">
+</picture>
+
+<table>
+  <tr>
+    <td width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/images/candidate-code-runner-dark.png">
+        <img alt="Code runner — Monaco editor with test-case results, runtime and memory metrics from the Docker sandbox" src="docs/images/candidate-code-runner-light.png">
+      </picture>
+      <p align="center"><strong>Code runner</strong> · Monaco IDE, run against test cases, live runtime/memory</p>
+    </td>
+    <td width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/images/candidate-daily-dark.png">
+        <img alt="Daily challenge — today's problem and current/longest streak" src="docs/images/candidate-daily-light.png">
+      </picture>
+      <p align="center"><strong>Daily challenge & streaks</strong> · one problem a day, streak tracking</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/images/candidate-profile-dark.png">
+        <img alt="Profile — solved breakdown, standing, and GitHub-style submission heatmap" src="docs/images/candidate-profile-light.png">
+      </picture>
+      <p align="center"><strong>Profile & heatmap</strong> · standing, badges, 365-day contribution grid</p>
+    </td>
+    <td width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/images/candidate-leaderboard-dark.png">
+        <img alt="Leaderboard — podium, your standing, and ranked table with badges" src="docs/images/candidate-leaderboard-light.png">
+      </picture>
+      <p align="center"><strong>Leaderboard</strong> · all-time / monthly / weekly rankings</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/images/candidate-achievements-dark.png">
+        <img alt="Achievements — badge cards with unlock progress" src="docs/images/candidate-achievements-light.png">
+      </picture>
+      <p align="center"><strong>Achievements</strong> · earned and locked badges with progress</p>
+    </td>
+    <td width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/images/candidate-forum-dark.png">
+        <img alt="Community forum — discussion posts with votes, tags, and topic filters" src="docs/images/candidate-forum-light.png">
+      </picture>
+      <p align="center"><strong>Community forum</strong> · posts, votes, comments, topic filters</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/images/candidate-assessment-dark.png">
+        <img alt="Coding assessments — problem browser with difficulty and tag filters" src="docs/images/candidate-assessment-light.png">
+      </picture>
+      <p align="center"><strong>Problem bank</strong> · 2,700+ problems, search, difficulty and runnable filters</p>
+    </td>
+    <td width="50%"></td>
+  </tr>
+</table>
+
+### Admin backoffice
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/admin-dashboard-dark.png">
+  <img alt="Admin dashboard — platform stats, feature-flag coverage, and recent audit trail" src="docs/images/admin-dashboard-light.png">
+</picture>
+
+<table>
+  <tr>
+    <td width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/images/admin-coding-problems-dark.png">
+        <img alt="Coding problems admin — problem bank with test-case counts and publish toggles" src="docs/images/admin-coding-problems-light.png">
+      </picture>
+      <p align="center"><strong>Problem bank admin</strong> · author problems, publish, per-problem test cases</p>
+    </td>
+    <td width="50%">
+      <img alt="Problem editor — authoring form with description, multi-language starter code, and test cases" src="docs/images/admin-problem-editor-dark.png">
+      <p align="center"><strong>Problem editor</strong> · Markdown, JS/Python/C++ starter code, test-case authoring</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/images/admin-contests-dark.png">
+        <img alt="Contests admin — scheduled contest with window, status, and problem count" src="docs/images/admin-contests-light.png">
+      </picture>
+      <p align="center"><strong>Contests</strong> · schedule, publish, DRAFT → SCHEDULED → LIVE → ENDED</p>
+    </td>
+    <td width="50%">
+      <img alt="Contest builder — schedule window and point-weighted problems from the published bank" src="docs/images/admin-contest-builder-dark.png">
+      <p align="center"><strong>Contest builder</strong> · schedule window, attach point-weighted problems</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/images/admin-daily-challenges-dark.png">
+        <img alt="Daily challenge scheduler — assign a published problem to each date" src="docs/images/admin-daily-challenges-light.png">
+      </picture>
+      <p align="center"><strong>Daily challenge scheduler</strong> · assign a problem per day, track completions</p>
+    </td>
+    <td width="50%"></td>
+  </tr>
+</table>
 
 ## Code Execution Sandbox
 
@@ -149,11 +267,16 @@ The API requires a PostgreSQL database (and Redis for caching/queues). Both are 
 | Coding assessments       | `http://localhost:3001/dashboard/assessment`   | Any authenticated user |
 | Daily challenge & streak | `http://localhost:3001/dashboard/daily`        | Any authenticated user |
 | Profile & heatmap        | `http://localhost:3001/dashboard/profile`      | Any authenticated user |
+| Leaderboard              | `http://localhost:3001/dashboard/leaderboard`  | Any authenticated user |
+| Achievements & badges    | `http://localhost:3001/dashboard/achievements` | Any authenticated user |
+| Community forum          | `http://localhost:3001/dashboard/forum`        | Any authenticated user |
+| Notifications            | `http://localhost:3001/dashboard/notifications`| Any authenticated user |
 | Organization dashboard   | `http://localhost:3001/dashboard/org`          | `TENANT_ADMIN` only    |
 | Super-Admin backoffice   | `http://localhost:3001/admin`                  | `ADMIN` only           |
 | Coding problem bank      | `http://localhost:3001/admin/coding-problems`  | `ADMIN` only           |
 | Daily challenge schedule | `http://localhost:3001/admin/daily-challenges` | `ADMIN` only           |
 | Coding contests          | `http://localhost:3001/admin/contests`         | `ADMIN` only           |
+| Badge management         | `http://localhost:3001/admin/badges`           | `ADMIN` only           |
 
 > Everything is reached through the single web origin on **port 3001**. The backoffice is a separate Next.js app (`apps/admin`) that runs internally on port `3002` with `basePath: '/admin'`; `apps/web/next.config.ts` rewrites `/admin/:path*` to it, so you always visit `localhost:3001/admin` (a reverse proxy does the same under one domain in production). Do not open port `3002` directly.
 
@@ -165,7 +288,7 @@ Seeded demo logins (all use the password `Password123!`):
 | `org@elevatesde.dev`       | `TENANT_ADMIN` |
 | `candidate@elevatesde.dev` | `USER`         |
 
-Most surfaces are backed by live, user-scoped API endpoints: the candidate dashboard, coding assessments + execution, daily challenge & streaks, profile & submission heatmap, job tracker, community forum, leaderboard, and the organization dashboard, plus the backoffice (`/api/v1/admin/*`, including the coding problem bank and daily-challenge scheduling). Per-problem community and curation endpoints are also live via the `problem-social` module: problem discussions with comments/upvotes (`/api/v1/problems/:id/discussions`, `/api/v1/discussions/*`), bookmarks (`/api/v1/problems/:id/bookmark`, `/api/v1/me/bookmarks`), private notes (`/api/v1/problems/:id/note`), and custom problem collections (`/api/v1/me/lists*`). Only the **AI mock interview** and **resume analyzer** surfaces remain client-side mocks (in-browser engines), pending their domain models.
+Most surfaces are backed by live, user-scoped API endpoints: the candidate dashboard, coding assessments + execution, daily challenge & streaks, profile & submission heatmap, job tracker, community forum, leaderboard, achievements/badges (`/api/v1/achievements`), notifications (`/api/v1/notifications`), and the organization dashboard, plus the backoffice (`/api/v1/admin/*`, including the coding problem bank, daily-challenge scheduling, contest management, badge management, forum moderation, and leaderboard management). Per-problem community and curation endpoints are also live via the `problem-social` module: problem discussions with comments/upvotes (`/api/v1/problems/:id/discussions`, `/api/v1/discussions/*`), bookmarks (`/api/v1/problems/:id/bookmark`, `/api/v1/me/bookmarks`), private notes (`/api/v1/problems/:id/note`), and custom problem collections (`/api/v1/me/lists*`). The spaced-repetition `review` module (`/api/v1/review/due`, `/api/v1/review/:problemId/grade`) is live at the API layer, with its candidate UI still to come. Only the **AI mock interview** and **resume analyzer** surfaces remain client-side mocks (in-browser engines), pending their domain models.
 
 ## Common Commands
 

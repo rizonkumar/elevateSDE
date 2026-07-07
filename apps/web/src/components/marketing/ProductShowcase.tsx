@@ -1,7 +1,18 @@
 'use client';
 
 import * as React from 'react';
-import { Mic2, Code2, Briefcase, Trophy } from 'lucide-react';
+import {
+  Mic2,
+  Code2,
+  Flame,
+  Trophy,
+  Award,
+  MessagesSquare,
+  Bell,
+  ListChecks,
+  Briefcase,
+  UserRound,
+} from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { SectionShell } from './SectionShell';
 import { SectionHeading } from './SectionHeading';
@@ -39,7 +50,61 @@ const TABS: ShowcaseTab[] = [
     route: 'app.elevatesde.dev/assessment',
     caption:
       'A full Monaco IDE with the problem, your solution, and live test results side by side.',
-    alt: 'Coding assessment editor with problem statement and Monaco editor',
+    alt: 'Coding assessment editor with problem statement, Monaco editor, and test-case results',
+  },
+  {
+    id: 'daily',
+    label: 'Daily Challenge',
+    icon: Flame,
+    shot: 'daily',
+    route: 'app.elevatesde.dev/daily',
+    caption: 'One curated problem a day — solve it to keep your streak alive.',
+    alt: 'Daily challenge with today’s problem and streak tracker',
+  },
+  {
+    id: 'leaderboard',
+    label: 'Leaderboard',
+    icon: Trophy,
+    shot: 'leaderboard',
+    route: 'app.elevatesde.dev/leaderboard',
+    caption: 'See how your preparation stacks up against the community.',
+    alt: 'Leaderboard with podium and ranked performers',
+  },
+  {
+    id: 'achievements',
+    label: 'Achievements',
+    icon: Award,
+    shot: 'achievements',
+    route: 'app.elevatesde.dev/achievements',
+    caption: 'Unlock badges as you hit solving, streak, and points milestones.',
+    alt: 'Achievements page with earned and locked badge cards',
+  },
+  {
+    id: 'community',
+    label: 'Community',
+    icon: MessagesSquare,
+    shot: 'forum',
+    route: 'app.elevatesde.dev/forum',
+    caption: 'Ask questions, share strategies, and upvote the best answers.',
+    alt: 'Community discussion forum with posts, tags, and vote counts',
+  },
+  {
+    id: 'notifications',
+    label: 'Notifications',
+    icon: Bell,
+    shot: 'notifications',
+    route: 'app.elevatesde.dev/notifications',
+    caption: 'Badge unlocks, streak milestones, and community activity in one inbox.',
+    alt: 'Notification center with badge, streak, and community alerts',
+  },
+  {
+    id: 'lists',
+    label: 'My Lists',
+    icon: ListChecks,
+    shot: 'lists',
+    route: 'app.elevatesde.dev/lists',
+    caption: 'Group problems into custom lists you can revisit and track progress on.',
+    alt: 'My Lists curation view with bookmarked problems and solved progress',
   },
   {
     id: 'tracker',
@@ -51,13 +116,13 @@ const TABS: ShowcaseTab[] = [
     alt: 'Job application tracker Kanban board',
   },
   {
-    id: 'leaderboard',
-    label: 'Leaderboard',
-    icon: Trophy,
-    shot: 'leaderboard',
-    route: 'app.elevatesde.dev/leaderboard',
-    caption: 'See how your preparation stacks up against the community.',
-    alt: 'Leaderboard with podium and ranked performers',
+    id: 'profile',
+    label: 'Profile',
+    icon: UserRound,
+    shot: 'profile',
+    route: 'app.elevatesde.dev/profile',
+    caption: 'Your solved breakdown, standing, badges, and a year of activity.',
+    alt: 'Candidate profile with solved stats, standing, and contribution heatmap',
   },
 ];
 

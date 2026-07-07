@@ -74,27 +74,40 @@ elevatesde/
 
 The platform exposes a **single public origin** to users; the admin backoffice is a separate deployable that sits behind the same origin.
 
-```text
-                 ┌──────────────────────────────────────────────┐
-   Browser  ───▶ │  Web app  (apps/web)        :3001            │
-                 │  • /            Candidate portal              │
-                 │  • /dashboard   Candidate dashboard          │
-                 │  • /dashboard/org  Organization (TENANT_ADMIN)│
-                 │  • /admin/:path*  ── rewrite ──┐             │
-                 └────────────────────────────────┼─────────────┘
-                                                   ▼
-                 ┌──────────────────────────────────────────────┐
-                 │  Admin app (apps/admin)     :3002 (internal)  │
-                 │  • basePath: '/admin'                         │
-                 │  • Super-Admin backoffice (ADMIN only)        │
-                 └──────────────────────────────────────────────┘
-                                   │  Axios (Bearer JWT)
-                                   ▼
-                 ┌──────────────────────────────────────────────┐
-                 │  API (apps/api, NestJS)     :4400             │
-                 │  • Global prefix /api, URI versioning /v1     │
-                 │  • PostgreSQL :5432 · Redis :6379             │
-                 └──────────────────────────────────────────────┘
+```mermaid
+graph TD
+    Browser["Browser"]
+
+    subgraph Web["Web app · apps/web · :3001"]
+        Portal["/ · Candidate portal"]
+        Dash["/dashboard · Candidate dashboard"]
+        Org["/dashboard/org · Organization (TENANT_ADMIN)"]
+        Rewrite["/admin/:path* · rewrite"]
+    end
+
+    subgraph Admin["Admin app · apps/admin · :3002 (internal)"]
+        Backoffice["basePath /admin · Super-Admin backoffice (ADMIN only)"]
+    end
+
+    subgraph API["API · apps/api (NestJS) · :4400"]
+        Gateway["Global prefix /api · URI versioning /v1 · Swagger /api/docs"]
+    end
+
+    subgraph Data["Data layer"]
+        PG[("PostgreSQL :5432")]
+        Redis[("Redis :6379")]
+    end
+
+    Browser --> Portal
+    Browser --> Dash
+    Browser --> Org
+    Browser --> Rewrite
+    Rewrite -->|Next.js rewrite / NGINX in prod| Backoffice
+    Dash -->|Axios · Bearer JWT| Gateway
+    Org -->|Axios · Bearer JWT| Gateway
+    Backoffice -->|Axios · Bearer JWT| Gateway
+    Gateway --> PG
+    Gateway --> Redis
 ```
 
 - **Single entry point:** users only ever visit the web origin (`http://localhost:3001`). The candidate portal and dashboards are served directly; `/admin/*` is transparently forwarded to the admin app.
@@ -123,7 +136,7 @@ The backoffice consumes live `/api/v1/admin/*` endpoints (including the coding p
 
 ## Domain-Driven Design (DDD) Backend Architecture
 
-Instead of grouping by framework features (controllers/services), the API is structured by business domains. Current domain modules include `users`, `auth`, `audit-log`, `feature-flag`, `admin`, `organization` (tenant/seat/invitation management), `job-application` (the candidate job tracker), `problem` and `code-runner` (the coding assessment bank and Dockerized execution sandbox), `daily-challenge` (daily problems + streaks), `dashboard` (aggregated candidate stats), `forum` and `leaderboard` (the community discussion board and rankings), `problem-social` (per-problem discussions with comments/upvotes plus personal bookmarks, private notes, and custom problem collections), `contest` (admin-assembled timed competitions over the problem bank), and `queues` (the shared BullMQ root that owns async job processing), each following the layered template below.
+Instead of grouping by framework features (controllers/services), the API is structured by business domains. Current domain modules include `users`, `auth`, `audit-log`, `feature-flag`, `admin`, `organization` (tenant/seat/invitation management), `job-application` (the candidate job tracker), `problem` and `code-runner` (the coding assessment bank and Dockerized execution sandbox), `daily-challenge` (daily problems + streaks), `dashboard` (aggregated candidate stats), `forum` and `leaderboard` (the community discussion board and rankings), `achievement` (badge criteria + user badge awards, plus admin badge management), `notification` (the in-app notification center and per-type preferences), `problem-social` (per-problem discussions with comments/upvotes plus personal bookmarks, private notes, and custom problem collections), `review` (SM-2 style spaced-repetition scheduling over solved problems), `contest` (admin-assembled timed competitions over the problem bank), and `queues` (the shared BullMQ root that owns async job processing), each following the layered template below.
 
 ### Example: Users Domain
 
@@ -163,6 +176,180 @@ apps/api/src/modules/users/
 
 ## Core Database Schema & Multi-Tenancy
 
+The Prisma models and their relationships (source of truth: `apps/api/prisma/schema.prisma`). `User` is the central aggregate; `Problem` anchors all coding/assessment data. `tenantId` is nullable throughout for B2C users and global content.
+
+```mermaid
+classDiagram
+    class Tenant {
+        +String id
+        +String name
+        +String subscriptionPlan
+        +Int seatLimit
+        +String stripeCustomerId
+    }
+    class User {
+        +String id
+        +String tenantId
+        +String email
+        +UserRole role
+    }
+    class UserStats {
+        +String userId
+        +Int points
+        +Int weeklyPoints
+        +Int monthlyPoints
+        +Int streakDays
+        +Int longestStreak
+        +Date lastActiveDate
+    }
+    class RefreshToken {
+        +String token
+        +DateTime expiresAt
+    }
+    class Invitation {
+        +String email
+        +InvitationStatus status
+        +DateTime expiresAt
+    }
+    class Problem {
+        +String id
+        +String slug
+        +AssessmentDifficulty difficulty
+        +Json starterCode
+        +Json harness
+        +ComparisonMode comparisonMode
+        +Boolean isPublished
+    }
+    class ProblemTestCase {
+        +Int ordinal
+        +String input
+        +String expectedOutput
+        +Boolean isHidden
+    }
+    class Submission {
+        +AssessmentLanguage language
+        +SubmissionStatus status
+        +Int passedCount
+        +Int totalCount
+        +Float totalRuntimeMs
+        +Int peakMemoryKb
+    }
+    class SubmissionResult {
+        +String label
+        +TestCaseResultStatus status
+        +Float runtimeMs
+        +Boolean isHidden
+    }
+    class DailyChallenge {
+        +Date challengeDate
+        +String tenantId
+    }
+    class DailyChallengeCompletion {
+        +String submissionId
+        +DateTime completedAt
+    }
+    class Contest {
+        +String slug
+        +DateTime startsAt
+        +DateTime endsAt
+        +ContestStatus status
+    }
+    class ContestProblem {
+        +Int ordinal
+        +Int points
+    }
+    class Badge {
+        +String key
+        +BadgeCriteriaType criteriaType
+        +Int threshold
+    }
+    class UserBadge {
+        +DateTime awardedAt
+    }
+    class Notification {
+        +NotificationType type
+        +String title
+        +DateTime readAt
+    }
+    class NotificationPreference {
+        +NotificationType type
+        +Boolean inAppEnabled
+    }
+    class ReviewItem {
+        +Float ease
+        +Int intervalDays
+        +Int repetitions
+        +DateTime dueAt
+    }
+    class JobApplication {
+        +String company
+        +JobApplicationStatus status
+        +Int boardPosition
+    }
+    class ForumPost {
+        +String title
+        +ForumPostStatus status
+        +Int viewCount
+    }
+    class ForumComment
+    class ProblemDiscussion {
+        +String title
+    }
+    class Bookmark
+    class ProblemNote
+    class ProblemList {
+        +String name
+        +Boolean isPublic
+    }
+    class ProblemListItem {
+        +Int ordinal
+    }
+    class AuditLog {
+        +String action
+        +Json metadata
+    }
+    class FeatureFlag {
+        +String flagKey
+        +Boolean isEnabled
+        +Int percentageRollout
+    }
+
+    Tenant "1" o-- "*" User
+    Tenant "1" o-- "*" Invitation
+    User "1" --> "0..1" UserStats
+    User "1" o-- "*" RefreshToken
+    User "1" o-- "*" Submission
+    User "1" o-- "*" JobApplication
+    User "1" o-- "*" ForumPost
+    User "1" o-- "*" ProblemDiscussion
+    User "1" o-- "*" Bookmark
+    User "1" o-- "*" ProblemNote
+    User "1" o-- "*" ProblemList
+    User "1" o-- "*" ReviewItem
+    User "1" o-- "*" Notification
+    User "1" o-- "*" NotificationPreference
+    User "1" o-- "*" UserBadge
+    User "1" o-- "*" AuditLog
+    User "1" o-- "*" DailyChallengeCompletion
+    Problem "1" o-- "*" ProblemTestCase
+    Problem "1" o-- "*" Submission
+    Problem "1" o-- "*" DailyChallenge
+    Problem "1" o-- "*" ContestProblem
+    Problem "1" o-- "*" ProblemDiscussion
+    Problem "1" o-- "*" Bookmark
+    Problem "1" o-- "*" ProblemNote
+    Problem "1" o-- "*" ReviewItem
+    Submission "1" o-- "*" SubmissionResult
+    DailyChallenge "1" o-- "*" DailyChallengeCompletion
+    Contest "1" o-- "*" ContestProblem
+    Badge "1" o-- "*" UserBadge
+    ForumPost "1" o-- "*" ForumComment
+    ProblemList "1" o-- "*" ProblemListItem
+    Problem "1" o-- "*" ProblemListItem
+```
+
+> Composite-key join tables that back upvote counts and per-viewer state — `ForumPostVote`, `ForumCommentVote`, `ProblemDiscussionVote`, `ProblemDiscussionCommentVote` — are omitted from the diagram for clarity; each is a `(parentId, userId)` pair. `UserBadge` (`@@unique([userId, badgeId])`) is the many-to-many join between `User` and `Badge`.
+
 **Tenants, Users & Auth**
 
 - `Tenant` (B2B Companies): `id`, `name`, `stripeCustomerId`, `subscriptionPlan`
@@ -199,6 +386,9 @@ apps/api/src/modules/users/
 - `ProblemNote`: `id`, `userId`, `problemId`, `body` (`@@unique([userId, problemId])`) — one private note per user per problem
 - `ProblemList` / `ProblemListItem`: user-owned custom problem collections (`name`, `isPublic`) and their ordered members (`ordinal`, `@@unique([listId, problemId])`)
 - `JobApplication`: `id`, `userId`, `company`, `role`, `status` (`JobApplicationStatus` enum: APPLIED, OA, INTERVIEW, OFFER, REJECTED), `salaryRange`, `jobDescriptionUrl`, `interviewDate`, `boardPosition` (Kanban ordering), `createdAt`, `updatedAt`
+- `Badge` / `UserBadge`: a badge definition (`key`, `name`, `icon`, `criteriaType` — `BadgeCriteriaType` enum: PROBLEMS_SOLVED / STREAK_DAYS / ASSESSMENTS_COMPLETED / FORUM_POSTS / POINTS — `threshold`, `isActive`, `tenantId`) and the many-to-many award join to `User` (`@@unique([userId, badgeId])`, `awardedAt`)
+- `Notification` / `NotificationPreference`: an in-app notification (`type` — `NotificationType` enum: BADGE_AWARDED / STREAK_MILESTONE / FORUM_REPLY / FORUM_UPVOTE / SUBMISSION_ACCEPTED / SYSTEM — `title`, `body`, `linkUrl`, `metadata`, `readAt`) and a per-user, per-type `inAppEnabled` toggle (`@@unique([userId, type])`)
+- `ReviewItem`: an SM-2 spaced-repetition entry per user+problem (`ease`, `intervalDays`, `repetitions`, `dueAt`, `lastReviewedAt`, `@@unique([userId, problemId])`) driving the `review` module's "due today" queue
 
 ---
 
@@ -232,13 +422,34 @@ Daily engagement is driven by the `daily-challenge` module and the `UserStats` a
 - **Streaks:** completing the day's challenge writes a `DailyChallengeCompletion`, advancing `UserStats.streakDays` (and `longestStreak`); `GET /daily-challenge/streak` returns current/longest streak plus calendar cells. A streak-celebration modal fires on completion.
 - **Submission heatmap:** `GET /users/me/submission-heatmap` returns a GitHub-style 365-day contribution grid rendered on the profile page (`/dashboard/profile`).
 
-### 4. AI Mock Interviews (RAG Implementation)
+### 4. Achievements & Badges _(implemented)_
+
+The `achievement` module turns `UserStats` counters into unlockable badges.
+
+- **Badge criteria:** each `Badge` declares a `criteriaType` (`PROBLEMS_SOLVED`, `STREAK_DAYS`, `ASSESSMENTS_COMPLETED`, `FORUM_POSTS`, `POINTS`) and a `threshold`; admins define and toggle them via `/api/v1/admin/badges` (backoffice `/admin/badges`).
+- **Candidate view:** `GET /api/v1/achievements` returns earned and locked badges with per-badge progress, rendered as cards on `/dashboard/achievements` and summarised on the profile.
+
+### 5. In-App Notifications _(implemented)_
+
+The `notification` module delivers a bell + notification center (`/dashboard/notifications`).
+
+- **Types:** `BADGE_AWARDED`, `STREAK_MILESTONE`, `FORUM_REPLY`, `FORUM_UPVOTE`, `SUBMISSION_ACCEPTED`, `SYSTEM`, emitted by domain events (e.g. a badge award or an accepted submission).
+- **Delivery & preferences:** `GET /api/v1/notifications` (list + unread count, polled ~45s by the client), with per-user, per-type `inAppEnabled` toggles via `NotificationPreference`.
+
+### 6. Spaced Repetition _(API implemented; candidate UI pending)_
+
+The `review` module schedules solved problems for re-practice using an SM-2 style algorithm.
+
+- **Scheduling:** each `ReviewItem` tracks `ease`, `intervalDays`, `repetitions`, and `dueAt`; grading a review (`POST /api/v1/review/:problemId/grade`) advances the interval.
+- **Queue:** `GET /api/v1/review/due` returns the problems due today. The candidate-facing "due today" surface is still to be built.
+
+### 7. AI Mock Interviews (RAG Implementation)
 
 - When a user submits an answer (text or transcribed audio), the backend converts the response into an embedding.
 - `pgvector` performs a cosine similarity search against the `idealSolutionEmbedding`.
 - LangChain orchestrates the comparison to generate contextual, accurate feedback and a dynamic follow-up question.
 
-### 5. CI/CD Pipeline (GitHub Actions)
+### 8. CI/CD Pipeline (GitHub Actions)
 
 1. **PR Created:** Triggers pipeline.
 2. **Lint & Format:** Checks `eslint` and `prettier` rules.
@@ -255,5 +466,5 @@ Daily engagement is driven by the `daily-challenge` module and the `UserStats` a
 - **Phase 1 (Core Foundations):** Monorepo setup, Auth, Users, RBAC, Basic Questions, Next.js Dashboard.
 - **Phase 2 (Asynchronous & Real-time):** Redis, BullMQ, WebSockets, Notifications, Job Tracker.
 - **Phase 3 (Enterprise & AI):** Multi-tenancy, Stripe Subscriptions, AI Resume Analyzer, LangChain integration.
-- **Phase 4 (Advanced Systems):** pgvector RAG _(pending)_, Dockerized Code Execution Engine _(done)_, Discussion Forums _(done)_, Leaderboards _(done)_, Gamification & Streaks — daily challenges, profile, submission heatmap _(done)_, Problem Discussions + Bookmarks/Notes/Lists _(done)_, Coding Contests — admin builder _(done)_; candidate register/submit/standings + status scheduler _(pending)_.
+- **Phase 4 (Advanced Systems):** pgvector RAG _(pending)_, Dockerized Code Execution Engine _(done)_, Discussion Forums _(done)_, Leaderboards _(done)_, Gamification & Streaks — daily challenges, profile, submission heatmap _(done)_, Achievements & Badges _(done)_, In-App Notifications _(done)_, Problem Discussions + Bookmarks/Notes/Lists _(done)_, Spaced Repetition — API _(done)_; candidate UI _(pending)_, Coding Contests — admin builder _(done)_; candidate register/submit/standings + status scheduler _(pending)_.
 - **Phase 5 (Production Readiness):** OpenTelemetry, Sentry, Swagger Docs, Feature Flags, Audit Logging, CI/CD pipelines.
