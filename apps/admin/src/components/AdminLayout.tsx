@@ -15,6 +15,7 @@ import {
   CalendarDays,
   Swords,
   Medal,
+  Map,
   LogOut,
   Sun,
   Moon,
@@ -87,6 +88,7 @@ export function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
     { name: 'Coding Problems', href: '/coding-problems', icon: Code2 },
     { name: 'Daily Challenges', href: '/daily-challenges', icon: CalendarDays },
     { name: 'Contests', href: '/contests', icon: Swords },
+    { name: 'Learning Paths', href: '/learning-paths', icon: Map },
     { name: 'Badges', href: '/badges', icon: Medal },
   ];
 
