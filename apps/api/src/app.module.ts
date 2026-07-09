@@ -21,6 +21,7 @@ import { NotificationModule } from './modules/notification/notification.module';
 import { ProblemSocialModule } from './modules/problem-social/problem-social.module';
 import { ReviewModule } from './modules/review/review.module';
 import { ContestModule } from './modules/contest/contest.module';
+import { LearningPathModule } from './modules/learning-path/learning-path.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { ContestModule } from './modules/contest/contest.module';
     ProblemSocialModule,
     ReviewModule,
     ContestModule,
+    LearningPathModule,
   ],
   controllers: [AppController],
   providers: [AppService],

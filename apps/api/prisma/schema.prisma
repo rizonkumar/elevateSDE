@@ -91,6 +91,12 @@ enum ContestStatus {
   ENDED
 }
 
+enum PathLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
 model Tenant {
   id               String       @id @default(uuid())
   name             String
@@ -138,6 +144,7 @@ model User {
   problemNotes                  ProblemNote[]
   problemLists                  ProblemList[]
   reviewItems                   ReviewItem[]
+  pathEnrollments               PathEnrollment[]
 }
 
 model RefreshToken {
@@ -212,6 +219,7 @@ model Problem {
   listItems         ProblemListItem[]
   reviewItems       ReviewItem[]
   contestProblems   ContestProblem[]
+  learningPathItems LearningPathItem[]
 
   @@index([difficulty, isPublished])
 }
@@ -589,4 +597,59 @@ model ReviewItem {
 
   @@unique([userId, problemId])
   @@index([userId, dueAt])
+}
+
+model LearningPath {
+  id          String               @id @default(uuid())
+  slug        String               @unique
+  title       String
+  description String
+  level       PathLevel            @default(BEGINNER)
+  tags        String[]
+  coverImage  String?
+  isPublished Boolean              @default(false)
+  tenantId    String?
+  order       Int                  @default(0)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  modules     LearningPathModule[]
+  enrollments PathEnrollment[]
+
+  @@index([isPublished, order])
+  @@index([tenantId])
+}
+
+model LearningPathModule {
+  id     String             @id @default(uuid())
+  pathId String
+  title  String
+  order  Int
+  path   LearningPath       @relation(fields: [pathId], references: [id], onDelete: Cascade)
+  items  LearningPathItem[]
+
+  @@index([pathId, order])
+}
+
+model LearningPathItem {
+  id        String             @id @default(uuid())
+  moduleId  String
+  problemId String
+  order     Int
+  module    LearningPathModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  problem   Problem            @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@unique([moduleId, problemId])
+  @@index([moduleId, order])
+}
+
+model PathEnrollment {
+  id         String       @id @default(uuid())
+  userId     String
+  pathId     String
+  enrolledAt DateTime     @default(now())
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  path       LearningPath @relation(fields: [pathId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, pathId])
+  @@index([userId])
 }
