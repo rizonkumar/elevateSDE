@@ -707,3 +707,115 @@ export interface ReviewItemDto {
 export interface GradeReviewDto {
   quality: ReviewQuality;
 }
+
+export type PathLevel = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+
+export interface PathProgressDto {
+  solved: number;
+  total: number;
+  percent: number;
+}
+
+export interface LearningPathDto {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  level: PathLevel;
+  tags: string[];
+  coverImage: string | null;
+  moduleCount: number;
+  problemCount: number;
+  enrolled: boolean;
+  progress: PathProgressDto;
+}
+
+export interface LearningPathItemDto {
+  id: string;
+  problemId: string;
+  title: string;
+  difficulty: AssessmentDifficulty;
+  order: number;
+  solved: boolean;
+}
+
+export interface LearningPathModuleDto {
+  id: string;
+  title: string;
+  order: number;
+  items: LearningPathItemDto[];
+}
+
+export interface LearningPathDetailDto {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  level: PathLevel;
+  tags: string[];
+  coverImage: string | null;
+  isPublished: boolean;
+  enrolled: boolean;
+  progress: PathProgressDto;
+  resumeProblemId: string | null;
+  modules: LearningPathModuleDto[];
+}
+
+export interface CreateLearningPathDto {
+  title: string;
+  slug: string;
+  description: string;
+  level: PathLevel;
+  tags: string[];
+  coverImage?: string | null;
+}
+
+export interface AdminLearningPathSummaryDto {
+  id: string;
+  slug: string;
+  title: string;
+  level: PathLevel;
+  moduleCount: number;
+  problemCount: number;
+  isPublished: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminLearningPathListDto {
+  items: AdminLearningPathSummaryDto[];
+  total: number;
+}
+
+export interface AdminLearningPathModuleItemDto {
+  id: string;
+  problemId: string;
+  title: string;
+  difficulty: AssessmentDifficulty;
+  order: number;
+}
+
+export interface AdminLearningPathModuleDto {
+  id: string;
+  title: string;
+  order: number;
+  items: AdminLearningPathModuleItemDto[];
+}
+
+export interface AdminLearningPathDetailDto extends AdminLearningPathSummaryDto {
+  description: string;
+  tags: string[];
+  coverImage: string | null;
+  modules: AdminLearningPathModuleDto[];
+}
+
+export interface AdminLearningPathInput {
+  title: string;
+  slug: string;
+  description: string;
+  level: PathLevel;
+  tags: string[];
+  coverImage?: string | null;
+}
+
+export type ReorderDirection = 'up' | 'down';
