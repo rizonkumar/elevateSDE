@@ -15,7 +15,9 @@ export class CreateLearningPathDto implements AdminLearningPathInput {
   @MinLength(1)
   slug!: string;
 
-  @ApiProperty({ example: 'A structured roadmap covering arrays, graphs, and dynamic programming.' })
+  @ApiProperty({
+    example: 'A structured roadmap covering arrays, graphs, and dynamic programming.',
+  })
   @IsString()
   description!: string;
 

@@ -5,7 +5,10 @@ import { useRouter } from 'next/navigation';
 import { Plus } from 'lucide-react';
 import { Button, ConfirmDialog } from '@elevatesde/ui';
 import { AdminLayout } from '../../components/AdminLayout';
-import { useLearningPathsStore, type LearningPathFormValues } from '../../store/learning-paths.store';
+import {
+  useLearningPathsStore,
+  type LearningPathFormValues,
+} from '../../store/learning-paths.store';
 import { LearningPathDirectory } from './_components/LearningPathDirectory';
 import { LearningPathFormModal } from './_components/LearningPathFormModal';
 
