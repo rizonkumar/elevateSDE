@@ -490,6 +490,37 @@ export interface SetContestProblemsInput {
   problems: ContestProblemInput[];
 }
 
+export interface ContestSummaryDto {
+  id: string;
+  slug: string;
+  title: string;
+  status: ContestStatus;
+  startsAt: string;
+  endsAt: string;
+  problemCount: number;
+  participantCount: number;
+  registered: boolean;
+}
+
+export interface ContestProblemProgressDto extends ContestProblemDto {
+  solved: boolean;
+}
+
+export interface ContestDetailDto extends ContestSummaryDto {
+  description: string;
+  problems: ContestProblemProgressDto[];
+}
+
+export interface ContestStandingRowDto {
+  rank: number;
+  userId: string;
+  name: string;
+  solvedCount: number;
+  score: number;
+  penaltySeconds: number;
+  isCurrentUser: boolean;
+}
+
 export interface SubmissionHeatmapCellDto {
   date: string;
   count: number;
