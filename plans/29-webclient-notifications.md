@@ -1,6 +1,6 @@
 # Webclient: In-App Notification Center
 
-> **Status: IN PROGRESS** — built on `feature/in-app-notifications`.
+> **Status: DONE** — implemented at `apps/web/src/app/dashboard/notifications/`.
 
 Candidate-facing bell + notification center, backed by the `notification` API (Plan 28). Polls unread count (~45s); no WebSocket in v1.
 

@@ -1,6 +1,6 @@
 # Webclient: Learning Paths / Prep Tracks
 
-> **Status: TODO** — planned, not yet implemented.
+> **Status: DONE** — implemented at `apps/web/src/app/dashboard/paths/` on `feature/learning-paths`.
 
 The candidate-facing surface for browsing curated prep tracks, enrolling, and working through ordered modules with live progress. Backed by the `learning-path` API (Plan 25).
 

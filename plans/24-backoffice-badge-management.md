@@ -1,6 +1,6 @@
 # Backoffice: Badge Management
 
-> **Status: TODO** — planned, not yet implemented.
+> **Status: DONE** — implemented at `apps/admin/src/app/badges/`.
 
 The internal admin surface for defining badge criteria and manually granting/revoking badges. Backed by the admin endpoints in Plan 22.
 

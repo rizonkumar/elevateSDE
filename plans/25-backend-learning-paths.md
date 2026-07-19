@@ -1,6 +1,6 @@
 # Backend: Learning Paths / Prep Tracks
 
-> **Status: TODO** — planned, not yet implemented.
+> **Status: DONE** — implemented as the `learning-path` DDD module (`apps/api/src/modules/learning-path/`) on `feature/learning-paths`.
 
 The backend for curated, ordered roadmaps that bundle existing coding problems into structured tracks (e.g. "FAANG DSA Prep"). Reuses the `Problem` bank (Plan 15/16); progress is derived from a candidate's ACCEPTED submissions on the problems referenced by a path.
 

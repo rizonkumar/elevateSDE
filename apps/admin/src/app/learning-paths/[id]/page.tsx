@@ -131,7 +131,11 @@ export default function LearningPathBuilderPage() {
                 onChange={(event) => setModuleTitle(event.target.value)}
                 placeholder="Arrays & Hashing"
               />
-              <Button type="button" onClick={handleAddModule} disabled={busy || moduleTitle.trim().length === 0}>
+              <Button
+                type="button"
+                onClick={handleAddModule}
+                disabled={busy || moduleTitle.trim().length === 0}
+              >
                 <Plus className="h-4 w-4 shrink-0" />
                 Add module
               </Button>

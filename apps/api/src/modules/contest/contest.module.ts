@@ -2,13 +2,16 @@ import { Module } from '@nestjs/common';
 import { IContestRepository } from './domain/interfaces/contest-repository.interface';
 import { ContestRepository } from './infrastructure/repositories/contest.repository';
 import { ContestService } from './application/contest.service';
+import { ContestParticipationService } from './application/contest-participation.service';
 import { ContestManagementController } from './presentation/controllers/contest-management.controller';
+import { ContestsController } from './presentation/controllers/contests.controller';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 
 @Module({
-  controllers: [ContestManagementController],
+  controllers: [ContestManagementController, ContestsController],
   providers: [
     ContestService,
+    ContestParticipationService,
     PrismaService,
     {
       provide: IContestRepository,

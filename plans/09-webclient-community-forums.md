@@ -3,12 +3,9 @@
 A discussion platform and ranking system for candidates to interact, share interview
 experiences, compare offers, and view their standing against the community.
 
-> **Backend status:** No forum or leaderboard Prisma models or endpoints exist yet. The
-> webclient is built **mock-driven** first — Zustand stores seeded with in-memory data
-> (`apps/web/src/lib/forum-data.ts`, `apps/web/src/lib/leaderboard-data.ts`) — and swaps to
-> real endpoints later, one line per action, matching the `job-tracker.store.ts` pattern.
-> The shared shapes live in `packages/shared-types` (`ForumPostDto`, `ForumCommentDto`,
-> `ForumSortOption`, `ForumPostStatus`, `LeaderboardEntryDto`, `LeaderboardTimeframe`).
+> **Status: DONE** — implemented at `apps/web/src/app/dashboard/forum/` and
+> `apps/web/src/app/dashboard/leaderboard/`, with `forum.store.ts` and
+> `leaderboard.store.ts` calling the real `forum` and `leaderboard` API modules.
 
 ## Proposed UI/UX Changes
 

@@ -145,6 +145,7 @@ model User {
   problemLists                  ProblemList[]
   reviewItems                   ReviewItem[]
   pathEnrollments               PathEnrollment[]
+  contestParticipations         ContestParticipant[]
 }
 
 model RefreshToken {
@@ -397,17 +398,18 @@ model DailyChallengeCompletion {
 }
 
 model Contest {
-  id          String           @id @default(uuid())
-  slug        String           @unique
-  title       String
-  description String
-  startsAt    DateTime
-  endsAt      DateTime
-  status      ContestStatus    @default(DRAFT)
-  tenantId    String?
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-  problems    ContestProblem[]
+  id           String               @id @default(uuid())
+  slug         String               @unique
+  title        String
+  description  String
+  startsAt     DateTime
+  endsAt       DateTime
+  status       ContestStatus        @default(DRAFT)
+  tenantId     String?
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  problems     ContestProblem[]
+  participants ContestParticipant[]
 
   @@index([status, startsAt])
 }
@@ -422,6 +424,18 @@ model ContestProblem {
   problem   Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
 
   @@unique([contestId, problemId])
+  @@index([contestId])
+}
+
+model ContestParticipant {
+  id           String   @id @default(uuid())
+  contestId    String
+  userId       String
+  registeredAt DateTime @default(now())
+  contest      Contest  @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([contestId, userId])
   @@index([contestId])
 }
 

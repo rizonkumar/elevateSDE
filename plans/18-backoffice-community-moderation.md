@@ -4,13 +4,9 @@ The internal admin panel for moderating the candidate Community Forum and curati
 Leaderboard that ship in the webclient (Plan 09). Administrators review reported and flagged
 posts, approve or remove content, and adjust leaderboard standings (points, badges).
 
-> **Backend status:** No `ForumPost`, `ForumComment`, `ForumReport`, or `LeaderboardEntry`
-> Prisma models or endpoints exist yet. The admin UI is built **mock-driven** first (Zustand
-> stores seeded with in-memory data) and swaps to the real `/api/v1/admin/forum-posts` and
-> `/api/v1/admin/leaderboard` endpoints once the backend lands. Mirrors how `apps/admin`
-> separates store logic from `lib/api.ts`, and matches the webclient shapes already added in
-> `packages/shared-types` (`ForumPostDto`, `ForumCommentDto`, `ForumPostStatus`,
-> `LeaderboardEntryDto`).
+> **Status: DONE** — implemented at `apps/admin/src/app/forum-moderation/` and
+> `apps/admin/src/app/leaderboard-management/`, backed by the `forum` and `leaderboard`
+> API modules.
 
 ## Proposed UI/UX Changes
 

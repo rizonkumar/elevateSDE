@@ -70,9 +70,7 @@ export async function renameLearningPathModule(
 export async function deleteLearningPathModule(
   moduleId: string,
 ): Promise<AdminLearningPathDetailDto> {
-  const response = await api.delete<AdminLearningPathDetailDto>(
-    `${BASE_PATH}/modules/${moduleId}`,
-  );
+  const response = await api.delete<AdminLearningPathDetailDto>(`${BASE_PATH}/modules/${moduleId}`);
   return response.data;
 }
 
@@ -98,9 +96,7 @@ export async function addLearningPathItem(
   return response.data;
 }
 
-export async function deleteLearningPathItem(
-  itemId: string,
-): Promise<AdminLearningPathDetailDto> {
+export async function deleteLearningPathItem(itemId: string): Promise<AdminLearningPathDetailDto> {
   const response = await api.delete<AdminLearningPathDetailDto>(`${BASE_PATH}/items/${itemId}`);
   return response.data;
 }

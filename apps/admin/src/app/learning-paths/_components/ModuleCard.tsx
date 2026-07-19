@@ -3,10 +3,7 @@
 import * as React from 'react';
 import { ArrowDown, ArrowUp, Check, Pencil, Plus, Trash2, X } from 'lucide-react';
 import { Button, Input } from '@elevatesde/ui';
-import type {
-  AdminLearningPathModuleDto,
-  AssessmentDifficulty,
-} from '@elevatesde/shared-types';
+import type { AdminLearningPathModuleDto, AssessmentDifficulty } from '@elevatesde/shared-types';
 import { Badge, Select, type BadgeVariant } from '../../../components/ui';
 import type { ProblemOption } from '../../../store/learning-paths.store';
 
@@ -210,7 +207,12 @@ export function ModuleCard({
           onChange={setSelectedProblemId}
           disabled={busy}
         />
-        <Button type="button" variant="secondary" onClick={handleAdd} disabled={busy || !selectedProblemId}>
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={handleAdd}
+          disabled={busy || !selectedProblemId}
+        >
           <Plus className="h-4 w-4 shrink-0" />
           Add
         </Button>

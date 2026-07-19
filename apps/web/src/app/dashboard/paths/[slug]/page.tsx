@@ -58,7 +58,9 @@ export default function LearningPathDetailPage() {
             <ArrowLeft className="h-4 w-4" />
             Back to paths
           </Link>
-          <p className="m-0 text-sm text-(--color-text-muted)">This learning path is unavailable.</p>
+          <p className="m-0 text-sm text-(--color-text-muted)">
+            This learning path is unavailable.
+          </p>
         </div>
       </PageContainer>
     );
@@ -115,10 +117,7 @@ export default function LearningPathDetailPage() {
 
             {primaryAction && (
               <div>
-                <Button
-                  onClick={primaryAction.onClick}
-                  disabled={enrollingId === active.id}
-                >
+                <Button onClick={primaryAction.onClick} disabled={enrollingId === active.id}>
                   {primaryAction.label}
                   <ArrowRight className="h-4 w-4" />
                 </Button>

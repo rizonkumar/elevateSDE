@@ -55,7 +55,11 @@ export class LearningPathService {
     }));
   }
 
-  async getBySlug(slug: string, userId: string, tenantId: string | null): Promise<LearningPathDetailView> {
+  async getBySlug(
+    slug: string,
+    userId: string,
+    tenantId: string | null,
+  ): Promise<LearningPathDetailView> {
     const detail = await this.repository.findPublishedDetailBySlug(slug, tenantId);
     if (!detail) {
       throw new NotFoundException('Learning path not found');
@@ -304,7 +308,9 @@ export class LearningPathService {
     return module;
   }
 
-  private async requireItem(itemId: string): Promise<{ id: string; moduleId: string; pathId: string }> {
+  private async requireItem(
+    itemId: string,
+  ): Promise<{ id: string; moduleId: string; pathId: string }> {
     const item = await this.repository.findItem(itemId);
     if (!item) {
       throw new NotFoundException('Item not found');

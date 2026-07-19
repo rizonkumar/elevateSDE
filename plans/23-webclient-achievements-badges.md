@@ -1,6 +1,6 @@
 # Webclient: Achievements & Badges
 
-> **Status: TODO** — planned, not yet implemented.
+> **Status: DONE** — implemented at `apps/web/src/app/dashboard/achievements/`.
 
 The candidate-facing badge showcase, backed by the `achievement` API (Plan 22). Shows earned badges, locked badges with progress-to-next, and surfaces an unlock toast.
 

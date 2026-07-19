@@ -49,7 +49,9 @@ export class LearningPathManagementController {
   @ApiResponse({ status: 200, type: AdminLearningPathDetailResponseDto })
   @ApiResponse({ status: 404, description: 'Not found.' })
   async detail(@Param('id') id: string): Promise<AdminLearningPathDetailResponseDto> {
-    return LearningPathPresentationMapper.toAdminDetail(await this.learningPathService.getDetail(id));
+    return LearningPathPresentationMapper.toAdminDetail(
+      await this.learningPathService.getDetail(id),
+    );
   }
 
   @Post()
