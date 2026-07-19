@@ -1,6 +1,6 @@
 # Backend: Spaced-Repetition Review Queue
 
-> **Status: TODO** — planned, not yet implemented.
+> **Status: DONE** — implemented as the `review` DDD module (`apps/api/src/modules/review/`).
 
 Anki-style review scheduling that resurfaces previously solved problems on a forgetting curve. Fully in-house (Postgres + BullMQ). Builds on existing `Submission` history.
 

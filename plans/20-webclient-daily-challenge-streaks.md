@@ -1,6 +1,6 @@
 # Webclient: Daily Challenge & Streaks
 
-> **Status: TODO** — planned, not yet implemented. First gamification feature to build.
+> **Status: DONE** — implemented at `apps/web/src/app/dashboard/daily/`.
 
 The candidate-facing surface for the daily coding challenge and streak tracking, backed by the `daily-challenge` API (Plan 19). Shows today's problem, the current/longest streak, and a contribution-style calendar of solved days.
 

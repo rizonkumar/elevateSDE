@@ -1,6 +1,6 @@
 # Backend: In-App Notification Center
 
-> **Status: IN PROGRESS** — built on `feature/in-app-notifications`.
+> **Status: DONE** — implemented as the `notification` DDD module (`apps/api/src/modules/notification/`).
 
 An in-app notification system (no email/third-party). Existing flows emit domain events; a listener inside the `notification` module persists a `Notification` row for the recipient. Candidates read them via a bell + center. Email digests are explicitly out of scope (no provider wired).
 

@@ -1,6 +1,6 @@
 # Backoffice: Learning Path Builder
 
-> **Status: TODO** — planned, not yet implemented.
+> **Status: DONE** — implemented at `apps/admin/src/app/learning-paths/` on `feature/learning-paths`.
 
 The internal admin surface for authoring prep tracks: create a path, add modules, pull problems from the existing bank into ordered items, reorder, and publish. Backed by the admin endpoints in Plan 25.
 

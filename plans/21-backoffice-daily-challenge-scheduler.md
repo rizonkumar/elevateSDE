@@ -1,6 +1,6 @@
 # Backoffice: Daily Challenge Scheduler
 
-> **Status: TODO** — planned, not yet implemented. First gamification feature to build.
+> **Status: DONE** — implemented at `apps/admin/src/app/daily-challenges/`.
 
 The internal admin surface for scheduling which published `Problem` runs as the daily challenge on each date, and reviewing participation. Backed by the admin endpoints in Plan 19.
 

@@ -1,6 +1,6 @@
 # Backend: Daily Challenge & Streaks
 
-> **Status: TODO** — planned, not yet implemented. First gamification feature to build.
+> **Status: DONE** — implemented as the `daily-challenge` DDD module (`apps/api/src/modules/daily-challenge/`).
 
 The backend that schedules one coding problem per day and tracks each candidate's solving streak. Reuses the existing `Problem` bank (Plan 15/16) and the `UserStats` row (Plan 09 leaderboard). A candidate who gets an **ACCEPTED** submission on the day's problem advances their streak; missing a day resets it.
 

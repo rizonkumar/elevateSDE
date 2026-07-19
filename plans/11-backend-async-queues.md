@@ -1,6 +1,6 @@
 # Backend: Distributed Task Queues (BullMQ & Redis)
 
-> **Status: TODO** — planned, not yet implemented.
+> **Status: DONE** — implemented as the `queues` module (`apps/api/src/modules/queues/`).
 
 An infrastructure system managing resource-intensive tasks (e.g. LLM evaluations, resume parsing, code execution) asynchronously in the background.
 

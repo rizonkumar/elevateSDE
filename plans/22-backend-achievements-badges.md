@@ -1,6 +1,6 @@
 # Backend: Achievements & Badges
 
-> **Status: TODO** — planned, not yet implemented.
+> **Status: DONE** — implemented as the `achievement` DDD module (`apps/api/src/modules/achievement/`).
 
 A badge/achievement engine on top of the existing `UserStats.badges String[]` field (currently a bare, manually-set array). Admins define badges with unlock criteria; candidates earn them automatically as they solve problems, build streaks, and post in the forum.
 
