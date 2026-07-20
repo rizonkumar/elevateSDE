@@ -1,6 +1,6 @@
 # Backoffice: Coding Contest Builder
 
-> **Status: TODO** — planned, not yet implemented.
+> **Status: DONE** — implemented at `apps/admin/src/app/contests/` (merged via PR #31).
 
 Admin surface to assemble, schedule, and publish contests from the existing `Problem` bank, backed by admin contest endpoints (Plan 30).
 

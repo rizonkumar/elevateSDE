@@ -1,6 +1,17 @@
 # Backend: Coding Contests
 
-> **Status: TODO** — planned, not yet implemented.
+> **Status: DONE** — implemented as the `contest` DDD module (`apps/api/src/modules/contest/`).
+>
+> Notes on deviations from the original plan:
+>
+> - No `ContestSubmission` model or score/penalty columns — standings are derived at read
+>   time from ACCEPTED rows in the existing `Submission` table inside the contest window
+>   (same derived-progress approach as learning paths). Only `ContestParticipant` was added.
+> - No BullMQ scheduler — `SCHEDULED → LIVE → ENDED` is derived from `startsAt`/`endsAt`
+>   at read time (`domain/contest-status.ts`), so no stored-status flips are needed.
+> - No dedicated contest submit endpoint — solving goes through the existing
+>   `/v1/assessments/submit` pipeline; any ACCEPTED submission on a contest problem during
+>   the window counts for registered participants.
 
 Time-boxed competitions over the existing `Problem` bank, graded by the existing `code-runner` sandbox, with a penalty-based ranked leaderboard. Fully in-house (Postgres + BullMQ + Docker sandbox).
 

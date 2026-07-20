@@ -111,19 +111,23 @@ The platform exposes a **single public origin** to users; the admin backoffice i
 | Daily challenge          | `/dashboard/daily`        | Any authenticated user |
 | Profile & heatmap        | `/dashboard/profile`      | Any authenticated user |
 | Job tracker              | `/dashboard/job-tracker`  | Any authenticated user |
+| Prep tracks              | `/dashboard/paths`        | Any authenticated user |
+| Coding contests          | `/dashboard/contests`     | Any authenticated user |
 | Organization dashboard   | `/dashboard/org`          | `TENANT_ADMIN`         |
 | Super-Admin backoffice   | `/admin`                  | `ADMIN`                |
 | Coding problem bank      | `/admin/coding-problems`  | `ADMIN`                |
 | Daily challenge schedule | `/admin/daily-challenges` | `ADMIN`                |
-| Coding contests          | `/admin/contests`         | `ADMIN`                |
+| Contest management       | `/admin/contests`         | `ADMIN`                |
+| Learning path builder    | `/admin/learning-paths`   | `ADMIN`                |
+| Badge management         | `/admin/badges`           | `ADMIN`                |
 
-The backoffice consumes live `/api/v1/admin/*` endpoints (including the coding problem bank, daily-challenge scheduling, contest management, forum moderation, and leaderboard management). The candidate-facing surfaces are likewise live and user-scoped: the dashboard (`/api/v1/users/me/dashboard-stats`), coding assessments + execution (`/api/v1/problems`, `/api/v1/assessments/run` + `/submit`), daily challenge & streaks (`/api/v1/daily-challenge/today` + `/streak`), profile & submission heatmap (`/api/v1/users/me` + `/submission-heatmap`), job tracker (`/api/v1/job-applications`), community forum (`/api/v1/forum/*`), leaderboard (`/api/v1/leaderboard`), and the organization dashboard (`/api/v1/org/*`). Only the **AI mock interview** and **resume analyzer** surfaces remain backed by typed client-side Zustand stores (in-browser engines) until their domain models are implemented.
+The backoffice consumes live `/api/v1/admin/*` endpoints (including the coding problem bank, daily-challenge scheduling, contest management, the learning path builder, badge management, forum moderation, and leaderboard management). The candidate-facing surfaces are likewise live and user-scoped: the dashboard (`/api/v1/users/me/dashboard-stats`), coding assessments + execution (`/api/v1/problems`, `/api/v1/assessments/run` + `/submit`), daily challenge & streaks (`/api/v1/daily-challenge/today` + `/streak`), learning paths (`/api/v1/learning-paths*`), coding contests (`/api/v1/contests*` — list/detail, registration, live standings), profile & submission heatmap (`/api/v1/users/me` + `/submission-heatmap`), job tracker (`/api/v1/job-applications`), community forum (`/api/v1/forum/*`), leaderboard (`/api/v1/leaderboard`), achievements (`/api/v1/achievements*`), notifications (`/api/v1/notifications*`), spaced repetition (`/api/v1/review/*`), and the organization dashboard (`/api/v1/org/*`). Only the **AI mock interview** and **resume analyzer** surfaces remain backed by typed client-side Zustand stores (in-browser engines) until their domain models are implemented.
 
 ---
 
 ## Domain-Driven Design (DDD) Backend Architecture
 
-Instead of grouping by framework features (controllers/services), the API is structured by business domains. Current domain modules include `users`, `auth`, `audit-log`, `feature-flag`, `admin`, `organization` (tenant/seat/invitation management), `job-application` (the candidate job tracker), `problem` and `code-runner` (the coding assessment bank and Dockerized execution sandbox), `daily-challenge` (daily problems + streaks), `dashboard` (aggregated candidate stats), `forum` and `leaderboard` (the community discussion board and rankings), `problem-social` (per-problem discussions with comments/upvotes plus personal bookmarks, private notes, and custom problem collections), `contest` (admin-assembled timed competitions over the problem bank), and `queues` (the shared BullMQ root that owns async job processing), each following the layered template below.
+Instead of grouping by framework features (controllers/services), the API is structured by business domains. Current domain modules include `users`, `auth`, `audit-log`, `feature-flag`, `admin`, `organization` (tenant/seat/invitation management), `job-application` (the candidate job tracker), `problem` and `code-runner` (the coding assessment bank and Dockerized execution sandbox), `daily-challenge` (daily problems + streaks), `dashboard` (aggregated candidate stats), `forum` and `leaderboard` (the community discussion board and rankings), `problem-social` (per-problem discussions with comments/upvotes plus personal bookmarks, private notes, and custom problem collections), `contest` (admin-assembled timed competitions over the problem bank, with candidate registration and read-time derived standings), `learning-path` (curated prep tracks with enrollment and derived progress), `achievement` (badges and awarding rules), `notification` (in-app notifications and preferences), `review` (spaced-repetition review queue over solved problems), and `queues` (the shared BullMQ root that owns async job processing), each following the layered template below.
 
 ### Example: Users Domain
 
@@ -180,7 +184,7 @@ apps/api/src/modules/users/
 - `Problem`: the coding assessment definition (replaces the legacy `Question` model) — `slug`, `difficulty`, `description`, `constraints`, `tags`, `starterCode`, `examples`, `functionName`, `harness` (paramTypes/returnType/cpp signature), `comparisonMode` (EXACT / UNORDERED / FLOAT_TOLERANT), `timeLimitMinutes`, `isPublished`
 - `ProblemTestCase`: `id`, `problemId`, `ordinal`, `input`, `expectedOutput`, `isHidden`
 - `Submission` / `SubmissionResult`: a submission attempt (status, passed count, runtime, memory) and its per-test-case results produced by the sandbox
-- `Contest` / `ContestProblem`: an admin-assembled timed competition (`slug`, `title`, `description`, `startsAt`, `endsAt`, `status ContestStatus` — DRAFT / SCHEDULED / LIVE / ENDED, `tenantId`) and its ordered, points-weighted problems (`@@unique([contestId, problemId])`). Candidate participation/submission tables and the BullMQ status scheduler are pending.
+- `Contest` / `ContestProblem` / `ContestParticipant`: an admin-assembled timed competition (`slug`, `title`, `description`, `startsAt`, `endsAt`, `status ContestStatus` — DRAFT / SCHEDULED / LIVE / ENDED, `tenantId`), its ordered, points-weighted problems (`@@unique([contestId, problemId])`), and candidate registrations (`@@unique([contestId, userId])`). LIVE/ENDED are derived from the time window at read time (no scheduler), and standings are derived from ACCEPTED `Submission` rows inside the window — score descending, then penalty (seconds from start to first accept) ascending.
 - `MockInterview` _(planned)_: `id`, `userId`, `transcript` (JSONB), `aiFeedback`, `overallScore`
 - `Resume` _(planned)_: `id`, `userId`, `s3FileUrl`, `atsScore`, `parsedSkills`
 
@@ -199,6 +203,10 @@ apps/api/src/modules/users/
 - `ProblemNote`: `id`, `userId`, `problemId`, `body` (`@@unique([userId, problemId])`) — one private note per user per problem
 - `ProblemList` / `ProblemListItem`: user-owned custom problem collections (`name`, `isPublic`) and their ordered members (`ordinal`, `@@unique([listId, problemId])`)
 - `JobApplication`: `id`, `userId`, `company`, `role`, `status` (`JobApplicationStatus` enum: APPLIED, OA, INTERVIEW, OFFER, REJECTED), `salaryRange`, `jobDescriptionUrl`, `interviewDate`, `boardPosition` (Kanban ordering), `createdAt`, `updatedAt`
+- `Badge` / `UserBadge`: admin-defined badges with awarding criteria (`BadgeCriteriaType` + threshold) and per-user awards
+- `Notification` / `NotificationPreference`: in-app notifications (`NotificationType`, read state) and per-type user preferences
+- `ReviewItem`: spaced-repetition state per user per problem (`@@unique([userId, problemId])`) driving the review queue
+- `LearningPath` / `LearningPathModule` / `LearningPathItem` / `PathEnrollment`: curated prep tracks (`slug`, `level PathLevel`, `isPublished`), their ordered modules and problem items, and candidate enrollments — progress is derived from ACCEPTED submissions at read time
 
 ---
 
@@ -255,5 +263,5 @@ Daily engagement is driven by the `daily-challenge` module and the `UserStats` a
 - **Phase 1 (Core Foundations):** Monorepo setup, Auth, Users, RBAC, Basic Questions, Next.js Dashboard.
 - **Phase 2 (Asynchronous & Real-time):** Redis, BullMQ, WebSockets, Notifications, Job Tracker.
 - **Phase 3 (Enterprise & AI):** Multi-tenancy, Stripe Subscriptions, AI Resume Analyzer, LangChain integration.
-- **Phase 4 (Advanced Systems):** pgvector RAG _(pending)_, Dockerized Code Execution Engine _(done)_, Discussion Forums _(done)_, Leaderboards _(done)_, Gamification & Streaks — daily challenges, profile, submission heatmap _(done)_, Problem Discussions + Bookmarks/Notes/Lists _(done)_, Coding Contests — admin builder _(done)_; candidate register/submit/standings + status scheduler _(pending)_.
+- **Phase 4 (Advanced Systems):** pgvector RAG _(pending)_, Dockerized Code Execution Engine _(done)_, Discussion Forums _(done)_, Leaderboards _(done)_, Gamification & Streaks — daily challenges, profile, submission heatmap _(done)_, Achievements & Badges _(done)_, In-App Notifications _(done)_, Problem Discussions + Bookmarks/Notes/Lists _(done)_, Spaced Repetition — backend _(done)_, web UI _(pending)_, Learning Paths / Prep Tracks _(done)_, Coding Contests — admin builder + candidate register/solve/standings _(done, statuses and standings derived at read time; no scheduler needed)_.
 - **Phase 5 (Production Readiness):** OpenTelemetry, Sentry, Swagger Docs, Feature Flags, Audit Logging, CI/CD pipelines.
