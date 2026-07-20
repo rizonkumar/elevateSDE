@@ -21,8 +21,8 @@ graph TD
 
         subgraph Domains["DDD Modules"]
             CoreMods["auth · users · organization · admin"]
-            LearnMods["problem · code-runner · daily-challenge · dashboard"]
-            CommMods["forum · leaderboard · job-application · problem-social"]
+            LearnMods["problem · code-runner · daily-challenge · dashboard · learning-path · contest · review"]
+            CommMods["forum · leaderboard · job-application · problem-social · achievement · notification"]
             PlatMods["audit-log · feature-flag · queues"]
         end
 
@@ -148,12 +148,16 @@ The API requires a PostgreSQL database (and Redis for caching/queues). Both are 
 | Candidate dashboard      | `http://localhost:3001/dashboard`              | Any authenticated user |
 | Coding assessments       | `http://localhost:3001/dashboard/assessment`   | Any authenticated user |
 | Daily challenge & streak | `http://localhost:3001/dashboard/daily`        | Any authenticated user |
+| Prep tracks              | `http://localhost:3001/dashboard/paths`        | Any authenticated user |
+| Coding contests          | `http://localhost:3001/dashboard/contests`     | Any authenticated user |
 | Profile & heatmap        | `http://localhost:3001/dashboard/profile`      | Any authenticated user |
 | Organization dashboard   | `http://localhost:3001/dashboard/org`          | `TENANT_ADMIN` only    |
 | Super-Admin backoffice   | `http://localhost:3001/admin`                  | `ADMIN` only           |
 | Coding problem bank      | `http://localhost:3001/admin/coding-problems`  | `ADMIN` only           |
 | Daily challenge schedule | `http://localhost:3001/admin/daily-challenges` | `ADMIN` only           |
-| Coding contests          | `http://localhost:3001/admin/contests`         | `ADMIN` only           |
+| Contest management       | `http://localhost:3001/admin/contests`         | `ADMIN` only           |
+| Learning path builder    | `http://localhost:3001/admin/learning-paths`   | `ADMIN` only           |
+| Badge management         | `http://localhost:3001/admin/badges`           | `ADMIN` only           |
 
 > Everything is reached through the single web origin on **port 3001**. The backoffice is a separate Next.js app (`apps/admin`) that runs internally on port `3002` with `basePath: '/admin'`; `apps/web/next.config.ts` rewrites `/admin/:path*` to it, so you always visit `localhost:3001/admin` (a reverse proxy does the same under one domain in production). Do not open port `3002` directly.
 
@@ -165,7 +169,7 @@ Seeded demo logins (all use the password `Password123!`):
 | `org@elevatesde.dev`       | `TENANT_ADMIN` |
 | `candidate@elevatesde.dev` | `USER`         |
 
-Most surfaces are backed by live, user-scoped API endpoints: the candidate dashboard, coding assessments + execution, daily challenge & streaks, profile & submission heatmap, job tracker, community forum, leaderboard, and the organization dashboard, plus the backoffice (`/api/v1/admin/*`, including the coding problem bank and daily-challenge scheduling). Per-problem community and curation endpoints are also live via the `problem-social` module: problem discussions with comments/upvotes (`/api/v1/problems/:id/discussions`, `/api/v1/discussions/*`), bookmarks (`/api/v1/problems/:id/bookmark`, `/api/v1/me/bookmarks`), private notes (`/api/v1/problems/:id/note`), and custom problem collections (`/api/v1/me/lists*`). Only the **AI mock interview** and **resume analyzer** surfaces remain client-side mocks (in-browser engines), pending their domain models.
+Most surfaces are backed by live, user-scoped API endpoints: the candidate dashboard, coding assessments + execution, daily challenge & streaks, learning paths (`/api/v1/learning-paths*`), coding contests (`/api/v1/contests*` — list/detail, registration, and live standings polled every 15s), achievements (`/api/v1/achievements*`), notifications (`/api/v1/notifications*`), spaced repetition (`/api/v1/review/*`), profile & submission heatmap, job tracker, community forum, leaderboard, and the organization dashboard, plus the backoffice (`/api/v1/admin/*`, including the coding problem bank, daily-challenge scheduling, contest management, the learning path builder, and badge management). Per-problem community and curation endpoints are also live via the `problem-social` module: problem discussions with comments/upvotes (`/api/v1/problems/:id/discussions`, `/api/v1/discussions/*`), bookmarks (`/api/v1/problems/:id/bookmark`, `/api/v1/me/bookmarks`), private notes (`/api/v1/problems/:id/note`), and custom problem collections (`/api/v1/me/lists*`). Only the **AI mock interview** and **resume analyzer** surfaces remain client-side mocks (in-browser engines), pending their domain models.
 
 ## Common Commands
 

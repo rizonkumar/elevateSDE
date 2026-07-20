@@ -1,6 +1,13 @@
 # Webclient: Coding Contests
 
-> **Status: TODO** — planned, not yet implemented.
+> **Status: DONE** — implemented at `apps/web/src/app/dashboard/contests/` with
+> `contests.store.ts`.
+>
+> Notes on deviations from the original plan:
+>
+> - No `contests/[slug]/[problemId]` solve route — problem rows link straight to the
+>   existing `/dashboard/assessment/[id]` editor, matching how the daily challenge and
+>   learning paths reuse the solve view.
 
 Candidate-facing contest list, detail/registration, in-contest solve view, and live standings, backed by the `contest` API (Plan 30). Standings poll for v1 (no WebSocket).
 
