@@ -13,4 +13,8 @@ export abstract class IReviewRepository {
     userId: string,
     problemId: string,
   ): Promise<ReviewItemView | null>;
+  abstract countDue(userId: string, dueBefore: Date): Promise<number>;
+  abstract countTracked(userId: string): Promise<number>;
+  abstract countReviewed(userId: string): Promise<number>;
+  abstract findDueAtsBefore(userId: string, before: Date): Promise<Date[]>;
 }

@@ -1,6 +1,10 @@
 import { ProblemSummaryResponseDto } from '../../../problem/presentation/dtos/problem-summary-response.dto';
-import { ReviewItemView } from '../../domain/read-models/review-item-view';
+import { ReviewItemView, ReviewSummaryView } from '../../domain/read-models/review-item-view';
 import { ReviewItemResponseDto } from '../dtos/review-item-response.dto';
+import {
+  ReviewForecastDayResponseDto,
+  ReviewSummaryResponseDto,
+} from '../dtos/review-summary-response.dto';
 
 export class ReviewPresentationMapper {
   static toItem(view: ReviewItemView): ReviewItemResponseDto {
@@ -18,6 +22,20 @@ export class ReviewPresentationMapper {
     dto.repetitions = view.repetitions;
     dto.dueAt = view.dueAt.toISOString();
     dto.lastReviewedAt = view.lastReviewedAt ? view.lastReviewedAt.toISOString() : null;
+    return dto;
+  }
+
+  static toSummary(view: ReviewSummaryView): ReviewSummaryResponseDto {
+    const dto = new ReviewSummaryResponseDto();
+    dto.dueCount = view.dueCount;
+    dto.trackedCount = view.trackedCount;
+    dto.reviewedCount = view.reviewedCount;
+    dto.forecast = view.forecast.map((day) => {
+      const forecastDay = new ReviewForecastDayResponseDto();
+      forecastDay.date = day.date;
+      forecastDay.count = day.count;
+      return forecastDay;
+    });
     return dto;
   }
 }

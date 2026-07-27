@@ -1,8 +1,18 @@
-import type { GradeReviewDto, ReviewItemDto, ReviewQuality } from '@elevatesde/shared-types';
+import type {
+  GradeReviewDto,
+  ReviewItemDto,
+  ReviewQuality,
+  ReviewSummaryDto,
+} from '@elevatesde/shared-types';
 import { api } from './api';
 
 export async function getDueReviews(): Promise<ReviewItemDto[]> {
   const response = await api.get<ReviewItemDto[]>('/api/v1/review/due');
+  return response.data;
+}
+
+export async function getReviewSummary(): Promise<ReviewSummaryDto> {
+  const response = await api.get<ReviewSummaryDto>('/api/v1/review/summary');
   return response.data;
 }
 

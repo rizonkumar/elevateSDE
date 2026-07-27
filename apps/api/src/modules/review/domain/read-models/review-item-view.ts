@@ -16,3 +16,15 @@ export interface ReviewItemView {
   dueAt: Date;
   lastReviewedAt: Date | null;
 }
+
+export interface ReviewForecastDayView {
+  date: string;
+  count: number;
+}
+
+export interface ReviewSummaryView {
+  dueCount: number;
+  trackedCount: number;
+  reviewedCount: number;
+  forecast: ReviewForecastDayView[];
+}

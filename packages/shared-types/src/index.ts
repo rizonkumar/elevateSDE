@@ -739,6 +739,18 @@ export interface GradeReviewDto {
   quality: ReviewQuality;
 }
 
+export interface ReviewForecastDayDto {
+  date: string;
+  count: number;
+}
+
+export interface ReviewSummaryDto {
+  dueCount: number;
+  trackedCount: number;
+  reviewedCount: number;
+  forecast: ReviewForecastDayDto[];
+}
+
 export type PathLevel = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
 
 export interface PathProgressDto {

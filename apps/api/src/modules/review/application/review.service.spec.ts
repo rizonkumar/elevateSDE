@@ -59,6 +59,29 @@ class FakeReviewRepository implements IReviewRepository {
     return item ? this.toView(item) : null;
   }
 
+  async countDue(userId: string, dueBefore: Date): Promise<number> {
+    return this.forUser(userId).filter((item) => item.getDueAt().getTime() <= dueBefore.getTime())
+      .length;
+  }
+
+  async countTracked(userId: string): Promise<number> {
+    return this.forUser(userId).length;
+  }
+
+  async countReviewed(userId: string): Promise<number> {
+    return this.forUser(userId).filter((item) => item.getLastReviewedAt() !== null).length;
+  }
+
+  async findDueAtsBefore(userId: string, before: Date): Promise<Date[]> {
+    return this.forUser(userId)
+      .filter((item) => item.getDueAt().getTime() < before.getTime())
+      .map((item) => item.getDueAt());
+  }
+
+  private forUser(userId: string): ReviewItem[] {
+    return [...this.items.values()].filter((item) => item.getUserId() === userId);
+  }
+
   private key(userId: string, problemId: string): string {
     return `${userId}:${problemId}`;
   }
@@ -139,6 +162,45 @@ describe('ReviewService', () => {
 
       expect(due).toHaveLength(1);
       expect(due[0]?.problem.id).toBe('problem-1');
+    });
+  });
+
+  describe('summary', () => {
+    it('backfills from history and reports every item as due today', async () => {
+      repository.acceptedProblemIds = ['problem-1', 'problem-2'];
+
+      const summary = await service.summary('user-1');
+
+      expect(summary.dueCount).toBe(2);
+      expect(summary.trackedCount).toBe(2);
+      expect(summary.reviewedCount).toBe(0);
+      expect(summary.forecast).toHaveLength(30);
+      expect(summary.forecast[0]?.count).toBe(2);
+    });
+
+    it('counts graded items as reviewed and moves them out of the due bucket', async () => {
+      await service.seedFromAcceptedSubmission('user-1', 'problem-1');
+      await service.grade('user-1', 'problem-1', 5);
+
+      const summary = await service.summary('user-1');
+
+      expect(summary.dueCount).toBe(0);
+      expect(summary.reviewedCount).toBe(1);
+      expect(summary.forecast[0]?.count).toBe(0);
+      expect(summary.forecast.reduce((total, day) => total + day.count, 0)).toBe(1);
+    });
+
+    it('excludes items scheduled beyond the forecast horizon', async () => {
+      repository.acceptedProblemIds = ['problem-1'];
+      await service.summary('user-1');
+      for (let repetition = 0; repetition < 4; repetition += 1) {
+        await service.grade('user-1', 'problem-1', 5);
+      }
+
+      const summary = await service.summary('user-1');
+
+      expect(summary.trackedCount).toBe(1);
+      expect(summary.forecast.reduce((total, day) => total + day.count, 0)).toBe(0);
     });
   });
 

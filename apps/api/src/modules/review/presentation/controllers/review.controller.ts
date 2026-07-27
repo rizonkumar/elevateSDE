@@ -16,6 +16,7 @@ import { User } from '../../../users/domain/entities/user';
 import { ReviewService } from '../../application/review.service';
 import { GradeReviewDto } from '../dtos/grade-review.dto';
 import { ReviewItemResponseDto } from '../dtos/review-item-response.dto';
+import { ReviewSummaryResponseDto } from '../dtos/review-summary-response.dto';
 import { ReviewPresentationMapper } from '../mappers/review-presentation.mapper';
 
 interface RequestWithUser {
@@ -35,6 +36,14 @@ export class ReviewController {
   async getDue(@Req() req: RequestWithUser): Promise<ReviewItemResponseDto[]> {
     const views = await this.reviewService.dueToday(req.user.getId());
     return views.map((view) => ReviewPresentationMapper.toItem(view));
+  }
+
+  @Get('summary')
+  @ApiOperation({ summary: 'Review queue counts and 30-day due forecast' })
+  @ApiResponse({ status: 200, type: ReviewSummaryResponseDto })
+  async getSummary(@Req() req: RequestWithUser): Promise<ReviewSummaryResponseDto> {
+    const view = await this.reviewService.summary(req.user.getId());
+    return ReviewPresentationMapper.toSummary(view);
   }
 
   @Post(':problemId/grade')
