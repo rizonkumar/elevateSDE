@@ -1,6 +1,19 @@
 # Webclient: Spaced-Repetition Review Queue
 
-> **Status: TODO** — planned, not yet implemented.
+> **Status: DONE** — implemented at `apps/web/src/app/dashboard/review/` with
+> `review.store.ts`, `lib/review-api.ts`, and `components/dashboard/review/`.
+>
+> Notes on deviations from the original plan:
+>
+> - The plan called for reusing the profile heatmap to show "review history", but no endpoint
+>   exposed it — `GET /v1/review/due` returns only items already due. Two changes cover it:
+>   the existing `/v1/users/me/submission-heatmap` powers a "Practice activity" panel, and a new
+>   additive `GET /v1/review/summary` endpoint (counts + 30-day due forecast) powers the stat
+>   cards and an "Upcoming reviews" bar strip. No Prisma schema change or migration.
+> - Rating buttons live inline on each queue card (Again/Hard/Good/Easy) with a secondary
+>   "Solve" link into the existing assessment editor, rather than requiring a round trip through
+>   the solve view first.
+> - The sidebar shows a due-count pill on the Review row, fed by `loadSummary()`.
 
 Candidate "Due today" review surface backed by the `review` API (Plan 33).
 

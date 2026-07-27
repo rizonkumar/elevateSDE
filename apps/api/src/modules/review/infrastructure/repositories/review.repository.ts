@@ -110,4 +110,24 @@ export class ReviewRepository implements IReviewRepository {
     });
     return row ? toView(row) : null;
   }
+
+  async countDue(userId: string, dueBefore: Date): Promise<number> {
+    return this.prisma.reviewItem.count({ where: { userId, dueAt: { lte: dueBefore } } });
+  }
+
+  async countTracked(userId: string): Promise<number> {
+    return this.prisma.reviewItem.count({ where: { userId } });
+  }
+
+  async countReviewed(userId: string): Promise<number> {
+    return this.prisma.reviewItem.count({ where: { userId, lastReviewedAt: { not: null } } });
+  }
+
+  async findDueAtsBefore(userId: string, before: Date): Promise<Date[]> {
+    const rows = await this.prisma.reviewItem.findMany({
+      where: { userId, dueAt: { lt: before } },
+      select: { dueAt: true },
+    });
+    return rows.map((row) => row.dueAt);
+  }
 }

@@ -5,10 +5,12 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { X, Shield, ExternalLink, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
+import { useReviewStore } from '@/store/review.store';
 import { buildNavLinks, isNavItemActive } from '@/lib/dashboard-nav';
 import { ThemeToggle } from './ThemeToggle';
 
 const COLLAPSE_KEY = 'web-sidebar-collapsed';
+const REVIEW_HREF = '/dashboard/review';
 
 interface SidebarProps {
   open: boolean;
@@ -19,6 +21,8 @@ export function Sidebar({ open, onClose }: SidebarProps) {
   const pathname = usePathname();
   const { user } = useAuthStore();
   const links = buildNavLinks(user?.role);
+  const dueReviewCount = useReviewStore((state) => state.summary?.dueCount ?? 0);
+  const loadReviewSummary = useReviewStore((state) => state.loadSummary);
 
   const [collapsed, setCollapsed] = React.useState(false);
   const [mounted, setMounted] = React.useState(false);
@@ -27,6 +31,10 @@ export function Sidebar({ open, onClose }: SidebarProps) {
     setMounted(true);
     setCollapsed(localStorage.getItem(COLLAPSE_KEY) === 'true');
   }, []);
+
+  React.useEffect(() => {
+    void loadReviewSummary();
+  }, [loadReviewSummary]);
 
   React.useEffect(() => {
     if (!open) return;
@@ -97,6 +105,11 @@ export function Sidebar({ open, onClose }: SidebarProps) {
             >
               <Icon className="h-4 w-4 shrink-0" />
               {!isRail && link.label}
+              {!isRail && link.href === REVIEW_HREF && dueReviewCount > 0 && (
+                <span className="ml-auto inline-flex min-w-5 items-center justify-center rounded-(--radius-full) bg-(--color-accent-soft) px-1.5 py-0.5 text-xs font-semibold tabular-nums text-(--color-accent)">
+                  {dueReviewCount}
+                </span>
+              )}
             </Link>
           );
         })}
