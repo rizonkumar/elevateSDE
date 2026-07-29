@@ -17,6 +17,7 @@ import { ProblemService } from '../../../problem/application/problem.service';
 import { ICodeExecutionQueue } from '../../../queues/domain/interfaces/code-execution-queue.interface';
 import { CodeRunnerService } from '../../application/code-runner.service';
 import { SubmissionService } from '../../application/submission.service';
+import { toPrismaLanguage } from '../../application/language';
 import { SubmissionStatusValue } from '@elevatesde/shared-types';
 import { RunAssessmentDto } from '../dtos/run-assessment.dto';
 import { AssessmentRunResponseDto } from '../dtos/assessment-run-response.dto';
