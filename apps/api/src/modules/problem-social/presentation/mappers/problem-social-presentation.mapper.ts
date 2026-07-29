@@ -1,5 +1,6 @@
 import { ForumAuthorResponseDto } from '../../../forum/presentation/dtos/forum-author-response.dto';
 import { ProblemSummaryResponseDto } from '../../../problem/presentation/dtos/problem-summary-response.dto';
+import { PublicCollectionPage } from '../../domain/interfaces/problem-social-repository.interface';
 import {
   BookmarkView,
   ProblemCollectionItemView,
@@ -8,14 +9,19 @@ import {
   ProblemDiscussionView,
   ProblemNoteView,
   ProblemSummaryView,
+  PublicCollectionSummaryView,
   SocialAuthorView,
 } from '../../domain/read-models/problem-social-view';
+import { PublicCollectionDetailResult } from '../../application/problem-social.service';
 import { ProblemDiscussionResponseDto } from '../dtos/problem-discussion-response.dto';
 import { ProblemDiscussionCommentResponseDto } from '../dtos/problem-discussion-comment-response.dto';
 import { BookmarkResponseDto } from '../dtos/bookmark-response.dto';
 import { ProblemNoteResponseDto } from '../dtos/problem-note-response.dto';
 import { ProblemCollectionResponseDto } from '../dtos/problem-collection-response.dto';
 import { ProblemCollectionItemResponseDto } from '../dtos/problem-collection-item-response.dto';
+import { PublicCollectionSummaryResponseDto } from '../dtos/public-collection-summary-response.dto';
+import { PublicCollectionListResponseDto } from '../dtos/public-collection-list-response.dto';
+import { PublicCollectionDetailResponseDto } from '../dtos/public-collection-detail-response.dto';
 
 export class ProblemSocialPresentationMapper {
   static toDiscussionResponse(view: ProblemDiscussionView): ProblemDiscussionResponseDto {
@@ -72,6 +78,45 @@ export class ProblemSocialPresentationMapper {
     dto.createdAt = view.createdAt.toISOString();
     return dto;
   }
+
+  static toPublicCollectionSummaryResponse(
+    view: PublicCollectionSummaryView,
+  ): PublicCollectionSummaryResponseDto {
+    const dto = new PublicCollectionSummaryResponseDto();
+    dto.id = view.id;
+    dto.name = view.name;
+    dto.itemCount = view.itemCount;
+    dto.createdAt = view.createdAt.toISOString();
+    dto.author = toAuthor(view.author);
+    return dto;
+  }
+
+  static toPublicCollectionListResponse(
+    page: PublicCollectionPage,
+    pageNumber: number,
+    pageSize: number,
+  ): PublicCollectionListResponseDto {
+    const dto = new PublicCollectionListResponseDto();
+    dto.items = page.items.map((item) => this.toPublicCollectionSummaryResponse(item));
+    dto.total = page.total;
+    dto.page = pageNumber;
+    dto.pageSize = pageSize;
+    return dto;
+  }
+
+  static toPublicCollectionDetailResponse(
+    detail: PublicCollectionDetailResult,
+  ): PublicCollectionDetailResponseDto {
+    const dto = new PublicCollectionDetailResponseDto();
+    dto.id = detail.id;
+    dto.name = detail.name;
+    dto.itemCount = detail.itemCount;
+    dto.createdAt = detail.createdAt.toISOString();
+    dto.author = toAuthor(detail.author);
+    dto.items = detail.items.map((item) => toCollectionItem(item));
+    dto.viewerSolvedProblemIds = detail.viewerSolvedProblemIds;
+    return dto;
+  }
 }
 
 function toCollectionItem(view: ProblemCollectionItemView): ProblemCollectionItemResponseDto {
@@ -95,6 +140,7 @@ function toProblemSummary(view: ProblemSummaryView): ProblemSummaryResponseDto {
 function toAuthor(author: SocialAuthorView): ForumAuthorResponseDto {
   const dto = new ForumAuthorResponseDto();
   dto.id = author.id;
+  dto.handle = author.handle;
   dto.name = buildName(author.firstName, author.lastName);
   dto.headline = author.headline;
   return dto;

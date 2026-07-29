@@ -5,7 +5,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { IProblemSocialRepository } from '../domain/interfaces/problem-social-repository.interface';
+import {
+  IProblemSocialRepository,
+  PublicCollectionFilter,
+  PublicCollectionPage,
+} from '../domain/interfaces/problem-social-repository.interface';
 import { ProblemDiscussion } from '../domain/entities/problem-discussion';
 import { ProblemDiscussionComment } from '../domain/entities/problem-discussion-comment';
 import { ProblemList } from '../domain/entities/problem-list';
@@ -16,6 +20,7 @@ import {
   ProblemDiscussionCommentView,
   ProblemDiscussionView,
   ProblemNoteView,
+  PublicCollectionDetailView,
 } from '../domain/read-models/problem-social-view';
 
 export interface CreateDiscussionInput {
@@ -31,6 +36,10 @@ export interface CreateCollectionInput {
 export interface UpdateCollectionInput {
   name?: string;
   isPublic?: boolean;
+}
+
+export interface PublicCollectionDetailResult extends PublicCollectionDetailView {
+  viewerSolvedProblemIds: string[];
 }
 
 @Injectable()
@@ -194,6 +203,33 @@ export class ProblemSocialService {
     assertSameMembers(existingIds, orderedProblemIds);
     await this.repository.reorderCollection(listId, orderedProblemIds);
     return this.requireCollectionView(listId);
+  }
+
+  async listPublicCollections(filter: PublicCollectionFilter): Promise<PublicCollectionPage> {
+    return this.repository.listPublicCollections(filter);
+  }
+
+  async getPublicCollection(
+    listId: string,
+    viewerId: string | null,
+  ): Promise<PublicCollectionDetailResult> {
+    const detail = await this.repository.findPublicCollectionDetail(listId);
+    if (!detail) {
+      throw new NotFoundException('List not found');
+    }
+    const viewerSolvedProblemIds = viewerId
+      ? await this.repository.findAcceptedProblemIds(viewerId)
+      : [];
+    return { ...detail, viewerSolvedProblemIds };
+  }
+
+  async forkPublicCollection(userId: string, listId: string): Promise<ProblemCollectionView> {
+    const detail = await this.repository.findPublicCollectionDetail(listId);
+    if (!detail) {
+      throw new NotFoundException('List not found');
+    }
+    const newListId = await this.repository.forkCollection(listId, userId, `${detail.name} (copy)`);
+    return this.requireCollectionView(newListId);
   }
 
   private async requireProblem(problemId: string): Promise<void> {

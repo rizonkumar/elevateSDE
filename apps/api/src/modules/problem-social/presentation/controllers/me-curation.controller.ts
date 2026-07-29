@@ -133,6 +133,18 @@ export class MeCurationController {
     return ProblemSocialPresentationMapper.toCollectionResponse(collection);
   }
 
+  @Post('lists/:id/fork')
+  @ApiOperation({ summary: 'Fork a public list into my own lists' })
+  @ApiResponse({ status: 201, type: ProblemCollectionResponseDto })
+  @ApiResponse({ status: 404, description: 'List not found or not public.' })
+  async fork(
+    @Param('id') id: string,
+    @Req() req: RequestWithUser,
+  ): Promise<ProblemCollectionResponseDto> {
+    const collection = await this.problemSocialService.forkPublicCollection(req.user.getId(), id);
+    return ProblemSocialPresentationMapper.toCollectionResponse(collection);
+  }
+
   @Patch('lists/:id/reorder')
   @ApiOperation({ summary: 'Reorder the problems in a collection' })
   @ApiResponse({ status: 200, type: ProblemCollectionResponseDto })

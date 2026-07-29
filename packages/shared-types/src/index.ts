@@ -355,6 +355,7 @@ export type ForumPostStatus = 'PUBLISHED' | 'FLAGGED' | 'REMOVED';
 
 export interface ForumAuthor {
   id: string;
+  handle: string;
   name: string;
   headline: string | null;
 }
@@ -787,6 +788,26 @@ export interface ProblemCollectionDto {
   itemCount: number;
   items: ProblemCollectionItemDto[];
   createdAt: string;
+}
+
+export interface PublicCollectionSummaryDto {
+  id: string;
+  name: string;
+  itemCount: number;
+  createdAt: string;
+  author: ForumAuthor;
+}
+
+export interface PublicCollectionDetailDto extends PublicCollectionSummaryDto {
+  items: ProblemCollectionItemDto[];
+  viewerSolvedProblemIds: string[];
+}
+
+export interface PublicCollectionListDto {
+  items: PublicCollectionSummaryDto[];
+  total: number;
+  page: number;
+  pageSize: number;
 }
 
 export type ReviewQuality = 0 | 1 | 2 | 3 | 4 | 5;

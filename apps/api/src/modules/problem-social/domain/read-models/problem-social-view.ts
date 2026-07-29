@@ -2,6 +2,7 @@ import { AssessmentDifficulty } from '@prisma/client';
 
 export interface SocialAuthorView {
   id: string;
+  handle: string;
   firstName: string | null;
   lastName: string | null;
   headline: string | null;
@@ -62,4 +63,16 @@ export interface ProblemCollectionView {
   itemCount: number;
   items: ProblemCollectionItemView[];
   createdAt: Date;
+}
+
+export interface PublicCollectionSummaryView {
+  id: string;
+  name: string;
+  itemCount: number;
+  createdAt: Date;
+  author: SocialAuthorView;
+}
+
+export interface PublicCollectionDetailView extends PublicCollectionSummaryView {
+  items: ProblemCollectionItemView[];
 }

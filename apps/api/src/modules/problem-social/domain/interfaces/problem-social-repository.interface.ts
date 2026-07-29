@@ -7,7 +7,20 @@ import {
   ProblemDiscussionCommentView,
   ProblemDiscussionView,
   ProblemNoteView,
+  PublicCollectionDetailView,
+  PublicCollectionSummaryView,
 } from '../read-models/problem-social-view';
+
+export interface PublicCollectionFilter {
+  search?: string;
+  page: number;
+  pageSize: number;
+}
+
+export interface PublicCollectionPage {
+  items: PublicCollectionSummaryView[];
+  total: number;
+}
 
 export abstract class IProblemSocialRepository {
   abstract problemExists(problemId: string): Promise<boolean>;
@@ -46,4 +59,9 @@ export abstract class IProblemSocialRepository {
   abstract removeCollectionItem(listId: string, problemId: string): Promise<void>;
   abstract listCollectionProblemIds(listId: string): Promise<string[]>;
   abstract reorderCollection(listId: string, orderedProblemIds: string[]): Promise<void>;
+
+  abstract listPublicCollections(filter: PublicCollectionFilter): Promise<PublicCollectionPage>;
+  abstract findPublicCollectionDetail(listId: string): Promise<PublicCollectionDetailView | null>;
+  abstract findAcceptedProblemIds(userId: string): Promise<string[]>;
+  abstract forkCollection(sourceListId: string, userId: string, name: string): Promise<string>;
 }

@@ -1,7 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { AssessmentDifficulty } from '@prisma/client';
+import { randomUUID } from 'node:crypto';
+import { AssessmentDifficulty, SubmissionStatus } from '@prisma/client';
 import { PrismaService } from '../../../../infrastructure/prisma/prisma.service';
-import { IProblemSocialRepository } from '../../domain/interfaces/problem-social-repository.interface';
+import {
+  IProblemSocialRepository,
+  PublicCollectionFilter,
+  PublicCollectionPage,
+} from '../../domain/interfaces/problem-social-repository.interface';
 import { ProblemDiscussion } from '../../domain/entities/problem-discussion';
 import { ProblemDiscussionComment } from '../../domain/entities/problem-discussion-comment';
 import { ProblemList } from '../../domain/entities/problem-list';
@@ -11,12 +16,15 @@ import {
   ProblemDiscussionCommentView,
   ProblemDiscussionView,
   ProblemNoteView,
+  PublicCollectionDetailView,
+  PublicCollectionSummaryView,
 } from '../../domain/read-models/problem-social-view';
 import { ProblemSocialMapper } from '../mappers/problem-social.mapper';
 import { ProblemSocialViewMapper } from '../mappers/problem-social-view.mapper';
 
 const authorSelect = {
   id: true,
+  handle: true,
   firstName: true,
   lastName: true,
   headline: true,
@@ -296,6 +304,87 @@ export class ProblemSocialRepository implements IProblemSocialRepository {
     );
   }
 
+  async listPublicCollections(filter: PublicCollectionFilter): Promise<PublicCollectionPage> {
+    const where = {
+      isPublic: true,
+      ...(filter.search ? { name: { contains: filter.search, mode: 'insensitive' as const } } : {}),
+    };
+    const [records, total] = await Promise.all([
+      this.prisma.problemList.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: (filter.page - 1) * filter.pageSize,
+        take: filter.pageSize,
+        include: {
+          user: { select: authorSelect },
+          _count: { select: { items: true } },
+        },
+      }),
+      this.prisma.problemList.count({ where }),
+    ]);
+    return {
+      items: records.map((record) => toPublicCollectionSummary(record)),
+      total,
+    };
+  }
+
+  async findPublicCollectionDetail(listId: string): Promise<PublicCollectionDetailView | null> {
+    const record = await this.prisma.problemList.findFirst({
+      where: { id: listId, isPublic: true },
+      include: {
+        user: { select: authorSelect },
+        items: {
+          orderBy: { ordinal: 'asc' },
+          include: { problem: { select: problemSummarySelect } },
+        },
+      },
+    });
+    if (!record) {
+      return null;
+    }
+    return {
+      id: record.id,
+      name: record.name,
+      itemCount: record.items.length,
+      createdAt: record.createdAt,
+      author: {
+        id: record.user.id,
+        handle: record.user.handle,
+        firstName: record.user.firstName,
+        lastName: record.user.lastName,
+        headline: record.user.headline,
+      },
+      items: record.items.map((item) => ProblemSocialViewMapper.toCollectionItemView(item)),
+    };
+  }
+
+  async findAcceptedProblemIds(userId: string): Promise<string[]> {
+    const rows = await this.prisma.submission.findMany({
+      where: { userId, status: SubmissionStatus.ACCEPTED },
+      distinct: ['problemId'],
+      select: { problemId: true },
+    });
+    return rows.map((row) => row.problemId);
+  }
+
+  async forkCollection(sourceListId: string, userId: string, name: string): Promise<string> {
+    const problemIds = await this.listCollectionProblemIds(sourceListId);
+    const newListId = randomUUID();
+    await this.prisma.$transaction([
+      this.prisma.problemList.create({
+        data: { id: newListId, userId, name, isPublic: false },
+      }),
+      this.prisma.problemListItem.createMany({
+        data: problemIds.map((problemId, index) => ({
+          listId: newListId,
+          problemId,
+          ordinal: index,
+        })),
+      }),
+    ]);
+    return newListId;
+  }
+
   private async votedDiscussionIds(viewerId: string, ids: string[]): Promise<Set<string>> {
     if (ids.length === 0) {
       return new Set();
@@ -372,5 +461,35 @@ function toCollectionView(record: CollectionRecord): ProblemCollectionView {
     itemCount: items.length,
     items,
     createdAt: record.createdAt,
+  };
+}
+
+interface PublicCollectionRecord {
+  id: string;
+  name: string;
+  createdAt: Date;
+  user: {
+    id: string;
+    handle: string;
+    firstName: string | null;
+    lastName: string | null;
+    headline: string | null;
+  };
+  _count: { items: number };
+}
+
+function toPublicCollectionSummary(record: PublicCollectionRecord): PublicCollectionSummaryView {
+  return {
+    id: record.id,
+    name: record.name,
+    itemCount: record._count.items,
+    createdAt: record.createdAt,
+    author: {
+      id: record.user.id,
+      handle: record.user.handle,
+      firstName: record.user.firstName,
+      lastName: record.user.lastName,
+      headline: record.user.headline,
+    },
   };
 }
