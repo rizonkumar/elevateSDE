@@ -20,11 +20,12 @@ import { SubmissionService } from '../../application/submission.service';
 import { SubmissionStatusValue } from '@elevatesde/shared-types';
 import { RunAssessmentDto } from '../dtos/run-assessment.dto';
 import { AssessmentRunResponseDto } from '../dtos/assessment-run-response.dto';
-import { SubmissionResponseDto } from '../dtos/submission-response.dto';
 import { SubmissionAcceptedResponseDto } from '../dtos/submission-accepted-response.dto';
 import { SubmissionDetailResponseDto } from '../dtos/submission-detail-response.dto';
+import { ListSubmissionsQueryDto } from '../dtos/list-submissions-query.dto';
+import { SubmissionListResponseDto } from '../dtos/submission-list-response.dto';
 import { AssessmentPresentationMapper } from '../mappers/assessment-presentation.mapper';
-import { SubmissionPresentationMapper } from '../mappers/submission-presentation.mapper';
+import { SubmissionSummaryPresentationMapper } from '../mappers/submission-summary-presentation.mapper';
 import { SubmissionDetailPresentationMapper } from '../mappers/submission-detail-presentation.mapper';
 
 interface RequestWithUser {
