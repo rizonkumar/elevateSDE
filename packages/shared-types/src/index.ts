@@ -2,11 +2,67 @@ export interface UserDto {
   id: string;
   tenantId: string | null;
   email: string;
+  handle: string;
   firstName: string | null;
   lastName: string | null;
   headline: string | null;
+  bio: string | null;
+  isProfilePublic: boolean;
+  githubUrl: string | null;
+  linkedinUrl: string | null;
+  websiteUrl: string | null;
   role: string;
   createdAt: string;
+}
+
+export interface UpdateProfileDto {
+  handle?: string;
+  firstName?: string;
+  lastName?: string;
+  headline?: string;
+  bio?: string;
+  githubUrl?: string;
+  linkedinUrl?: string;
+  websiteUrl?: string;
+  isProfilePublic?: boolean;
+}
+
+export interface HandleAvailabilityDto {
+  handle: string;
+  available: boolean;
+}
+
+export interface PublicProfileStatsDto {
+  points: number;
+  rank: number | null;
+  streakDays: number;
+  longestStreak: number;
+  problemsSolved: number;
+  acceptanceRate: number;
+  byDifficulty: Record<AssessmentDifficulty, number>;
+}
+
+export interface PublicProblemCollectionSummaryDto {
+  id: string;
+  name: string;
+  itemCount: number;
+  createdAt: string;
+}
+
+export interface PublicProfileDto {
+  handle: string;
+  firstName: string | null;
+  lastName: string | null;
+  headline: string | null;
+  bio: string | null;
+  githubUrl: string | null;
+  linkedinUrl: string | null;
+  websiteUrl: string | null;
+  joinedAt: string;
+  stats: PublicProfileStatsDto;
+  badges: UserBadgeDto[];
+  heatmap: SubmissionHeatmapCellDto[];
+  publicLists: PublicProblemCollectionSummaryDto[];
 }
 
 export interface TenantDto {

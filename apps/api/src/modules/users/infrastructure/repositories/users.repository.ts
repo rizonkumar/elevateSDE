@@ -28,27 +28,33 @@ export class UsersRepository implements IUsersRepository {
     return UserMapper.toDomain(user);
   }
 
+  async findByHandle(handle: string): Promise<User | null> {
+    const user = await this.prisma.user.findUnique({
+      where: { handle },
+    });
+    if (!user) {
+      return null;
+    }
+    return UserMapper.toDomain(user);
+  }
+
+  async existsByHandle(handle: string, excludeUserId?: string): Promise<boolean> {
+    const match = await this.prisma.user.findUnique({
+      where: { handle },
+      select: { id: true },
+    });
+    if (!match) {
+      return false;
+    }
+    return match.id !== excludeUserId;
+  }
+
   async save(user: User): Promise<User> {
-    const data = UserMapper.toPersistence(user);
+    const { id, ...data } = UserMapper.toPersistence(user);
     const prismaUser = await this.prisma.user.upsert({
-      where: { id: user.getId() },
-      update: {
-        email: data.email,
-        passwordHash: data.passwordHash,
-        role: data.role,
-        tenantId: data.tenantId,
-        firstName: data.firstName,
-        lastName: data.lastName,
-      },
-      create: {
-        id: data.id,
-        email: data.email,
-        passwordHash: data.passwordHash,
-        role: data.role,
-        tenantId: data.tenantId,
-        firstName: data.firstName,
-        lastName: data.lastName,
-      },
+      where: { id },
+      update: data,
+      create: { id, ...data },
     });
     return UserMapper.toDomain(prismaUser);
   }

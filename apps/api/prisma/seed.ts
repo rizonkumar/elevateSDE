@@ -16,6 +16,16 @@ async function hashPassword(plain: string): Promise<string> {
   return bcrypt.hash(plain, salt);
 }
 
+function toHandle(email: string): string {
+  return (
+    email
+      .split('@')[0]
+      ?.toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '') ?? 'member'
+  );
+}
+
 async function main() {
   const password = await hashPassword('Password123!');
 
@@ -36,6 +46,7 @@ async function main() {
       email: 'admin@elevatesde.dev',
       passwordHash: password,
       role: 'ADMIN',
+      handle: toHandle('admin@elevatesde.dev'),
     },
   });
 
@@ -46,6 +57,7 @@ async function main() {
       email: 'candidate@elevatesde.dev',
       passwordHash: password,
       role: 'USER',
+      handle: toHandle('candidate@elevatesde.dev'),
     },
   });
 
@@ -57,6 +69,7 @@ async function main() {
       passwordHash: password,
       role: 'TENANT_ADMIN',
       tenantId: tenant.id,
+      handle: toHandle('org@elevatesde.dev'),
     },
   });
 
@@ -71,7 +84,13 @@ async function main() {
     await prisma.user.upsert({
       where: { email },
       update: { tenantId: tenant.id, role: 'USER' },
-      create: { email, passwordHash: password, role: 'USER', tenantId: tenant.id },
+      create: {
+        email,
+        passwordHash: password,
+        role: 'USER',
+        tenantId: tenant.id,
+        handle: toHandle(email),
+      },
     });
   }
 

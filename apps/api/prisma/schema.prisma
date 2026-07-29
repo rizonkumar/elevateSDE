@@ -118,9 +118,15 @@ model User {
   tenantId                      String?
   email                         String                         @unique
   passwordHash                  String
+  handle                        String                         @unique
   firstName                     String?
   lastName                      String?
   headline                      String?
+  bio                           String?
+  isProfilePublic               Boolean                        @default(true)
+  githubUrl                     String?
+  linkedinUrl                   String?
+  websiteUrl                    String?
   role                          UserRole                       @default(USER)
   createdAt                     DateTime                       @default(now())
   updatedAt                     DateTime                       @updatedAt
@@ -151,6 +157,8 @@ model User {
   pathEnrollments               PathEnrollment[]
   contestParticipations         ContestParticipant[]
   pointsAwards                  PointsAward[]
+
+  @@index([isProfilePublic])
 }
 
 model RefreshToken {

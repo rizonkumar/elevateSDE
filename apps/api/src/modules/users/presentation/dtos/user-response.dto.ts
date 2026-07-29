@@ -9,6 +9,9 @@ export class UserResponseDto implements UserDto {
   @ApiProperty({ example: 'candidate@example.com' })
   email!: string;
 
+  @ApiProperty({ example: 'ada-lovelace' })
+  handle!: string;
+
   @ApiPropertyOptional({ example: 'uuid-tenant-string', nullable: true })
   tenantId!: string | null;
 
@@ -20,6 +23,21 @@ export class UserResponseDto implements UserDto {
 
   @ApiPropertyOptional({ example: '3 YOE in Full Stack Development.', nullable: true })
   headline!: string | null;
+
+  @ApiPropertyOptional({ example: 'Building things that solve real problems.', nullable: true })
+  bio!: string | null;
+
+  @ApiProperty({ example: true })
+  isProfilePublic!: boolean;
+
+  @ApiPropertyOptional({ example: 'https://github.com/ada', nullable: true })
+  githubUrl!: string | null;
+
+  @ApiPropertyOptional({ example: 'https://linkedin.com/in/ada', nullable: true })
+  linkedinUrl!: string | null;
+
+  @ApiPropertyOptional({ example: 'https://ada.dev', nullable: true })
+  websiteUrl!: string | null;
 
   @ApiProperty({ enum: UserRole })
   role!: string;

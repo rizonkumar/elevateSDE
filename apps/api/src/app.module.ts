@@ -24,6 +24,7 @@ import { ContestModule } from './modules/contest/contest.module';
 import { LearningPathModule } from './modules/learning-path/learning-path.module';
 import { ScoringModule } from './modules/scoring/scoring.module';
 import { SchedulerModule } from './modules/scheduler/scheduler.module';
+import { ProfileModule } from './modules/profile/profile.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { SchedulerModule } from './modules/scheduler/scheduler.module';
     LearningPathModule,
     ScoringModule,
     SchedulerModule,
+    ProfileModule,
   ],
   controllers: [AppController],
   providers: [AppService],

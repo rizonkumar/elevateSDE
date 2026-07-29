@@ -233,6 +233,7 @@ export async function seedCommunity(prisma: PrismaClient, passwordHash: string):
         email,
         passwordHash,
         role: 'USER',
+        handle: toHandle(member.name, member.id),
         firstName,
         lastName,
         headline: member.headline,
@@ -398,4 +399,12 @@ function toEmail(name: string): string {
     .split(/\s+/)
     .join('.');
   return `${handle}@community.dev`;
+}
+
+function toHandle(name: string, id: string): string {
+  const slug = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+  return slug.length >= 3 ? slug : `member-${id.replace(/[^a-z0-9]/gi, '').slice(0, 8)}`;
 }

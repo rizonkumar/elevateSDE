@@ -4,6 +4,7 @@ import {
   Patch,
   Param,
   Body,
+  Query,
   UseGuards,
   Req,
   ForbiddenException,
@@ -16,6 +17,8 @@ import { Roles } from '../../../auth/decorators/roles.decorator';
 import { UserRole } from '@prisma/client';
 import { User } from '../../domain/entities/user';
 import { UserResponseDto } from '../dtos/user-response.dto';
+import { UpdateProfileDto } from '../dtos/update-profile.dto';
+import { HandleAvailabilityResponseDto } from '../dtos/handle-availability-response.dto';
 import { UserPresentationMapper } from '../mappers/user-presentation.mapper';
 
 interface RequestWithUser {
@@ -35,6 +38,31 @@ export class UsersController {
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   getMe(@Req() req: RequestWithUser): UserResponseDto {
     return UserPresentationMapper.toResponse(req.user);
+  }
+
+  @Patch('me')
+  @ApiOperation({ summary: 'Update the current user profile' })
+  @ApiResponse({ status: 200, type: UserResponseDto })
+  @ApiResponse({ status: 409, description: 'Handle already taken or reserved.' })
+  async updateMe(
+    @Body() dto: UpdateProfileDto,
+    @Req() req: RequestWithUser,
+  ): Promise<UserResponseDto> {
+    const updated = await this.usersService.updateProfile(req.user.getId(), dto);
+    return UserPresentationMapper.toResponse(updated);
+  }
+
+  @Get('handle-available')
+  @ApiOperation({ summary: 'Check whether a handle is available' })
+  @ApiResponse({ status: 200, type: HandleAvailabilityResponseDto })
+  async handleAvailable(
+    @Query('handle') handle: string,
+    @Req() req: RequestWithUser,
+  ): Promise<HandleAvailabilityResponseDto> {
+    const response = new HandleAvailabilityResponseDto();
+    response.handle = handle;
+    response.available = await this.usersService.isHandleAvailable(handle, req.user.getId());
+    return response;
   }
 
   @Patch(':id/role')
