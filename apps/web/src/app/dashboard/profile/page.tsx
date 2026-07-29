@@ -85,21 +85,40 @@ export default function ProfilePage() {
         <PageHeader kicker="Profile" title="Your coding profile" />
 
         <div className={cardClass}>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <span className="inline-flex h-16 w-16 shrink-0 items-center justify-center rounded-(--radius-full) bg-(--color-accent-soft) font-display text-xl font-semibold text-(--color-accent)">
-              {initials(user)}
-            </span>
-            <div className="min-w-0">
-              <h2 className="m-0 font-display text-xl font-semibold tracking-tight">
-                {displayName(user)}
-              </h2>
-              {user.headline && (
-                <p className="mt-1 mb-0 text-sm text-(--color-text-muted)">{user.headline}</p>
-              )}
-              <p className="mt-1 mb-0 text-xs text-(--color-text-muted)">
-                Joined {joinedLabel(user.createdAt)}
-              </p>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+              <span className="inline-flex h-16 w-16 shrink-0 items-center justify-center rounded-(--radius-full) bg-(--color-accent-soft) font-display text-xl font-semibold text-(--color-accent)">
+                {initials(user)}
+              </span>
+              <div className="min-w-0">
+                <h2 className="m-0 font-display text-xl font-semibold tracking-tight">
+                  {displayName(user)}
+                </h2>
+                {user.headline && (
+                  <p className="mt-1 mb-0 text-sm text-(--color-text-muted)">{user.headline}</p>
+                )}
+                <p className="mt-1 mb-0 text-xs text-(--color-text-muted)">
+                  Joined {joinedLabel(user.createdAt)}
+                </p>
+              </div>
             </div>
+            {user.isProfilePublic && (
+              <div className="flex shrink-0 items-center gap-2 self-start sm:self-center">
+                <Link href={`/u/${user.handle}`} target="_blank" rel="noopener noreferrer">
+                  <Button variant="secondary">View public profile</Button>
+                </Link>
+                <Button
+                  variant="tertiary"
+                  onClick={() => {
+                    void navigator.clipboard
+                      .writeText(`${window.location.origin}/u/${user.handle}`)
+                      .then(() => useToastStore.getState().addToast('Link copied.', 'success'));
+                  }}
+                >
+                  <Link2 className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
           </div>
         </div>
 
