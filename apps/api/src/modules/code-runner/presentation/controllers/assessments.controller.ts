@@ -87,17 +87,22 @@ export class AssessmentsController {
   }
 
   @Get('submissions')
-  @ApiOperation({ summary: 'List the current user submissions for a problem' })
-  @ApiResponse({ status: 200, type: [SubmissionResponseDto] })
+  @ApiOperation({ summary: 'List the current user submissions, optionally filtered' })
+  @ApiResponse({ status: 200, type: SubmissionListResponseDto })
   async submissions(
-    @Query('problemId') problemId: string,
+    @Query() query: ListSubmissionsQueryDto,
     @Req() req: RequestWithUser,
-  ): Promise<SubmissionResponseDto[]> {
-    const submissions = await this.submissionService.listForUserProblem(
-      req.user.getId(),
-      problemId,
-    );
-    return submissions.map((submission) => SubmissionPresentationMapper.toResponse(submission));
+  ): Promise<SubmissionListResponseDto> {
+    const page = query.page ?? 1;
+    const pageSize = query.pageSize ?? 20;
+    const result = await this.submissionService.listForUser(req.user.getId(), {
+      problemId: query.problemId,
+      status: query.status,
+      language: query.language ? toPrismaLanguage[query.language] : undefined,
+      page,
+      pageSize,
+    });
+    return SubmissionSummaryPresentationMapper.toListResponse(result, page, pageSize);
   }
 
   @Get('submissions/:id')
