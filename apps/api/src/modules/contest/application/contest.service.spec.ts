@@ -30,8 +30,7 @@ class FakeContestRepository implements Partial<IContestRepository> {
     let toEnded = 0;
     let toLive = 0;
     for (const row of this.rows) {
-      const eligible =
-        row.status === ContestStatus.SCHEDULED || row.status === ContestStatus.LIVE;
+      const eligible = row.status === ContestStatus.SCHEDULED || row.status === ContestStatus.LIVE;
       if (eligible && row.endsAt <= now) {
         row.status = ContestStatus.ENDED;
         toEnded += 1;

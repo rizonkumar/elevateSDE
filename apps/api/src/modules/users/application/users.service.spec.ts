@@ -160,9 +160,9 @@ describe('UsersService.updateProfile', () => {
     const { service } = buildService();
     const user = await seedUser(service);
 
-    await expect(service.updateProfile(user.getId(), { handle: 'settings' })).rejects.toBeInstanceOf(
-      ConflictException,
-    );
+    await expect(
+      service.updateProfile(user.getId(), { handle: 'settings' }),
+    ).rejects.toBeInstanceOf(ConflictException);
   });
 
   it('allows a user to keep their own handle unchanged', async () => {

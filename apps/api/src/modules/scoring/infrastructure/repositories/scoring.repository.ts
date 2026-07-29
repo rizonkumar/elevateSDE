@@ -170,7 +170,8 @@ export class ScoringRepository implements IScoringRepository {
     column: 'weeklyPoints' | 'monthlyPoints',
     windowStart: Date,
   ): Promise<number> {
-    const target = column === 'weeklyPoints' ? Prisma.raw('"weeklyPoints"') : Prisma.raw('"monthlyPoints"');
+    const target =
+      column === 'weeklyPoints' ? Prisma.raw('"weeklyPoints"') : Prisma.raw('"monthlyPoints"');
     return client.$executeRaw(Prisma.sql`
       UPDATE "UserStats" u
       SET ${target} = COALESCE(agg."total", 0),

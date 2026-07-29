@@ -188,7 +188,10 @@ class FakeProblemSocialRepository implements IProblemSocialRepository {
     search?: string;
     page: number;
     pageSize: number;
-  }): Promise<{ items: ReturnType<FakeProblemSocialRepository['toPublicSummary']>[]; total: number }> {
+  }): Promise<{
+    items: ReturnType<FakeProblemSocialRepository['toPublicSummary']>[];
+    total: number;
+  }> {
     const all = [...this.lists.values()]
       .filter((stored) => stored.entity.getIsPublic())
       .filter(
@@ -198,7 +201,9 @@ class FakeProblemSocialRepository implements IProblemSocialRepository {
       );
     const start = (filter.page - 1) * filter.pageSize;
     return {
-      items: all.slice(start, start + filter.pageSize).map((stored) => this.toPublicSummary(stored)),
+      items: all
+        .slice(start, start + filter.pageSize)
+        .map((stored) => this.toPublicSummary(stored)),
       total: all.length,
     };
   }
@@ -208,7 +213,13 @@ class FakeProblemSocialRepository implements IProblemSocialRepository {
     name: string;
     itemCount: number;
     createdAt: Date;
-    author: { id: string; handle: string; firstName: string | null; lastName: string | null; headline: string | null };
+    author: {
+      id: string;
+      handle: string;
+      firstName: string | null;
+      lastName: string | null;
+      headline: string | null;
+    };
     items: ProblemCollectionItemView[];
   } | null> {
     const stored = this.lists.get(listId);
