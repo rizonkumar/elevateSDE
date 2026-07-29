@@ -23,9 +23,17 @@ export class SubmissionSummaryResponseDto implements SubmissionSummaryDto {
   language!: AssessmentLanguage;
 
   @ApiProperty({
-    enum: ['ACCEPTED', 'WRONG_ANSWER', 'RUNTIME_ERROR', 'TIME_LIMIT_EXCEEDED', 'COMPILE_ERROR'],
+    enum: [
+      'QUEUED',
+      'RUNNING',
+      'ACCEPTED',
+      'WRONG_ANSWER',
+      'RUNTIME_ERROR',
+      'TIME_LIMIT_EXCEEDED',
+      'COMPILE_ERROR',
+    ],
   })
-  status!: string;
+  status!: SubmissionStatusValue;
 
   @ApiProperty({ example: 4 })
   passedCount!: number;
