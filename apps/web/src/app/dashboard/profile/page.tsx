@@ -1,24 +1,24 @@
 'use client';
 
 import * as React from 'react';
+import Link from 'next/link';
 import { RadialBar, RadialBarChart, PolarAngleAxis, ResponsiveContainer } from 'recharts';
-import { Award, Flame, Trophy, Zap } from 'lucide-react';
-import { Badge } from '@elevatesde/ui';
+import { Award, Flame, Link2, Trophy, Zap } from 'lucide-react';
+import { Badge, Button } from '@elevatesde/ui';
 import type { AssessmentDifficulty, UserDto } from '@elevatesde/shared-types';
 import { PageContainer } from '@/components/dashboard/PageContainer';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { ContributionHeatmap } from '@/components/dashboard/profile/ContributionHeatmap';
 import { ProfileAchievements } from '@/components/dashboard/profile/ProfileAchievements';
 import { useProfileStore } from '@/store/profile.store';
+import { useToastStore } from '@/store/toast.store';
+import { cardClass } from '@/lib/ui-classes';
 
 const DIFFICULTIES: { key: AssessmentDifficulty; label: string; tone: string }[] = [
   { key: 'EASY', label: 'Easy', tone: 'text-(--color-success)' },
   { key: 'MEDIUM', label: 'Medium', tone: 'text-(--color-warning)' },
   { key: 'HARD', label: 'Hard', tone: 'text-(--color-danger)' },
 ];
-
-const cardClass =
-  'rounded-md border border-(--color-border-subtle) bg-(--color-surface) p-6 shadow-(--shadow-card)';
 
 function initials(user: UserDto): string {
   const first = user.firstName?.trim()?.[0];
