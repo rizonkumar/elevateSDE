@@ -7,6 +7,7 @@ import { QUEUE_NAMES } from '../../../queues/domain/queue-names';
 import { CodeExecutionJobData } from '../../../queues/domain/interfaces/code-execution-queue.interface';
 import { DailyChallengeService } from '../../../daily-challenge/application/daily-challenge.service';
 import { AchievementService } from '../../../achievement/application/achievement.service';
+import { ScoringService } from '../../../scoring/application/scoring.service';
 import {
   NOTIFICATION_EVENTS,
   SubmissionAcceptedEvent,
@@ -23,6 +24,7 @@ export class CodeExecutionProcessor extends WorkerHost {
   constructor(
     private readonly codeRunnerService: CodeRunnerService,
     private readonly submissionService: SubmissionService,
+    private readonly scoringService: ScoringService,
     private readonly dailyChallengeService: DailyChallengeService,
     private readonly achievementService: AchievementService,
     private readonly eventEmitter: EventEmitter2,
@@ -36,11 +38,15 @@ export class CodeExecutionProcessor extends WorkerHost {
     const outcome = await this.codeRunnerService.evaluate(problemId, language, code, true);
     await this.submissionService.applyResult(submissionId, outcome);
     if (outcome.status === SubmissionStatus.ACCEPTED) {
+      const award = await this.scoringService.awardForAcceptedSubmission(userId, problemId);
       await this.dailyChallengeService.registerCompletion(userId, problemId, submissionId);
       await this.achievementService.evaluate(userId);
       this.eventEmitter.emit(NOTIFICATION_EVENTS.SUBMISSION_ACCEPTED, {
         userId,
         problemId,
+        submissionId,
+        firstSolve: award.firstSolve,
+        pointsAwarded: award.pointsAwarded,
       } satisfies SubmissionAcceptedEvent);
     }
   }

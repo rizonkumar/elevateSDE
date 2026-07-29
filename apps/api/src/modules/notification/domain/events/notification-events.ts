@@ -33,4 +33,7 @@ export interface ForumUpvoteEvent {
 export interface SubmissionAcceptedEvent {
   userId: string;
   problemId: string;
+  submissionId: string;
+  firstSolve: boolean;
+  pointsAwarded: number;
 }

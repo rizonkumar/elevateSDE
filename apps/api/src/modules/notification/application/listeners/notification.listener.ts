@@ -67,7 +67,10 @@ export class NotificationListener {
       userId: event.userId,
       type: 'SUBMISSION_ACCEPTED',
       title: 'Solution accepted',
-      body: 'Your submission passed all test cases.',
+      body:
+        event.pointsAwarded > 0
+          ? `Your submission passed all test cases. +${event.pointsAwarded} points.`
+          : 'Your submission passed all test cases.',
       linkUrl: `/dashboard/assessment/${event.problemId}`,
     });
   }

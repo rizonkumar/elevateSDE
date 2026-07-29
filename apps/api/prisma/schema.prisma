@@ -26,6 +26,10 @@ enum AssessmentDifficulty {
   HARD
 }
 
+enum PointsSource {
+  FIRST_SOLVE
+}
+
 enum AssessmentLanguage {
   JAVASCRIPT
   PYTHON
@@ -146,6 +150,7 @@ model User {
   reviewItems                   ReviewItem[]
   pathEnrollments               PathEnrollment[]
   contestParticipations         ContestParticipant[]
+  pointsAwards                  PointsAward[]
 }
 
 model RefreshToken {
@@ -352,6 +357,24 @@ model UserStats {
   lastActiveDate       DateTime? @db.Date
   updatedAt            DateTime  @updatedAt
   user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([points])
+  @@index([monthlyPoints])
+  @@index([weeklyPoints])
+}
+
+model PointsAward {
+  id        String       @id @default(uuid())
+  userId    String
+  source    PointsSource
+  sourceRef String
+  points    Int
+  awardedAt DateTime     @default(now())
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, source, sourceRef])
+  @@index([userId, awardedAt])
+  @@index([awardedAt])
 }
 
 model Invitation {

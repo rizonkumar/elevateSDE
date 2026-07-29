@@ -362,6 +362,15 @@ export interface LeaderboardEntryDto {
   isCurrentUser: boolean;
 }
 
+export type PointsSource = 'FIRST_SOLVE';
+
+export interface ScoringBackfillResultDto {
+  usersTouched: number;
+  awardsInserted: number;
+  pointsAwarded: number;
+  dryRun: boolean;
+}
+
 export interface DashboardJobTrackerStats {
   total: number;
   byStatus: Record<JobApplicationStatus, number>;

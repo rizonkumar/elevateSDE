@@ -22,6 +22,7 @@ import { ProblemSocialModule } from './modules/problem-social/problem-social.mod
 import { ReviewModule } from './modules/review/review.module';
 import { ContestModule } from './modules/contest/contest.module';
 import { LearningPathModule } from './modules/learning-path/learning-path.module';
+import { ScoringModule } from './modules/scoring/scoring.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { LearningPathModule } from './modules/learning-path/learning-path.module
     ReviewModule,
     ContestModule,
     LearningPathModule,
+    ScoringModule,
   ],
   controllers: [AppController],
   providers: [AppService],
