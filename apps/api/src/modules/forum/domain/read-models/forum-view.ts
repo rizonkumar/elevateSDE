@@ -2,6 +2,7 @@ import { ForumPostStatus } from '@prisma/client';
 
 export interface ForumAuthorView {
   id: string;
+  handle: string;
   firstName: string | null;
   lastName: string | null;
   headline: string | null;

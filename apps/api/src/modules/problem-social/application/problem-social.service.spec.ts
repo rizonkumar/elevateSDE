@@ -28,6 +28,8 @@ class FakeProblemSocialRepository implements IProblemSocialRepository {
   bookmarks = new Set<string>();
   notes = new Map<string, { body: string; updatedAt: Date }>();
   lists = new Map<string, StoredList>();
+  acceptedProblemIds = new Map<string, string[]>();
+  forkCounter = 0;
 
   async problemExists(problemId: string): Promise<boolean> {
     return this.problems.has(problemId);
@@ -182,8 +184,89 @@ class FakeProblemSocialRepository implements IProblemSocialRepository {
     stored.items = orderedProblemIds.map((problemId, index) => ({ problemId, ordinal: index }));
   }
 
-  seedList(id: string, userId: string, problemIds: string[]): void {
-    const entity = ProblemList.create(id, userId, `list-${id}`, false);
+  async listPublicCollections(filter: {
+    search?: string;
+    page: number;
+    pageSize: number;
+  }): Promise<{ items: ReturnType<FakeProblemSocialRepository['toPublicSummary']>[]; total: number }> {
+    const all = [...this.lists.values()]
+      .filter((stored) => stored.entity.getIsPublic())
+      .filter(
+        (stored) =>
+          !filter.search ||
+          stored.entity.getName().toLowerCase().includes(filter.search.toLowerCase()),
+      );
+    const start = (filter.page - 1) * filter.pageSize;
+    return {
+      items: all.slice(start, start + filter.pageSize).map((stored) => this.toPublicSummary(stored)),
+      total: all.length,
+    };
+  }
+
+  async findPublicCollectionDetail(listId: string): Promise<{
+    id: string;
+    name: string;
+    itemCount: number;
+    createdAt: Date;
+    author: { id: string; handle: string; firstName: string | null; lastName: string | null; headline: string | null };
+    items: ProblemCollectionItemView[];
+  } | null> {
+    const stored = this.lists.get(listId);
+    if (!stored || !stored.entity.getIsPublic()) {
+      return null;
+    }
+    const summary = this.toPublicSummary(stored);
+    return { ...summary, items: this.toItemViews(stored) };
+  }
+
+  async findAcceptedProblemIds(userId: string): Promise<string[]> {
+    return this.acceptedProblemIds.get(userId) ?? [];
+  }
+
+  async forkCollection(sourceListId: string, userId: string, name: string): Promise<string> {
+    const source = this.lists.get(sourceListId);
+    this.forkCounter += 1;
+    const newId = `fork-${this.forkCounter}`;
+    const entity = ProblemList.create(newId, userId, name, false);
+    this.lists.set(newId, {
+      entity,
+      items: source ? [...source.items] : [],
+    });
+    return newId;
+  }
+
+  private toPublicSummary(stored: StoredList) {
+    return {
+      id: stored.entity.getId(),
+      name: stored.entity.getName(),
+      itemCount: stored.items.length,
+      createdAt: stored.entity.getCreatedAt(),
+      author: {
+        id: stored.entity.getUserId(),
+        handle: stored.entity.getUserId(),
+        firstName: null,
+        lastName: null,
+        headline: null,
+      },
+    };
+  }
+
+  private toItemViews(stored: StoredList): ProblemCollectionItemView[] {
+    return stored.items.map((item) => ({
+      id: `${stored.entity.getId()}:${item.problemId}`,
+      ordinal: item.ordinal,
+      problem: {
+        id: item.problemId,
+        title: item.problemId,
+        difficulty: 'EASY' as AssessmentDifficulty,
+        tags: [],
+        timeLimitMinutes: 30,
+      },
+    }));
+  }
+
+  seedList(id: string, userId: string, problemIds: string[], isPublic = false): void {
+    const entity = ProblemList.create(id, userId, `list-${id}`, isPublic);
     this.lists.set(id, {
       entity,
       items: problemIds.map((problemId, index) => ({ problemId, ordinal: index })),
@@ -252,6 +335,60 @@ describe('ProblemSocialService', () => {
         ForbiddenException,
       );
       await expect(service.getCollection(OWNER, 'missing')).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
+    });
+  });
+
+  describe('public collections', () => {
+    it('only ever lists public collections', async () => {
+      repository.seedList('private-1', OWNER, ['A'], false);
+      repository.seedList('public-1', OWNER, ['A', 'B'], true);
+
+      const page = await service.listPublicCollections({ page: 1, pageSize: 20 });
+
+      expect(page.items.map((item) => item.id)).toEqual(['public-1']);
+    });
+
+    it('404s for a private list requested via the public endpoint', async () => {
+      repository.seedList('private-1', OWNER, ['A'], false);
+
+      await expect(service.getPublicCollection('private-1', null)).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
+    });
+
+    it('returns an empty viewer-progress array for an anonymous viewer', async () => {
+      repository.seedList('public-1', OWNER, ['A', 'B'], true);
+
+      const detail = await service.getPublicCollection('public-1', null);
+
+      expect(detail.viewerSolvedProblemIds).toEqual([]);
+    });
+
+    it('includes viewer progress only when a viewer is authenticated', async () => {
+      repository.seedList('public-1', OWNER, ['A', 'B'], true);
+      repository.acceptedProblemIds.set(OTHER, ['A']);
+
+      const detail = await service.getPublicCollection('public-1', OTHER);
+
+      expect(detail.viewerSolvedProblemIds).toEqual(['A']);
+    });
+
+    it('forks a public list into a new private list owned by the requester', async () => {
+      repository.seedList('public-1', OWNER, ['A', 'B'], true);
+
+      const forked = await service.forkPublicCollection(OTHER, 'public-1');
+
+      expect(forked.isPublic).toBe(false);
+      expect(forked.items.map((item) => item.problem.id)).toEqual(['A', 'B']);
+      expect(forked.name).toContain('(copy)');
+    });
+
+    it('404s when forking a list that is not public', async () => {
+      repository.seedList('private-1', OWNER, ['A'], false);
+
+      await expect(service.forkPublicCollection(OTHER, 'private-1')).rejects.toBeInstanceOf(
         NotFoundException,
       );
     });

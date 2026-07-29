@@ -11,6 +11,7 @@ import { ForumViewMapper } from '../mappers/forum-view.mapper';
 const authorSelect = {
   id: true,
   email: true,
+  handle: true,
   firstName: true,
   lastName: true,
   headline: true,

@@ -5,6 +5,9 @@ export class ForumAuthorResponseDto implements ForumAuthor {
   @ApiProperty({ example: 'u-kenji' })
   id!: string;
 
+  @ApiProperty({ example: 'kenji-watanabe' })
+  handle!: string;
+
   @ApiProperty({ example: 'Kenji Watanabe' })
   name!: string;
 

@@ -60,6 +60,7 @@ export class ForumPresentationMapper {
 function toAuthor(author: ForumAuthorView): ForumAuthorResponseDto {
   const dto = new ForumAuthorResponseDto();
   dto.id = author.id;
+  dto.handle = author.handle;
   dto.name = buildName(author.firstName, author.lastName);
   dto.headline = author.headline;
   return dto;

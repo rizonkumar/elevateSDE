@@ -5,10 +5,16 @@ import { ProblemSocialService } from './application/problem-social.service';
 import { ProblemDiscussionController } from './presentation/controllers/problem-discussion.controller';
 import { DiscussionController } from './presentation/controllers/discussion.controller';
 import { MeCurationController } from './presentation/controllers/me-curation.controller';
+import { PublicCollectionController } from './presentation/controllers/public-collection.controller';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 
 @Module({
-  controllers: [ProblemDiscussionController, DiscussionController, MeCurationController],
+  controllers: [
+    ProblemDiscussionController,
+    DiscussionController,
+    MeCurationController,
+    PublicCollectionController,
+  ],
   providers: [
     ProblemSocialService,
     PrismaService,

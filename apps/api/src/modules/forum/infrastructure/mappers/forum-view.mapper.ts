@@ -9,6 +9,7 @@ import {
 interface AuthorRecord {
   id: string;
   email: string;
+  handle: string;
   firstName: string | null;
   lastName: string | null;
   headline: string | null;
@@ -79,6 +80,7 @@ export class ForumViewMapper {
 function toAuthorView(record: AuthorRecord): ForumAuthorView {
   return {
     id: record.id,
+    handle: record.handle,
     firstName: record.firstName,
     lastName: record.lastName,
     headline: record.headline,
