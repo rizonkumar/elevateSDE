@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import type { ForumAuthor } from '@elevatesde/shared-types';
 import { AuthorAvatar } from '@/components/dashboard/AuthorAvatar';
 import { UpvoteButton } from '@/components/dashboard/forum/UpvoteButton';
@@ -25,7 +26,12 @@ export function CommentItem({ comment, onUpvote }: Readonly<CommentItemProps>) {
       <AuthorAvatar name={comment.author.name} size="md" />
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-(--color-text-muted)">
-          <span className="font-semibold text-(--color-text-primary)">{comment.author.name}</span>
+          <Link
+            href={`/u/${comment.author.handle}`}
+            className="font-semibold text-(--color-text-primary) hover:text-(--color-accent)"
+          >
+            {comment.author.name}
+          </Link>
           {comment.author.headline && <span>· {comment.author.headline}</span>}
           <span>· {formatRelativeTime(comment.createdAt)}</span>
         </div>

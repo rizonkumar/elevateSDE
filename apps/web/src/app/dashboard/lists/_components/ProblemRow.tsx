@@ -9,7 +9,7 @@ import { DIFFICULTY_LABEL, DIFFICULTY_VARIANT } from '@/lib/difficulty';
 interface ProblemRowProps {
   problem: ProblemSummaryDto;
   solved: boolean;
-  onRemove: () => void;
+  onRemove?: () => void;
   showHandle?: boolean;
   showStatus?: boolean;
 }
@@ -58,14 +58,16 @@ export function ProblemRow({
           ))}
         </div>
       </div>
-      <button
-        type="button"
-        onClick={onRemove}
-        aria-label={`Remove ${problem.title}`}
-        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-(--color-text-muted) transition-colors hover:bg-(--color-badge-bg) hover:text-(--color-danger) cursor-pointer"
-      >
-        <X className="h-4 w-4" />
-      </button>
+      {onRemove && (
+        <button
+          type="button"
+          onClick={onRemove}
+          aria-label={`Remove ${problem.title}`}
+          className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-(--color-text-muted) transition-colors hover:bg-(--color-badge-bg) hover:text-(--color-danger) cursor-pointer"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      )}
     </div>
   );
 }

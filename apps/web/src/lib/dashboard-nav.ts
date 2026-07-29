@@ -15,6 +15,7 @@ import {
   Swords,
   Repeat,
   UserRound,
+  Settings,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -40,6 +41,7 @@ const BASE_LINKS: DashboardNavItem[] = [
   { href: '/dashboard/achievements', label: 'Achievements', icon: Award },
   { href: '/dashboard/notifications', label: 'Notifications', icon: Bell },
   { href: '/dashboard/profile', label: 'Profile', icon: UserRound },
+  { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ];
 
 export function buildNavLinks(role?: string): DashboardNavItem[] {

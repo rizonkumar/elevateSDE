@@ -45,10 +45,13 @@ export function PostCard({ post, onUpvote }: Readonly<PostCardProps>) {
             </div>
           )}
           <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-(--color-text-muted)">
-            <span className="inline-flex items-center gap-2">
+            <Link
+              href={`/u/${post.author.handle}`}
+              className="inline-flex items-center gap-2 hover:text-(--color-accent)"
+            >
               <AuthorAvatar name={post.author.name} size="sm" />
               <span className="font-medium text-(--color-text-primary)">{post.author.name}</span>
-            </span>
+            </Link>
             <span>{formatRelativeTime(post.createdAt)}</span>
             <span className="inline-flex items-center gap-1">
               <MessageSquare className="h-3.5 w-3.5" />

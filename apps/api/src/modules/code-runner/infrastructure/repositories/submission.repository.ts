@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { ISubmissionRepository } from '../../domain/interfaces/submission-repository.interface';
+import {
+  ISubmissionRepository,
+  SubmissionListFilter,
+} from '../../domain/interfaces/submission-repository.interface';
 import { Submission } from '../../domain/entities/submission';
+import { SubmissionListPage } from '../../domain/read-models/submission-summary-view';
 import { SubmissionMapper } from '../mappers/submission.mapper';
 import { PrismaService } from '../../../../infrastructure/prisma/prisma.service';
 
@@ -55,13 +59,39 @@ export class SubmissionRepository implements ISubmissionRepository {
     return record ? SubmissionMapper.toDomain(record) : null;
   }
 
-  async findByUserAndProblem(userId: string, problemId: string): Promise<Submission[]> {
-    const records = await this.prisma.submission.findMany({
-      where: { userId, problemId },
-      orderBy: { createdAt: 'desc' },
-      include: { results: true },
-    });
-    return records.map((record) => SubmissionMapper.toDomain(record));
+  async findForUser(userId: string, filter: SubmissionListFilter): Promise<SubmissionListPage> {
+    const where: Prisma.SubmissionWhereInput = {
+      userId,
+      ...(filter.problemId ? { problemId: filter.problemId } : {}),
+      ...(filter.status ? { status: filter.status } : {}),
+      ...(filter.language ? { language: filter.language } : {}),
+    };
+    const [records, total] = await Promise.all([
+      this.prisma.submission.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: (filter.page - 1) * filter.pageSize,
+        take: filter.pageSize,
+        include: { problem: { select: { title: true, difficulty: true } } },
+      }),
+      this.prisma.submission.count({ where }),
+    ]);
+    return {
+      items: records.map((record) => ({
+        id: record.id,
+        problemId: record.problemId,
+        problemTitle: record.problem.title,
+        problemDifficulty: record.problem.difficulty,
+        language: record.language,
+        status: record.status,
+        passedCount: record.passedCount,
+        totalCount: record.totalCount,
+        totalRuntimeMs: record.totalRuntimeMs,
+        peakMemoryKb: record.peakMemoryKb,
+        createdAt: record.createdAt,
+      })),
+      total,
+    };
   }
 
   private toResultRows(

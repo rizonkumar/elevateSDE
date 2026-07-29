@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import Link from 'next/link';
 import { ArrowLeft, MessageSquare, MessagesSquare, Plus } from 'lucide-react';
 import { Button, Textarea } from '@elevatesde/ui';
 import type { ProblemDiscussionCommentDto, ProblemDiscussionDto } from '@elevatesde/shared-types';
@@ -89,9 +90,13 @@ export function DiscussionTab({ problemId }: Readonly<DiscussionTabProps>) {
             </h3>
             <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-(--color-text-muted)">
               <AuthorAvatar name={selected.author.name} size="sm" />
-              <span className="font-medium text-(--color-text-primary)">
+              <Link
+                href={`/u/${selected.author.handle}`}
+                target="_blank"
+                className="font-medium text-(--color-text-primary) hover:text-(--color-accent)"
+              >
                 {selected.author.name}
-              </span>
+              </Link>
               {selected.author.headline && <span>· {selected.author.headline}</span>}
               <span>· {formatRelativeTime(selected.createdAt)}</span>
             </div>

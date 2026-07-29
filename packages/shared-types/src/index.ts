@@ -349,6 +349,27 @@ export interface SubmissionDetailDto {
   updatedAt: string;
 }
 
+export interface SubmissionSummaryDto {
+  id: string;
+  problemId: string;
+  problemTitle: string;
+  problemDifficulty: AssessmentDifficulty;
+  language: AssessmentLanguage;
+  status: SubmissionStatusValue;
+  passedCount: number;
+  totalCount: number;
+  totalRuntimeMs: number;
+  peakMemoryKb: number;
+  createdAt: string;
+}
+
+export interface SubmissionListDto {
+  items: SubmissionSummaryDto[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
 export type ForumSortOption = 'newest' | 'popular' | 'unanswered';
 
 export type ForumPostStatus = 'PUBLISHED' | 'FLAGGED' | 'REMOVED';

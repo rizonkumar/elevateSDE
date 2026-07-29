@@ -7,6 +7,8 @@ import type {
   ProblemDiscussionCommentDto,
   ProblemDiscussionDto,
   ProblemNoteDto,
+  PublicCollectionListDto,
+  PublicCollectionSummaryDto,
 } from '@elevatesde/shared-types';
 import { api } from '@/lib/api';
 import { useToastStore } from '@/store/toast.store';
@@ -24,11 +26,14 @@ interface ProblemSocialState {
   bookmarkedProblemIds: Record<string, boolean>;
   bookmarks: BookmarkDto[];
   lists: ProblemCollectionDto[];
+  publicLists: PublicCollectionSummaryDto[];
+  publicListsTotal: number;
   solvedProblemIds: string[];
   isLoadingDiscussions: boolean;
   isLoadingComments: boolean;
   isSavingNote: boolean;
   isLoadingLists: boolean;
+  isLoadingPublicLists: boolean;
   hasLoadedLists: boolean;
   hasLoadedBookmarks: boolean;
   hasLoadedSolved: boolean;
@@ -47,10 +52,13 @@ interface ProblemSocialState {
   fetchLists: () => Promise<void>;
   createList: (name: string) => Promise<ProblemCollectionDto | null>;
   renameList: (listId: string, name: string) => Promise<void>;
+  setListVisibility: (listId: string, isPublic: boolean) => Promise<void>;
   deleteList: (listId: string) => Promise<void>;
   addProblemToList: (listId: string, problemId: string) => Promise<void>;
   removeProblemFromList: (listId: string, problemId: string) => Promise<void>;
   reorderList: (listId: string, orderedProblemIds: string[]) => Promise<void>;
+  fetchPublicLists: (search?: string, page?: number) => Promise<void>;
+  forkList: (listId: string) => Promise<ProblemCollectionDto | null>;
 }
 
 function bookmarkMap(bookmarks: BookmarkDto[]): Record<string, boolean> {
@@ -81,11 +89,14 @@ export const useProblemSocialStore = create<ProblemSocialState>((set, get) => ({
   bookmarkedProblemIds: {},
   bookmarks: [],
   lists: [],
+  publicLists: [],
+  publicListsTotal: 0,
   solvedProblemIds: [],
   isLoadingDiscussions: false,
   isLoadingComments: false,
   isSavingNote: false,
   isLoadingLists: false,
+  isLoadingPublicLists: false,
   hasLoadedLists: false,
   hasLoadedBookmarks: false,
   hasLoadedSolved: false,
@@ -358,6 +369,25 @@ export const useProblemSocialStore = create<ProblemSocialState>((set, get) => ({
     }
   },
 
+  setListVisibility: async (listId, isPublic) => {
+    const previous = get().lists;
+    set({
+      lists: previous.map((list) => (list.id === listId ? { ...list, isPublic } : list)),
+    });
+    try {
+      const { data } = await api.patch<ProblemCollectionDto>(`/api/v1/me/lists/${listId}`, {
+        isPublic,
+      });
+      set((state) => ({ lists: state.lists.map((list) => (list.id === listId ? data : list)) }));
+      useToastStore
+        .getState()
+        .addToast(isPublic ? 'List is now public.' : 'List is now private.', 'success');
+    } catch {
+      set({ lists: previous });
+      useToastStore.getState().addToast('Could not update list visibility.', 'error');
+    }
+  },
+
   deleteList: async (listId) => {
     const previous = get().lists;
     set({ lists: previous.filter((list) => list.id !== listId) });
@@ -425,6 +455,35 @@ export const useProblemSocialStore = create<ProblemSocialState>((set, get) => ({
     } catch {
       set({ lists: previous });
       useToastStore.getState().addToast('Could not reorder the list.', 'error');
+    }
+  },
+
+  fetchPublicLists: async (search, page = 1) => {
+    set({ isLoadingPublicLists: true });
+    try {
+      const { data } = await api.get<PublicCollectionListDto>('/api/v1/public/lists', {
+        params: { search: search || undefined, page, pageSize: 20 },
+      });
+      set({
+        publicLists: data.items,
+        publicListsTotal: data.total,
+        isLoadingPublicLists: false,
+      });
+    } catch {
+      set({ isLoadingPublicLists: false });
+      useToastStore.getState().addToast('Could not load public lists.', 'error');
+    }
+  },
+
+  forkList: async (listId) => {
+    try {
+      const { data } = await api.post<ProblemCollectionDto>(`/api/v1/me/lists/${listId}/fork`);
+      set((state) => ({ lists: [data, ...state.lists] }));
+      useToastStore.getState().addToast('List added to your lists.', 'success');
+      return data;
+    } catch {
+      useToastStore.getState().addToast('Could not fork this list.', 'error');
+      return null;
     }
   },
 }));

@@ -1,8 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { ISubmissionRepository } from '../domain/interfaces/submission-repository.interface';
+import {
+  ISubmissionRepository,
+  SubmissionListFilter,
+} from '../domain/interfaces/submission-repository.interface';
 import { Submission } from '../domain/entities/submission';
 import { SubmissionResult } from '../domain/entities/submission-result';
+import { SubmissionListPage } from '../domain/read-models/submission-summary-view';
 import { ProblemLanguage } from '../../problem/domain/entities/problem';
 import { AssessmentRunOutcome } from './assessment-outcome';
 import { toPrismaLanguage } from './language';
@@ -74,7 +78,7 @@ export class SubmissionService {
     return submission;
   }
 
-  async listForUserProblem(userId: string, problemId: string): Promise<Submission[]> {
-    return this.submissionRepository.findByUserAndProblem(userId, problemId);
+  async listForUser(userId: string, filter: SubmissionListFilter): Promise<SubmissionListPage> {
+    return this.submissionRepository.findForUser(userId, filter);
   }
 }

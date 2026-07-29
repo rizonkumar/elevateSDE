@@ -1,8 +1,9 @@
 'use client';
 
 import * as React from 'react';
-import { Bookmark, Check, ListChecks, Pencil, Plus, Trash2, X } from 'lucide-react';
-import { Badge, Button, ConfirmDialog, Input, Modal } from '@elevatesde/ui';
+import Link from 'next/link';
+import { Bookmark, Check, Compass, ListChecks, Pencil, Plus, Trash2, X } from 'lucide-react';
+import { Badge, Button, ConfirmDialog, Input, Modal, Toggle } from '@elevatesde/ui';
 import type { ProblemSummaryDto } from '@elevatesde/shared-types';
 import { PageContainer } from '@/components/dashboard/PageContainer';
 import { PageHeader } from '@/components/dashboard/PageHeader';
@@ -64,6 +65,7 @@ export default function ListsPage() {
   const fetchSolvedProblemIds = useProblemSocialStore((state) => state.fetchSolvedProblemIds);
   const createList = useProblemSocialStore((state) => state.createList);
   const renameList = useProblemSocialStore((state) => state.renameList);
+  const setListVisibility = useProblemSocialStore((state) => state.setListVisibility);
   const deleteList = useProblemSocialStore((state) => state.deleteList);
   const removeProblemFromList = useProblemSocialStore((state) => state.removeProblemFromList);
   const reorderList = useProblemSocialStore((state) => state.reorderList);
@@ -156,15 +158,23 @@ export default function ListsPage() {
           title="My Lists"
           description="Group problems into custom lists you can revisit, reorder, and track your progress on."
           actions={
-            <Button
-              onClick={() => {
-                setNewName('');
-                setCreating(true);
-              }}
-            >
-              <Plus className="h-4 w-4" />
-              New list
-            </Button>
+            <>
+              <Link href="/dashboard/lists/browse">
+                <Button variant="secondary">
+                  <Compass className="h-4 w-4" />
+                  Browse public lists
+                </Button>
+              </Link>
+              <Button
+                onClick={() => {
+                  setNewName('');
+                  setCreating(true);
+                }}
+              >
+                <Plus className="h-4 w-4" />
+                New list
+              </Button>
+            </>
           }
         />
 
@@ -238,6 +248,14 @@ export default function ListsPage() {
                   actions={
                     renaming ? undefined : (
                       <>
+                        <label className="flex items-center gap-2 text-xs font-medium text-(--color-text-muted)">
+                          Public
+                          <Toggle
+                            checked={selected.isPublic}
+                            onChange={(next) => void setListVisibility(selected.id, next)}
+                            label="Toggle list visibility"
+                          />
+                        </label>
                         <button
                           type="button"
                           onClick={() => {

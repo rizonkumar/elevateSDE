@@ -27,7 +27,7 @@ const DIFFICULTY_TABS: TabItem[] = [
 interface QuestionsPanelProps {
   problems: ProblemSummaryDto[];
   solvedSet: Set<string>;
-  onRemove: (problemId: string) => void;
+  onRemove?: (problemId: string) => void;
   emptyMessage: string;
   reorderable?: boolean;
   onReorder?: (orderedProblemIds: string[]) => void;
@@ -138,7 +138,7 @@ export function QuestionsPanel({
               <ProblemRow
                 problem={problem}
                 solved={solvedSet.has(problem.id)}
-                onRemove={() => onRemove(problem.id)}
+                onRemove={onRemove ? () => onRemove(problem.id) : undefined}
                 showHandle
                 showStatus={anySolved}
               />
@@ -157,7 +157,7 @@ export function QuestionsPanel({
                 <ProblemRow
                   problem={problem}
                   solved={solvedSet.has(problem.id)}
-                  onRemove={() => onRemove(problem.id)}
+                  onRemove={onRemove ? () => onRemove(problem.id) : undefined}
                   showStatus={anySolved}
                 />
               </li>
