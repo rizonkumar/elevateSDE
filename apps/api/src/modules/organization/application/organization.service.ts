@@ -140,6 +140,10 @@ export class OrganizationService {
     };
   }
 
+  async expireStaleInvitations(now: Date): Promise<number> {
+    return this.organizationRepository.expirePendingBefore(now);
+  }
+
   async accept(token: string, user: AcceptingUser): Promise<Invitation> {
     const invitation = await this.organizationRepository.findInvitationByToken(token);
     if (!invitation) {

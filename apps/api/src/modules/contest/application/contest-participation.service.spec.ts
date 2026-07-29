@@ -43,6 +43,10 @@ class FakeRepository implements IContestRepository {
   async list(): Promise<ContestSummaryView[]> {
     return [];
   }
+
+  async applyStatusTransitions(): Promise<{ toLive: number; toEnded: number }> {
+    return { toLive: 0, toEnded: 0 };
+  }
   async listVisible(): Promise<ContestSummaryView[]> {
     return this.detail ? [this.detail] : [];
   }

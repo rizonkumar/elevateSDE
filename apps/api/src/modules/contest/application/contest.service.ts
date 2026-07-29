@@ -5,7 +5,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ContestStatus } from '@prisma/client';
-import { IContestRepository } from '../domain/interfaces/contest-repository.interface';
+import {
+  ContestStatusTransitionResult,
+  IContestRepository,
+} from '../domain/interfaces/contest-repository.interface';
 import { Contest } from '../domain/entities/contest';
 import { deriveContestStatus } from '../domain/contest-status';
 import {
@@ -32,6 +35,10 @@ export class ContestService {
     const now = new Date();
     const views = await this.repository.list();
     return views.map((view) => this.withDerivedSummaryStatus(view, now));
+  }
+
+  async syncStatuses(now: Date): Promise<ContestStatusTransitionResult> {
+    return this.repository.applyStatusTransitions(now);
   }
 
   async getDetail(id: string): Promise<ContestDetailView> {

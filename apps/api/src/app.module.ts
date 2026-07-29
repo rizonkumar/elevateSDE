@@ -23,6 +23,7 @@ import { ReviewModule } from './modules/review/review.module';
 import { ContestModule } from './modules/contest/contest.module';
 import { LearningPathModule } from './modules/learning-path/learning-path.module';
 import { ScoringModule } from './modules/scoring/scoring.module';
+import { SchedulerModule } from './modules/scheduler/scheduler.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { ScoringModule } from './modules/scoring/scoring.module';
     ContestModule,
     LearningPathModule,
     ScoringModule,
+    SchedulerModule,
   ],
   controllers: [AppController],
   providers: [AppService],

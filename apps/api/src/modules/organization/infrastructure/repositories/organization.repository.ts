@@ -104,4 +104,12 @@ export class OrganizationRepository implements IOrganizationRepository {
       data: { tenantId },
     });
   }
+
+  async expirePendingBefore(now: Date): Promise<number> {
+    const { count } = await this.prisma.invitation.updateMany({
+      where: { status: InvitationStatus.PENDING, expiresAt: { lte: now } },
+      data: { status: InvitationStatus.EXPIRED },
+    });
+    return count;
+  }
 }

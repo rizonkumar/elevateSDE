@@ -2,7 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { ContestStatus, Prisma, SubmissionStatus } from '@prisma/client';
 import { PrismaService } from '../../../../infrastructure/prisma/prisma.service';
-import { IContestRepository } from '../../domain/interfaces/contest-repository.interface';
+import {
+  ContestStatusTransitionResult,
+  IContestRepository,
+} from '../../domain/interfaces/contest-repository.interface';
 import { Contest } from '../../domain/entities/contest';
 import {
   AcceptedSubmissionView,
@@ -28,6 +31,27 @@ export class ContestRepository implements IContestRepository {
       include: { _count: { select: { problems: true } } },
     });
     return rows.map((row) => this.toSummaryView(row));
+  }
+
+  async applyStatusTransitions(now: Date): Promise<ContestStatusTransitionResult> {
+    const [ended, live] = await Promise.all([
+      this.prisma.contest.updateMany({
+        where: {
+          status: { in: [ContestStatus.SCHEDULED, ContestStatus.LIVE] },
+          endsAt: { lte: now },
+        },
+        data: { status: ContestStatus.ENDED },
+      }),
+      this.prisma.contest.updateMany({
+        where: {
+          status: ContestStatus.SCHEDULED,
+          startsAt: { lte: now },
+          endsAt: { gt: now },
+        },
+        data: { status: ContestStatus.LIVE },
+      }),
+    ]);
+    return { toLive: live.count, toEnded: ended.count };
   }
 
   async listVisible(): Promise<ContestSummaryView[]> {

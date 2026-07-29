@@ -67,6 +67,18 @@ class FakeOrganizationRepository implements IOrganizationRepository {
   async attachUserToTenant(userId: string, tenantId: string): Promise<void> {
     this.attached.push({ userId, tenantId });
   }
+
+  async expirePendingBefore(now: Date): Promise<number> {
+    let expired = 0;
+    this.invitations = this.invitations.map((invitation) => {
+      if (!invitation.isPending() || !invitation.isExpired(now)) {
+        return invitation;
+      }
+      expired += 1;
+      return invitation.markExpired();
+    });
+    return expired;
+  }
 }
 
 function member(id: string, email: string, points: number): OrgMemberRecord {
@@ -207,6 +219,62 @@ describe('OrganizationService', () => {
       await expect(
         service.accept(invitation.getToken(), { id: 'user-9', email: 'join@acme.dev' }),
       ).rejects.toBeInstanceOf(ConflictException);
+    });
+  });
+
+  describe('expireStaleInvitations', () => {
+    const NOW = new Date('2026-07-29T00:00:00.000Z');
+
+    function pending(
+      id: string,
+      expiresAt: Date,
+      status: InvitationStatus = InvitationStatus.PENDING,
+    ): Invitation {
+      return Invitation.reconstitute({
+        id,
+        tenantId: TENANT_ID,
+        email: `${id}@acme.dev`,
+        token: `${id}-token`,
+        status,
+        invitedById: ADMIN_ID,
+        createdAt: new Date('2026-07-01T00:00:00.000Z'),
+        expiresAt,
+        acceptedAt: null,
+      });
+    }
+
+    it('expires only pending invitations already past their expiry', async () => {
+      repository.invitations = [
+        pending('stale', new Date('2026-07-28T00:00:00.000Z')),
+        pending('fresh', new Date('2026-08-05T00:00:00.000Z')),
+      ];
+
+      const expired = await service.expireStaleInvitations(NOW);
+
+      expect(expired).toBe(1);
+      expect((await repository.findInvitationById('stale'))?.getStatus()).toBe(
+        InvitationStatus.EXPIRED,
+      );
+      expect((await repository.findInvitationById('fresh'))?.getStatus()).toBe(
+        InvitationStatus.PENDING,
+      );
+    });
+
+    it('leaves accepted and revoked invitations untouched', async () => {
+      repository.invitations = [
+        pending('taken', new Date('2026-07-01T00:00:00.000Z'), InvitationStatus.ACCEPTED),
+        pending('pulled', new Date('2026-07-01T00:00:00.000Z'), InvitationStatus.REVOKED),
+      ];
+
+      const expired = await service.expireStaleInvitations(NOW);
+
+      expect(expired).toBe(0);
+      expect((await repository.findInvitationById('taken'))?.getStatus()).toBe(
+        InvitationStatus.ACCEPTED,
+      );
+      expect((await repository.findInvitationById('pulled'))?.getStatus()).toBe(
+        InvitationStatus.REVOKED,
+      );
     });
   });
 });

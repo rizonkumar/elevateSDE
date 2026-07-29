@@ -8,8 +8,14 @@ import {
   PublishedProblemRef,
 } from '../read-models/contest-view';
 
+export interface ContestStatusTransitionResult {
+  toLive: number;
+  toEnded: number;
+}
+
 export abstract class IContestRepository {
   abstract list(): Promise<ContestSummaryView[]>;
+  abstract applyStatusTransitions(now: Date): Promise<ContestStatusTransitionResult>;
   abstract listVisible(): Promise<ContestSummaryView[]>;
   abstract findDetail(id: string): Promise<ContestDetailView | null>;
   abstract findById(id: string): Promise<Contest | null>;

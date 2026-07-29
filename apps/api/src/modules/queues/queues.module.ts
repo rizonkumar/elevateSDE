@@ -11,7 +11,10 @@ import { buildRedisConnection } from './infrastructure/redis-connection';
     BullModule.forRootAsync({
       useFactory: () => ({ connection: buildRedisConnection(), prefix: QUEUE_PREFIX }),
     }),
-    BullModule.registerQueue({ name: QUEUE_NAMES.CODE_EXECUTION }),
+    BullModule.registerQueue(
+      { name: QUEUE_NAMES.CODE_EXECUTION },
+      { name: QUEUE_NAMES.SCHEDULED_TASKS },
+    ),
   ],
   providers: [{ provide: ICodeExecutionQueue, useClass: CodeExecutionQueue }],
   exports: [ICodeExecutionQueue, BullModule],
