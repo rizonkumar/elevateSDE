@@ -16,6 +16,7 @@ import {
   Repeat,
   UserRound,
   Settings,
+  History,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -37,6 +38,7 @@ const BASE_LINKS: DashboardNavItem[] = [
   { href: '/dashboard/contests', label: 'Contests', icon: Swords },
   { href: '/dashboard/forum', label: 'Community', icon: MessagesSquare },
   { href: '/dashboard/lists', label: 'My Lists', icon: ListChecks },
+  { href: '/dashboard/submissions', label: 'Submissions', icon: History },
   { href: '/dashboard/leaderboard', label: 'Leaderboard', icon: Trophy },
   { href: '/dashboard/achievements', label: 'Achievements', icon: Award },
   { href: '/dashboard/notifications', label: 'Notifications', icon: Bell },
