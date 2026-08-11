@@ -98,6 +98,13 @@ export interface ResumeDto {
   updatedAt: string;
 }
 
+export const MAX_RESUME_SIZE_BYTES = 5 * 1024 * 1024;
+
+export const ACCEPTED_RESUME_MIME_TYPES: readonly string[] = [
+  'application/pdf',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+];
+
 export type MockInterviewTopic = 'SYSTEM_DESIGN' | 'BEHAVIORAL' | 'CODING' | 'DSA';
 
 export type InterviewRoleLevel = 'JUNIOR' | 'MID' | 'SENIOR' | 'STAFF';
