@@ -265,15 +265,9 @@ importers:
       lucide-react:
         specifier: ^1.18.0
         version: 1.18.0(react@19.2.4)
-      mammoth:
-        specifier: ^1.12.0
-        version: 1.12.0
       next:
         specifier: 16.2.9
         version: 16.2.9(@babel/core@7.29.7)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      pdfjs-dist:
-        specifier: ^6.0.227
-        version: 6.0.227
       react:
         specifier: 19.2.4
         version: 19.2.4

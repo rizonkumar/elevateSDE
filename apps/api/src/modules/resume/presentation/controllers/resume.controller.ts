@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Logger,
   Param,
   ParseUUIDPipe,
   Post,
@@ -35,6 +36,8 @@ interface RequestWithUser {
 @Controller({ path: 'resume', version: '1' })
 @UseGuards(JwtAuthGuard)
 export class ResumeController {
+  private readonly logger = new Logger(ResumeController.name);
+
   constructor(
     private readonly resumeService: ResumeService,
     private readonly resumeTextExtractor: IResumeTextExtractor,
@@ -60,7 +63,7 @@ export class ResumeController {
       throw new BadRequestException('Please upload a PDF or DOCX resume.');
     }
 
-    const text = await this.resumeTextExtractor.extract(file.buffer, file.mimetype);
+    const text = await this.extractText(file.buffer, file.mimetype);
     if (!isReadableResumeText(text)) {
       throw new UnprocessableEntityException('We could not read enough text from this file.');
     }
@@ -106,5 +109,16 @@ export class ResumeController {
   @ApiResponse({ status: 404, description: 'Resume analysis not found' })
   async remove(@Req() req: RequestWithUser, @Param('id', ParseUUIDPipe) id: string): Promise<void> {
     await this.resumeService.deleteForUser(req.user.getId(), id);
+  }
+
+  private async extractText(buffer: Buffer, mimeType: string): Promise<string> {
+    try {
+      return await this.resumeTextExtractor.extract(buffer, mimeType);
+    } catch (error) {
+      this.logger.warn(`Failed to extract resume text: ${(error as Error).message}`);
+      throw new UnprocessableEntityException(
+        'We could not read this file. Try another PDF or DOCX.',
+      );
+    }
   }
 }

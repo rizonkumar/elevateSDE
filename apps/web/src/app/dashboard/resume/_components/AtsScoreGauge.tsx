@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { RadialBarChart, RadialBar, PolarAngleAxis, ResponsiveContainer } from 'recharts';
-import { scoreBand } from '@/lib/resume-analyzer';
+import { scoreBand } from '@/lib/score-band';
 
 interface AtsScoreGaugeProps {
   readonly score: number;

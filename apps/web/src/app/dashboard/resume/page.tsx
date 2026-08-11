@@ -12,18 +12,21 @@ import { PageContainer } from '@/components/dashboard/PageContainer';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 
 const STEPS = [
-  { icon: UploadCloud, title: 'Upload', detail: 'Drop a PDF or DOCX. Parsed in your browser.' },
+  { icon: UploadCloud, title: 'Upload', detail: 'Drop a PDF or DOCX. We score it in seconds.' },
   { icon: Gauge, title: 'Score', detail: 'Get an ATS score across skills and structure.' },
   { icon: ListChecks, title: 'Improve', detail: 'Apply a prioritized list of targeted edits.' },
 ];
 
 export default function ResumeAnalyzerPage() {
-  const { analyses, activeId, isAnalyzing, analyze, select, remove } = useResumeStore();
+  const { analyses, activeId, isAnalyzing, fetchHistory, analyze, select, remove, stopPolling } =
+    useResumeStore();
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
     setMounted(true);
-  }, []);
+    void fetchHistory();
+    return () => stopPolling();
+  }, [fetchHistory, stopPolling]);
 
   const active = analyses.find((item) => item.id === activeId) ?? null;
   const hasHistory = analyses.length > 1;

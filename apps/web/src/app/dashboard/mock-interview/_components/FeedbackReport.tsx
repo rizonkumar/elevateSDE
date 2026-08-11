@@ -7,7 +7,7 @@ import { CheckCircle2, ArrowUpRight, RotateCcw } from 'lucide-react';
 import { Badge, Button } from '@elevatesde/ui';
 import type { BadgeVariant } from '@elevatesde/ui';
 import type { InterviewCompetencySeverity, MockInterviewFeedback } from '@elevatesde/shared-types';
-import { scoreBand } from '@/lib/resume-analyzer';
+import { scoreBand } from '@/lib/score-band';
 import { useMockInterviewStore } from '@/store/mock-interview.store';
 
 interface FeedbackReportProps {

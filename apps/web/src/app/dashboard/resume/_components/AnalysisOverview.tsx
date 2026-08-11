@@ -3,7 +3,7 @@
 import { Sparkles, PlusCircle, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { Badge } from '@elevatesde/ui';
 import type { ResumeDto } from '@elevatesde/shared-types';
-import { scoreBand } from '@/lib/resume-analyzer';
+import { scoreBand } from '@/lib/score-band';
 import { AtsScoreGauge } from './AtsScoreGauge';
 import { ResumeDropzone } from './ResumeDropzone';
 
