@@ -144,7 +144,7 @@ describe('ResumeService', () => {
       expect(await repository.findById(resume.getId())).toBeNull();
     });
 
-    it('throws ForbiddenException instead of deleting another user\'s resume', async () => {
+    it("throws ForbiddenException instead of deleting another user's resume", async () => {
       const resume = await service.createPending({
         userId: 'user-1',
         tenantId: null,

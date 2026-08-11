@@ -73,7 +73,7 @@ the `mammoth` / `pdfjs-dist` client dependencies.
 #### [MODIFY] `src/app/dashboard/resume/page.tsx`
 
 - Call `fetchHistory()` on mount, and `stopPolling()` on unmount.
-- Step copy currently reads *"Parsed in your browser."* — no longer true; update to reflect
+- Step copy currently reads _"Parsed in your browser."_ — no longer true; update to reflect
   server-side analysis.
 
 ---
@@ -87,6 +87,7 @@ pnpm --filter=@elevatesde/web build
 ```
 
 ### Manual
+
 1. Upload a PDF → spinner appears immediately, resolves to a score without a page refresh.
 2. **Reload the page** → history persists and the active analysis is still selectable
    (impossible before this change).

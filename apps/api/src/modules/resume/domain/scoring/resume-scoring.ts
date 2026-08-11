@@ -188,7 +188,8 @@ export function scoreResumeText(text: string): ResumeScoreResult {
   const actionVerbCount = countOccurrences(padded, ACTION_VERBS);
   const hasMetrics = METRICS_PATTERN.test(text);
 
-  const contactScore = (hasEmail ? CONTACT_EMAIL_POINTS : 0) + (hasPhone ? CONTACT_PHONE_POINTS : 0);
+  const contactScore =
+    (hasEmail ? CONTACT_EMAIL_POINTS : 0) + (hasPhone ? CONTACT_PHONE_POINTS : 0);
   const sectionScore = foundSections.length * SECTION_POINTS_EACH;
   const verbScore = clamp(actionVerbCount * VERB_POINTS_PER_MATCH, 0, MAX_VERB_SCORE);
   const metricsScore = hasMetrics ? METRICS_SCORE : 0;

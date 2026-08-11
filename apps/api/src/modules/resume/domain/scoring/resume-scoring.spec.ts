@@ -49,12 +49,10 @@ describe('scoreResumeText', () => {
     const result = scoreResumeText(WEAK_RESUME);
 
     expect(result.atsScore).toBeLessThan(60);
-    expect(result.structureFeedback.some((item) => item.title === 'No email detected')).toBe(
+    expect(result.structureFeedback.some((item) => item.title === 'No email detected')).toBe(true);
+    expect(result.structureFeedback.some((item) => item.title === 'Add measurable results')).toBe(
       true,
     );
-    expect(
-      result.structureFeedback.some((item) => item.title === 'Add measurable results'),
-    ).toBe(true);
   });
 
   it('caps missing skills at eight and excludes already-parsed skills', () => {
@@ -65,7 +63,9 @@ describe('scoreResumeText', () => {
   });
 
   it('matches multi-word and symbol keywords without matching unrelated substrings', () => {
-    const result = scoreResumeText('Experience with C++ and CI/CD pipelines. Wrote services in Golang.');
+    const result = scoreResumeText(
+      'Experience with C++ and CI/CD pipelines. Wrote services in Golang.',
+    );
 
     expect(result.parsedSkills).toContain('C++');
     expect(result.parsedSkills).toContain('CI/CD');
@@ -76,8 +76,6 @@ describe('scoreResumeText', () => {
     const result = scoreResumeText('   ');
 
     expect(result.atsScore).toBeGreaterThanOrEqual(0);
-    expect(
-      result.structureFeedback.some((item) => item.title === 'Resume looks short'),
-    ).toBe(true);
+    expect(result.structureFeedback.some((item) => item.title === 'Resume looks short')).toBe(true);
   });
 });

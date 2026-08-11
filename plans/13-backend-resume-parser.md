@@ -25,21 +25,21 @@ catalog and structural rules, and returns an ATS score with prioritized feedback
   `ResumeStatus` union already exported from `@elevatesde/shared-types`.
 - **[NEW] `Resume`**
 
-  | Column | Type | Notes |
-  |---|---|---|
-  | `id` | `String @id @default(uuid())` | |
-  | `userId` | `String` | FK → `User`, `onDelete: Cascade` |
-  | `tenantId` | `String?` | Follows the multi-tenant convention used by `Notification` |
-  | `fileName` | `String` | |
-  | `status` | `ResumeStatus @default(PROCESSING)` | |
-  | `atsScore` | `Int?` | Null until `COMPLETED` |
-  | `parsedSkills` | `String[]` | |
-  | `missingSkills` | `String[]` | |
-  | `structureFeedback` | `Json?` | `ResumeFeedbackItem[]`, same as `Notification.metadata` |
-  | `actionableTips` | `String[]` | |
-  | `summary` | `String?` | |
-  | `failureReason` | `String?` | Surfaced only in logs, not in the DTO |
-  | `createdAt` / `updatedAt` | `DateTime` | |
+  | Column                    | Type                                | Notes                                                      |
+  | ------------------------- | ----------------------------------- | ---------------------------------------------------------- |
+  | `id`                      | `String @id @default(uuid())`       |                                                            |
+  | `userId`                  | `String`                            | FK → `User`, `onDelete: Cascade`                           |
+  | `tenantId`                | `String?`                           | Follows the multi-tenant convention used by `Notification` |
+  | `fileName`                | `String`                            |                                                            |
+  | `status`                  | `ResumeStatus @default(PROCESSING)` |                                                            |
+  | `atsScore`                | `Int?`                              | Null until `COMPLETED`                                     |
+  | `parsedSkills`            | `String[]`                          |                                                            |
+  | `missingSkills`           | `String[]`                          |                                                            |
+  | `structureFeedback`       | `Json?`                             | `ResumeFeedbackItem[]`, same as `Notification.metadata`    |
+  | `actionableTips`          | `String[]`                          |                                                            |
+  | `summary`                 | `String?`                           |                                                            |
+  | `failureReason`           | `String?`                           | Surfaced only in logs, not in the DTO                      |
+  | `createdAt` / `updatedAt` | `DateTime`                          |                                                            |
 
   `@@index([userId, createdAt])` for the history list.
 
@@ -121,12 +121,12 @@ resume.module.ts
 
 ### Endpoints — `@Controller({ path: 'resume', version: '1' })`, `JwtAuthGuard`
 
-| Verb | Path | Result |
-|---|---|---|
-| `POST` | `/v1/resume` | `202` → `ResumeResponseDto` (`PROCESSING`) |
-| `GET` | `/v1/resume` | `200` → `ResumeResponseDto[]`, newest first, capped |
-| `GET` | `/v1/resume/:id` | `200` → poll target; `404` if not the caller's |
-| `DELETE` | `/v1/resume/:id` | `204` |
+| Verb     | Path             | Result                                              |
+| -------- | ---------------- | --------------------------------------------------- |
+| `POST`   | `/v1/resume`     | `202` → `ResumeResponseDto` (`PROCESSING`)          |
+| `GET`    | `/v1/resume`     | `200` → `ResumeResponseDto[]`, newest first, capped |
+| `GET`    | `/v1/resume/:id` | `200` → poll target; `404` if not the caller's      |
+| `DELETE` | `/v1/resume/:id` | `204`                                               |
 
 Every query is scoped by `userId` from the JWT — an id belonging to another user returns
 `404`, never `403`, matching `ProblemNote` in `problem-social`.
@@ -135,11 +135,11 @@ Every query is scoped by `userId` from the JWT — an id belonging to another us
 
 ## 5. Dependencies
 
-| Package | App | Reason |
-|---|---|---|
-| `pdfjs-dist` | `apps/api` **+**, `apps/web` **−** | PDF text extraction (moved) |
-| `mammoth` | `apps/api` **+**, `apps/web` **−** | DOCX text extraction (moved) |
-| `@types/multer` | `apps/api` dev | Types for `FileInterceptor` |
+| Package         | App                                | Reason                       |
+| --------------- | ---------------------------------- | ---------------------------- |
+| `pdfjs-dist`    | `apps/api` **+**, `apps/web` **−** | PDF text extraction (moved)  |
+| `mammoth`       | `apps/api` **+**, `apps/web` **−** | DOCX text extraction (moved) |
+| `@types/multer` | `apps/api` dev                     | Types for `FileInterceptor`  |
 
 Net client bundle change is negative; no new runtime services in `docker-compose.yml`.
 
@@ -160,6 +160,7 @@ pnpm --filter=@elevatesde/api lint
   `COMPLETED`, failure path sets `FAILED`, cross-user read throws `NotFoundException`.
 
 ### Manual
+
 1. `docker-compose up -d` (Postgres + Redis, both already defined).
 2. Upload a PDF and a DOCX at `/dashboard/resume`; confirm the row flips `PROCESSING → COMPLETED`.
 3. Upload a 6 MB file and a `.txt` → rejected before any row is written.
