@@ -56,7 +56,7 @@ export class ResumeController {
     if (!file) {
       throw new BadRequestException('No file was uploaded.');
     }
-    if (!ACCEPTED_RESUME_MIME_TYPES.includes(file.mimetype as never)) {
+    if (!ACCEPTED_RESUME_MIME_TYPES.includes(file.mimetype)) {
       throw new BadRequestException('Please upload a PDF or DOCX resume.');
     }
 
