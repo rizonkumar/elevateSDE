@@ -28,6 +28,24 @@ export class ResumeMapper {
       userId: resume.getUserId(),
       tenantId: resume.getTenantId(),
       fileName: resume.getFileName(),
+      ...ResumeMapper.toAnalysisUpdate(resume),
+    };
+  }
+
+  static toAnalysisUpdate(
+    resume: ResumeAnalysis,
+  ): Pick<
+    PrismaResume,
+    | 'status'
+    | 'atsScore'
+    | 'parsedSkills'
+    | 'missingSkills'
+    | 'structureFeedback'
+    | 'actionableTips'
+    | 'summary'
+    | 'failureReason'
+  > {
+    return {
       status: resume.getStatus(),
       atsScore: resume.getAtsScore(),
       parsedSkills: resume.getParsedSkills(),
