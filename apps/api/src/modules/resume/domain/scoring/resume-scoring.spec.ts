@@ -64,7 +64,7 @@ describe('scoreResumeText', () => {
 
   it('matches multi-word and symbol keywords without matching unrelated substrings', () => {
     const result = scoreResumeText(
-      'Experience with C++ and CI/CD pipelines. Wrote services in Golang.',
+      'Experience with C++ and CI/CD pipelines. Wrote services in Golang',
     );
 
     expect(result.parsedSkills).toContain('C++');

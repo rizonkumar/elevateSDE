@@ -1,74 +1,85 @@
 import { create } from 'zustand';
 import type { ResumeDto } from '@elevatesde/shared-types';
-import { useAuthStore } from '@/store/auth.store';
 import { useToastStore } from '@/store/toast.store';
-import { extractResumeText, validateResumeFile } from '@/lib/resume-parser';
-import { analyzeResumeText } from '@/lib/resume-analyzer';
+import { validateResumeFile } from '@/lib/resume-parser';
+import { deleteResume, getResume, getResumes, uploadResume } from '@/lib/resume-api';
+
+const POLL_INTERVAL_MS = 2500;
 
 interface ResumeState {
   analyses: ResumeDto[];
   activeId: string | null;
   isAnalyzing: boolean;
+  fetchHistory: () => Promise<void>;
   analyze: (file: File) => Promise<void>;
   select: (id: string) => void;
-  remove: (id: string) => void;
+  remove: (id: string) => Promise<void>;
   reset: () => void;
+  stopPolling: () => void;
 }
 
-function newId(): string {
-  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
-    return crypto.randomUUID();
+let pollTimer: ReturnType<typeof setInterval> | null = null;
+
+function ensurePolling(get: () => ResumeState, set: (partial: Partial<ResumeState>) => void): void {
+  if (pollTimer !== null) {
+    return;
   }
-  return `resume-${Date.now()}`;
+  pollTimer = setInterval(() => {
+    void pollProcessing(get, set);
+  }, POLL_INTERVAL_MS);
 }
 
-async function produceAnalysis(file: File, userId: string): Promise<ResumeDto> {
-  const text = await extractResumeText(file);
-  if (text.trim().length < 40) {
-    throw new Error('We could not read enough text from this file.');
+async function pollProcessing(
+  get: () => ResumeState,
+  set: (partial: Partial<ResumeState>) => void,
+): Promise<void> {
+  const processing = get().analyses.filter((item) => item.status === 'PROCESSING');
+  if (processing.length === 0) {
+    if (pollTimer !== null) {
+      clearInterval(pollTimer);
+      pollTimer = null;
+    }
+    return;
   }
-  const result = analyzeResumeText(text, file.name);
-  const now = new Date().toISOString();
-  return {
-    id: newId(),
-    userId,
-    fileName: file.name,
-    fileUrl: null,
-    status: 'COMPLETED',
-    atsScore: result.atsScore,
-    parsedSkills: result.parsedSkills,
-    missingSkills: result.missingSkills,
-    structureFeedback: result.structureFeedback,
-    actionableTips: result.actionableTips,
-    summary: result.summary,
-    createdAt: now,
-    updatedAt: now,
-  };
+
+  const results = await Promise.all(
+    processing.map(async (item) => {
+      try {
+        return await getResume(item.id);
+      } catch {
+        return null;
+      }
+    }),
+  );
+
+  const updated = new Map(results.filter((item): item is ResumeDto => item !== null).map((item) => [item.id, item]));
+  if (updated.size === 0) {
+    return;
+  }
+  set({
+    analyses: get().analyses.map((item) => updated.get(item.id) ?? item),
+  });
 }
 
-function pendingRecord(file: File, userId: string): ResumeDto {
-  const now = new Date().toISOString();
-  return {
-    id: newId(),
-    userId,
-    fileName: file.name,
-    fileUrl: null,
-    status: 'PROCESSING',
-    atsScore: null,
-    parsedSkills: [],
-    missingSkills: [],
-    structureFeedback: [],
-    actionableTips: [],
-    summary: null,
-    createdAt: now,
-    updatedAt: now,
-  };
-}
-
-export const useResumeStore = create<ResumeState>((set) => ({
+export const useResumeStore = create<ResumeState>((set, get) => ({
   analyses: [],
   activeId: null,
   isAnalyzing: false,
+
+  fetchHistory: async () => {
+    try {
+      const analyses = await getResumes();
+      set((state) => ({
+        analyses,
+        activeId: state.activeId ?? (analyses[0]?.id ?? null),
+      }));
+      if (analyses.some((item) => item.status === 'PROCESSING')) {
+        ensurePolling(get, set);
+      }
+    } catch {
+      useToastStore.getState().addToast('Could not load your resume history.', 'error');
+    }
+  },
 
   analyze: async (file) => {
     const validationError = validateResumeFile(file);
@@ -77,45 +88,57 @@ export const useResumeStore = create<ResumeState>((set) => ({
       return;
     }
 
-    const userId = useAuthStore.getState().user?.id ?? '';
-    const pending = pendingRecord(file, userId);
-    set((state) => ({
-      analyses: [pending, ...state.analyses],
-      activeId: pending.id,
-      isAnalyzing: true,
-    }));
-
+    set({ isAnalyzing: true });
     try {
-      const completed = await produceAnalysis(file, userId);
-      const result: ResumeDto = { ...completed, id: pending.id, createdAt: pending.createdAt };
+      const resume = await uploadResume(file);
       set((state) => ({
-        analyses: state.analyses.map((item) => (item.id === pending.id ? result : item)),
+        analyses: [resume, ...state.analyses],
+        activeId: resume.id,
         isAnalyzing: false,
       }));
-      useToastStore.getState().addToast('Resume analyzed.', 'success');
-    } catch {
-      set((state) => ({
-        analyses: state.analyses.map((item) =>
-          item.id === pending.id
-            ? { ...item, status: 'FAILED', updatedAt: new Date().toISOString() }
-            : item,
-        ),
-        isAnalyzing: false,
-      }));
-      useToastStore
-        .getState()
-        .addToast('Could not analyze this resume. Try another file.', 'error');
+      ensurePolling(get, set);
+    } catch (error) {
+      set({ isAnalyzing: false });
+      useToastStore.getState().addToast(extractMessage(error, 'Could not analyze this resume.'), 'error');
     }
   },
 
   select: (id) => set({ activeId: id }),
 
-  remove: (id) =>
+  remove: async (id) => {
+    try {
+      await deleteResume(id);
+    } catch {
+      useToastStore.getState().addToast('Could not remove this analysis.', 'error');
+      return;
+    }
     set((state) => {
       const analyses = state.analyses.filter((item) => item.id !== id);
       const activeId = state.activeId === id ? (analyses[0]?.id ?? null) : state.activeId;
       return { analyses, activeId };
-    }),
+    });
+  },
 
   reset: () => set({ analyses: [], activeId: null, isAnalyzing: false }),
+
+  stopPolling: () => {
+    if (pollTimer !== null) {
+      clearInterval(pollTimer);
+      pollTimer = null;
+    }
+  },
 }));
+
+function extractMessage(error: unknown, fallback: string): string {
+  if (typeof error === 'object' && error !== null) {
+    const response = (error as { response?: { data?: { message?: string | string[] } } }).response;
+    const message = response?.data?.message;
+    if (Array.isArray(message)) {
+      return message[0] ?? fallback;
+    }
+    if (typeof message === 'string') {
+      return message;
+    }
+  }
+  return fallback;
+}

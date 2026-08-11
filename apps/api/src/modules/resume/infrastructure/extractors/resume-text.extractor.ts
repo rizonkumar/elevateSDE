@@ -23,7 +23,7 @@ export class ResumeTextExtractor implements IResumeTextExtractor {
 
   private async extractPdfText(buffer: Buffer): Promise<string> {
     const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
-    const loadingTask = pdfjs.getDocument({ data: buffer });
+    const loadingTask = pdfjs.getDocument({ data: new Uint8Array(buffer) });
     const document = await loadingTask.promise;
     const pages: string[] = [];
     for (let pageNumber = 1; pageNumber <= document.numPages; pageNumber += 1) {
