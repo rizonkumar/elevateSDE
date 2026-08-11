@@ -70,7 +70,11 @@ export class ResumeController {
       tenantId: req.user.getTenantId(),
       fileName: file.originalname,
     });
-    await this.resumeAnalysisQueue.enqueue({ resumeId: resume.getId(), userId: resume.getUserId(), text });
+    await this.resumeAnalysisQueue.enqueue({
+      resumeId: resume.getId(),
+      userId: resume.getUserId(),
+      text,
+    });
 
     return ResumePresentationMapper.toResponse(resume);
   }

@@ -1,6 +1,17 @@
-import { Resume as PrismaResume } from '@prisma/client';
-import { ResumeFeedbackItem } from '@elevatesde/shared-types';
+import { Prisma, Resume as PrismaResume } from '@prisma/client';
+import { ResumeFeedbackItem, ResumeStatus } from '@elevatesde/shared-types';
 import { ResumeAnalysis } from '../../domain/entities/resume-analysis';
+
+export interface ResumeAnalysisUpdateData {
+  status: ResumeStatus;
+  atsScore: number | null;
+  parsedSkills: string[];
+  missingSkills: string[];
+  structureFeedback: Prisma.InputJsonValue;
+  actionableTips: string[];
+  summary: string | null;
+  failureReason: string | null;
+}
 
 export class ResumeMapper {
   static toDomain(record: PrismaResume): ResumeAnalysis {
@@ -22,7 +33,9 @@ export class ResumeMapper {
     });
   }
 
-  static toPersistence(resume: ResumeAnalysis): Omit<PrismaResume, 'createdAt' | 'updatedAt'> {
+  static toPersistence(
+    resume: ResumeAnalysis,
+  ): Pick<PrismaResume, 'id' | 'userId' | 'tenantId' | 'fileName'> & ResumeAnalysisUpdateData {
     return {
       id: resume.getId(),
       userId: resume.getUserId(),
@@ -32,25 +45,13 @@ export class ResumeMapper {
     };
   }
 
-  static toAnalysisUpdate(
-    resume: ResumeAnalysis,
-  ): Pick<
-    PrismaResume,
-    | 'status'
-    | 'atsScore'
-    | 'parsedSkills'
-    | 'missingSkills'
-    | 'structureFeedback'
-    | 'actionableTips'
-    | 'summary'
-    | 'failureReason'
-  > {
+  static toAnalysisUpdate(resume: ResumeAnalysis): ResumeAnalysisUpdateData {
     return {
       status: resume.getStatus(),
       atsScore: resume.getAtsScore(),
       parsedSkills: resume.getParsedSkills(),
       missingSkills: resume.getMissingSkills(),
-      structureFeedback: resume.getStructureFeedback(),
+      structureFeedback: resume.getStructureFeedback() as unknown as Prisma.InputJsonValue,
       actionableTips: resume.getActionableTips(),
       summary: resume.getSummary(),
       failureReason: resume.getFailureReason(),
