@@ -4,12 +4,12 @@ import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Mail, Lock, ShieldCheck } from 'lucide-react';
-import { Button, Input } from '@elevatesde/ui';
+import { Button, Input, GoogleSignInButton } from '@elevatesde/ui';
 import { AdminAuthLayout } from '../../components/AdminAuthLayout';
 import { useAuthStore } from '../../store/auth.store';
 import { useToastStore } from '../../store/toast.store';
 import { api } from '../../lib/api';
-import { AuthResponseDto } from '@elevatesde/shared-types';
+import { AuthResponseDto, GoogleAuthResultDto } from '@elevatesde/shared-types';
 
 interface AxiosErrorResponse {
   response?: {
@@ -18,6 +18,8 @@ interface AxiosErrorResponse {
     };
   };
 }
+
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -59,6 +61,28 @@ export default function LoginPage() {
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleCredential = async (idToken: string) => {
+    try {
+      const response = await api.post<GoogleAuthResultDto>('/api/v1/auth/google', {
+        idToken,
+        context: 'ADMIN',
+      });
+      const result = response.data;
+      if (result.status !== 'AUTHENTICATED' || !result.auth || result.auth.user.role !== 'ADMIN') {
+        clearAuth();
+        addToast('Access Denied: Administrative permissions required.', 'error');
+        return;
+      }
+      const { user, accessToken, refreshToken } = result.auth;
+      setAuth(user, accessToken, refreshToken);
+      addToast('Successfully authenticated admin console.', 'success');
+      router.push('/');
+    } catch (err) {
+      const axiosError = err as AxiosErrorResponse;
+      addToast(axiosError.response?.data?.message || 'Google sign-in failed.', 'error');
     }
   };
 
@@ -125,6 +149,24 @@ export default function LoginPage() {
             {loading ? 'Authenticating...' : 'Sign In'}
           </Button>
         </form>
+
+        {GOOGLE_CLIENT_ID && (
+          <>
+            <div className="flex items-center gap-3 my-6">
+              <div className="h-px flex-1 bg-(--color-border-subtle)" />
+              <span className="text-[11px] uppercase tracking-wider text-(--color-text-muted)">
+                Or
+              </span>
+              <div className="h-px flex-1 bg-(--color-border-subtle)" />
+            </div>
+            <GoogleSignInButton
+              clientId={GOOGLE_CLIENT_ID}
+              text="signin_with"
+              disabled={loading}
+              onCredential={handleGoogleCredential}
+            />
+          </>
+        )}
 
         <div className="border-t border-(--color-border-subtle) mt-6 pt-4 text-center text-xs text-(--color-text-muted)">
           Not an administrator?{' '}

@@ -5,14 +5,16 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, Building2, User } from 'lucide-react';
-import { Button, Input } from '@elevatesde/ui';
+import { Button, Input, GoogleSignInButton } from '@elevatesde/ui';
 import { AuthLayout } from '../../components/AuthLayout';
 import { RoleGuide } from '../../components/RoleGuide';
 import { RoleToggle } from '../../components/RoleToggle';
+import { GoogleOnboardingPanel } from '../../components/GoogleOnboardingPanel';
 import { useAuthStore } from '../../store/auth.store';
 import { useToastStore } from '../../store/toast.store';
 import { api } from '../../lib/api';
-import { AuthResponseDto } from '@elevatesde/shared-types';
+import { signInWithGoogle } from '../../lib/google-auth';
+import { AuthResponseDto, GoogleOnboardingDto } from '@elevatesde/shared-types';
 
 interface AxiosErrorResponse {
   response?: {
@@ -21,6 +23,8 @@ interface AxiosErrorResponse {
     };
   };
 }
+
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -35,6 +39,7 @@ export default function RegisterPage() {
   const [companyName, setCompanyName] = React.useState('');
   const [loading, setLoading] = React.useState(false);
   const [redirectTo, setRedirectTo] = React.useState('/dashboard');
+  const [onboarding, setOnboarding] = React.useState<GoogleOnboardingDto | null>(null);
 
   React.useEffect(() => {
     if (globalThis.window === undefined) return;
@@ -43,6 +48,28 @@ export default function RegisterPage() {
       setRedirectTo(target);
     }
   }, []);
+
+  const handleAuthenticated = (auth: AuthResponseDto, message: string) => {
+    setAuth(auth.user, auth.accessToken, auth.refreshToken);
+    addToast(message, 'success');
+    router.push(redirectTo);
+  };
+
+  const handleGoogleCredential = async (idToken: string) => {
+    try {
+      const result = await signInWithGoogle(idToken);
+      if (result.status === 'AUTHENTICATED' && result.auth) {
+        handleAuthenticated(result.auth, 'Welcome back! Successfully logged in.');
+        return;
+      }
+      if (result.status === 'ONBOARDING_REQUIRED' && result.onboarding) {
+        setOnboarding(result.onboarding);
+      }
+    } catch (err) {
+      const axiosError = err as AxiosErrorResponse;
+      addToast(axiosError.response?.data?.message || 'Google sign-in failed.', 'error');
+    }
+  };
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -80,10 +107,7 @@ export default function RegisterPage() {
       }
 
       const response = await api.post<AuthResponseDto>('/api/v1/auth/register', payload);
-      const { user, accessToken, refreshToken } = response.data;
-      setAuth(user, accessToken, refreshToken);
-      addToast('Welcome to ElevateSDE! Account created.', 'success');
-      router.push(redirectTo);
+      handleAuthenticated(response.data, 'Welcome to ElevateSDE! Account created.');
     } catch (err) {
       const axiosError = err as AxiosErrorResponse;
       addToast(
@@ -95,6 +119,22 @@ export default function RegisterPage() {
       setLoading(false);
     }
   };
+
+  if (onboarding) {
+    return (
+      <AuthLayout>
+        <GoogleOnboardingPanel
+          email={onboarding.email}
+          firstName={onboarding.firstName}
+          lastName={onboarding.lastName}
+          onboardingToken={onboarding.onboardingToken}
+          onComplete={(auth) =>
+            handleAuthenticated(auth, 'Welcome to ElevateSDE! Account created.')
+          }
+        />
+      </AuthLayout>
+    );
+  }
 
   return (
     <AuthLayout>
@@ -202,6 +242,24 @@ export default function RegisterPage() {
             {loading ? 'Creating account...' : 'Create Account'}
           </Button>
         </form>
+
+        {GOOGLE_CLIENT_ID && (
+          <>
+            <div className="flex items-center gap-3 my-6">
+              <div className="h-px flex-1 bg-(--color-border-subtle)" />
+              <span className="text-[11px] uppercase tracking-wider text-(--color-text-muted)">
+                Or
+              </span>
+              <div className="h-px flex-1 bg-(--color-border-subtle)" />
+            </div>
+            <GoogleSignInButton
+              clientId={GOOGLE_CLIENT_ID}
+              text="signup_with"
+              disabled={loading}
+              onCredential={handleGoogleCredential}
+            />
+          </>
+        )}
 
         <div className="text-center mt-6 flex flex-col gap-2.5 text-xs text-(--color-text-muted)">
           <div>
