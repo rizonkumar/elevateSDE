@@ -52,7 +52,9 @@ async function pollProcessing(
     }),
   );
 
-  const updated = new Map(results.filter((item): item is ResumeDto => item !== null).map((item) => [item.id, item]));
+  const updated = new Map(
+    results.filter((item): item is ResumeDto => item !== null).map((item) => [item.id, item]),
+  );
   if (updated.size === 0) {
     return;
   }
@@ -71,7 +73,7 @@ export const useResumeStore = create<ResumeState>((set, get) => ({
       const analyses = await getResumes();
       set((state) => ({
         analyses,
-        activeId: state.activeId ?? (analyses[0]?.id ?? null),
+        activeId: state.activeId ?? analyses[0]?.id ?? null,
       }));
       if (analyses.some((item) => item.status === 'PROCESSING')) {
         ensurePolling(get, set);
@@ -99,7 +101,9 @@ export const useResumeStore = create<ResumeState>((set, get) => ({
       ensurePolling(get, set);
     } catch (error) {
       set({ isAnalyzing: false });
-      useToastStore.getState().addToast(extractMessage(error, 'Could not analyze this resume.'), 'error');
+      useToastStore
+        .getState()
+        .addToast(extractMessage(error, 'Could not analyze this resume.'), 'error');
     }
   },
 

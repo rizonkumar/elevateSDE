@@ -13,6 +13,7 @@ export class UserMapper {
       prismaUser.firstName,
       prismaUser.lastName,
       prismaUser.headline,
+      prismaUser.googleId,
     );
   }
 
@@ -22,6 +23,7 @@ export class UserMapper {
       tenantId: user.getTenantId(),
       email: user.getEmail(),
       passwordHash: user.getPasswordHash(),
+      googleId: user.getGoogleId(),
       role: user.getRole(),
       firstName: user.getFirstName(),
       lastName: user.getLastName(),
