@@ -33,6 +33,19 @@ export interface AuthResponseDto {
   user: UserDto;
 }
 
+export interface GoogleOnboardingDto {
+  onboardingToken: string;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+}
+
+export interface GoogleAuthResultDto {
+  status: 'AUTHENTICATED' | 'ONBOARDING_REQUIRED';
+  auth: AuthResponseDto | null;
+  onboarding: GoogleOnboardingDto | null;
+}
+
 export interface AuditLogDto {
   id: string;
   userId: string | null;

@@ -28,6 +28,16 @@ export class UsersRepository implements IUsersRepository {
     return UserMapper.toDomain(user);
   }
 
+  async findByGoogleId(googleId: string): Promise<User | null> {
+    const user = await this.prisma.user.findUnique({
+      where: { googleId },
+    });
+    if (!user) {
+      return null;
+    }
+    return UserMapper.toDomain(user);
+  }
+
   async save(user: User): Promise<User> {
     const data = UserMapper.toPersistence(user);
     const prismaUser = await this.prisma.user.upsert({
@@ -35,6 +45,7 @@ export class UsersRepository implements IUsersRepository {
       update: {
         email: data.email,
         passwordHash: data.passwordHash,
+        googleId: data.googleId,
         role: data.role,
         tenantId: data.tenantId,
         firstName: data.firstName,
@@ -44,6 +55,7 @@ export class UsersRepository implements IUsersRepository {
         id: data.id,
         email: data.email,
         passwordHash: data.passwordHash,
+        googleId: data.googleId,
         role: data.role,
         tenantId: data.tenantId,
         firstName: data.firstName,

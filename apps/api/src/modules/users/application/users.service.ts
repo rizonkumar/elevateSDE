@@ -20,9 +20,14 @@ export class UsersService {
     return this.usersRepository.findByEmail(email);
   }
 
+  async findByGoogleId(googleId: string): Promise<User | null> {
+    return this.usersRepository.findByGoogleId(googleId);
+  }
+
   async create(data: {
     email: string;
-    passwordHash: string;
+    passwordHash?: string;
+    googleId?: string;
     role: UserRole;
     tenantId?: string;
     firstName?: string;
@@ -32,11 +37,13 @@ export class UsersService {
     const user = User.create(
       id,
       data.email,
-      data.passwordHash,
+      data.passwordHash ?? null,
       data.role,
       data.tenantId || null,
       data.firstName ?? null,
       data.lastName ?? null,
+      null,
+      data.googleId ?? null,
     );
     return this.usersRepository.save(user);
   }
@@ -44,6 +51,12 @@ export class UsersService {
   async updateRole(id: string, role: UserRole): Promise<User> {
     const user = await this.findById(id);
     const updatedUser = user.changeRole(role);
+    return this.usersRepository.save(updatedUser);
+  }
+
+  async linkGoogleAccount(id: string, googleId: string): Promise<User> {
+    const user = await this.findById(id);
+    const updatedUser = user.linkGoogleId(googleId);
     return this.usersRepository.save(updatedUser);
   }
 

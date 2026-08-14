@@ -5,7 +5,8 @@ export class User {
     private readonly id: string,
     private readonly tenantId: string | null,
     private readonly email: string,
-    private readonly passwordHash: string,
+    private readonly passwordHash: string | null,
+    private readonly googleId: string | null,
     private readonly role: UserRole,
     private readonly firstName: string | null,
     private readonly lastName: string | null,
@@ -16,24 +17,26 @@ export class User {
   static create(
     id: string,
     email: string,
-    passwordHash: string,
+    passwordHash: string | null,
     role: UserRole,
     tenantId: string | null = null,
     firstName: string | null = null,
     lastName: string | null = null,
     headline: string | null = null,
+    googleId: string | null = null,
   ): User {
     if (!email || !email.includes('@')) {
       throw new Error('Invalid email address');
     }
-    if (!passwordHash) {
-      throw new Error('Password hash cannot be empty');
+    if (!passwordHash && !googleId) {
+      throw new Error('User must have either a password hash or a Google account linked');
     }
     return new User(
       id,
       tenantId,
       email,
       passwordHash,
+      googleId,
       role,
       firstName,
       lastName,
@@ -45,19 +48,21 @@ export class User {
   static reconstitute(
     id: string,
     email: string,
-    passwordHash: string,
+    passwordHash: string | null,
     role: UserRole,
     tenantId: string | null,
     createdAt: Date,
     firstName: string | null,
     lastName: string | null,
     headline: string | null = null,
+    googleId: string | null = null,
   ): User {
     return new User(
       id,
       tenantId,
       email,
       passwordHash,
+      googleId,
       role,
       firstName,
       lastName,
@@ -72,7 +77,23 @@ export class User {
       this.tenantId,
       this.email,
       this.passwordHash,
+      this.googleId,
       newRole,
+      this.firstName,
+      this.lastName,
+      this.headline,
+      this.createdAt,
+    );
+  }
+
+  linkGoogleId(googleId: string): User {
+    return new User(
+      this.id,
+      this.tenantId,
+      this.email,
+      this.passwordHash,
+      googleId,
+      this.role,
       this.firstName,
       this.lastName,
       this.headline,
@@ -92,8 +113,16 @@ export class User {
     return this.email;
   }
 
-  getPasswordHash(): string {
+  getPasswordHash(): string | null {
     return this.passwordHash;
+  }
+
+  hasPassword(): boolean {
+    return this.passwordHash !== null;
+  }
+
+  getGoogleId(): string | null {
+    return this.googleId;
   }
 
   getRole(): UserRole {

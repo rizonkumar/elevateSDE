@@ -7,3 +7,4 @@ export * from './Modal';
 export * from './Tabs';
 export * from './DatePicker';
 export * from './ConfirmDialog';
+export * from './GoogleSignInButton';

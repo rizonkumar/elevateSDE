@@ -1,5 +1,4 @@
 import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/application/users.service';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { RegisterDto } from './dtos/register.dto';
@@ -7,15 +6,14 @@ import { LoginDto } from './dtos/login.dto';
 import { AuthResponseDto } from '@elevatesde/shared-types';
 import * as bcrypt from 'bcrypt';
 import { UserRole } from '@prisma/client';
-import { User } from '../users/domain/entities/user';
 import { UserMapper } from '../users/infrastructure/mappers/user.mapper';
-import { UserPresentationMapper } from '../users/presentation/mappers/user-presentation.mapper';
+import { TokenService } from './application/token.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
-    private readonly jwtService: JwtService,
+    private readonly tokenService: TokenService,
     private readonly prisma: PrismaService,
   ) {}
 
@@ -50,7 +48,7 @@ export class AuthService {
       lastName: dto.lastName,
     });
 
-    return this.generateTokens(user);
+    return this.tokenService.issueFor(user);
   }
 
   async login(dto: LoginDto): Promise<AuthResponseDto> {
@@ -59,12 +57,18 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const isMatch = await bcrypt.compare(dto.password, user.getPasswordHash());
+    if (!user.hasPassword()) {
+      throw new UnauthorizedException(
+        'This account uses Google sign-in. Please continue with Google.',
+      );
+    }
+
+    const isMatch = await bcrypt.compare(dto.password, user.getPasswordHash()!);
     if (!isMatch) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    return this.generateTokens(user);
+    return this.tokenService.issueFor(user);
   }
 
   async refresh(token: string): Promise<AuthResponseDto> {
@@ -83,7 +87,7 @@ export class AuthService {
     await this.prisma.refreshToken.delete({ where: { id: record.id } });
 
     const user = UserMapper.toDomain(record.user);
-    return this.generateTokens(user);
+    return this.tokenService.issueFor(user);
   }
 
   async logout(token: string): Promise<void> {
@@ -93,33 +97,5 @@ export class AuthService {
     if (record) {
       await this.prisma.refreshToken.delete({ where: { id: record.id } });
     }
-  }
-
-  private async generateTokens(user: User): Promise<AuthResponseDto> {
-    const payload = { sub: user.getId(), email: user.getEmail() };
-    const accessToken = await this.jwtService.signAsync(payload, {
-      expiresIn: '15m',
-    });
-
-    const refreshTokenString = await this.jwtService.signAsync(payload, {
-      expiresIn: '7d',
-    });
-
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7);
-
-    await this.prisma.refreshToken.create({
-      data: {
-        userId: user.getId(),
-        token: refreshTokenString,
-        expiresAt,
-      },
-    });
-
-    return {
-      accessToken,
-      refreshToken: refreshTokenString,
-      user: UserPresentationMapper.toResponse(user),
-    };
   }
 }
