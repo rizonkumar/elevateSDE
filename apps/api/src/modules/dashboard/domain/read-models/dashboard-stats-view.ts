@@ -1,4 +1,8 @@
-import { AssessmentDifficulty, JobApplicationStatus } from '@elevatesde/shared-types';
+import {
+  AssessmentDifficulty,
+  InterviewReadinessStatus,
+  JobApplicationStatus,
+} from '@elevatesde/shared-types';
 
 export interface SubmissionHeatmapCell {
   date: string;
@@ -42,10 +46,24 @@ export interface DashboardRecentSubmissionView {
   createdAt: Date;
 }
 
+export interface DashboardInterviewReadinessView {
+  planId: string;
+  jobApplicationId: string;
+  company: string;
+  role: string;
+  targetAt: Date;
+  timeZone: string;
+  score: number | null;
+  status: InterviewReadinessStatus;
+  confidence: number;
+  coverage: number;
+}
+
 export interface DashboardStatsView {
   jobTracker: DashboardJobTrackerView;
   assessments: DashboardAssessmentView;
   leaderboard: DashboardLeaderboardView;
   forum: DashboardForumView;
   recentSubmissions: DashboardRecentSubmissionView[];
+  interviewReadiness: DashboardInterviewReadinessView | null;
 }

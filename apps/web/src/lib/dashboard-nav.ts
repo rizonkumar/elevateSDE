@@ -15,6 +15,7 @@ import {
   Swords,
   Repeat,
   UserRound,
+  Target,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -27,6 +28,7 @@ export interface DashboardNavItem {
 const BASE_LINKS: DashboardNavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/dashboard/job-tracker', label: 'Job Tracker', icon: Briefcase },
+  { href: '/dashboard/interview-readiness', label: 'Interview Readiness', icon: Target },
   { href: '/dashboard/resume', label: 'Resume Analyzer', icon: FileText },
   { href: '/dashboard/mock-interview', label: 'Mock Interview', icon: Mic2 },
   { href: '/dashboard/assessment', label: 'Code Editor', icon: Code2 },

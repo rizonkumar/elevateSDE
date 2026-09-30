@@ -11,6 +11,7 @@ export class NotificationMapper {
       title: record.title,
       body: record.body,
       linkUrl: record.linkUrl,
+      dedupeKey: record.dedupeKey,
       readAt: record.readAt,
       createdAt: record.createdAt,
     });

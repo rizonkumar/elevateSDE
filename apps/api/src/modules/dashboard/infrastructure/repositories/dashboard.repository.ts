@@ -9,6 +9,7 @@ import {
   DashboardAssessmentView,
   DashboardLeaderboardView,
   DashboardForumView,
+  DashboardInterviewReadinessView,
   SubmissionHeatmapCell,
 } from '../../domain/read-models/dashboard-stats-view';
 
@@ -21,15 +22,17 @@ export class DashboardRepository implements IDashboardRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async getStats(userId: string): Promise<DashboardStatsView> {
-    const [jobTracker, assessments, leaderboard, forum, recentSubmissions] = await Promise.all([
-      this.getJobTracker(userId),
-      this.getAssessments(userId),
-      this.getLeaderboard(userId),
-      this.getForum(userId),
-      this.getRecentSubmissions(userId),
-    ]);
+    const [jobTracker, assessments, leaderboard, forum, recentSubmissions, interviewReadiness] =
+      await Promise.all([
+        this.getJobTracker(userId),
+        this.getAssessments(userId),
+        this.getLeaderboard(userId),
+        this.getForum(userId),
+        this.getRecentSubmissions(userId),
+        this.getInterviewReadiness(userId),
+      ]);
 
-    return { jobTracker, assessments, leaderboard, forum, recentSubmissions };
+    return { jobTracker, assessments, leaderboard, forum, recentSubmissions, interviewReadiness };
   }
 
   async getSolvedProblemIds(userId: string): Promise<string[]> {
@@ -173,6 +176,38 @@ export class DashboardRepository implements IDashboardRepository {
       postsCreated,
       commentsPosted,
       upvotesReceived: postUpvotes + commentUpvotes,
+    };
+  }
+
+  private async getInterviewReadiness(
+    userId: string,
+  ): Promise<DashboardInterviewReadinessView | null> {
+    const plan = await this.prisma.interviewPreparationPlan.findFirst({
+      where: { userId, status: 'ACTIVE', targetAt: { gte: new Date() } },
+      orderBy: { targetAt: 'asc' },
+      include: {
+        jobApplication: { select: { company: true, role: true } },
+        snapshots: { orderBy: { calculatedAt: 'desc' }, take: 1 },
+      },
+    });
+    if (!plan) return null;
+    const candidate = plan.snapshots[0];
+    const latest =
+      candidate &&
+      (candidate.sourceRevision === plan.readinessRevision)
+        ? candidate
+        : undefined;
+    return {
+      planId: plan.id,
+      jobApplicationId: plan.jobApplicationId,
+      company: plan.jobApplication.company,
+      role: plan.jobApplication.role,
+      targetAt: plan.targetAt,
+      timeZone: plan.timeZone,
+      score: latest?.score ?? null,
+      status: latest?.status ?? 'INSUFFICIENT_EVIDENCE',
+      confidence: latest?.confidence ?? 0,
+      coverage: latest?.coverage ?? 0,
     };
   }
 

@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start -p 3001",
     "lint": "eslint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "screenshots": "playwright test capture-screenshots.spec.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -22,14 +23,15 @@
     "lucide-react": "^1.18.0",
     "next": "16.2.9",
     "react": "19.2.4",
-    "react-resizable-panels": "^2.1.7",
     "react-dom": "19.2.4",
+    "react-resizable-panels": "^2.1.7",
     "recharts": "^3.8.1",
     "zustand": "^5.0.14"
   },
   "devDependencies": {
     "@elevatesde/eslint-config": "workspace:*",
     "@elevatesde/ts-config": "workspace:*",
+    "@playwright/test": "1.63.0",
     "@tailwindcss/postcss": "^4",
     "@types/js-cookie": "^3.0.6",
     "@types/node": "^20",

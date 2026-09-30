@@ -3,7 +3,8 @@
 import * as React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Calendar, ExternalLink, GripVertical, Pencil, Trash2, Wallet } from 'lucide-react';
+import Link from 'next/link';
+import { Calendar, CalendarClock, ExternalLink, GripVertical, Pencil, Trash2, Wallet } from 'lucide-react';
 import type { JobApplicationDto } from '@elevatesde/shared-types';
 
 interface JobCardViewProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -84,6 +85,15 @@ export const JobCardView = React.forwardRef<HTMLDivElement, JobCardViewProps>(
             <span className="text-xs text-(--color-text-muted)">No link</span>
           )}
           <div className="flex items-center gap-1">
+            <Link
+              href={`/dashboard/interview-readiness?application=${application.id}`}
+              aria-label={`Prepare for ${application.company}`}
+              onPointerDown={(event) => event.stopPropagation()}
+              className="inline-flex items-center gap-1 rounded-(--radius-sm) px-2 py-1.5 text-xs font-medium text-(--color-accent) hover:bg-(--color-accent-soft) transition"
+            >
+              <CalendarClock className="w-3.5 h-3.5" />
+              Prepare
+            </Link>
             <button
               type="button"
               aria-label="Edit application"

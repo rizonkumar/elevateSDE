@@ -3,10 +3,12 @@ import {
   AssessmentDifficulty,
   DashboardAssessmentStats,
   DashboardForumStats,
+  DashboardInterviewReadinessStats,
   DashboardJobTrackerStats,
   DashboardLeaderboardStats,
   DashboardRecentSubmission,
   DashboardStatsDto,
+  InterviewReadinessStatus,
   JobApplicationStatus,
 } from '@elevatesde/shared-types';
 
@@ -88,6 +90,38 @@ class DashboardRecentSubmissionDto implements DashboardRecentSubmission {
   createdAt!: string;
 }
 
+class DashboardInterviewReadinessStatsDto implements DashboardInterviewReadinessStats {
+  @ApiProperty()
+  planId!: string;
+
+  @ApiProperty()
+  jobApplicationId!: string;
+
+  @ApiProperty()
+  company!: string;
+
+  @ApiProperty()
+  role!: string;
+
+  @ApiProperty()
+  targetAt!: string;
+
+  @ApiProperty()
+  timeZone!: string;
+
+  @ApiProperty({ nullable: true })
+  score!: number | null;
+
+  @ApiProperty()
+  status!: InterviewReadinessStatus;
+
+  @ApiProperty()
+  confidence!: number;
+
+  @ApiProperty()
+  coverage!: number;
+}
+
 export class DashboardStatsResponseDto implements DashboardStatsDto {
   @ApiProperty({ type: DashboardJobTrackerStatsDto })
   jobTracker!: DashboardJobTrackerStatsDto;
@@ -103,4 +137,7 @@ export class DashboardStatsResponseDto implements DashboardStatsDto {
 
   @ApiProperty({ type: [DashboardRecentSubmissionDto] })
   recentSubmissions!: DashboardRecentSubmissionDto[];
+
+  @ApiProperty({ type: DashboardInterviewReadinessStatsDto, nullable: true })
+  interviewReadiness!: DashboardInterviewReadinessStatsDto | null;
 }

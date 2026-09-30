@@ -9,6 +9,7 @@ export interface NotificationProps {
   title: string;
   body: string;
   linkUrl: string | null;
+  dedupeKey: string | null;
   readAt: Date | null;
   createdAt: Date;
 }
@@ -19,6 +20,7 @@ export interface NotificationDraft {
   title: string;
   body: string;
   linkUrl: string | null;
+  dedupeKey?: string | null;
 }
 
 export class Notification {
@@ -33,6 +35,7 @@ export class Notification {
       title: draft.title,
       body: draft.body,
       linkUrl: draft.linkUrl,
+      dedupeKey: draft.dedupeKey ?? null,
       readAt: null,
       createdAt: new Date(),
     });
@@ -72,6 +75,10 @@ export class Notification {
 
   getLinkUrl(): string | null {
     return this.props.linkUrl;
+  }
+
+  getDedupeKey(): string | null {
+    return this.props.dedupeKey;
   }
 
   getReadAt(): Date | null {
