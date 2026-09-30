@@ -21,6 +21,10 @@ export class PeerPracticeService {
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
+  async get(userId: string, sessionId: string): Promise<PeerPracticeSessionDto> {
+    return this.findSession(userId, sessionId);
+  }
+
   async create(
     organizerId: string,
     planId: string,

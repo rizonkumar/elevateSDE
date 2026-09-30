@@ -190,6 +190,15 @@ export class InterviewPreparationController {
     return this.peerPracticeService.create(req.user.getId(), planId, dto);
   }
 
+  @Get('peer-sessions/:sessionId')
+  @ApiOperation({ summary: 'Get a participant-owned peer practice session' })
+  getPeerSession(
+    @Req() req: RequestWithUser,
+    @Param('sessionId', ParseUUIDPipe) sessionId: string,
+  ): Promise<PeerPracticeSessionDto> {
+    return this.peerPracticeService.get(req.user.getId(), sessionId);
+  }
+
   @Patch('peer-sessions/:sessionId/status')
   @ApiOperation({ summary: 'Update a peer practice session status' })
   updatePeerSessionStatus(

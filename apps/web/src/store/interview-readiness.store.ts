@@ -24,6 +24,7 @@ const ENDPOINT = '/api/v1/interview-preparation';
 interface InterviewReadinessState {
   overview: InterviewPreparationOverviewDto | null;
   plan: InterviewPreparationPlanDto | null;
+  peerSession: PeerPracticeSessionDto | null;
   templates: InterviewLoopTemplateDto[];
   isLoading: boolean;
   isSaving: boolean;
@@ -31,6 +32,7 @@ interface InterviewReadinessState {
   loadOverview: () => Promise<void>;
   loadTemplates: () => Promise<void>;
   loadPlan: (planId: string) => Promise<void>;
+  loadPeerSession: (sessionId: string) => Promise<void>;
   createPlan: (input: CreateInterviewPreparationPlanDto) => Promise<string | null>;
   updatePlan: (planId: string, input: UpdateInterviewPreparationPlanDto) => Promise<boolean>;
   updateRound: (roundId: string, input: UpdatePreparationRoundDto) => Promise<boolean>;
@@ -89,6 +91,7 @@ function replacePeerSession(
 export const useInterviewReadinessStore = create<InterviewReadinessState>((set, get) => ({
   overview: null,
   plan: null,
+  peerSession: null,
   templates: [],
   isLoading: false,
   isSaving: false,
@@ -121,6 +124,16 @@ export const useInterviewReadinessStore = create<InterviewReadinessState>((set, 
       set({ plan: response.data, isLoading: false });
     } catch (error) {
       set({ isLoading: false, error: messageFor(error, 'Could not load this preparation plan.') });
+    }
+  },
+
+  loadPeerSession: async (sessionId) => {
+    set({ isLoading: true, error: null, peerSession: null });
+    try {
+      const response = await api.get<PeerPracticeSessionDto>(`${ENDPOINT}/peer-sessions/${sessionId}`);
+      set({ peerSession: response.data, isLoading: false });
+    } catch (error) {
+      set({ isLoading: false, error: messageFor(error, 'Could not load this peer session.') });
     }
   },
 
@@ -228,6 +241,68 @@ export const useInterviewReadinessStore = create<InterviewReadinessState>((set, 
     } catch (error) {
       useToastStore.getState().addToast(messageFor(error, 'Could not refresh readiness evidence.'), 'error');
       return null;
+    }
+  },
+
+  createPeerSession: async (planId, input) => {
+    set({ isSaving: true });
+    try {
+      const response = await api.post<PeerPracticeSessionDto>(`${ENDPOINT}/plans/${planId}/peer-sessions`, input);
+      const current = get().plan;
+      set({ plan: current ? replacePeerSession(current, response.data) : current, isSaving: false });
+      useToastStore.getState().addToast('Peer practice invitation sent.', 'success');
+      return true;
+    } catch (error) {
+      set({ isSaving: false });
+      useToastStore.getState().addToast(messageFor(error, 'Could not schedule peer practice.'), 'error');
+      return false;
+    }
+  },
+
+  updatePeerSessionStatus: async (session, status) => {
+    try {
+      const response = await api.patch<PeerPracticeSessionDto>(`${ENDPOINT}/peer-sessions/${session.id}/status`, {
+        status,
+        version: session.version,
+      });
+      const current = get().plan;
+      set({
+        plan: current ? replacePeerSession(current, response.data) : current,
+        peerSession: get().peerSession?.id === response.data.id ? response.data : get().peerSession,
+      });
+      return true;
+    } catch (error) {
+      useToastStore.getState().addToast(messageFor(error, 'Could not update the peer session.'), 'error');
+      return false;
+    }
+  },
+
+  reschedulePeerSession: async (session, input) => {
+    try {
+      const response = await api.patch<PeerPracticeSessionDto>(`${ENDPOINT}/peer-sessions/${session.id}/reschedule`, {
+        ...input,
+        version: session.version,
+      });
+      const current = get().plan;
+      if (current) set({ plan: replacePeerSession(current, response.data) });
+      useToastStore.getState().addToast('Peer practice rescheduled.', 'success');
+      return true;
+    } catch (error) {
+      useToastStore.getState().addToast(messageFor(error, 'Could not reschedule peer practice.'), 'error');
+      return false;
+    }
+  },
+
+  submitPeerScorecard: async (sessionId, input) => {
+    try {
+      await api.post(`${ENDPOINT}/peer-sessions/${sessionId}/scorecards`, input);
+      const current = get().plan;
+      if (current) await get().loadPlan(current.id);
+      useToastStore.getState().addToast('Peer feedback submitted.', 'success');
+      return true;
+    } catch (error) {
+      useToastStore.getState().addToast(messageFor(error, 'Could not submit peer feedback.'), 'error');
+      return false;
     }
   },
 

@@ -95,7 +95,7 @@ export class NotificationListener {
       type: 'PEER_INVITATION',
       title: 'Peer practice invitation',
       body: `${event.organizerName} invited you to an interview practice session.`,
-      linkUrl: `/dashboard/interview-readiness/${event.planId}?session=${event.sessionId}`,
+      linkUrl: `/dashboard/interview-readiness/peer/${event.sessionId}`,
       dedupeKey: `peer-invite:${event.sessionId}:${event.recipientId}`,
     });
   }
@@ -107,7 +107,7 @@ export class NotificationListener {
       type: 'PEER_SESSION_CHANGED',
       title: 'Peer session updated',
       body: `The session is now ${event.status.toLowerCase().replaceAll('_', ' ')}.`,
-      linkUrl: `/dashboard/interview-readiness/${event.planId}?session=${event.sessionId}`,
+      linkUrl: `/dashboard/interview-readiness/peer/${event.sessionId}`,
       dedupeKey: event.dedupeKey,
     });
   }
@@ -119,7 +119,7 @@ export class NotificationListener {
       type: 'SCORECARD_REQUEST',
       title: 'Share peer feedback',
       body: 'Your practice session is complete. Submit a scorecard while the conversation is fresh.',
-      linkUrl: `/dashboard/interview-readiness/${event.planId}?session=${event.sessionId}`,
+      linkUrl: `/dashboard/interview-readiness/peer/${event.sessionId}`,
       dedupeKey: event.dedupeKey,
     });
   }

@@ -25,6 +25,7 @@ import { PageContainer } from '@/components/dashboard/PageContainer';
 import { ReadinessIndicator } from '@/components/dashboard/ReadinessIndicator';
 import { useInterviewReadinessStore } from '@/store/interview-readiness.store';
 import { PlanSettingsModal } from './PlanSettingsModal';
+import { PeerPracticePanel } from './PeerPracticePanel';
 
 interface InterviewReadinessDetailProps {
   planId: string;
@@ -314,6 +315,8 @@ export function InterviewReadinessDetail({ planId }: InterviewReadinessDetailPro
         </nav>
 
         {activeRound && <RoundWorkspace round={activeRound} />}
+
+        <PeerPracticePanel plan={plan} />
 
         <section className="rounded-(--radius-lg) border border-(--color-border-subtle) bg-(--color-surface) p-5 shadow-(--shadow-card) sm:p-6">
           <div className="flex items-center gap-2 text-sm font-semibold text-(--color-text-primary)">
