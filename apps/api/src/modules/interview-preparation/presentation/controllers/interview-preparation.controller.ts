@@ -14,6 +14,8 @@ import type {
   InterviewLoopTemplateDto,
   InterviewPreparationOverviewDto,
   InterviewPreparationPlanDto,
+  PeerPracticeSessionDto,
+  PeerScorecardDto,
   PreparationRoundDto,
   PreparationTaskDto,
   ReadinessSnapshotDto,
@@ -21,12 +23,17 @@ import type {
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
 import { User } from '../../../users/domain/entities/user';
 import { InterviewPreparationService } from '../../application/interview-preparation.service';
+import { PeerPracticeService } from '../../application/peer-practice.service';
 import {
   CreateInterviewPreparationPlanRequestDto,
+  CreatePeerPracticeSessionRequestDto,
   CreatePreparationRoundRequestDto,
   CreatePreparationTaskRequestDto,
   UpdateInterviewPreparationPlanRequestDto,
   UpdatePreparationRoundRequestDto,
+  ReschedulePeerPracticeSessionRequestDto,
+  SubmitPeerScorecardRequestDto,
+  UpdatePeerPracticeStatusRequestDto,
   UpdatePreparationTaskRequestDto,
   VersionRequestDto,
 } from '../dtos/interview-preparation.dto';
@@ -40,7 +47,10 @@ interface RequestWithUser {
 @Controller({ path: 'interview-preparation', version: '1' })
 @UseGuards(JwtAuthGuard)
 export class InterviewPreparationController {
-  constructor(private readonly service: InterviewPreparationService) {}
+  constructor(
+    private readonly service: InterviewPreparationService,
+    private readonly peerPracticeService: PeerPracticeService,
+  ) {}
 
   @Get('templates')
   @ApiOperation({ summary: 'List editable interview loop templates' })
@@ -168,5 +178,45 @@ export class InterviewPreparationController {
     @Param('planId', ParseUUIDPipe) planId: string,
   ): Promise<ReadinessSnapshotDto> {
     return this.service.refreshSnapshot(req.user.getId(), planId);
+  }
+
+  @Post('plans/:planId/peer-sessions')
+  @ApiOperation({ summary: 'Invite a candidate to peer practice' })
+  createPeerSession(
+    @Req() req: RequestWithUser,
+    @Param('planId', ParseUUIDPipe) planId: string,
+    @Body() dto: CreatePeerPracticeSessionRequestDto,
+  ): Promise<PeerPracticeSessionDto> {
+    return this.peerPracticeService.create(req.user.getId(), planId, dto);
+  }
+
+  @Patch('peer-sessions/:sessionId/status')
+  @ApiOperation({ summary: 'Update a peer practice session status' })
+  updatePeerSessionStatus(
+    @Req() req: RequestWithUser,
+    @Param('sessionId', ParseUUIDPipe) sessionId: string,
+    @Body() dto: UpdatePeerPracticeStatusRequestDto,
+  ): Promise<PeerPracticeSessionDto> {
+    return this.peerPracticeService.updateStatus(req.user.getId(), sessionId, dto.status, dto.version);
+  }
+
+  @Patch('peer-sessions/:sessionId/reschedule')
+  @ApiOperation({ summary: 'Reschedule a peer practice session' })
+  reschedulePeerSession(
+    @Req() req: RequestWithUser,
+    @Param('sessionId', ParseUUIDPipe) sessionId: string,
+    @Body() dto: ReschedulePeerPracticeSessionRequestDto,
+  ): Promise<PeerPracticeSessionDto> {
+    return this.peerPracticeService.reschedule(req.user.getId(), sessionId, dto);
+  }
+
+  @Post('peer-sessions/:sessionId/scorecards')
+  @ApiOperation({ summary: 'Submit peer practice feedback' })
+  submitPeerScorecard(
+    @Req() req: RequestWithUser,
+    @Param('sessionId', ParseUUIDPipe) sessionId: string,
+    @Body() dto: SubmitPeerScorecardRequestDto,
+  ): Promise<PeerScorecardDto> {
+    return this.peerPracticeService.submitScorecard(req.user.getId(), sessionId, dto);
   }
 }

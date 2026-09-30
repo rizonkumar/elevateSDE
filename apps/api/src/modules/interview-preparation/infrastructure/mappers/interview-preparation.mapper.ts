@@ -11,6 +11,12 @@ import type {
   ReadinessSnapshotDto,
 } from '@elevatesde/shared-types';
 
+export const peerSessionInclude = {
+  organizer: true,
+  invitee: true,
+  scorecards: { include: { evaluator: true }, orderBy: { submittedAt: 'asc' as const } },
+} satisfies Prisma.PeerPracticeSessionInclude;
+
 export const planInclude = {
   jobApplication: true,
   rounds: { orderBy: { ordinal: 'asc' as const } },
@@ -18,11 +24,7 @@ export const planInclude = {
   snapshots: { orderBy: { calculatedAt: 'desc' as const }, take: 20 },
   peerSessions: {
     orderBy: { startsAt: 'asc' as const },
-    include: {
-      organizer: true,
-      invitee: true,
-      scorecards: { include: { evaluator: true }, orderBy: { submittedAt: 'asc' as const } },
-    },
+    include: peerSessionInclude,
   },
 } satisfies Prisma.InterviewPreparationPlanInclude;
 

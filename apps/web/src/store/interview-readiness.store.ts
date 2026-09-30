@@ -2,12 +2,17 @@ import { create } from 'zustand';
 import axios from 'axios';
 import type {
   CreateInterviewPreparationPlanDto,
+  CreatePeerPracticeSessionDto,
   InterviewLoopTemplateDto,
   InterviewPreparationOverviewDto,
   InterviewPreparationPlanDto,
+  PeerPracticeSessionDto,
+  PeerPracticeStatus,
   PreparationRoundDto,
   PreparationTaskDto,
   ReadinessSnapshotDto,
+  ReschedulePeerPracticeSessionDto,
+  SubmitPeerScorecardDto,
   UpdateInterviewPreparationPlanDto,
   UpdatePreparationRoundDto,
 } from '@elevatesde/shared-types';
@@ -31,6 +36,19 @@ interface InterviewReadinessState {
   updateRound: (roundId: string, input: UpdatePreparationRoundDto) => Promise<boolean>;
   setTaskCompletion: (task: PreparationTaskDto, completed: boolean) => Promise<void>;
   refreshSnapshot: (planId: string) => Promise<ReadinessSnapshotDto | null>;
+  createPeerSession: (planId: string, input: CreatePeerPracticeSessionDto) => Promise<boolean>;
+  updatePeerSessionStatus: (
+    session: PeerPracticeSessionDto,
+    status: Exclude<PeerPracticeStatus, 'PENDING'>,
+  ) => Promise<boolean>;
+  reschedulePeerSession: (
+    session: PeerPracticeSessionDto,
+    input: Omit<ReschedulePeerPracticeSessionDto, 'version'>,
+  ) => Promise<boolean>;
+  submitPeerScorecard: (
+    sessionId: string,
+    input: SubmitPeerScorecardDto,
+  ) => Promise<boolean>;
   clearPlan: () => void;
 }
 
@@ -50,6 +68,21 @@ function replaceTask(
       ...round,
       tasks: round.tasks.map((item) => (item.id === task.id ? task : item)),
     })),
+  };
+}
+
+function replacePeerSession(
+  plan: InterviewPreparationPlanDto,
+  session: PeerPracticeSessionDto,
+): InterviewPreparationPlanDto {
+  const exists = plan.peerSessions.some((item) => item.id === session.id);
+  return {
+    ...plan,
+    peerSessions: exists
+      ? plan.peerSessions.map((item) => (item.id === session.id ? session : item))
+      : [...plan.peerSessions, session].sort(
+          (left, right) => new Date(left.startsAt).getTime() - new Date(right.startsAt).getTime(),
+        ),
   };
 }
 

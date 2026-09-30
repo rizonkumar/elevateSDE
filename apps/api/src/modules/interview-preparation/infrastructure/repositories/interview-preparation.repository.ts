@@ -29,6 +29,7 @@ import {
 } from '../../domain/interfaces/interview-preparation-repository.interface';
 import {
   InterviewPreparationMapper,
+  peerSessionInclude,
   planInclude,
 } from '../mappers/interview-preparation.mapper';
 
@@ -397,6 +398,116 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
       },
     });
     return InterviewPreparationMapper.toSnapshot(created);
+  }
+
+  async createPeerSession(
+    input: CreatePeerSessionRecordInput,
+  ): Promise<PeerPracticeSessionDto | 'DUPLICATE' | null> {
+    const round = await this.prisma.interviewPreparationRound.findFirst({
+      where: { id: input.roundId, planId: input.planId, plan: { userId: input.organizerId } },
+      select: { id: true },
+    });
+    if (!round) return null;
+    try {
+      const session = await this.prisma.peerPracticeSession.create({
+        data: { id: randomUUID(), ...input },
+        include: peerSessionInclude,
+      });
+      return InterviewPreparationMapper.toPeerSession(session);
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        return 'DUPLICATE';
+      }
+      throw error;
+    }
+  }
+
+  async findPeerSessionForParticipant(
+    userId: string,
+    sessionId: string,
+  ): Promise<PeerPracticeSessionDto | null> {
+    const session = await this.prisma.peerPracticeSession.findFirst({
+      where: { id: sessionId, OR: [{ organizerId: userId }, { inviteeId: userId }] },
+      include: peerSessionInclude,
+    });
+    return session ? InterviewPreparationMapper.toPeerSession(session) : null;
+  }
+
+  async updatePeerSessionStatus(
+    userId: string,
+    sessionId: string,
+    status: PeerPracticeStatus,
+    version: number,
+  ): Promise<PeerPracticeSessionDto | 'VERSION_CONFLICT' | null> {
+    const result = await this.prisma.peerPracticeSession.updateMany({
+      where: {
+        id: sessionId,
+        version,
+        OR: [{ organizerId: userId }, { inviteeId: userId }],
+      },
+      data: { status, version: { increment: 1 } },
+    });
+    return this.resolvePeerUpdate(userId, sessionId, result.count);
+  }
+
+  async reschedulePeerSession(
+    userId: string,
+    sessionId: string,
+    input: ReschedulePeerPracticeSessionDto,
+  ): Promise<PeerPracticeSessionDto | 'VERSION_CONFLICT' | null> {
+    const result = await this.prisma.peerPracticeSession.updateMany({
+      where: { id: sessionId, organizerId: userId, version: input.version },
+      data: {
+        startsAt: new Date(input.startsAt),
+        timeZone: input.timeZone,
+        durationMinutes: input.durationMinutes,
+        meetingUrl: input.meetingUrl,
+        status: 'PENDING',
+        version: { increment: 1 },
+      },
+    });
+    return this.resolvePeerUpdate(userId, sessionId, result.count);
+  }
+
+  async createScorecard(
+    userId: string,
+    sessionId: string,
+    input: SubmitPeerScorecardDto,
+  ): Promise<PeerScorecardDto | 'DUPLICATE' | null> {
+    const session = await this.prisma.peerPracticeSession.findFirst({
+      where: {
+        id: sessionId,
+        status: 'COMPLETED',
+        OR: [{ organizerId: userId }, { inviteeId: userId }],
+      },
+      select: { id: true },
+    });
+    if (!session) return null;
+    try {
+      const scorecard = await this.prisma.peerScorecard.create({
+        data: { id: randomUUID(), sessionId, evaluatorId: userId, ...input },
+        include: { evaluator: true },
+      });
+      return InterviewPreparationMapper.toScorecard(scorecard);
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        return 'DUPLICATE';
+      }
+      throw error;
+    }
+  }
+
+  private async resolvePeerUpdate(
+    userId: string,
+    sessionId: string,
+    count: number,
+  ): Promise<PeerPracticeSessionDto | 'VERSION_CONFLICT' | null> {
+    if (count > 0) return this.findPeerSessionForParticipant(userId, sessionId);
+    const exists = await this.prisma.peerPracticeSession.findFirst({
+      where: { id: sessionId, OR: [{ organizerId: userId }, { inviteeId: userId }] },
+      select: { id: true },
+    });
+    return exists ? 'VERSION_CONFLICT' : null;
   }
 
   private async resolvePlanUpdate(
