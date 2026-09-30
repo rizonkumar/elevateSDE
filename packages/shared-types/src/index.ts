@@ -1187,3 +1187,8 @@ export interface AiReadinessExplanationDto {
   generatedAt: string;
   fallback: boolean;
 }
+
+export interface UpdatePeerPracticeStatusDto {
+  status: Exclude<PeerPracticeStatus, 'PENDING'>;
+  version: number;
+}

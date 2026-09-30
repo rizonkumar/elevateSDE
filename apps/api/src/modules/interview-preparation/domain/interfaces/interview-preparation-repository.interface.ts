@@ -1,7 +1,12 @@
 import type {
   CreatePreparationRoundDto,
   CreatePreparationTaskDto,
-  InterviewPreparationOverviewDto,
+  PeerPracticeSessionDto,
+  PeerPracticeStatus,
+  PeerScorecardDto,
+  ReadinessSnapshotDto,
+  ReschedulePeerPracticeSessionDto,
+  SubmitPeerScorecardDto,
   InterviewPreparationPlanDto,
   InterviewPreparationPlanStatus,
   JobApplicationDto,
