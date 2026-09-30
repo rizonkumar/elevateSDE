@@ -117,9 +117,6 @@ export class CreatePreparationRoundRequestDto implements CreateRoundContract {
   @Max(10)
   weight!: number;
 
-  @IsInt()
-  @Min(0)
-  ordinal!: number;
 }
 
 export class UpdatePreparationRoundRequestDto implements UpdateRoundContract {
@@ -139,10 +136,6 @@ export class UpdatePreparationRoundRequestDto implements UpdateRoundContract {
   @IsOptional()
   weight?: number;
 
-  @IsInt()
-  @Min(0)
-  @IsOptional()
-  ordinal?: number;
 
   @IsInt()
   @Min(0)
@@ -183,9 +176,6 @@ export class CreatePreparationTaskRequestDto implements CreateTaskContract {
   @IsOptional()
   deepLink?: string | null;
 
-  @IsInt()
-  @Min(0)
-  ordinal!: number;
 }
 
 export class UpdatePreparationTaskRequestDto implements UpdateTaskContract {
@@ -204,10 +194,6 @@ export class UpdatePreparationTaskRequestDto implements UpdateTaskContract {
   @IsOptional()
   dueAt?: string | null;
 
-  @IsInt()
-  @Min(0)
-  @IsOptional()
-  ordinal?: number;
 
   @IsInt()
   @Min(0)

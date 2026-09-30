@@ -309,7 +309,7 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
       });
       await transaction.interviewPreparationPlan.update({
         where: { id: planId },
-        data: { readinessInvalidatedAt: new Date() },
+        data: { readinessInvalidatedAt: new Date(), readinessRevision: { increment: 1 } },
       });
       return created;
     });
@@ -339,7 +339,7 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
         });
         await transaction.interviewPreparationPlan.update({
           where: { id: round.planId },
-          data: { readinessInvalidatedAt: new Date() },
+          data: { readinessInvalidatedAt: new Date(), readinessRevision: { increment: 1 } },
         });
       }
       return updated;
@@ -386,7 +386,7 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
       });
       await transaction.interviewPreparationPlan.update({
         where: { id: planId },
-        data: { readinessInvalidatedAt: new Date() },
+        data: { readinessInvalidatedAt: new Date(), readinessRevision: { increment: 1 } },
       });
       return created;
     });
@@ -435,7 +435,7 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
       if (updated.count > 0) {
         await transaction.interviewPreparationPlan.update({
           where: { id: task.planId },
-          data: { readinessInvalidatedAt: new Date() },
+          data: { readinessInvalidatedAt: new Date(), readinessRevision: { increment: 1 } },
         });
       }
       return updated;
@@ -587,7 +587,7 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
         });
         await transaction.interviewPreparationPlan.update({
           where: { id: session.planId },
-          data: { readinessInvalidatedAt: new Date() },
+          data: { readinessInvalidatedAt: new Date(), readinessRevision: { increment: 1 } },
         });
         return created;
       });
