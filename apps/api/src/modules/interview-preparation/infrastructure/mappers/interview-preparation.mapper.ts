@@ -188,6 +188,14 @@ export class InterviewPreparationMapper {
     return snapshot(record);
   }
 
+  static toPeerSession(record: PeerSessionRecord): PeerPracticeSessionDto {
+    return peerSession(record);
+  }
+
+  static toScorecard(record: ScorecardRecord): PeerScorecardDto {
+    return scorecard(record);
+  }
+
   static toJobApplication(record: PlanRecord['jobApplication']): JobApplicationDto {
     return {
       id: record.id,

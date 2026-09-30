@@ -8,15 +8,21 @@ import type {
   InterviewPreparationPlanDto,
   InterviewPreparationPlanStatus,
   JobApplicationDto,
+  PeerPracticeSessionDto,
+  PeerPracticeStatus,
+  PeerScorecardDto,
   PreparationRoundDto,
   PreparationTaskDto,
   ReadinessSnapshotDto,
+  ReschedulePeerPracticeSessionDto,
+  SubmitPeerScorecardDto,
   UpdateInterviewPreparationPlanDto,
   UpdatePreparationRoundDto,
   UpdatePreparationTaskDto,
 } from '@elevatesde/shared-types';
 import { PrismaService } from '../../../../infrastructure/prisma/prisma.service';
 import {
+  CreatePeerSessionRecordInput,
   CreatePlanRecordInput,
   InterviewPreparationEvidence,
   IInterviewPreparationRepository,

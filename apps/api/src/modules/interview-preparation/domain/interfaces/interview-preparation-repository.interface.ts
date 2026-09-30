@@ -1,19 +1,19 @@
 import type {
   CreatePreparationRoundDto,
   CreatePreparationTaskDto,
-  PeerPracticeSessionDto,
-  PeerPracticeStatus,
-  PeerScorecardDto,
-  ReadinessSnapshotDto,
-  ReschedulePeerPracticeSessionDto,
-  SubmitPeerScorecardDto,
+  InterviewPreparationOverviewDto,
   InterviewPreparationPlanDto,
   InterviewPreparationPlanStatus,
   JobApplicationDto,
-  PreviewInterviewPreparationPlanDto,
+  PeerPracticeSessionDto,
+  PeerPracticeStatus,
+  PeerScorecardDto,
   PreparationRoundDto,
   PreparationTaskDto,
+  PreviewInterviewPreparationPlanDto,
   ReadinessSnapshotDto,
+  ReschedulePeerPracticeSessionDto,
+  SubmitPeerScorecardDto,
   UpdateInterviewPreparationPlanDto,
   UpdatePreparationRoundDto,
   UpdatePreparationTaskDto,
@@ -30,6 +30,17 @@ export interface InterviewPreparationEvidence {
   learning: { score: number | null; observedAt: Date | null };
   resume: { score: number | null; observedAt: Date | null };
   peer: { score: number | null; observedAt: Date | null };
+}
+
+export interface CreatePeerSessionRecordInput {
+  planId: string;
+  roundId: string;
+  organizerId: string;
+  inviteeId: string;
+  startsAt: Date;
+  timeZone: string;
+  durationMinutes: number;
+  meetingUrl: string;
 }
 
 export abstract class IInterviewPreparationRepository {
@@ -89,4 +100,27 @@ export abstract class IInterviewPreparationRepository {
     planId: string,
     snapshot: Omit<ReadinessSnapshotDto, 'id'>,
   ): Promise<ReadinessSnapshotDto | null>;
+  abstract createPeerSession(
+    input: CreatePeerSessionRecordInput,
+  ): Promise<PeerPracticeSessionDto | 'DUPLICATE' | null>;
+  abstract findPeerSessionForParticipant(
+    userId: string,
+    sessionId: string,
+  ): Promise<PeerPracticeSessionDto | null>;
+  abstract updatePeerSessionStatus(
+    userId: string,
+    sessionId: string,
+    status: PeerPracticeStatus,
+    version: number,
+  ): Promise<PeerPracticeSessionDto | 'VERSION_CONFLICT' | null>;
+  abstract reschedulePeerSession(
+    userId: string,
+    sessionId: string,
+    input: ReschedulePeerPracticeSessionDto,
+  ): Promise<PeerPracticeSessionDto | 'VERSION_CONFLICT' | null>;
+  abstract createScorecard(
+    userId: string,
+    sessionId: string,
+    input: SubmitPeerScorecardDto,
+  ): Promise<PeerScorecardDto | 'DUPLICATE' | null>;
 }
