@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import {
-  Mic2,
   Code2,
   FileText,
   Briefcase,
@@ -10,6 +9,7 @@ import {
   Building2,
   Check,
   ArrowUp,
+  Target,
 } from 'lucide-react';
 import { SectionShell } from './SectionShell';
 import { SectionHeading } from './SectionHeading';
@@ -59,31 +59,23 @@ function MiniPanel({
   );
 }
 
-function InterviewPreview() {
+function ReadinessPreview() {
   return (
-    <MiniPanel className="flex flex-col gap-3">
-      <div className="flex items-start gap-2.5">
-        <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-(--color-accent-soft) text-(--color-accent)">
-          <Mic2 className="h-3 w-3" />
-        </span>
-        <p className="text-sm text-(--color-text-primary)">
-          Walk me through how you&apos;d shard a write-heavy service.
-        </p>
+    <MiniPanel className="grid gap-3 sm:grid-cols-[auto_1fr] sm:items-center">
+      <div className="flex h-20 w-20 items-center justify-center rounded-full border-[7px] border-(--color-accent-soft) font-display text-xl font-bold text-(--color-text-primary)">
+        78
       </div>
-      <div className="flex items-center justify-between rounded-sm border border-(--color-border-subtle) bg-(--color-surface) px-3 py-2">
-        <span className="font-mono text-[11px] uppercase tracking-wider text-(--color-text-muted)">
-          Round score
-        </span>
-        <span className="text-sm font-semibold text-(--color-text-primary)">8.2 / 10</span>
-      </div>
-      <div className="flex flex-wrap gap-1.5">
-        {['System Design', 'Senior', 'FAANG'].map((tag) => (
-          <span
-            key={tag}
-            className="rounded-(--radius-full) border border-(--color-border-subtle) px-2 py-0.5 text-[11px] font-medium text-(--color-text-muted)"
-          >
-            {tag}
-          </span>
+      <div className="grid gap-2 sm:grid-cols-2">
+        {[
+          ['Coding', 'Ready'],
+          ['System design', 'Progressing'],
+          ['Behavioral', 'Evidence needed'],
+          ['Role fit', 'Progressing'],
+        ].map(([round, status]) => (
+          <div key={round} className="rounded-(--radius-sm) border border-(--color-border-subtle) bg-(--color-surface) px-3 py-2">
+            <div className="text-xs font-semibold text-(--color-text-primary)">{round}</div>
+            <div className="mt-0.5 text-[11px] text-(--color-text-muted)">{status}</div>
+          </div>
         ))}
       </div>
     </MiniPanel>
@@ -246,19 +238,19 @@ export function BentoFeatures() {
       <Reveal>
         <SectionHeading
           kicker="The platform"
-          title="Everything you need to get hired — in one place"
-          description="A complete, enterprise-grade toolkit for interview preparation. From timed practice to the signed offer, every workflow lives under one roof."
+          title="Every preparation tool, organized around the interview"
+          description="Build a plan from a tracked application, then use coding practice, review, learning paths, resume analysis, mock interviews, and peer feedback to close visible gaps."
         />
       </Reveal>
 
       <Reveal delay={0.1} className="mt-12">
         <div className="grid gap-4 lg:grid-cols-3">
           <Tile
-            icon={Mic2}
-            meta="Real-time"
-            title="Adaptive AI mock interviews"
-            body="Answer by voice or text across System Design, DSA, Coding, and Behavioral rounds. The engine scores each answer and raises domain-specific follow-ups in real time."
-            preview={<InterviewPreview />}
+            icon={Target}
+            meta="Deadline-aware"
+            title="Application-linked readiness plans"
+            body="Confirm the interview loop, follow prioritized tasks, and inspect the evidence behind every round status. Missing signals lower confidence instead of becoming a failing score."
+            preview={<ReadinessPreview />}
             className="lg:col-span-2"
           />
           <div className="flex flex-col gap-4">

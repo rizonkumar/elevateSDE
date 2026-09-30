@@ -5,18 +5,18 @@ import { Reveal } from './Reveal';
 const STEPS = [
   {
     step: '01',
-    title: 'Set up your profile',
-    body: 'Create an account, pick your target role, and import your resume in seconds.',
+    title: 'Choose the interview',
+    body: 'Start from a tracked application and confirm the deadline, company archetype, and expected rounds.',
   },
   {
     step: '02',
-    title: 'Practice with AI',
-    body: 'Run timed mock interviews and assessments tailored to your level and company style.',
+    title: 'Close the visible gaps',
+    body: 'Follow prioritized coding, review, learning, resume, mock interview, and peer-practice actions.',
   },
   {
     step: '03',
-    title: 'Improve and track',
-    body: 'Review scored feedback, follow a personalized plan, and track every application to offer.',
+    title: 'Inspect the evidence',
+    body: 'Track round status, coverage, and confidence without turning missing activity into a failing score.',
   },
 ];
 
@@ -26,8 +26,8 @@ export function HowItWorks() {
       <Reveal>
         <SectionHeading
           kicker="How it works"
-          title="Three steps from sign-up to interview-ready"
-          description="No setup overhead. Start practicing the same day you join."
+          title="From application to interview plan in three steps"
+          description="Start with the role in front of you. Adjust every assumption as the interview changes."
         />
       </Reveal>
 

@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Mic2, Code2, Briefcase, Trophy } from 'lucide-react';
+import { Mic2, Code2, Briefcase, Trophy, Target } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { SectionShell } from './SectionShell';
 import { SectionHeading } from './SectionHeading';
@@ -19,6 +19,16 @@ interface ShowcaseTab {
   alt: string;
 }
 
+const READINESS_TAB: ShowcaseTab = {
+  id: 'readiness',
+  label: 'Interview Readiness',
+  icon: Target,
+  shot: 'interview-readiness',
+  route: 'app.elevatesde.dev/interview-readiness',
+  caption: 'Turn a tracked application into editable rounds, prioritized tasks, and transparent evidence.',
+  alt: 'Interview Readiness workspace showing round status, evidence, tasks, and deadline',
+};
+
 const INTERVIEW_TAB: ShowcaseTab = {
   id: 'interview',
   label: 'Mock Interview',
@@ -30,6 +40,7 @@ const INTERVIEW_TAB: ShowcaseTab = {
 };
 
 const TABS: ShowcaseTab[] = [
+  READINESS_TAB,
   INTERVIEW_TAB,
   {
     id: 'editor',
@@ -62,16 +73,16 @@ const TABS: ShowcaseTab[] = [
 ];
 
 export function ProductShowcase() {
-  const [activeId, setActiveId] = React.useState(INTERVIEW_TAB.id);
-  const active = TABS.find((tab) => tab.id === activeId) ?? INTERVIEW_TAB;
+  const [activeId, setActiveId] = React.useState(READINESS_TAB.id);
+  const active = TABS.find((tab) => tab.id === activeId) ?? READINESS_TAB;
 
   return (
     <SectionShell id="product" bordered>
       <Reveal>
         <SectionHeading
           kicker="See it in action"
-          title="A workspace built for deep practice"
-          description="Real screenshots from the product. Switch between the surfaces engineers use every day to go from rusty to interview-ready."
+          title="One plan across every interview round"
+          description="Start with the application and deadline in front of you, then move directly into the coding, resume, review, mock interview, and peer-practice tools that close each gap."
         />
       </Reveal>
 

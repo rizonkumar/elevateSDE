@@ -11,11 +11,10 @@ export function CtaSection() {
             Get started
           </span>
           <h2 className="max-w-2xl font-display text-3xl font-bold leading-[1.1] tracking-tight text-(--color-text-primary) sm:text-4xl">
-            Ready to ace your next engineering interview?
+            Turn your next interview into a plan
           </h2>
           <p className="max-w-xl text-base text-(--color-text-muted)">
-            Join engineers preparing smarter with AI-driven mock interviews, real test cases, and
-            personalized feedback.
+            Track the deadline, confirm the rounds, and work the highest-priority gaps with transparent evidence across your existing preparation tools.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Link

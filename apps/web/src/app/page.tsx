@@ -11,9 +11,9 @@ import { CtaSection } from '../components/marketing/CtaSection';
 import { SiteFooter } from '../components/marketing/SiteFooter';
 
 export const metadata: Metadata = {
-  title: 'ElevateSDE — AI Interview Prep for Engineers & Teams',
+  title: 'ElevateSDE — Interview Readiness for Software Engineers',
   description:
-    'Timed coding assessments, real-time AI mock interviews, resume analysis, and a job tracker. One enterprise-grade platform for individual engineers and the teams that hire them.',
+    'Turn tracked applications into deadline-aware interview plans with round-level evidence, coding practice, resume analysis, mock interviews, and private peer feedback.',
 };
 
 export default function Home() {
