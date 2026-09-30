@@ -5,8 +5,11 @@ import type {
   InterviewLoopTemplateDto,
   InterviewPreparationOverviewDto,
   InterviewPreparationPlanDto,
+  PreparationRoundDto,
   PreparationTaskDto,
   ReadinessSnapshotDto,
+  UpdateInterviewPreparationPlanDto,
+  UpdatePreparationRoundDto,
 } from '@elevatesde/shared-types';
 import { api } from '@/lib/api';
 import { useToastStore } from './toast.store';
@@ -24,6 +27,8 @@ interface InterviewReadinessState {
   loadTemplates: () => Promise<void>;
   loadPlan: (planId: string) => Promise<void>;
   createPlan: (input: CreateInterviewPreparationPlanDto) => Promise<string | null>;
+  updatePlan: (planId: string, input: UpdateInterviewPreparationPlanDto) => Promise<boolean>;
+  updateRound: (roundId: string, input: UpdatePreparationRoundDto) => Promise<boolean>;
   setTaskCompletion: (task: PreparationTaskDto, completed: boolean) => Promise<void>;
   refreshSnapshot: (planId: string) => Promise<ReadinessSnapshotDto | null>;
   clearPlan: () => void;
@@ -98,6 +103,47 @@ export const useInterviewReadinessStore = create<InterviewReadinessState>((set, 
       set({ isSaving: false });
       useToastStore.getState().addToast(messageFor(error, 'Could not create the preparation plan.'), 'error');
       return null;
+    }
+  },
+
+  updatePlan: async (planId, input) => {
+    set({ isSaving: true });
+    try {
+      const response = await api.patch<InterviewPreparationPlanDto>(`${ENDPOINT}/plans/${planId}`, input);
+      set({ plan: response.data, isSaving: false });
+      useToastStore.getState().addToast('Plan settings updated.', 'success');
+      return true;
+    } catch (error) {
+      set({ isSaving: false });
+      useToastStore.getState().addToast(messageFor(error, 'Could not update plan settings.'), 'error');
+      return false;
+    }
+  },
+
+  updateRound: async (roundId, input) => {
+    const current = get().plan;
+    if (!current) return false;
+    set({ isSaving: true });
+    try {
+      const response = await api.patch<PreparationRoundDto>(`${ENDPOINT}/rounds/${roundId}`, input);
+      set({
+        isSaving: false,
+        plan: {
+          ...current,
+          rounds: current.rounds
+            .map((round) =>
+              round.id === roundId
+                ? { ...response.data, tasks: round.tasks, readiness: round.readiness }
+                : round,
+            )
+            .sort((a, b) => a.ordinal - b.ordinal),
+        },
+      });
+      return true;
+    } catch (error) {
+      set({ isSaving: false });
+      useToastStore.getState().addToast(messageFor(error, 'Could not update the interview round.'), 'error');
+      return false;
     }
   },
 

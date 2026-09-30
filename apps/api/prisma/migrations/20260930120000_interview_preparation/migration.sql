@@ -10,6 +10,8 @@ ALTER TYPE "NotificationType" ADD VALUE 'PREPARATION_REMINDER';
 ALTER TYPE "NotificationType" ADD VALUE 'PEER_INVITATION';
 ALTER TYPE "NotificationType" ADD VALUE 'PEER_SESSION_CHANGED';
 ALTER TYPE "NotificationType" ADD VALUE 'SCORECARD_REQUEST';
+ALTER TABLE "Notification" ADD COLUMN "dedupeKey" TEXT;
+CREATE UNIQUE INDEX "Notification_dedupeKey_key" ON "Notification"("dedupeKey");
 
 CREATE TABLE "InterviewPreparationPlan" (
   "id" TEXT NOT NULL,
@@ -128,6 +130,7 @@ CREATE INDEX "ReadinessSnapshot_planId_calculatedAt_idx" ON "ReadinessSnapshot"(
 CREATE INDEX "PeerPracticeSession_organizerId_startsAt_idx" ON "PeerPracticeSession"("organizerId", "startsAt");
 CREATE INDEX "PeerPracticeSession_inviteeId_startsAt_idx" ON "PeerPracticeSession"("inviteeId", "startsAt");
 CREATE INDEX "PeerPracticeSession_planId_status_idx" ON "PeerPracticeSession"("planId", "status");
+CREATE UNIQUE INDEX "PeerPracticeSession_roundId_organizerId_inviteeId_startsAt_key" ON "PeerPracticeSession"("roundId", "organizerId", "inviteeId", "startsAt");
 CREATE UNIQUE INDEX "PeerScorecard_sessionId_evaluatorId_key" ON "PeerScorecard"("sessionId", "evaluatorId");
 CREATE INDEX "PeerScorecard_evaluatorId_submittedAt_idx" ON "PeerScorecard"("evaluatorId", "submittedAt");
 

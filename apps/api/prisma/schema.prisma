@@ -556,6 +556,7 @@ model Notification {
   body      String
   linkUrl   String?
   metadata  Json?
+  dedupeKey String?          @unique
   readAt    DateTime?
   createdAt DateTime         @default(now())
   user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -872,6 +873,7 @@ model PeerPracticeSession {
   @@index([organizerId, startsAt])
   @@index([inviteeId, startsAt])
   @@index([planId, status])
+  @@unique([roundId, organizerId, inviteeId, startsAt])
 }
 
 model PeerScorecard {

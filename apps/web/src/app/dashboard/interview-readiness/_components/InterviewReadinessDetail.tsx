@@ -11,6 +11,7 @@ import {
   Clock3,
   History,
   RefreshCw,
+  Settings2,
   ShieldCheck,
   Target,
 } from 'lucide-react';
@@ -23,6 +24,7 @@ import type {
 import { PageContainer } from '@/components/dashboard/PageContainer';
 import { ReadinessIndicator } from '@/components/dashboard/ReadinessIndicator';
 import { useInterviewReadinessStore } from '@/store/interview-readiness.store';
+import { PlanSettingsModal } from './PlanSettingsModal';
 
 interface InterviewReadinessDetailProps {
   planId: string;
@@ -202,6 +204,7 @@ function RoundWorkspace({ round }: { round: PreparationRoundDto }) {
 export function InterviewReadinessDetail({ planId }: InterviewReadinessDetailProps) {
   const { plan, isLoading, error, loadPlan, refreshSnapshot, clearPlan } = useInterviewReadinessStore();
   const [activeRoundId, setActiveRoundId] = React.useState<string | null>(null);
+  const [settingsOpen, setSettingsOpen] = React.useState(false);
   const initialRefresh = React.useRef(false);
 
   React.useEffect(() => {
@@ -273,10 +276,16 @@ export function InterviewReadinessDetail({ planId }: InterviewReadinessDetailPro
                 status={latest?.status ?? 'INSUFFICIENT_EVIDENCE'}
                 confidence={latest?.confidence ?? 0}
               />
-              <Button variant="secondary" onClick={() => void refreshSnapshot(plan.id)}>
-                <RefreshCw className="h-4 w-4" />
-                Refresh evidence
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="secondary" onClick={() => setSettingsOpen(true)}>
+                  <Settings2 className="h-4 w-4" />
+                  Edit plan
+                </Button>
+                <Button variant="secondary" onClick={() => void refreshSnapshot(plan.id)}>
+                  <RefreshCw className="h-4 w-4" />
+                  Refresh evidence
+                </Button>
+              </div>
             </div>
           </div>
         </header>
@@ -330,6 +339,7 @@ export function InterviewReadinessDetail({ planId }: InterviewReadinessDetailPro
           Readiness summarizes available preparation evidence. It is not a hiring probability and cannot predict an interview outcome.
         </div>
       </div>
+      <PlanSettingsModal plan={plan} open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </PageContainer>
   );
 }

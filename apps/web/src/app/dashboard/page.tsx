@@ -37,8 +37,8 @@ import type {
 } from '@elevatesde/shared-types';
 import { useAuthStore } from '@/store/auth.store';
 import { useResumeStore } from '@/store/resume.store';
-import { useMockInterviewStore } from '@/store/mock-interview.store';
 import { PageContainer } from '@/components/dashboard/PageContainer';
+import { ReadinessIndicator } from '@/components/dashboard/ReadinessIndicator';
 import { useDashboardStore, type QuickAction, type QuickActionKey } from '@/store/dashboard.store';
 
 const quickActionIcons: Record<QuickActionKey, LucideIcon> = {
@@ -416,28 +416,46 @@ function RecentActivity({ items }: Readonly<{ items: ActivityItem[] }>) {
 }
 
 function PreparationInsights({
+  readiness,
   acceptanceRate,
   resumeAts,
-  interviewScore,
-}: Readonly<{ acceptanceRate: number; resumeAts: number | null; interviewScore: number | null }>) {
-  const hasReadinessSignal = resumeAts !== null || interviewScore !== null;
+}: Readonly<{
+  readiness: DashboardStatsDto['interviewReadiness'];
+  acceptanceRate: number;
+  resumeAts: number | null;
+}>) {
   return (
     <div className="rounded-md border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-card) p-5 sm:p-6">
-      <h2 className="text-sm font-semibold text-(--color-text-primary) mb-5">
-        Preparation insights
-      </h2>
-      <div className="flex flex-col gap-5">
-        <ProgressRow label="Code acceptance rate" value={acceptanceRate} />
-        {resumeAts !== null && <ProgressRow label="Resume ATS readiness" value={resumeAts} />}
-        {interviewScore !== null && (
-          <ProgressRow label="Last interview score" value={interviewScore} />
-        )}
-        {!hasReadinessSignal && (
-          <p className="text-xs text-(--color-text-muted) mb-0">
-            Analyze your resume or run a mock interview to unlock readiness signals.
-          </p>
-        )}
+      <div className="mb-5 flex items-center justify-between gap-3">
+        <h2 className="text-sm font-semibold text-(--color-text-primary)">Interview readiness</h2>
+        <Link href={readiness ? `/dashboard/interview-readiness/${readiness.planId}` : '/dashboard/interview-readiness'} className="text-xs font-medium text-(--color-accent) hover:underline">
+          {readiness ? 'Open plan' : 'Build a plan'}
+        </Link>
       </div>
+      {readiness ? (
+        <div className="flex flex-col gap-4">
+          <div>
+            <div className="text-sm font-semibold text-(--color-text-primary)">{readiness.company}</div>
+            <div className="mt-0.5 text-xs text-(--color-text-muted)">{readiness.role}</div>
+          </div>
+          <ReadinessIndicator
+            score={readiness.score}
+            status={readiness.status}
+            confidence={readiness.confidence}
+          />
+          <div className="text-xs text-(--color-text-muted)">
+            {Math.round(readiness.coverage * 100)}% evidence coverage · not a hiring prediction
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-5">
+          <ProgressRow label="Code acceptance rate" value={acceptanceRate} />
+          {resumeAts !== null && <ProgressRow label="Resume ATS readiness" value={resumeAts} />}
+          <p className="mb-0 text-xs text-(--color-text-muted)">
+            Link preparation to an upcoming application to see round-level evidence and priorities.
+          </p>
+        </div>
+      )}
     </div>
   );
 }
@@ -547,7 +565,6 @@ export default function DashboardPage() {
   const { user } = useAuthStore();
   const { stats, quickActions, isLoading, error, loadDashboard } = useDashboardStore();
   const resumeAnalyses = useResumeStore((state) => state.analyses);
-  const interviewFeedback = useMockInterviewStore((state) => state.feedback);
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
@@ -581,7 +598,6 @@ export default function DashboardPage() {
       )
     : undefined;
   const resumeAts = latestResume?.atsScore ?? null;
-  const interviewScore = mounted ? (interviewFeedback?.overallScore ?? null) : null;
 
   return (
     <PageContainer>
@@ -624,9 +640,9 @@ export default function DashboardPage() {
 
             <div className="flex flex-col gap-6">
               <PreparationInsights
+                readiness={data.interviewReadiness}
                 acceptanceRate={data.assessments.acceptanceRate}
                 resumeAts={resumeAts}
-                interviewScore={interviewScore}
               />
               <CommunityCard forum={data.forum} />
             </div>
