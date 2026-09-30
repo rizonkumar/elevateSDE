@@ -30,8 +30,9 @@ describe('PeerPracticeSession', () => {
     expect(() => PeerPracticeSession.assertTransition('ACCEPTED', 'COMPLETED', 'ORGANIZER', future, now)).toThrow(RangeError);
   });
 
-  it('allows either participant to complete a started accepted session', () => {
-    expect(() => PeerPracticeSession.assertTransition('ACCEPTED', 'COMPLETED', 'INVITEE', past, now)).not.toThrow();
+  it('allows only the organizer to complete a started accepted session', () => {
+    expect(() => PeerPracticeSession.assertTransition('ACCEPTED', 'COMPLETED', 'ORGANIZER', past, now)).not.toThrow();
+    expect(() => PeerPracticeSession.assertTransition('ACCEPTED', 'COMPLETED', 'INVITEE', past, now)).toThrow(RangeError);
   });
 
   it('rejects transitions from terminal states', () => {

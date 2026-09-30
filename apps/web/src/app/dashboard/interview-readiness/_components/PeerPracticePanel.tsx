@@ -165,7 +165,7 @@ export function PeerSessionCard({
 }: {
   session: PeerPracticeSessionDto;
   currentUserId: string | undefined;
-  onReschedule: () => void;
+  onReschedule?: () => void;
   onScorecard: () => void;
 }) {
   const updateStatus = useInterviewReadinessStore((state) => state.updatePeerSessionStatus);
@@ -190,11 +190,13 @@ export function PeerSessionCard({
             <Button className="h-8" variant="secondary" onClick={() => void updateStatus(session, 'DECLINED')}><X className="h-3.5 w-3.5" />Decline</Button>
           </>
         )}
-        {['PENDING', 'ACCEPTED'].includes(session.status) && organizer && <Button className="h-8" variant="secondary" onClick={onReschedule}>Reschedule</Button>}
+        {['PENDING', 'ACCEPTED'].includes(session.status) && organizer && onReschedule && <Button className="h-8" variant="secondary" onClick={onReschedule}>Reschedule</Button>}
         {['PENDING', 'ACCEPTED'].includes(session.status) && <Button className="h-8" variant="tertiary" onClick={() => void updateStatus(session, 'CANCELLED')}>Cancel</Button>}
         {session.status === 'ACCEPTED' && (
+          <a href={session.meetingUrl} target="_blank" rel="noreferrer" className="inline-flex h-8 items-center gap-1.5 rounded-(--radius-sm) bg-(--color-text-primary) px-3 text-xs font-medium text-(--color-bg)">Join room<ExternalLink className="h-3.5 w-3.5" /></a>
+        )}
+        {session.status === 'ACCEPTED' && organizer && (
           <>
-            <a href={session.meetingUrl} target="_blank" rel="noreferrer" className="inline-flex h-8 items-center gap-1.5 rounded-(--radius-sm) bg-(--color-text-primary) px-3 text-xs font-medium text-(--color-bg)">Join room<ExternalLink className="h-3.5 w-3.5" /></a>
             <Button className="h-8" variant="secondary" onClick={() => void updateStatus(session, 'COMPLETED')}>Complete</Button>
             <Button className="h-8" variant="tertiary" onClick={() => void updateStatus(session, 'NO_SHOW')}>No-show</Button>
           </>

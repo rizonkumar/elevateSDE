@@ -44,7 +44,6 @@ export function PeerSessionPage({ sessionId }: { sessionId: string }) {
         <PeerSessionCard
           session={peerSession}
           currentUserId={userId}
-          onReschedule={() => undefined}
           onScorecard={() => setScorecardOpen(true)}
         />
         <div className="flex items-start gap-3 rounded-(--radius-md) border border-(--color-border-subtle) bg-(--color-bg-soft) p-4 text-xs text-(--color-text-muted)">

@@ -54,6 +54,9 @@ export class PeerPracticeSession {
     if (next === 'CANCELLED' && current === 'PENDING' && actor !== 'ORGANIZER') {
       throw new RangeError('Only the organizer can cancel a pending invitation');
     }
+    if ((next === 'COMPLETED' || next === 'NO_SHOW') && actor !== 'ORGANIZER') {
+      throw new RangeError('Only the organizer can finalize a peer session');
+    }
     if ((next === 'COMPLETED' || next === 'NO_SHOW') && startsAt > now) {
       throw new RangeError('A future session cannot be completed or marked no-show');
     }
