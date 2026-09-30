@@ -2,7 +2,18 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { Award, Bell, CheckCircle2, Flame, MessageSquare, ThumbsUp } from 'lucide-react';
+import {
+  Award,
+  Bell,
+  CalendarClock,
+  CheckCircle2,
+  ClipboardCheck,
+  Flame,
+  MessageSquare,
+  RefreshCw,
+  ThumbsUp,
+  Users,
+} from 'lucide-react';
 import { Badge } from '@elevatesde/ui';
 import type { BadgeVariant } from '@elevatesde/ui';
 import type { NotificationDto, NotificationType } from '@elevatesde/shared-types';
@@ -23,6 +34,10 @@ const TYPE_META: Record<NotificationType, NotificationTypeMeta> = {
   FORUM_REPLY: { icon: MessageSquare, label: 'Reply', variant: 'accent' },
   FORUM_UPVOTE: { icon: ThumbsUp, label: 'Upvote', variant: 'accent' },
   SUBMISSION_ACCEPTED: { icon: CheckCircle2, label: 'Accepted', variant: 'success' },
+  PREPARATION_REMINDER: { icon: CalendarClock, label: 'Preparation', variant: 'warning' },
+  PEER_INVITATION: { icon: Users, label: 'Peer invite', variant: 'accent' },
+  PEER_SESSION_CHANGED: { icon: RefreshCw, label: 'Peer session', variant: 'neutral' },
+  SCORECARD_REQUEST: { icon: ClipboardCheck, label: 'Feedback', variant: 'accent' },
   SYSTEM: { icon: Bell, label: 'System', variant: 'neutral' },
 };
 
