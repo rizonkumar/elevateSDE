@@ -882,3 +882,279 @@ export interface AdminLearningPathInput {
 }
 
 export type ReorderDirection = 'up' | 'down';
+
+export type InterviewReadinessFormulaVersion = 'v1';
+
+export type InterviewPreparationArchetype = 'GENERAL' | 'FAANG' | 'STARTUP' | 'ENTERPRISE';
+
+export type InterviewRoundType =
+  | 'CODING'
+  | 'SYSTEM_DESIGN'
+  | 'BEHAVIORAL'
+  | 'RESUME_ROLE_FIT'
+  | 'CUSTOM';
+
+export type InterviewReadinessStatus =
+  | 'INSUFFICIENT_EVIDENCE'
+  | 'NEEDS_WORK'
+  | 'PROGRESSING'
+  | 'READY';
+
+export type InterviewPreparationPlanStatus = 'ACTIVE' | 'ARCHIVED' | 'COMPLETED';
+
+export type PreparationTaskStatus = 'PENDING' | 'COMPLETED';
+
+export type PreparationTaskType =
+  | 'SOLVE_PROBLEM'
+  | 'REVIEW_PROBLEM'
+  | 'COMPLETE_PATH'
+  | 'ANALYZE_RESUME'
+  | 'RUN_MOCK_INTERVIEW'
+  | 'SCHEDULE_PEER_PRACTICE'
+  | 'CUSTOM';
+
+export type PreparationResourceType =
+  | 'PROBLEM'
+  | 'PROBLEM_COLLECTION'
+  | 'LEARNING_PATH'
+  | 'REVIEW_QUEUE'
+  | 'RESUME_ANALYSIS'
+  | 'MOCK_INTERVIEW'
+  | 'PEER_SESSION';
+
+export type ReadinessEvidenceSource =
+  | 'CODING_SUBMISSIONS'
+  | 'SPACED_REPETITION'
+  | 'LEARNING_PATH'
+  | 'RESUME_ANALYSIS'
+  | 'TASK_COMPLETION'
+  | 'MOCK_INTERVIEW'
+  | 'PEER_SCORECARD';
+
+export type PeerPracticeStatus =
+  | 'PENDING'
+  | 'ACCEPTED'
+  | 'DECLINED'
+  | 'CANCELLED'
+  | 'COMPLETED'
+  | 'NO_SHOW';
+
+export interface InterviewLoopTemplateDto {
+  archetype: InterviewPreparationArchetype;
+  title: string;
+  description: string;
+  rounds: Array<{
+    type: InterviewRoundType;
+    title: string;
+    weight: number;
+    suggestedTaskTypes: PreparationTaskType[];
+  }>;
+}
+
+export interface ReadinessEvidenceDto {
+  source: ReadinessEvidenceSource;
+  label: string;
+  score: number | null;
+  weight: number;
+  observedAt: string | null;
+  stale: boolean;
+  detail: string;
+  deepLink: string | null;
+}
+
+export interface InterviewRoundReadinessDto {
+  roundId: string;
+  roundType: InterviewRoundType;
+  title: string;
+  score: number | null;
+  status: InterviewReadinessStatus;
+  confidence: number;
+  coverage: number;
+  evidence: ReadinessEvidenceDto[];
+  missingEvidence: ReadinessEvidenceSource[];
+}
+
+export interface ReadinessSnapshotDto {
+  id: string;
+  formulaVersion: InterviewReadinessFormulaVersion;
+  score: number | null;
+  status: InterviewReadinessStatus;
+  confidence: number;
+  coverage: number;
+  rounds: InterviewRoundReadinessDto[];
+  deterministicRecommendations: string[];
+  aiExplanation: string | null;
+  aiSnapshotId: string | null;
+  calculatedAt: string;
+}
+
+export interface PreparationTaskDto {
+  id: string;
+  roundId: string | null;
+  type: PreparationTaskType;
+  title: string;
+  description: string | null;
+  status: PreparationTaskStatus;
+  dueAt: string | null;
+  completedAt: string | null;
+  resourceType: PreparationResourceType | null;
+  resourceId: string | null;
+  deepLink: string | null;
+  ordinal: number;
+  version: number;
+}
+
+export interface PreparationRoundDto {
+  id: string;
+  type: InterviewRoundType;
+  title: string;
+  weight: number;
+  ordinal: number;
+  tasks: PreparationTaskDto[];
+  readiness: InterviewRoundReadinessDto | null;
+}
+
+export interface InterviewPreparationPlanSummaryDto {
+  id: string;
+  jobApplicationId: string;
+  company: string;
+  role: string;
+  targetAt: string;
+  timeZone: string;
+  archetype: InterviewPreparationArchetype;
+  status: InterviewPreparationPlanStatus;
+  latestReadiness: Pick<
+    ReadinessSnapshotDto,
+    'score' | 'status' | 'confidence' | 'coverage' | 'calculatedAt'
+  > | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface InterviewPreparationPlanDto extends InterviewPreparationPlanSummaryDto {
+  rounds: PreparationRoundDto[];
+  snapshots: ReadinessSnapshotDto[];
+}
+
+export interface InterviewPreparationOverviewDto {
+  plans: InterviewPreparationPlanSummaryDto[];
+  unplannedApplications: JobApplicationDto[];
+}
+
+export interface PreviewInterviewPreparationPlanDto {
+  jobApplicationId: string;
+  targetAt: string;
+  timeZone: string;
+  archetype: InterviewPreparationArchetype;
+  rounds: Array<{
+    type: InterviewRoundType;
+    title: string;
+    weight: number;
+  }>;
+}
+
+export interface CreateInterviewPreparationPlanDto extends PreviewInterviewPreparationPlanDto {}
+
+export interface UpdateInterviewPreparationPlanDto {
+  targetAt?: string;
+  timeZone?: string;
+  archetype?: InterviewPreparationArchetype;
+  status?: InterviewPreparationPlanStatus;
+  version: number;
+}
+
+export interface CreatePreparationRoundDto {
+  type: InterviewRoundType;
+  title: string;
+  weight: number;
+  ordinal: number;
+}
+
+export interface CreatePreparationTaskDto {
+  roundId?: string | null;
+  type: PreparationTaskType;
+  title: string;
+  description?: string | null;
+  dueAt?: string | null;
+  resourceType?: PreparationResourceType | null;
+  resourceId?: string | null;
+  deepLink?: string | null;
+  ordinal: number;
+}
+
+export interface UpdatePreparationTaskDto {
+  title?: string;
+  description?: string | null;
+  dueAt?: string | null;
+  ordinal?: number;
+  version: number;
+}
+
+export interface PeerPracticeParticipantDto {
+  id: string;
+  displayName: string;
+}
+
+export interface PeerScorecardDto {
+  id: string;
+  sessionId: string;
+  evaluator: PeerPracticeParticipantDto;
+  communication: number;
+  problemSolving: number;
+  technicalDepth: number;
+  structure: number;
+  strengths: string[];
+  improvements: string[];
+  submittedAt: string;
+}
+
+export interface PeerPracticeSessionDto {
+  id: string;
+  planId: string;
+  roundId: string;
+  organizer: PeerPracticeParticipantDto;
+  invitee: PeerPracticeParticipantDto;
+  status: PeerPracticeStatus;
+  startsAt: string;
+  timeZone: string;
+  durationMinutes: number;
+  meetingUrl: string;
+  scorecards: PeerScorecardDto[];
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreatePeerPracticeSessionDto {
+  roundId: string;
+  inviteeEmail: string;
+  startsAt: string;
+  timeZone: string;
+  durationMinutes: number;
+  meetingUrl: string;
+}
+
+export interface ReschedulePeerPracticeSessionDto {
+  startsAt: string;
+  timeZone: string;
+  durationMinutes: number;
+  meetingUrl: string;
+  version: number;
+}
+
+export interface SubmitPeerScorecardDto {
+  communication: number;
+  problemSolving: number;
+  technicalDepth: number;
+  structure: number;
+  strengths: string[];
+  improvements: string[];
+}
+
+export interface AiReadinessExplanationDto {
+  snapshotId: string;
+  explanation: string;
+  recommendations: string[];
+  generatedAt: string;
+  fallback: boolean;
+}
