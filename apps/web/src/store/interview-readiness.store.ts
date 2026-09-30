@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import axios from 'axios';
 import type {
+  AiReadinessExplanationDto,
   CreateInterviewPreparationPlanDto,
   CreatePeerPracticeSessionDto,
   InterviewLoopTemplateDto,
@@ -51,6 +52,10 @@ interface InterviewReadinessState {
     sessionId: string,
     input: SubmitPeerScorecardDto,
   ) => Promise<boolean>;
+  generateExplanation: (
+    planId: string,
+    snapshotId: string,
+  ) => Promise<AiReadinessExplanationDto | null>;
   clearPlan: () => void;
 }
 
@@ -309,6 +314,36 @@ export const useInterviewReadinessStore = create<InterviewReadinessState>((set, 
     } catch (error) {
       useToastStore.getState().addToast(messageFor(error, 'Could not submit peer feedback.'), 'error');
       return false;
+    }
+  },
+
+  generateExplanation: async (planId, snapshotId) => {
+    set({ isSaving: true });
+    try {
+      const response = await api.post<AiReadinessExplanationDto>(
+        `${ENDPOINT}/plans/${planId}/readiness-snapshots/${snapshotId}/explanation`,
+      );
+      const current = get().plan;
+      if (current) {
+        set({
+          isSaving: false,
+          plan: {
+            ...current,
+            snapshots: current.snapshots.map((snapshot) =>
+              snapshot.id === snapshotId
+                ? { ...snapshot, aiExplanation: response.data.explanation, aiSnapshotId: snapshotId }
+                : snapshot,
+            ),
+          },
+        });
+      } else {
+        set({ isSaving: false });
+      }
+      return response.data;
+    } catch (error) {
+      set({ isSaving: false });
+      useToastStore.getState().addToast(messageFor(error, 'Could not generate the readiness explanation.'), 'error');
+      return null;
     }
   },
 

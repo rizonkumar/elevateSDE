@@ -37,6 +37,7 @@ function repository(): jest.Mocked<IInterviewPreparationRepository> {
     updateTask: jest.fn(),
     setTaskCompletion: jest.fn(),
     createSnapshot: jest.fn(),
+    saveSnapshotExplanation: jest.fn(),
     createPeerSession: jest.fn().mockResolvedValue(session),
     findPeerSessionForParticipant: jest.fn().mockResolvedValue(session),
     updatePeerSessionStatus: jest.fn(),

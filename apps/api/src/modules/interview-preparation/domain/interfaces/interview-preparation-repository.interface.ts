@@ -100,6 +100,12 @@ export abstract class IInterviewPreparationRepository {
     planId: string,
     snapshot: Omit<ReadinessSnapshotDto, 'id'>,
   ): Promise<ReadinessSnapshotDto | null>;
+  abstract saveSnapshotExplanation(
+    userId: string,
+    planId: string,
+    snapshotId: string,
+    explanation: string,
+  ): Promise<ReadinessSnapshotDto | null>;
   abstract createPeerSession(
     input: CreatePeerSessionRecordInput,
   ): Promise<PeerPracticeSessionDto | 'DUPLICATE' | null>;

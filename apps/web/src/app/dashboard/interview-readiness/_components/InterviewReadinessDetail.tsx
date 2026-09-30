@@ -12,11 +12,14 @@ import {
   History,
   RefreshCw,
   Settings2,
+  Sparkles,
   ShieldCheck,
   Target,
 } from 'lucide-react';
 import { Badge, Button, type BadgeVariant } from '@elevatesde/ui';
 import type {
+  AiReadinessExplanationDto,
+  InterviewPreparationPlanDto,
   InterviewReadinessStatus,
   InterviewRoundReadinessDto,
   PreparationRoundDto,
@@ -202,6 +205,50 @@ function RoundWorkspace({ round }: { round: PreparationRoundDto }) {
   );
 }
 
+function ReadinessNarrative({
+  planId,
+  snapshot,
+}: {
+  planId: string;
+  snapshot: InterviewPreparationPlanDto['snapshots'][number] | undefined;
+}) {
+  const generate = useInterviewReadinessStore((state) => state.generateExplanation);
+  const isSaving = useInterviewReadinessStore((state) => state.isSaving);
+  const [result, setResult] = React.useState<AiReadinessExplanationDto | null>(null);
+  if (!snapshot) return null;
+  const explanation = result?.explanation ?? snapshot.aiExplanation;
+  const recommendations = result?.recommendations ?? snapshot.deterministicRecommendations;
+  return (
+    <section className="rounded-(--radius-lg) border border-(--color-accent)/25 bg-(--color-accent-soft) p-5 sm:p-6">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2 text-sm font-semibold text-(--color-text-primary)">
+            <Sparkles className="h-4 w-4 text-(--color-accent)" />
+            Readiness explanation
+          </div>
+          <p className="mb-0 mt-1 text-xs">AI can explain the evidence, but it cannot change scores or task state.</p>
+        </div>
+        <Button
+          variant="secondary"
+          disabled={isSaving}
+          onClick={async () => setResult(await generate(planId, snapshot.id))}
+        >
+          {isSaving ? 'Generating…' : explanation ? 'Regenerate' : 'Explain readiness'}
+        </Button>
+      </div>
+      {explanation && <p className="mb-0 mt-4 text-sm leading-6 text-(--color-text-primary)">{explanation}</p>}
+      {recommendations.length > 0 && (
+        <ul className="mt-4 grid gap-2 text-sm text-(--color-text-primary) sm:grid-cols-3">
+          {recommendations.map((item) => (
+            <li key={item} className="rounded-(--radius-sm) border border-(--color-border-subtle) bg-(--color-surface) p-3">{item}</li>
+          ))}
+        </ul>
+      )}
+      {result?.fallback && <div className="mt-3 text-xs text-(--color-text-muted)">Deterministic fallback shown.</div>}
+    </section>
+  );
+}
+
 export function InterviewReadinessDetail({ planId }: InterviewReadinessDetailProps) {
   const { plan, isLoading, error, loadPlan, refreshSnapshot, clearPlan } = useInterviewReadinessStore();
   const [activeRoundId, setActiveRoundId] = React.useState<string | null>(null);
@@ -317,6 +364,8 @@ export function InterviewReadinessDetail({ planId }: InterviewReadinessDetailPro
         {activeRound && <RoundWorkspace round={activeRound} />}
 
         <PeerPracticePanel plan={plan} />
+
+        <ReadinessNarrative planId={plan.id} snapshot={latest} />
 
         <section className="rounded-(--radius-lg) border border-(--color-border-subtle) bg-(--color-surface) p-5 shadow-(--shadow-card) sm:p-6">
           <div className="flex items-center gap-2 text-sm font-semibold text-(--color-text-primary)">

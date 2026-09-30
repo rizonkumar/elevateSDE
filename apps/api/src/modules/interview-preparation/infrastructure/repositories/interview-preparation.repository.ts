@@ -400,6 +400,23 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
     return InterviewPreparationMapper.toSnapshot(created);
   }
 
+  async saveSnapshotExplanation(
+    userId: string,
+    planId: string,
+    snapshotId: string,
+    explanation: string,
+  ): Promise<ReadinessSnapshotDto | null> {
+    const result = await this.prisma.readinessSnapshot.updateMany({
+      where: { id: snapshotId, planId, plan: { userId } },
+      data: { aiExplanation: explanation, aiSnapshotId: snapshotId },
+    });
+    if (result.count === 0) return null;
+    const snapshot = await this.prisma.readinessSnapshot.findFirst({
+      where: { id: snapshotId, planId, plan: { userId } },
+    });
+    return snapshot ? InterviewPreparationMapper.toSnapshot(snapshot) : null;
+  }
+
   async createPeerSession(
     input: CreatePeerSessionRecordInput,
   ): Promise<PeerPracticeSessionDto | 'DUPLICATE' | null> {

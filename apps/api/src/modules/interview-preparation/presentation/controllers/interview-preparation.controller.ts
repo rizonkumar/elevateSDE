@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type {
+  AiReadinessExplanationDto,
   InterviewLoopTemplateDto,
   InterviewPreparationOverviewDto,
   InterviewPreparationPlanDto,
@@ -24,6 +25,7 @@ import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
 import { User } from '../../../users/domain/entities/user';
 import { InterviewPreparationService } from '../../application/interview-preparation.service';
 import { PeerPracticeService } from '../../application/peer-practice.service';
+import { ReadinessNarrativeService } from '../../application/readiness-narrative.service';
 import {
   CreateInterviewPreparationPlanRequestDto,
   CreatePeerPracticeSessionRequestDto,
@@ -50,6 +52,7 @@ export class InterviewPreparationController {
   constructor(
     private readonly service: InterviewPreparationService,
     private readonly peerPracticeService: PeerPracticeService,
+    private readonly readinessNarrativeService: ReadinessNarrativeService,
   ) {}
 
   @Post('reminders/sync')
@@ -184,6 +187,16 @@ export class InterviewPreparationController {
     @Param('planId', ParseUUIDPipe) planId: string,
   ): Promise<ReadinessSnapshotDto> {
     return this.service.refreshSnapshot(req.user.getId(), planId);
+  }
+
+  @Post('plans/:planId/readiness-snapshots/:snapshotId/explanation')
+  @ApiOperation({ summary: 'Generate a privacy-filtered readiness narrative' })
+  generateExplanation(
+    @Req() req: RequestWithUser,
+    @Param('planId', ParseUUIDPipe) planId: string,
+    @Param('snapshotId', ParseUUIDPipe) snapshotId: string,
+  ): Promise<AiReadinessExplanationDto> {
+    return this.readinessNarrativeService.generate(req.user.getId(), planId, snapshotId);
   }
 
   @Post('plans/:planId/peer-sessions')
