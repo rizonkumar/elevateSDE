@@ -103,6 +103,68 @@ enum ResumeStatus {
   FAILED
 }
 
+enum InterviewPreparationArchetype {
+  GENERAL
+  FAANG
+  STARTUP
+  ENTERPRISE
+}
+
+enum InterviewRoundType {
+  CODING
+  SYSTEM_DESIGN
+  BEHAVIORAL
+  RESUME_ROLE_FIT
+  CUSTOM
+}
+
+enum InterviewPreparationPlanStatus {
+  ACTIVE
+  ARCHIVED
+  COMPLETED
+}
+
+enum PreparationTaskStatus {
+  PENDING
+  COMPLETED
+}
+
+enum PreparationTaskType {
+  SOLVE_PROBLEM
+  REVIEW_PROBLEM
+  COMPLETE_PATH
+  ANALYZE_RESUME
+  RUN_MOCK_INTERVIEW
+  SCHEDULE_PEER_PRACTICE
+  CUSTOM
+}
+
+enum PreparationResourceType {
+  PROBLEM
+  PROBLEM_COLLECTION
+  LEARNING_PATH
+  REVIEW_QUEUE
+  RESUME_ANALYSIS
+  MOCK_INTERVIEW
+  PEER_SESSION
+}
+
+enum InterviewReadinessStatus {
+  INSUFFICIENT_EVIDENCE
+  NEEDS_WORK
+  PROGRESSING
+  READY
+}
+
+enum PeerPracticeStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
 model Tenant {
   id               String       @id @default(uuid())
   name             String
@@ -154,6 +216,10 @@ model User {
   pathEnrollments               PathEnrollment[]
   contestParticipations         ContestParticipant[]
   resumes                       Resume[]
+  interviewPreparationPlans    InterviewPreparationPlan[]
+  organizedPeerSessions        PeerPracticeSession[]          @relation("PeerPracticeOrganizer")
+  invitedPeerSessions          PeerPracticeSession[]          @relation("PeerPracticeInvitee")
+  peerScorecards               PeerScorecard[]                 @relation("PeerScorecardEvaluator")
 }
 
 model RefreshToken {
@@ -196,6 +262,7 @@ model JobApplication {
   createdAt         DateTime             @default(now())
   updatedAt         DateTime             @updatedAt
   user              User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  preparationPlan   InterviewPreparationPlan?
 
   @@index([userId, status])
 }
@@ -694,4 +761,128 @@ model Resume {
   user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
+}
+
+model InterviewPreparationPlan {
+  id               String                           @id @default(uuid())
+  userId           String
+  jobApplicationId String                           @unique
+  targetAt         DateTime
+  timeZone         String
+  archetype        InterviewPreparationArchetype
+  status           InterviewPreparationPlanStatus  @default(ACTIVE)
+  version          Int                              @default(0)
+  createdAt        DateTime                         @default(now())
+  updatedAt        DateTime                         @updatedAt
+  user             User                             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobApplication   JobApplication                   @relation(fields: [jobApplicationId], references: [id], onDelete: Cascade)
+  rounds           InterviewPreparationRound[]
+  tasks            PreparationTask[]
+  snapshots        ReadinessSnapshot[]
+  peerSessions     PeerPracticeSession[]
+
+  @@index([userId, status, targetAt])
+}
+
+model InterviewPreparationRound {
+  id           String                     @id @default(uuid())
+  planId       String
+  type         InterviewRoundType
+  title        String
+  weight       Float
+  ordinal      Int
+  createdAt    DateTime                   @default(now())
+  updatedAt    DateTime                   @updatedAt
+  plan         InterviewPreparationPlan   @relation(fields: [planId], references: [id], onDelete: Cascade)
+  tasks        PreparationTask[]
+  peerSessions PeerPracticeSession[]
+
+  @@unique([planId, ordinal])
+  @@index([planId, type])
+}
+
+model PreparationTask {
+  id           String                    @id @default(uuid())
+  planId       String
+  roundId      String?
+  type         PreparationTaskType
+  title        String
+  description  String?
+  status       PreparationTaskStatus     @default(PENDING)
+  dueAt        DateTime?
+  completedAt  DateTime?
+  resourceType PreparationResourceType?
+  resourceId   String?
+  deepLink     String?
+  ordinal      Int
+  version      Int                       @default(0)
+  createdAt    DateTime                  @default(now())
+  updatedAt    DateTime                  @updatedAt
+  plan         InterviewPreparationPlan  @relation(fields: [planId], references: [id], onDelete: Cascade)
+  round        InterviewPreparationRound? @relation(fields: [roundId], references: [id], onDelete: SetNull)
+
+  @@unique([planId, ordinal])
+  @@index([planId, status, dueAt])
+  @@index([roundId, ordinal])
+}
+
+model ReadinessSnapshot {
+  id                           String                     @id @default(uuid())
+  planId                       String
+  formulaVersion               String
+  score                        Float?
+  status                       InterviewReadinessStatus
+  confidence                   Float
+  coverage                     Float
+  rounds                       Json
+  deterministicRecommendations String[]
+  aiExplanation                String?
+  aiSnapshotId                 String?
+  calculatedAt                 DateTime                   @default(now())
+  plan                         InterviewPreparationPlan   @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@index([planId, calculatedAt(sort: Desc)])
+}
+
+model PeerPracticeSession {
+  id              String                    @id @default(uuid())
+  planId          String
+  roundId         String
+  organizerId     String
+  inviteeId       String
+  status          PeerPracticeStatus        @default(PENDING)
+  startsAt        DateTime
+  timeZone        String
+  durationMinutes Int
+  meetingUrl      String
+  version         Int                       @default(0)
+  createdAt       DateTime                  @default(now())
+  updatedAt       DateTime                  @updatedAt
+  plan            InterviewPreparationPlan  @relation(fields: [planId], references: [id], onDelete: Cascade)
+  round           InterviewPreparationRound @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  organizer       User                      @relation("PeerPracticeOrganizer", fields: [organizerId], references: [id], onDelete: Cascade)
+  invitee         User                      @relation("PeerPracticeInvitee", fields: [inviteeId], references: [id], onDelete: Cascade)
+  scorecards      PeerScorecard[]
+
+  @@index([organizerId, startsAt])
+  @@index([inviteeId, startsAt])
+  @@index([planId, status])
+}
+
+model PeerScorecard {
+  id             String              @id @default(uuid())
+  sessionId      String
+  evaluatorId    String
+  communication  Int
+  problemSolving Int
+  technicalDepth Int
+  structure      Int
+  strengths      String[]
+  improvements   String[]
+  submittedAt    DateTime            @default(now())
+  session        PeerPracticeSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  evaluator      User                @relation("PeerScorecardEvaluator", fields: [evaluatorId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, evaluatorId])
+  @@index([evaluatorId, submittedAt])
 }
