@@ -1023,6 +1023,7 @@ export interface InterviewPreparationPlanSummaryDto {
   timeZone: string;
   archetype: InterviewPreparationArchetype;
   status: InterviewPreparationPlanStatus;
+  version: number;
   latestReadiness: Pick<
     ReadinessSnapshotDto,
     'score' | 'status' | 'confidence' | 'coverage' | 'calculatedAt'
@@ -1034,6 +1035,7 @@ export interface InterviewPreparationPlanSummaryDto {
 export interface InterviewPreparationPlanDto extends InterviewPreparationPlanSummaryDto {
   rounds: PreparationRoundDto[];
   snapshots: ReadinessSnapshotDto[];
+  peerSessions: PeerPracticeSessionDto[];
 }
 
 export interface InterviewPreparationOverviewDto {

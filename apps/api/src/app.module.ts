@@ -23,6 +23,7 @@ import { ReviewModule } from './modules/review/review.module';
 import { ContestModule } from './modules/contest/contest.module';
 import { LearningPathModule } from './modules/learning-path/learning-path.module';
 import { ResumeModule } from './modules/resume/resume.module';
+import { InterviewPreparationModule } from './modules/interview-preparation/interview-preparation.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { ResumeModule } from './modules/resume/resume.module';
     ContestModule,
     LearningPathModule,
     ResumeModule,
+    InterviewPreparationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
