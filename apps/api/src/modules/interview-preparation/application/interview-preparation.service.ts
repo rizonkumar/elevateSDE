@@ -32,7 +32,7 @@ import {
 } from '../domain/templates/interview-loop-templates';
 import { calculateInterviewReadinessV1 } from '../domain/scoring/interview-readiness-calculator';
 
-interface GeneratedTask extends CreatePreparationTaskDto {
+interface GeneratedTask extends Omit<CreatePreparationTaskDto, 'roundId'> {
   roundOrdinal: number;
 }
 
@@ -47,10 +47,10 @@ const TASK_BLUEPRINTS: Record<ReadinessEvidenceSource, { title: string; deepLink
 };
 
 function evidenceSourcesFor(roundType: PreviewInterviewPreparationPlanDto['rounds'][number]['type']): ReadinessEvidenceSource[] {
-  if (roundType === 'CODING') return ['CODING_SUBMISSIONS', 'SPACED_REPETITION', 'TASK_COMPLETION', 'MOCK_INTERVIEW'];
-  if (roundType === 'SYSTEM_DESIGN') return ['LEARNING_PATH', 'TASK_COMPLETION', 'MOCK_INTERVIEW', 'PEER_SCORECARD'];
-  if (roundType === 'BEHAVIORAL') return ['TASK_COMPLETION', 'MOCK_INTERVIEW', 'PEER_SCORECARD'];
-  if (roundType === 'RESUME_ROLE_FIT') return ['RESUME_ANALYSIS', 'TASK_COMPLETION', 'MOCK_INTERVIEW'];
+  if (roundType === 'CODING') return ['CODING_SUBMISSIONS', 'SPACED_REPETITION', 'TASK_COMPLETION'];
+  if (roundType === 'SYSTEM_DESIGN') return ['LEARNING_PATH', 'TASK_COMPLETION', 'PEER_SCORECARD'];
+  if (roundType === 'BEHAVIORAL') return ['TASK_COMPLETION', 'PEER_SCORECARD'];
+  if (roundType === 'RESUME_ROLE_FIT') return ['RESUME_ANALYSIS', 'TASK_COMPLETION'];
   return ['TASK_COMPLETION', 'PEER_SCORECARD'];
 }
 
@@ -67,7 +67,7 @@ function taskTypeFor(source: ReadinessEvidenceSource): CreatePreparationTaskDto[
 function buildGeneratedTasks(rounds: PreviewInterviewPreparationPlanDto['rounds']): GeneratedTask[] {
   let ordinal = 0;
   return rounds.flatMap((round, roundOrdinal) =>
-    evidenceSourcesFor(round.type)
+    [...evidenceSourcesFor(round.type), 'MOCK_INTERVIEW' as const]
       .filter((source) => source !== 'TASK_COMPLETION')
       .slice(0, 2)
       .map((source) => {
@@ -200,7 +200,7 @@ export class InterviewPreparationService {
       PreparationTask.create({
         id: 'pending',
         planId,
-        roundId: input.roundId ?? null,
+        roundId: input.roundId,
         type: input.type,
         title: input.title,
         description: input.description ?? null,

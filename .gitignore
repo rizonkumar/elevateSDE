@@ -52,3 +52,4 @@ coverage/
 /playwright/.cache
 .eslintcache
 apps/web/tsconfig.tsbuildinfo
+semantic-review/

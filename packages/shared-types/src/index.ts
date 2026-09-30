@@ -1008,7 +1008,7 @@ export interface ReadinessSnapshotDto {
 
 export interface PreparationTaskDto {
   id: string;
-  roundId: string | null;
+  roundId: string;
   type: PreparationTaskType;
   title: string;
   description: string | null;
@@ -1100,7 +1100,7 @@ export interface UpdatePreparationRoundDto {
 }
 
 export interface CreatePreparationTaskDto {
-  roundId?: string | null;
+  roundId: string;
   type: PreparationTaskType;
   title: string;
   description?: string | null;

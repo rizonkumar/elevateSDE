@@ -7,7 +7,7 @@ import type {
 export interface PreparationTaskProps {
   id: string;
   planId: string;
-  roundId: string | null;
+  roundId: string;
   type: PreparationTaskType;
   title: string;
   description: string | null;

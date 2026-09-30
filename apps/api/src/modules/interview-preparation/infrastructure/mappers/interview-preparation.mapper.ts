@@ -146,7 +146,6 @@ export class InterviewPreparationMapper {
     const readinessByRound = new Map(latest ? snapshot(latest).rounds.map((item) => [item.roundId, item]) : []);
     const tasksByRound = new Map<string, PreparationTaskDto[]>();
     for (const recordTask of record.tasks) {
-      if (recordTask.roundId === null) continue;
       const existing = tasksByRound.get(recordTask.roundId) ?? [];
       existing.push(task(recordTask));
       tasksByRound.set(recordTask.roundId, existing);

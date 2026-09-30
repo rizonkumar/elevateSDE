@@ -21,7 +21,7 @@ import type {
 
 export interface CreatePlanRecordInput extends PreviewInterviewPreparationPlanDto {
   userId: string;
-  tasks: Array<CreatePreparationTaskDto & { roundOrdinal: number | null }>;
+  tasks: Array<Omit<CreatePreparationTaskDto, 'roundId'> & { roundOrdinal: number }>;
 }
 
 export interface InterviewPreparationEvidence {

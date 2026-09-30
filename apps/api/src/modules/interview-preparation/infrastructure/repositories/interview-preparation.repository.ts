@@ -104,8 +104,16 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
       select: { id: true },
     });
     if (!plan) return null;
-    const [submissionCounts, latestSubmission, reviewCounts, latestReview, learningCounts, latestResume, peerScores] =
-      await Promise.all([
+    const [
+      submissionCounts,
+      latestSubmission,
+      reviewCounts,
+      latestReview,
+      learningCounts,
+      learningObservation,
+      latestResume,
+      peerScores,
+    ] = await Promise.all([
         Promise.all([
           this.prisma.submission.count({ where: { userId } }),
           this.prisma.submission.count({ where: { userId, status: 'ACCEPTED' } }),
@@ -125,6 +133,26 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
               module: { path: { enrollments: { some: { userId } } } },
               problem: { submissions: { some: { userId, status: 'ACCEPTED' } } },
             },
+          }),
+        ]),
+        Promise.all([
+          this.prisma.submission.findFirst({
+            where: {
+              userId,
+              status: 'ACCEPTED',
+              problem: {
+                learningPathItems: {
+                  some: { module: { path: { enrollments: { some: { userId } } } } },
+                },
+              },
+            },
+            orderBy: { createdAt: 'desc' },
+            select: { createdAt: true },
+          }),
+          this.prisma.pathEnrollment.findFirst({
+            where: { userId },
+            orderBy: { enrolledAt: 'desc' },
+            select: { enrolledAt: true },
           }),
         ]),
         this.prisma.resume.findFirst({
@@ -148,6 +176,9 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
     const [totalSubmissions, acceptedSubmissions] = submissionCounts;
     const [trackedReviews, dueReviews] = reviewCounts;
     const [learningTotal, learningSolved] = learningCounts;
+    const [latestLearningSubmission, latestEnrollment] = learningObservation;
+    const learningObservedAt =
+      latestLearningSubmission?.createdAt ?? latestEnrollment?.enrolledAt ?? null;
     const peerValues = [
       peerScores._avg.communication,
       peerScores._avg.problemSolving,
@@ -165,7 +196,7 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
       },
       learning: {
         score: learningTotal === 0 ? null : Math.round((learningSolved / learningTotal) * 100),
-        observedAt: latestSubmission._max.createdAt,
+        observedAt: learningObservedAt,
       },
       resume: { score: latestResume?.atsScore ?? null, observedAt: latestResume?.updatedAt ?? null },
       peer: {
@@ -203,7 +234,7 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
           tasks: {
             create: input.tasks.map((task) => ({
               id: randomUUID(),
-              roundId: task.roundOrdinal === null ? null : (roundIds.get(task.roundOrdinal) ?? null),
+              roundId: roundIds.get(task.roundOrdinal) ?? randomUUID(),
               type: task.type,
               title: task.title,
               description: task.description ?? null,
@@ -311,12 +342,12 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
       select: { id: true, rounds: { select: { id: true } } },
     });
     if (!plan) return null;
-    if (input.roundId && !plan.rounds.some((round) => round.id === input.roundId)) return null;
+    if (!plan.rounds.some((round) => round.id === input.roundId)) return null;
     const task = await this.prisma.preparationTask.create({
       data: {
         id: randomUUID(),
         planId,
-        roundId: input.roundId ?? null,
+        roundId: input.roundId,
         type: input.type,
         title: input.title,
         description: input.description ?? null,

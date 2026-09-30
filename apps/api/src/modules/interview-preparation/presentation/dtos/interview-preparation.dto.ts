@@ -151,8 +151,8 @@ export class UpdatePreparationRoundRequestDto implements UpdateRoundContract {
 
 export class CreatePreparationTaskRequestDto implements CreateTaskContract {
   @IsString()
-  @IsOptional()
-  roundId?: string | null;
+  @IsNotEmpty()
+  roundId!: string;
 
   @IsIn(TASK_TYPES)
   type!: PreparationTaskType;
