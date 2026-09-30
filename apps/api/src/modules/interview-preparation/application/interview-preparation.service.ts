@@ -34,6 +34,7 @@ import { calculateInterviewReadinessV1 } from '../domain/scoring/interview-readi
 
 interface GeneratedTask extends Omit<CreatePreparationTaskDto, 'roundId'> {
   roundOrdinal: number;
+  ordinal: number;
 }
 
 const TASK_BLUEPRINTS: Record<ReadinessEvidenceSource, { title: string; deepLink: string }> = {
@@ -170,7 +171,7 @@ export class InterviewPreparationService {
     input: CreatePreparationRoundDto,
   ): Promise<PreparationRoundDto> {
     try {
-      InterviewPreparationPlan.validateRounds([input]);
+      InterviewPreparationPlan.validateRounds([{ ...input, ordinal: 0 }]);
     } catch (error) {
       throw new BadRequestException(error instanceof Error ? error.message : 'Invalid interview round');
     }
@@ -210,7 +211,7 @@ export class InterviewPreparationService {
         resourceType: input.resourceType ?? null,
         resourceId: input.resourceId ?? null,
         deepLink: input.deepLink ?? null,
-        ordinal: input.ordinal,
+        ordinal: 0,
         version: 0,
       });
     } catch (error) {
@@ -313,6 +314,7 @@ export class InterviewPreparationService {
     }));
     const snapshot = await this.repository.createSnapshot(userId, planId, {
       formulaVersion: readiness.formulaVersion,
+      sourceRevision: durable.revision,
       score: readiness.score,
       status: readiness.status,
       confidence: readiness.confidence,
@@ -323,6 +325,9 @@ export class InterviewPreparationService {
       aiSnapshotId: null,
       calculatedAt: calculatedAt.toISOString(),
     });
+    if (snapshot === 'STALE_REVISION') {
+      throw new ConflictException('Readiness evidence changed; refresh again');
+    }
     if (!snapshot) throw new NotFoundException('Preparation plan not found');
     return snapshot;
   }

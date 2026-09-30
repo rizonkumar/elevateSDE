@@ -22,6 +22,7 @@ export const user: UserDto = {
 const snapshot: ReadinessSnapshotDto = {
   id: '00000000-0000-4000-8000-000000000101',
   formulaVersion: 'v1',
+  sourceRevision: 0,
   score: 76,
   status: 'PROGRESSING',
   confidence: 0.68,

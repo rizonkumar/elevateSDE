@@ -55,6 +55,7 @@ function repository(): jest.Mocked<IInterviewPreparationRepository> {
     findOwnedJobApplication: jest.fn().mockResolvedValue(application),
     findOwnedPlan: jest.fn().mockResolvedValue(plan),
     getReadinessEvidence: jest.fn().mockResolvedValue({
+      revision: 0,
       coding: { score: null, observedAt: null },
       review: { score: null, observedAt: null },
       learning: { score: null, observedAt: null },

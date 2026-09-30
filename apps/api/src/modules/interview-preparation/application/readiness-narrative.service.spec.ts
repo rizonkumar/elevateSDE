@@ -6,6 +6,7 @@ import { ReadinessNarrativeService } from './readiness-narrative.service';
 const snapshot: ReadinessSnapshotDto = {
   id: 'snapshot-1',
   formulaVersion: 'v1',
+  sourceRevision: 0,
   score: 72,
   status: 'PROGRESSING',
   confidence: 0.6,
