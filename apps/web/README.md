@@ -1,36 +1,36 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ElevateSDE Candidate Web Client
 
-## Getting Started
+Next.js 16.2.9 App Router client for candidate preparation, job tracking, Interview Readiness, coding assessments, learning paths, review, community, and organization workspaces.
 
-First, run the development server:
+## Local development
+
+From the repository root, install dependencies and start the complete stack:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+pnpm -w run dev:all
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3001](http://localhost:3001). The API defaults to `http://localhost:4400`; configure `NEXT_PUBLIC_API_URL` in `apps/web/.env.local` when using another address.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Interview Readiness
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Authenticated routes:
 
-## Learn More
+- `/dashboard/interview-readiness`
+- `/dashboard/interview-readiness/[planId]`
+- `/dashboard/interview-readiness/peer/[sessionId]`
 
-To learn more about Next.js, take a look at the following resources:
+The workspace uses live `/api/v1/interview-preparation` endpoints. Its readiness indicator is deterministic preparation guidance and is not a hiring probability.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Commands
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+pnpm dev
+pnpm type-check
+pnpm lint
+pnpm build
+pnpm screenshots
+```
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Build before capturing screenshots. `pnpm screenshots` uses the pinned Playwright runner, installed Google Chrome, synthetic authenticated fixtures, a 1440x900 viewport, reduced motion, and explicit light/dark themes. Curated files are written to `public/screenshots`.

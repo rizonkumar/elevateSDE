@@ -8,7 +8,6 @@
     "start": "next start -p 3001",
     "lint": "eslint",
     "type-check": "tsc --noEmit",
-    "test:e2e": "playwright test --grep-invert captures",
     "screenshots": "playwright test capture-screenshots.spec.ts"
   },
   "dependencies": {

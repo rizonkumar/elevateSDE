@@ -17,7 +17,9 @@ for (const theme of ['light', 'dark'] as const) {
     await page.screenshot({ path: path.join(output, `interview-readiness-${theme}.png`) });
 
     await page.goto('/');
-    await expect(page.getByRole('heading', { name: 'Know what to prepare next' })).toBeVisible();
+    const heading = page.getByRole('heading', { name: 'Elevate your software engineering career' });
+    await expect(heading).toBeVisible();
+    await expect(heading).toHaveCSS('opacity', '1');
     await page.evaluate(async () => document.fonts.ready);
     await page.screenshot({ path: path.join(output, `homepage-${theme}.png`) });
   });

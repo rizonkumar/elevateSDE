@@ -107,14 +107,14 @@ async function fulfill(route: Route, body: unknown, status = 200): Promise<void>
 
 export async function authenticate(context: BrowserContext, theme: 'light' | 'dark' = 'light'): Promise<void> {
   await context.addCookies([
-    { name: 'accessToken', value: 'e2e-token', domain: '127.0.0.1', path: '/' },
-    { name: 'user', value: JSON.stringify(user), domain: '127.0.0.1', path: '/' },
+    { name: 'accessToken', value: 'e2e-token', domain: 'localhost', path: '/' },
+    { name: 'user', value: JSON.stringify(user), domain: 'localhost', path: '/' },
   ]);
   await context.addInitScript((selectedTheme) => localStorage.setItem('theme', selectedTheme), theme);
 }
 
 export async function mockApi(page: Page, options: { empty?: boolean; error?: boolean } = {}): Promise<void> {
-  await page.route('http://localhost:4400/api/v1/**', async (route) => {
+  await page.route('**/api/v1/**', async (route) => {
     const request = route.request();
     const path = new URL(request.url()).pathname;
     if (options.error && path.endsWith('/interview-preparation/overview')) return fulfill(route, { message: 'Unavailable' }, 503);

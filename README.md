@@ -22,7 +22,7 @@ graph TD
         subgraph Domains["DDD Modules"]
             CoreMods["auth · users · organization · admin"]
             LearnMods["problem · code-runner · daily-challenge · dashboard · learning-path · contest · review"]
-            CommMods["forum · leaderboard · job-application · problem-social · achievement · notification"]
+            CommMods["forum · leaderboard · job-application · problem-social · achievement · notification · interview-preparation"]
             PlatMods["audit-log · feature-flag · queues"]
         end
 
@@ -66,6 +66,33 @@ graph TD
     App -.->|Trigger Audit Logs| PlatMods
     PlatMods --> Infra
 ```
+
+## Interview Readiness Workspace
+
+Interview Readiness turns a tracked job application into an editable, deadline-aware preparation plan. Candidates confirm a General, FAANG-style, Startup, or Enterprise interview-loop template, adjust expected rounds, and work prioritized tasks across coding, spaced repetition, learning paths, resume analysis, mock interviews, and peer practice.
+
+- **Routes:** `/dashboard/interview-readiness`, `/dashboard/interview-readiness/[planId]`, and participant-scoped `/dashboard/interview-readiness/peer/[sessionId]`.
+- **Readiness model:** Version `v1` normalizes only across applicable evidence. Missing evidence is reported as insufficient rather than scored as zero. Evidence coverage and recency determine confidence.
+- **Important:** Readiness is preparation guidance, not a hiring probability or prediction.
+- **Peer practice:** Invite an existing candidate by exact email, schedule an external HTTPS meeting room, manage invitation/session states, and exchange bilateral scorecards. There is no marketplace, automatic matching, native WebRTC, recording, public review, or reputation ranking.
+- **AI narrative:** Optional explanations consume privacy-filtered structured scores only and cannot modify scores, statuses, or tasks. Deterministic recommendations remain available when AI is disabled, stale, timed out, or unavailable.
+
+The optional OpenAI-compatible narrative adapter is disabled unless all of these API environment values are configured:
+
+```bash
+INTERVIEW_READINESS_AI_ENABLED=true
+READINESS_AI_ENDPOINT=https://provider.example.com/v1/chat/completions
+READINESS_AI_API_KEY=replace-me
+READINESS_AI_MODEL=replace-me
+```
+
+### Readiness scoring
+
+For each round, the service calculates a weighted average from the available applicable signals. Plan readiness is the configured weighted average of its rounds. Confidence combines evidence coverage with recency, so missing or stale signals lower confidence without becoming failure scores. Every persisted snapshot records its formula version and component evidence.
+
+![Interview Readiness in light mode](./apps/web/public/screenshots/interview-readiness-light.png)
+
+![Interview Readiness in dark mode](./apps/web/public/screenshots/interview-readiness-dark.png)
 
 ## Code Execution Sandbox
 
@@ -146,6 +173,7 @@ The API requires a PostgreSQL database (and Redis for caching/queues). Both are 
 | Surface                  | URL                                            | Access                 |
 | ------------------------ | ---------------------------------------------- | ---------------------- |
 | Candidate dashboard      | `http://localhost:3001/dashboard`              | Any authenticated user |
+| Interview readiness      | `http://localhost:3001/dashboard/interview-readiness` | Any authenticated user |
 | Coding assessments       | `http://localhost:3001/dashboard/assessment`   | Any authenticated user |
 | Daily challenge & streak | `http://localhost:3001/dashboard/daily`        | Any authenticated user |
 | Prep tracks              | `http://localhost:3001/dashboard/paths`        | Any authenticated user |
@@ -169,7 +197,7 @@ Seeded demo logins (all use the password `Password123!`):
 | `org@elevatesde.dev`       | `TENANT_ADMIN` |
 | `candidate@elevatesde.dev` | `USER`         |
 
-Most surfaces are backed by live, user-scoped API endpoints: the candidate dashboard, coding assessments + execution, daily challenge & streaks, learning paths (`/api/v1/learning-paths*`), coding contests (`/api/v1/contests*` — list/detail, registration, and live standings polled every 15s), achievements (`/api/v1/achievements*`), notifications (`/api/v1/notifications*`), spaced repetition (`/api/v1/review/*`), profile & submission heatmap, job tracker, community forum, leaderboard, and the organization dashboard, plus the backoffice (`/api/v1/admin/*`, including the coding problem bank, daily-challenge scheduling, contest management, the learning path builder, and badge management). Per-problem community and curation endpoints are also live via the `problem-social` module: problem discussions with comments/upvotes (`/api/v1/problems/:id/discussions`, `/api/v1/discussions/*`), bookmarks (`/api/v1/problems/:id/bookmark`, `/api/v1/me/bookmarks`), private notes (`/api/v1/problems/:id/note`), and custom problem collections (`/api/v1/me/lists*`). Only the **AI mock interview** and **resume analyzer** surfaces remain client-side mocks (in-browser engines), pending their domain models.
+Most surfaces are backed by live, user-scoped API endpoints: the candidate dashboard, interview readiness and peer practice (`/api/v1/interview-preparation*`), resume analysis, coding assessments + execution, daily challenge & streaks, learning paths (`/api/v1/learning-paths*`), coding contests (`/api/v1/contests*` — list/detail, registration, and live standings polled every 15s), achievements (`/api/v1/achievements*`), notifications (`/api/v1/notifications*`), spaced repetition (`/api/v1/review/*`), profile & submission heatmap, job tracker, community forum, leaderboard, and the organization dashboard, plus the backoffice (`/api/v1/admin/*`, including the coding problem bank, daily-challenge scheduling, contest management, the learning path builder, and badge management). Per-problem community and curation endpoints are also live via the `problem-social` module: problem discussions with comments/upvotes (`/api/v1/problems/:id/discussions`, `/api/v1/discussions/*`), bookmarks (`/api/v1/problems/:id/bookmark`), private notes (`/api/v1/problems/:id/note`), and custom problem collections (`/api/v1/me/lists*`). The AI mock interview console still uses its browser engine and is intentionally excluded from durable readiness evidence until persistent interview sessions land.
 
 ## Common Commands
 
@@ -179,4 +207,7 @@ pnpm -w run dev:clients   # Web Client + Admin Backoffice only
 pnpm -w run type-check    # TypeScript checks across the workspace
 pnpm -w run lint          # ESLint across the workspace
 pnpm -w run build         # Build all apps and packages
+pnpm --filter @elevatesde/web screenshots  # Regenerate four 1440x900 marketing/readiness captures
 ```
+
+Screenshot capture uses pinned Playwright with installed Google Chrome and a production web build. Run `pnpm --filter @elevatesde/web build` before `screenshots`. The capture fixture contains synthetic candidate and company data only.

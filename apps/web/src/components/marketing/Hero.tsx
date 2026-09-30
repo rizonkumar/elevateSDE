@@ -6,7 +6,7 @@ import { ArrowRight } from 'lucide-react';
 import { AppWindow } from './AppWindow';
 import { ThemedShot } from './ThemedShot';
 
-const SIGNALS = ['Application-linked plans', 'Explainable readiness', 'Private peer practice'];
+const SIGNALS = ['Free candidate plan', 'Real-time AI feedback', 'SOC 2-ready audit trail'];
 
 export function Hero() {
   const reduceMotion = useReducedMotion();
@@ -24,21 +24,22 @@ export function Hero() {
           className="inline-flex items-center gap-2 rounded-(--radius-full) border border-(--color-border-subtle) bg-(--color-bg-soft) px-3.5 py-1.5 font-mono text-xs font-medium uppercase tracking-[0.18em] text-(--color-accent)"
         >
           <span className="h-1.5 w-1.5 rounded-full bg-(--color-accent)" />
-          <span>Interview mission control</span>
+          <span>Enterprise AI interview prep</span>
         </motion.span>
 
         <motion.h1
           {...rise(0.08)}
           className="mt-6 max-w-4xl font-display text-4xl font-bold leading-[1.04] tracking-tight text-(--color-text-primary) sm:text-6xl lg:text-7xl"
         >
-          Know what to prepare next
+          Elevate your software engineering career
         </motion.h1>
 
         <motion.p
           {...rise(0.16)}
           className="mt-6 max-w-2xl text-base leading-relaxed text-(--color-text-muted) sm:text-lg"
         >
-          Turn every tracked application into a deadline-aware interview plan. See round-level evidence, close the highest-priority gaps, and practice with AI or a peer.
+          Timed coding assessments, real-time AI mock interviews, resume analysis, and a job tracker
+          — one platform for individual engineers and the teams that hire them.
         </motion.p>
 
         <motion.div
@@ -49,7 +50,7 @@ export function Hero() {
             href="/register"
             className="inline-flex items-center gap-2 rounded-(--radius-full) bg-(--color-accent) px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
           >
-            Build your readiness plan
+            Get started free
             <ArrowRight className="h-4 w-4" />
           </Link>
           <Link
@@ -79,11 +80,11 @@ export function Hero() {
         transition={{ duration: 0.7, ease: 'easeOut', delay: 0.4 }}
         className="mt-16"
       >
-        <AppWindow label="app.elevatesde.dev/interview-readiness">
+        <AppWindow label="app.elevatesde.dev/dashboard">
           <div className="aspect-16/10 w-full sm:aspect-video">
             <ThemedShot
-              name="interview-readiness"
-              alt="Interview Readiness workspace with deadline, round evidence, tasks, and confidence"
+              name="dashboard"
+              alt="ElevateSDE candidate dashboard showing assessment stats, job pipeline, and preparation insights"
               width={1440}
               height={900}
             />

@@ -6,16 +6,16 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   reporter: process.env.CI ? 'github' : 'list',
   use: {
-    baseURL: 'http://127.0.0.1:3001',
+    baseURL: 'http://localhost:3001',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
   projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    { name: 'chrome', use: { ...devices['Desktop Chrome'], channel: 'chrome' } },
   ],
   webServer: {
-    command: 'pnpm dev',
-    url: 'http://127.0.0.1:3001',
+    command: 'pnpm start',
+    url: 'http://localhost:3001',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },
