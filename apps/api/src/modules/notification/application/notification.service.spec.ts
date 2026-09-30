@@ -152,7 +152,7 @@ describe('NotificationService', () => {
     it('returns every type with stored values overriding defaults', async () => {
       await service.updatePreference('user-1', 'SUBMISSION_ACCEPTED', true);
       const preferences = await service.getPreferences('user-1');
-      expect(preferences).toHaveLength(6);
+      expect(preferences).toHaveLength(10);
 
       const submission = preferences.find(
         (preference) => preference.type === 'SUBMISSION_ACCEPTED',

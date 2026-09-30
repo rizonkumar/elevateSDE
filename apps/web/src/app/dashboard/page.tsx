@@ -73,6 +73,7 @@ const EMPTY_STATS: DashboardStatsDto = {
   leaderboard: { rank: null, points: 0, streakDays: 0, badges: [], assessmentsCompleted: 0 },
   forum: { postsCreated: 0, commentsPosted: 0, upvotesReceived: 0 },
   recentSubmissions: [],
+  interviewReadiness: null,
 };
 
 interface StatCardData {

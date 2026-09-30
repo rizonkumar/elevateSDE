@@ -674,6 +674,10 @@ export type NotificationType =
   | 'FORUM_REPLY'
   | 'FORUM_UPVOTE'
   | 'SUBMISSION_ACCEPTED'
+  | 'PREPARATION_REMINDER'
+  | 'PEER_INVITATION'
+  | 'PEER_SESSION_CHANGED'
+  | 'SCORECARD_REQUEST'
   | 'SYSTEM';
 
 export interface NotificationDto {
