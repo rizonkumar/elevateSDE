@@ -167,6 +167,19 @@ export class InterviewPreparationMapper {
     };
   }
 
+  static toRound(record: RoundRecord): PreparationRoundDto {
+    return {
+      id: record.id,
+      type: record.type,
+      title: record.title,
+      weight: record.weight,
+      ordinal: record.ordinal,
+      version: record.version,
+      tasks: [],
+      readiness: null,
+    };
+  }
+
   static toTask(record: TaskRecord): PreparationTaskDto {
     return task(record);
   }

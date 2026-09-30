@@ -6,15 +6,18 @@ import {
 } from '@nestjs/common';
 import type {
   CreateInterviewPreparationPlanDto,
+  CreatePreparationRoundDto,
   CreatePreparationTaskDto,
   InterviewLoopTemplateDto,
   InterviewPreparationOverviewDto,
   InterviewPreparationPlanDto,
   PreviewInterviewPreparationPlanDto,
+  PreparationRoundDto,
   PreparationTaskDto,
   ReadinessEvidenceSource,
   ReadinessSnapshotDto,
   UpdateInterviewPreparationPlanDto,
+  UpdatePreparationRoundDto,
   UpdatePreparationTaskDto,
 } from '@elevatesde/shared-types';
 import { IInterviewPreparationRepository } from '../domain/interfaces/interview-preparation-repository.interface';
@@ -142,6 +145,33 @@ export class InterviewPreparationService {
   ): Promise<InterviewPreparationPlanDto> {
     const result = await this.repository.setPlanStatus(userId, planId, 'ARCHIVED', version);
     return this.resolveVersioned(result, 'Preparation plan');
+  }
+
+  async createRound(
+    userId: string,
+    planId: string,
+    input: CreatePreparationRoundDto,
+  ): Promise<PreparationRoundDto> {
+    try {
+      InterviewPreparationPlan.validateRounds([input]);
+    } catch (error) {
+      throw new BadRequestException(error instanceof Error ? error.message : 'Invalid interview round');
+    }
+    const round = await this.repository.createRound(userId, planId, input);
+    if (!round) throw new NotFoundException('Preparation plan not found');
+    return round;
+  }
+
+  async updateRound(
+    userId: string,
+    roundId: string,
+    input: UpdatePreparationRoundDto,
+  ): Promise<PreparationRoundDto> {
+    if (input.weight !== undefined && input.weight <= 0) {
+      throw new BadRequestException('Round weight must be greater than zero');
+    }
+    const result = await this.repository.updateRound(userId, roundId, input);
+    return this.resolveVersioned(result, 'Preparation round');
   }
 
   async createTask(

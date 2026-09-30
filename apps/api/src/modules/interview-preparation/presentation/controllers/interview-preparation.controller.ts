@@ -14,6 +14,7 @@ import type {
   InterviewLoopTemplateDto,
   InterviewPreparationOverviewDto,
   InterviewPreparationPlanDto,
+  PreparationRoundDto,
   PreparationTaskDto,
   ReadinessSnapshotDto,
 } from '@elevatesde/shared-types';
@@ -22,8 +23,10 @@ import { User } from '../../../users/domain/entities/user';
 import { InterviewPreparationService } from '../../application/interview-preparation.service';
 import {
   CreateInterviewPreparationPlanRequestDto,
+  CreatePreparationRoundRequestDto,
   CreatePreparationTaskRequestDto,
   UpdateInterviewPreparationPlanRequestDto,
+  UpdatePreparationRoundRequestDto,
   UpdatePreparationTaskRequestDto,
   VersionRequestDto,
 } from '../dtos/interview-preparation.dto';
@@ -96,6 +99,26 @@ export class InterviewPreparationController {
     @Body() dto: VersionRequestDto,
   ): Promise<InterviewPreparationPlanDto> {
     return this.service.archivePlan(req.user.getId(), planId, dto.version);
+  }
+
+  @Post('plans/:planId/rounds')
+  @ApiOperation({ summary: 'Add an interview round' })
+  createRound(
+    @Req() req: RequestWithUser,
+    @Param('planId', ParseUUIDPipe) planId: string,
+    @Body() dto: CreatePreparationRoundRequestDto,
+  ): Promise<PreparationRoundDto> {
+    return this.service.createRound(req.user.getId(), planId, dto);
+  }
+
+  @Patch('rounds/:roundId')
+  @ApiOperation({ summary: 'Update an interview round' })
+  updateRound(
+    @Req() req: RequestWithUser,
+    @Param('roundId', ParseUUIDPipe) roundId: string,
+    @Body() dto: UpdatePreparationRoundRequestDto,
+  ): Promise<PreparationRoundDto> {
+    return this.service.updateRound(req.user.getId(), roundId, dto);
   }
 
   @Post('plans/:planId/tasks')

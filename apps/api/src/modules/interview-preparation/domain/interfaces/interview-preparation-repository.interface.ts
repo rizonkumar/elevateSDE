@@ -1,13 +1,16 @@
 import type {
+  CreatePreparationRoundDto,
   CreatePreparationTaskDto,
   InterviewPreparationOverviewDto,
   InterviewPreparationPlanDto,
   InterviewPreparationPlanStatus,
   JobApplicationDto,
   PreviewInterviewPreparationPlanDto,
+  PreparationRoundDto,
   PreparationTaskDto,
   ReadinessSnapshotDto,
   UpdateInterviewPreparationPlanDto,
+  UpdatePreparationRoundDto,
   UpdatePreparationTaskDto,
 } from '@elevatesde/shared-types';
 
@@ -37,6 +40,16 @@ export abstract class IInterviewPreparationRepository {
     status: InterviewPreparationPlanStatus,
     version: number,
   ): Promise<InterviewPreparationPlanDto | 'VERSION_CONFLICT' | null>;
+  abstract createRound(
+    userId: string,
+    planId: string,
+    input: CreatePreparationRoundDto,
+  ): Promise<PreparationRoundDto | null>;
+  abstract updateRound(
+    userId: string,
+    roundId: string,
+    input: UpdatePreparationRoundDto,
+  ): Promise<PreparationRoundDto | 'VERSION_CONFLICT' | null>;
   abstract createTask(
     userId: string,
     planId: string,

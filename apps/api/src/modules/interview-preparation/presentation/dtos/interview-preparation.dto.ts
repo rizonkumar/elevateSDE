@@ -18,6 +18,7 @@ import {
 } from 'class-validator';
 import type {
   CreateInterviewPreparationPlanDto as CreatePlanContract,
+  CreatePreparationRoundDto as CreateRoundContract,
   CreatePreparationTaskDto as CreateTaskContract,
   InterviewPreparationArchetype,
   InterviewPreparationPlanStatus,
@@ -25,6 +26,7 @@ import type {
   PreparationResourceType,
   PreparationTaskType,
   UpdateInterviewPreparationPlanDto as UpdatePlanContract,
+  UpdatePreparationRoundDto as UpdateRoundContract,
   UpdatePreparationTaskDto as UpdateTaskContract,
 } from '@elevatesde/shared-types';
 
@@ -88,6 +90,52 @@ export class UpdateInterviewPreparationPlanRequestDto implements UpdatePlanContr
   @IsIn(PLAN_STATUSES)
   @IsOptional()
   status?: InterviewPreparationPlanStatus;
+
+  @IsInt()
+  @Min(0)
+  version!: number;
+}
+
+export class CreatePreparationRoundRequestDto implements CreateRoundContract {
+  @IsIn(ROUND_TYPES)
+  type!: InterviewRoundType;
+
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(100)
+  title!: string;
+
+  @IsNumber()
+  @Min(0.1)
+  @Max(10)
+  weight!: number;
+
+  @IsInt()
+  @Min(0)
+  ordinal!: number;
+}
+
+export class UpdatePreparationRoundRequestDto implements UpdateRoundContract {
+  @IsIn(ROUND_TYPES)
+  @IsOptional()
+  type?: InterviewRoundType;
+
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(100)
+  @IsOptional()
+  title?: string;
+
+  @IsNumber()
+  @Min(0.1)
+  @Max(10)
+  @IsOptional()
+  weight?: number;
+
+  @IsInt()
+  @Min(0)
+  @IsOptional()
+  ordinal?: number;
 
   @IsInt()
   @Min(0)

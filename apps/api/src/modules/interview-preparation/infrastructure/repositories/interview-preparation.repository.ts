@@ -2,14 +2,17 @@ import { randomUUID } from 'node:crypto';
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import type {
+  CreatePreparationRoundDto,
   CreatePreparationTaskDto,
   InterviewPreparationOverviewDto,
   InterviewPreparationPlanDto,
   InterviewPreparationPlanStatus,
   JobApplicationDto,
+  PreparationRoundDto,
   PreparationTaskDto,
   ReadinessSnapshotDto,
   UpdateInterviewPreparationPlanDto,
+  UpdatePreparationRoundDto,
   UpdatePreparationTaskDto,
 } from '@elevatesde/shared-types';
 import { PrismaService } from '../../../../infrastructure/prisma/prisma.service';
@@ -160,6 +163,50 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
       data: { status, version: { increment: 1 } },
     });
     return this.resolvePlanUpdate(userId, planId, result.count);
+  }
+
+  async createRound(
+    userId: string,
+    planId: string,
+    input: CreatePreparationRoundDto,
+  ): Promise<PreparationRoundDto | null> {
+    const plan = await this.prisma.interviewPreparationPlan.findFirst({
+      where: { id: planId, userId },
+      select: { id: true },
+    });
+    if (!plan) return null;
+    const round = await this.prisma.interviewPreparationRound.create({
+      data: { id: randomUUID(), planId, ...input },
+    });
+    return InterviewPreparationMapper.toRound(round);
+  }
+
+  async updateRound(
+    userId: string,
+    roundId: string,
+    input: UpdatePreparationRoundDto,
+  ): Promise<PreparationRoundDto | 'VERSION_CONFLICT' | null> {
+    const result = await this.prisma.interviewPreparationRound.updateMany({
+      where: { id: roundId, plan: { userId }, version: input.version },
+      data: {
+        type: input.type,
+        title: input.title,
+        weight: input.weight,
+        ordinal: input.ordinal,
+        version: { increment: 1 },
+      },
+    });
+    if (result.count > 0) {
+      const round = await this.prisma.interviewPreparationRound.findFirst({
+        where: { id: roundId, plan: { userId } },
+      });
+      return round ? InterviewPreparationMapper.toRound(round) : null;
+    }
+    const exists = await this.prisma.interviewPreparationRound.findFirst({
+      where: { id: roundId, plan: { userId } },
+      select: { id: true },
+    });
+    return exists ? 'VERSION_CONFLICT' : null;
   }
 
   async createTask(
