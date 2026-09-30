@@ -137,4 +137,7 @@ export class DashboardStatsResponseDto implements DashboardStatsDto {
 
   @ApiProperty({ type: [DashboardRecentSubmissionDto] })
   recentSubmissions!: DashboardRecentSubmissionDto[];
+
+  @ApiProperty({ type: DashboardInterviewReadinessStatsDto, nullable: true })
+  interviewReadiness!: DashboardInterviewReadinessStatsDto | null;
 }

@@ -36,6 +36,12 @@ export class DashboardPresentationMapper {
       totalCount: submission.totalCount,
       createdAt: submission.createdAt.toISOString(),
     }));
+    dto.interviewReadiness = view.interviewReadiness
+      ? {
+          ...view.interviewReadiness,
+          targetAt: view.interviewReadiness.targetAt.toISOString(),
+        }
+      : null;
     return dto;
   }
 }
