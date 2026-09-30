@@ -191,7 +191,12 @@ export class DashboardRepository implements IDashboardRepository {
       },
     });
     if (!plan) return null;
-    const latest = plan.snapshots[0];
+    const candidate = plan.snapshots[0];
+    const latest =
+      candidate &&
+      (candidate.sourceRevision === plan.readinessRevision)
+        ? candidate
+        : undefined;
     return {
       planId: plan.id,
       jobApplicationId: plan.jobApplicationId,

@@ -21,10 +21,11 @@ import type {
 
 export interface CreatePlanRecordInput extends PreviewInterviewPreparationPlanDto {
   userId: string;
-  tasks: Array<Omit<CreatePreparationTaskDto, 'roundId'> & { roundOrdinal: number }>;
+  tasks: Array<Omit<CreatePreparationTaskDto, 'roundId'> & { roundOrdinal: number; ordinal: number }>;
 }
 
 export interface InterviewPreparationEvidence {
+  revision: number;
   coding: { score: number | null; observedAt: Date | null };
   review: { score: number | null; observedAt: Date | null };
   learning: { score: number | null; observedAt: Date | null };
@@ -99,11 +100,12 @@ export abstract class IInterviewPreparationRepository {
     userId: string,
     planId: string,
     snapshot: Omit<ReadinessSnapshotDto, 'id'>,
-  ): Promise<ReadinessSnapshotDto | null>;
+  ): Promise<ReadinessSnapshotDto | 'STALE_REVISION' | null>;
   abstract saveSnapshotExplanation(
     userId: string,
     planId: string,
     snapshotId: string,
+    sourceRevision: number,
     explanation: string,
   ): Promise<ReadinessSnapshotDto | null>;
   abstract createPeerSession(

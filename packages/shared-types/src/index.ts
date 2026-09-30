@@ -995,6 +995,7 @@ export interface InterviewRoundReadinessDto {
 export interface ReadinessSnapshotDto {
   id: string;
   formulaVersion: InterviewReadinessFormulaVersion;
+  sourceRevision: number;
   score: number | null;
   status: InterviewReadinessStatus;
   confidence: number;
@@ -1088,14 +1089,12 @@ export interface CreatePreparationRoundDto {
   type: InterviewRoundType;
   title: string;
   weight: number;
-  ordinal: number;
 }
 
 export interface UpdatePreparationRoundDto {
   type?: InterviewRoundType;
   title?: string;
   weight?: number;
-  ordinal?: number;
   version: number;
 }
 
@@ -1108,14 +1107,12 @@ export interface CreatePreparationTaskDto {
   resourceType?: PreparationResourceType | null;
   resourceId?: string | null;
   deepLink?: string | null;
-  ordinal: number;
 }
 
 export interface UpdatePreparationTaskDto {
   title?: string;
   description?: string | null;
   dueAt?: string | null;
-  ordinal?: number;
   version: number;
 }
 

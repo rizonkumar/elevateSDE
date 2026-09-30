@@ -777,6 +777,7 @@ model InterviewPreparationPlan {
   archetype        InterviewPreparationArchetype
   status           InterviewPreparationPlanStatus  @default(ACTIVE)
   version          Int                              @default(0)
+  readinessRevision Int                              @default(0)
   readinessInvalidatedAt DateTime?
   createdAt        DateTime                         @default(now())
   updatedAt        DateTime                         @updatedAt
@@ -837,6 +838,7 @@ model ReadinessSnapshot {
   id                           String                     @id @default(uuid())
   planId                       String
   formulaVersion               String
+  sourceRevision               Int
   score                        Float?
   status                       InterviewReadinessStatus
   confidence                   Float

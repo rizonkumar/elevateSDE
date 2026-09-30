@@ -101,7 +101,7 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
   ): Promise<InterviewPreparationEvidence | null> {
     const plan = await this.prisma.interviewPreparationPlan.findFirst({
       where: { id: planId, userId },
-      select: { id: true },
+      select: { id: true, readinessRevision: true },
     });
     if (!plan) return null;
     const [
@@ -190,6 +190,7 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
       peerScores._avg.structure,
     ].filter((value): value is number => value !== null);
     return {
+      revision: plan.readinessRevision,
       coding: {
         score: totalSubmissions === 0 ? null : Math.round((acceptedSubmissions / totalSubmissions) * 100),
         observedAt: latestSubmission._max.createdAt,
@@ -302,8 +303,15 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
       select: { id: true },
     });
     if (!plan) return null;
-    const round = await this.prisma.interviewPreparationRound.create({
-      data: { id: randomUUID(), planId, ...input },
+    const round = await this.prisma.$transaction(async (transaction) => {
+      const created = await transaction.interviewPreparationRound.create({
+        data: { id: randomUUID(), planId, ...input },
+      });
+      await transaction.interviewPreparationPlan.update({
+        where: { id: planId },
+        data: { readinessInvalidatedAt: new Date() },
+      });
+      return created;
     });
     return InterviewPreparationMapper.toRound(round);
   }
@@ -313,15 +321,28 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
     roundId: string,
     input: UpdatePreparationRoundDto,
   ): Promise<PreparationRoundDto | 'VERSION_CONFLICT' | null> {
-    const result = await this.prisma.interviewPreparationRound.updateMany({
-      where: { id: roundId, plan: { userId }, version: input.version },
-      data: {
-        type: input.type,
-        title: input.title,
-        weight: input.weight,
-        ordinal: input.ordinal,
-        version: { increment: 1 },
-      },
+    const result = await this.prisma.$transaction(async (transaction) => {
+      const updated = await transaction.interviewPreparationRound.updateMany({
+        where: { id: roundId, plan: { userId }, version: input.version },
+        data: {
+          type: input.type,
+          title: input.title,
+          weight: input.weight,
+          ordinal: input.ordinal,
+          version: { increment: 1 },
+        },
+      });
+      if (updated.count > 0) {
+        const round = await transaction.interviewPreparationRound.findUniqueOrThrow({
+          where: { id: roundId },
+          select: { planId: true },
+        });
+        await transaction.interviewPreparationPlan.update({
+          where: { id: round.planId },
+          data: { readinessInvalidatedAt: new Date() },
+        });
+      }
+      return updated;
     });
     if (result.count > 0) {
       const round = await this.prisma.interviewPreparationRound.findFirst({
@@ -347,20 +368,27 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
     });
     if (!plan) return null;
     if (!plan.rounds.some((round) => round.id === input.roundId)) return null;
-    const task = await this.prisma.preparationTask.create({
-      data: {
-        id: randomUUID(),
-        planId,
-        roundId: input.roundId,
-        type: input.type,
-        title: input.title,
-        description: input.description ?? null,
-        dueAt: input.dueAt ? new Date(input.dueAt) : null,
-        resourceType: input.resourceType ?? null,
-        resourceId: input.resourceId ?? null,
-        deepLink: input.deepLink ?? null,
-        ordinal: input.ordinal,
-      },
+    const task = await this.prisma.$transaction(async (transaction) => {
+      const created = await transaction.preparationTask.create({
+        data: {
+          id: randomUUID(),
+          planId,
+          roundId: input.roundId,
+          type: input.type,
+          title: input.title,
+          description: input.description ?? null,
+          dueAt: input.dueAt ? new Date(input.dueAt) : null,
+          resourceType: input.resourceType ?? null,
+          resourceId: input.resourceId ?? null,
+          deepLink: input.deepLink ?? null,
+          ordinal: input.ordinal,
+        },
+      });
+      await transaction.interviewPreparationPlan.update({
+        where: { id: planId },
+        data: { readinessInvalidatedAt: new Date() },
+      });
+      return created;
     });
     return InterviewPreparationMapper.toTask(task);
   }
@@ -395,13 +423,22 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
     if (!task) return null;
     const desiredStatus = completed ? 'COMPLETED' : 'PENDING';
     if (task.status === desiredStatus) return InterviewPreparationMapper.toTask(task);
-    const result = await this.prisma.preparationTask.updateMany({
-      where: { id: taskId, plan: { userId }, version },
-      data: {
-        status: desiredStatus,
-        completedAt: completed ? new Date() : null,
-        version: { increment: 1 },
-      },
+    const result = await this.prisma.$transaction(async (transaction) => {
+      const updated = await transaction.preparationTask.updateMany({
+        where: { id: taskId, plan: { userId }, version },
+        data: {
+          status: desiredStatus,
+          completedAt: completed ? new Date() : null,
+          version: { increment: 1 },
+        },
+      });
+      if (updated.count > 0) {
+        await transaction.interviewPreparationPlan.update({
+          where: { id: task.planId },
+          data: { readinessInvalidatedAt: new Date() },
+        });
+      }
+      return updated;
     });
     return this.resolveTaskUpdate(userId, taskId, result.count);
   }
@@ -416,21 +453,28 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
       select: { id: true },
     });
     if (!plan) return null;
-    const created = await this.prisma.readinessSnapshot.create({
-      data: {
-        id: randomUUID(),
-        planId,
-        formulaVersion: snapshot.formulaVersion,
-        score: snapshot.score,
-        status: snapshot.status,
-        confidence: snapshot.confidence,
-        coverage: snapshot.coverage,
-        rounds: snapshot.rounds as unknown as Prisma.InputJsonValue,
-        deterministicRecommendations: snapshot.deterministicRecommendations,
-        aiExplanation: snapshot.aiExplanation,
-        aiSnapshotId: snapshot.aiSnapshotId,
-        calculatedAt: new Date(snapshot.calculatedAt),
-      },
+    const created = await this.prisma.$transaction(async (transaction) => {
+      const record = await transaction.readinessSnapshot.create({
+        data: {
+          id: randomUUID(),
+          planId,
+          formulaVersion: snapshot.formulaVersion,
+          score: snapshot.score,
+          status: snapshot.status,
+          confidence: snapshot.confidence,
+          coverage: snapshot.coverage,
+          rounds: snapshot.rounds as unknown as Prisma.InputJsonValue,
+          deterministicRecommendations: snapshot.deterministicRecommendations,
+          aiExplanation: snapshot.aiExplanation,
+          aiSnapshotId: snapshot.aiSnapshotId,
+          calculatedAt: new Date(snapshot.calculatedAt),
+        },
+      });
+      await transaction.interviewPreparationPlan.update({
+        where: { id: planId },
+        data: { readinessInvalidatedAt: null },
+      });
+      return record;
     });
     return InterviewPreparationMapper.toSnapshot(created);
   }
@@ -532,13 +576,20 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
         status: 'COMPLETED',
         OR: [{ organizerId: userId }, { inviteeId: userId }],
       },
-      select: { id: true },
+      select: { id: true, planId: true },
     });
     if (!session) return null;
     try {
-      const scorecard = await this.prisma.peerScorecard.create({
-        data: { id: randomUUID(), sessionId, evaluatorId: userId, ...input },
-        include: { evaluator: true },
+      const scorecard = await this.prisma.$transaction(async (transaction) => {
+        const created = await transaction.peerScorecard.create({
+          data: { id: randomUUID(), sessionId, evaluatorId: userId, ...input },
+          include: { evaluator: true },
+        });
+        await transaction.interviewPreparationPlan.update({
+          where: { id: session.planId },
+          data: { readinessInvalidatedAt: new Date() },
+        });
+        return created;
       });
       return InterviewPreparationMapper.toScorecard(scorecard);
     } catch (error) {

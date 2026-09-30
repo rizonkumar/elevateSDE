@@ -47,6 +47,7 @@ function snapshot(record: SnapshotRecord): ReadinessSnapshotDto {
   return {
     id: record.id,
     formulaVersion: record.formulaVersion as ReadinessSnapshotDto['formulaVersion'],
+    sourceRevision: record.sourceRevision,
     score: record.score,
     status: record.status,
     confidence: record.confidence,
@@ -113,11 +114,7 @@ function peerSession(record: PeerSessionRecord): PeerPracticeSessionDto {
 
 function latestReadiness(record: PlanRecord): InterviewPreparationPlanSummaryDto['latestReadiness'] {
   const latest = record.snapshots[0];
-  if (
-    !latest ||
-    (record.readinessInvalidatedAt !== null &&
-      latest.calculatedAt <= record.readinessInvalidatedAt)
-  ) {
+  if (!latest || latest.sourceRevision !== record.readinessRevision) {
     return null;
   }
   return {
