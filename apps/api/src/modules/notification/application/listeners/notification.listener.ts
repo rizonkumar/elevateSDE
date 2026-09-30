@@ -6,6 +6,10 @@ import {
   ForumReplyEvent,
   ForumUpvoteEvent,
   NOTIFICATION_EVENTS,
+  PeerInvitationEvent,
+  PeerSessionChangedEvent,
+  PreparationReminderEvent,
+  ScorecardRequestEvent,
   StreakMilestoneEvent,
   SubmissionAcceptedEvent,
 } from '../../domain/events/notification-events';
@@ -69,6 +73,54 @@ export class NotificationListener {
       title: 'Solution accepted',
       body: 'Your submission passed all test cases.',
       linkUrl: `/dashboard/assessment/${event.problemId}`,
+    });
+  }
+
+  @OnEvent(NOTIFICATION_EVENTS.PREPARATION_REMINDER)
+  async onPreparationReminder(event: PreparationReminderEvent): Promise<void> {
+    await this.safeNotify({
+      userId: event.recipientId,
+      type: 'PREPARATION_REMINDER',
+      title: `Prepare for ${event.company}`,
+      body: 'Your interview is approaching. Review the highest-priority gaps in your plan.',
+      linkUrl: `/dashboard/interview-readiness/${event.planId}`,
+      dedupeKey: event.dedupeKey,
+    });
+  }
+
+  @OnEvent(NOTIFICATION_EVENTS.PEER_INVITATION)
+  async onPeerInvitation(event: PeerInvitationEvent): Promise<void> {
+    await this.safeNotify({
+      userId: event.recipientId,
+      type: 'PEER_INVITATION',
+      title: 'Peer practice invitation',
+      body: `${event.organizerName} invited you to an interview practice session.`,
+      linkUrl: `/dashboard/interview-readiness/${event.planId}?session=${event.sessionId}`,
+      dedupeKey: `peer-invite:${event.sessionId}:${event.recipientId}`,
+    });
+  }
+
+  @OnEvent(NOTIFICATION_EVENTS.PEER_SESSION_CHANGED)
+  async onPeerSessionChanged(event: PeerSessionChangedEvent): Promise<void> {
+    await this.safeNotify({
+      userId: event.recipientId,
+      type: 'PEER_SESSION_CHANGED',
+      title: 'Peer session updated',
+      body: `The session is now ${event.status.toLowerCase().replaceAll('_', ' ')}.`,
+      linkUrl: `/dashboard/interview-readiness/${event.planId}?session=${event.sessionId}`,
+      dedupeKey: event.dedupeKey,
+    });
+  }
+
+  @OnEvent(NOTIFICATION_EVENTS.SCORECARD_REQUEST)
+  async onScorecardRequest(event: ScorecardRequestEvent): Promise<void> {
+    await this.safeNotify({
+      userId: event.recipientId,
+      type: 'SCORECARD_REQUEST',
+      title: 'Share peer feedback',
+      body: 'Your practice session is complete. Submit a scorecard while the conversation is fresh.',
+      linkUrl: `/dashboard/interview-readiness/${event.planId}?session=${event.sessionId}`,
+      dedupeKey: event.dedupeKey,
     });
   }
 

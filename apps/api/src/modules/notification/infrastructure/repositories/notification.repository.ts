@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { NotificationType } from '@prisma/client';
+import { NotificationType, Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../infrastructure/prisma/prisma.service';
 import { INotificationRepository } from '../../domain/interfaces/notification-repository.interface';
 import { Notification } from '../../domain/entities/notification';
@@ -11,17 +11,29 @@ export class NotificationRepository implements INotificationRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(notification: Notification): Promise<void> {
-    await this.prisma.notification.create({
-      data: {
-        id: notification.getId(),
-        userId: notification.getUserId(),
-        tenantId: notification.getTenantId(),
-        type: notification.getType(),
-        title: notification.getTitle(),
-        body: notification.getBody(),
-        linkUrl: notification.getLinkUrl(),
-      },
-    });
+    try {
+      await this.prisma.notification.create({
+        data: {
+          id: notification.getId(),
+          userId: notification.getUserId(),
+          tenantId: notification.getTenantId(),
+          type: notification.getType(),
+          title: notification.getTitle(),
+          body: notification.getBody(),
+          linkUrl: notification.getLinkUrl(),
+          dedupeKey: notification.getDedupeKey(),
+        },
+      });
+    } catch (error) {
+      if (
+        notification.getDedupeKey() !== null &&
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        return;
+      }
+      throw error;
+    }
   }
 
   async listForUser(userId: string, limit: number): Promise<Notification[]> {
