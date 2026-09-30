@@ -419,12 +419,26 @@ export interface DashboardRecentSubmission {
   createdAt: string;
 }
 
+export interface DashboardInterviewReadinessStats {
+  planId: string;
+  jobApplicationId: string;
+  company: string;
+  role: string;
+  targetAt: string;
+  timeZone: string;
+  score: number | null;
+  status: InterviewReadinessStatus;
+  confidence: number;
+  coverage: number;
+}
+
 export interface DashboardStatsDto {
   jobTracker: DashboardJobTrackerStats;
   assessments: DashboardAssessmentStats;
   leaderboard: DashboardLeaderboardStats;
   forum: DashboardForumStats;
   recentSubmissions: DashboardRecentSubmission[];
+  interviewReadiness: DashboardInterviewReadinessStats | null;
 }
 
 export interface DailyChallengeDto {

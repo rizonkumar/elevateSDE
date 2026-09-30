@@ -18,6 +18,7 @@ import type {
 import { PrismaService } from '../../../../infrastructure/prisma/prisma.service';
 import {
   CreatePlanRecordInput,
+  InterviewPreparationEvidence,
   IInterviewPreparationRepository,
 } from '../../domain/interfaces/interview-preparation-repository.interface';
 import {
@@ -84,6 +85,90 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
       include: planInclude,
     });
     return plan ? InterviewPreparationMapper.toPlan(plan) : null;
+  }
+
+  async getReadinessEvidence(
+    userId: string,
+    planId: string,
+    now: Date,
+  ): Promise<InterviewPreparationEvidence | null> {
+    const plan = await this.prisma.interviewPreparationPlan.findFirst({
+      where: { id: planId, userId },
+      select: { id: true },
+    });
+    if (!plan) return null;
+    const [submissionCounts, latestSubmission, reviewCounts, latestReview, learningCounts, latestResume, peerScores] =
+      await Promise.all([
+        Promise.all([
+          this.prisma.submission.count({ where: { userId } }),
+          this.prisma.submission.count({ where: { userId, status: 'ACCEPTED' } }),
+        ]),
+        this.prisma.submission.aggregate({ where: { userId }, _max: { createdAt: true } }),
+        Promise.all([
+          this.prisma.reviewItem.count({ where: { userId } }),
+          this.prisma.reviewItem.count({ where: { userId, dueAt: { lte: now } } }),
+        ]),
+        this.prisma.reviewItem.aggregate({ where: { userId }, _max: { lastReviewedAt: true } }),
+        Promise.all([
+          this.prisma.learningPathItem.count({
+            where: { module: { path: { enrollments: { some: { userId } } } } },
+          }),
+          this.prisma.learningPathItem.count({
+            where: {
+              module: { path: { enrollments: { some: { userId } } } },
+              problem: { submissions: { some: { userId, status: 'ACCEPTED' } } },
+            },
+          }),
+        ]),
+        this.prisma.resume.findFirst({
+          where: { userId, status: 'COMPLETED', atsScore: { not: null } },
+          orderBy: { updatedAt: 'desc' },
+          select: { atsScore: true, updatedAt: true },
+        }),
+        this.prisma.peerScorecard.aggregate({
+          where: {
+            evaluatorId: { not: userId },
+            session: {
+              planId,
+              status: 'COMPLETED',
+              OR: [{ organizerId: userId }, { inviteeId: userId }],
+            },
+          },
+          _avg: { communication: true, problemSolving: true, technicalDepth: true, structure: true },
+          _max: { submittedAt: true },
+        }),
+      ]);
+    const [totalSubmissions, acceptedSubmissions] = submissionCounts;
+    const [trackedReviews, dueReviews] = reviewCounts;
+    const [learningTotal, learningSolved] = learningCounts;
+    const peerValues = [
+      peerScores._avg.communication,
+      peerScores._avg.problemSolving,
+      peerScores._avg.technicalDepth,
+      peerScores._avg.structure,
+    ].filter((value): value is number => value !== null);
+    return {
+      coding: {
+        score: totalSubmissions === 0 ? null : Math.round((acceptedSubmissions / totalSubmissions) * 100),
+        observedAt: latestSubmission._max.createdAt,
+      },
+      review: {
+        score: trackedReviews === 0 ? null : Math.round(((trackedReviews - dueReviews) / trackedReviews) * 100),
+        observedAt: latestReview._max.lastReviewedAt,
+      },
+      learning: {
+        score: learningTotal === 0 ? null : Math.round((learningSolved / learningTotal) * 100),
+        observedAt: latestSubmission._max.createdAt,
+      },
+      resume: { score: latestResume?.atsScore ?? null, observedAt: latestResume?.updatedAt ?? null },
+      peer: {
+        score:
+          peerValues.length === 0
+            ? null
+            : Math.round(peerValues.reduce((total, value) => total + value, 0) / peerValues.length),
+        observedAt: peerScores._max.submittedAt,
+      },
+    };
   }
 
   async createPlan(

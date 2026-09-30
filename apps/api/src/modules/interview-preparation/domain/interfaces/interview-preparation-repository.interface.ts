@@ -19,6 +19,14 @@ export interface CreatePlanRecordInput extends PreviewInterviewPreparationPlanDt
   tasks: Array<CreatePreparationTaskDto & { roundOrdinal: number | null }>;
 }
 
+export interface InterviewPreparationEvidence {
+  coding: { score: number | null; observedAt: Date | null };
+  review: { score: number | null; observedAt: Date | null };
+  learning: { score: number | null; observedAt: Date | null };
+  resume: { score: number | null; observedAt: Date | null };
+  peer: { score: number | null; observedAt: Date | null };
+}
+
 export abstract class IInterviewPreparationRepository {
   abstract getOverview(userId: string): Promise<InterviewPreparationOverviewDto>;
   abstract findOwnedJobApplication(
@@ -26,6 +34,11 @@ export abstract class IInterviewPreparationRepository {
     jobApplicationId: string,
   ): Promise<JobApplicationDto | null>;
   abstract findOwnedPlan(userId: string, planId: string): Promise<InterviewPreparationPlanDto | null>;
+  abstract getReadinessEvidence(
+    userId: string,
+    planId: string,
+    now: Date,
+  ): Promise<InterviewPreparationEvidence | null>;
   abstract createPlan(
     input: CreatePlanRecordInput,
   ): Promise<InterviewPreparationPlanDto | 'DUPLICATE'>;

@@ -3,10 +3,12 @@ import {
   AssessmentDifficulty,
   DashboardAssessmentStats,
   DashboardForumStats,
+  DashboardInterviewReadinessStats,
   DashboardJobTrackerStats,
   DashboardLeaderboardStats,
   DashboardRecentSubmission,
   DashboardStatsDto,
+  InterviewReadinessStatus,
   JobApplicationStatus,
 } from '@elevatesde/shared-types';
 
@@ -86,6 +88,38 @@ class DashboardRecentSubmissionDto implements DashboardRecentSubmission {
 
   @ApiProperty({ example: '2026-06-20T09:30:00.000Z' })
   createdAt!: string;
+}
+
+class DashboardInterviewReadinessStatsDto implements DashboardInterviewReadinessStats {
+  @ApiProperty()
+  planId!: string;
+
+  @ApiProperty()
+  jobApplicationId!: string;
+
+  @ApiProperty()
+  company!: string;
+
+  @ApiProperty()
+  role!: string;
+
+  @ApiProperty()
+  targetAt!: string;
+
+  @ApiProperty()
+  timeZone!: string;
+
+  @ApiProperty({ nullable: true })
+  score!: number | null;
+
+  @ApiProperty()
+  status!: InterviewReadinessStatus;
+
+  @ApiProperty()
+  confidence!: number;
+
+  @ApiProperty()
+  coverage!: number;
 }
 
 export class DashboardStatsResponseDto implements DashboardStatsDto {

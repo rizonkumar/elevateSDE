@@ -20,7 +20,10 @@ import type {
   UpdatePreparationRoundDto,
   UpdatePreparationTaskDto,
 } from '@elevatesde/shared-types';
-import { IInterviewPreparationRepository } from '../domain/interfaces/interview-preparation-repository.interface';
+import {
+  InterviewPreparationEvidence,
+  IInterviewPreparationRepository,
+} from '../domain/interfaces/interview-preparation-repository.interface';
 import { InterviewPreparationPlan } from '../domain/entities/interview-preparation-plan';
 import { PreparationTask } from '../domain/entities/preparation-task';
 import {
@@ -80,6 +83,20 @@ function buildGeneratedTasks(rounds: PreviewInterviewPreparationPlanDto['rounds'
         return task;
       }),
   );
+}
+
+function metricForSource(
+  source: ReadinessEvidenceSource,
+  durable: InterviewPreparationEvidence,
+  taskMetric: { score: number | null; observedAt: Date | null },
+): { score: number | null; observedAt: Date | null } {
+  if (source === 'CODING_SUBMISSIONS') return durable.coding;
+  if (source === 'SPACED_REPETITION') return durable.review;
+  if (source === 'LEARNING_PATH') return durable.learning;
+  if (source === 'RESUME_ANALYSIS') return durable.resume;
+  if (source === 'PEER_SCORECARD') return durable.peer;
+  if (source === 'TASK_COMPLETION') return taskMetric;
+  return { score: null, observedAt: null };
 }
 
 @Injectable()
@@ -226,37 +243,47 @@ export class InterviewPreparationService {
   async refreshSnapshot(userId: string, planId: string): Promise<ReadinessSnapshotDto> {
     const plan = await this.getPlan(userId, planId);
     const calculatedAt = new Date();
-    const readiness = calculateInterviewReadinessV1({
+    const durable = await this.repository.getReadinessEvidence(userId, planId, calculatedAt);
+    if (!durable) throw new NotFoundException('Preparation plan not found');
+    const readinessInput = {
       calculatedAt,
       rounds: plan.rounds.map((round) => {
         const completed = round.tasks.filter((task) => task.status === 'COMPLETED').length;
         const taskScore = round.tasks.length === 0 ? null : (completed / round.tasks.length) * 100;
-        const observedAt = round.tasks
+        const latestCompletion = round.tasks
           .map((task) => task.completedAt)
           .filter((date): date is string => date !== null)
           .sort()
           .at(-1);
+        const taskMetric = {
+          score: taskScore,
+          observedAt: latestCompletion ? new Date(latestCompletion) : null,
+        };
         return {
           roundId: round.id,
           roundType: round.type,
           title: round.title,
           weight: round.weight,
-          evidence: evidenceSourcesFor(round.type).map((source) => ({
-            source,
-            score: source === 'TASK_COMPLETION' ? taskScore : null,
-            weight: source === 'TASK_COMPLETION' ? 1.2 : 1,
-            observedAt: source === 'TASK_COMPLETION' && observedAt ? new Date(observedAt) : null,
-            applicable: true,
-          })),
+          evidence: evidenceSourcesFor(round.type).map((source) => {
+            const metric = metricForSource(source, durable, taskMetric);
+            return {
+              source,
+              score: metric.score,
+              weight: source === 'TASK_COMPLETION' ? 1.2 : 1,
+              observedAt: metric.observedAt,
+              applicable: true,
+            };
+          }),
         };
       }),
-    });
+    };
+    const readiness = calculateInterviewReadinessV1(readinessInput);
     const recommendations = readiness.rounds
       .flatMap((round) => round.missingEvidence)
       .filter((source, index, all) => all.indexOf(source) === index)
       .slice(0, 3)
       .map((source) => TASK_BLUEPRINTS[source].title);
-    const rounds = readiness.rounds.map((round) => ({
+    const rounds = readiness.rounds.map((round, roundIndex) => ({
       roundId: round.roundId,
       roundType: round.roundType,
       title: round.title,
@@ -264,16 +291,24 @@ export class InterviewPreparationService {
       status: round.status,
       confidence: round.confidence,
       coverage: round.coverage,
-      evidence: round.evidence.map((item) => ({
-        source: item.source,
-        label: TASK_BLUEPRINTS[item.source].title,
-        score: item.score,
-        weight: item.weight,
-        observedAt: null,
-        stale: item.stale,
-        detail: item.score === null ? 'No durable evidence is available yet.' : 'Measured from completed preparation tasks.',
-        deepLink: TASK_BLUEPRINTS[item.source].deepLink,
-      })),
+      evidence: round.evidence.map((item) => {
+        const sourceInput = readinessInput.rounds[roundIndex]?.evidence.find(
+          (candidate) => candidate.source === item.source,
+        );
+        return {
+          source: item.source,
+          label: TASK_BLUEPRINTS[item.source].title,
+          score: item.score,
+          weight: item.weight,
+          observedAt: sourceInput?.observedAt?.toISOString() ?? null,
+          stale: item.stale,
+          detail:
+            item.score === null
+              ? 'No durable evidence is available yet.'
+              : `Measured from ${TASK_BLUEPRINTS[item.source].title.toLowerCase()}.`,
+          deepLink: TASK_BLUEPRINTS[item.source].deepLink,
+        };
+      }),
       missingEvidence: round.missingEvidence,
     }));
     const snapshot = await this.repository.createSnapshot(userId, planId, {
