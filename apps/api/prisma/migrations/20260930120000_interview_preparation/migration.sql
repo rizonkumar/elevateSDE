@@ -28,6 +28,7 @@ CREATE TABLE "InterviewPreparationRound" (
   "title" TEXT NOT NULL,
   "weight" DOUBLE PRECISION NOT NULL,
   "ordinal" INTEGER NOT NULL,
+  "version" INTEGER NOT NULL DEFAULT 0,
   "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "updatedAt" TIMESTAMP(3) NOT NULL,
   CONSTRAINT "InterviewPreparationRound_pkey" PRIMARY KEY ("id"),

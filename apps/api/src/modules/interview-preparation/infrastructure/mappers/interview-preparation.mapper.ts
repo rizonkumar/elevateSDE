@@ -155,6 +155,7 @@ export class InterviewPreparationMapper {
       title: recordRound.title,
       weight: recordRound.weight,
       ordinal: recordRound.ordinal,
+      version: recordRound.version,
       tasks: tasksByRound.get(recordRound.id) ?? [],
       readiness: readinessByRound.get(recordRound.id) ?? null,
     }));

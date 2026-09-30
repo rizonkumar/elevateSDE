@@ -1010,6 +1010,7 @@ export interface PreparationRoundDto {
   title: string;
   weight: number;
   ordinal: number;
+  version: number;
   tasks: PreparationTaskDto[];
   readiness: InterviewRoundReadinessDto | null;
 }
@@ -1070,6 +1071,14 @@ export interface CreatePreparationRoundDto {
   title: string;
   weight: number;
   ordinal: number;
+}
+
+export interface UpdatePreparationRoundDto {
+  type?: InterviewRoundType;
+  title?: string;
+  weight?: number;
+  ordinal?: number;
+  version: number;
 }
 
 export interface CreatePreparationTaskDto {
