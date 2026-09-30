@@ -178,19 +178,19 @@ export const useInterviewReadinessStore = create<InterviewReadinessState>((set, 
     set({ isSaving: true });
     try {
       const response = await api.patch<PreparationRoundDto>(`${ENDPOINT}/rounds/${roundId}`, input);
-      set({
-        isSaving: false,
-        plan: {
-          ...current,
-          rounds: current.rounds
-            .map((round) =>
-              round.id === roundId
-                ? { ...response.data, tasks: round.tasks, readiness: round.readiness }
-                : round,
-            )
-            .sort((a, b) => a.ordinal - b.ordinal),
-        },
-      });
+      const invalidatedPlan: InterviewPreparationPlanDto = {
+        ...current,
+        latestReadiness: null,
+        rounds: current.rounds
+          .map((round) =>
+            round.id === roundId
+              ? { ...response.data, tasks: round.tasks, readiness: null }
+              : { ...round, readiness: null },
+          )
+          .sort((a, b) => a.ordinal - b.ordinal),
+      };
+      set({ isSaving: false, plan: invalidatedPlan });
+      await get().refreshSnapshot(current.id);
       return true;
     } catch (error) {
       set({ isSaving: false });

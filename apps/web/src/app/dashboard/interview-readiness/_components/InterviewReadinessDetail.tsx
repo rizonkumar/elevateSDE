@@ -295,7 +295,7 @@ export function InterviewReadinessDetail({ planId }: InterviewReadinessDetailPro
   }
 
   const activeRound = plan.rounds.find((round) => round.id === activeRoundId) ?? plan.rounds[0];
-  const latest = plan.snapshots[0];
+  const latest = plan.latestReadiness ? plan.snapshots[0] : undefined;
   const remaining = countdown(plan.targetAt);
 
   return (

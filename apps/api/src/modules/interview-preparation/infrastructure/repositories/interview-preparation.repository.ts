@@ -177,8 +177,12 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
     const [trackedReviews, dueReviews] = reviewCounts;
     const [learningTotal, learningSolved] = learningCounts;
     const [latestLearningSubmission, latestEnrollment] = learningObservation;
+    const learningTimes = [
+      latestLearningSubmission?.createdAt.getTime(),
+      latestEnrollment?.enrolledAt.getTime(),
+    ].filter((value): value is number => value !== undefined);
     const learningObservedAt =
-      latestLearningSubmission?.createdAt ?? latestEnrollment?.enrolledAt ?? null;
+      learningTimes.length === 0 ? null : new Date(Math.max(...learningTimes));
     const peerValues = [
       peerScores._avg.communication,
       peerScores._avg.problemSolving,

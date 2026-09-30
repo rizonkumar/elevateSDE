@@ -113,7 +113,13 @@ function peerSession(record: PeerSessionRecord): PeerPracticeSessionDto {
 
 function latestReadiness(record: PlanRecord): InterviewPreparationPlanSummaryDto['latestReadiness'] {
   const latest = record.snapshots[0];
-  if (!latest) return null;
+  if (
+    !latest ||
+    (record.readinessInvalidatedAt !== null &&
+      latest.calculatedAt <= record.readinessInvalidatedAt)
+  ) {
+    return null;
+  }
   return {
     score: latest.score,
     status: latest.status,
@@ -142,7 +148,8 @@ export class InterviewPreparationMapper {
   }
 
   static toPlan(record: PlanRecord): InterviewPreparationPlanDto {
-    const latest = record.snapshots[0];
+    const latestSummary = latestReadiness(record);
+    const latest = latestSummary ? record.snapshots[0] : undefined;
     const readinessByRound = new Map(latest ? snapshot(latest).rounds.map((item) => [item.roundId, item]) : []);
     const tasksByRound = new Map<string, PreparationTaskDto[]>();
     for (const recordTask of record.tasks) {
