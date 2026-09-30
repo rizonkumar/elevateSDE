@@ -304,12 +304,24 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
     });
     if (!plan) return null;
     const round = await this.prisma.$transaction(async (transaction) => {
+      await transaction.$queryRaw(Prisma.sql`
+        SELECT "id" FROM "InterviewPreparationPlan" WHERE "id" = ${planId} FOR UPDATE
+      `);
+      const current = await transaction.interviewPreparationRound.aggregate({
+        where: { planId },
+        _max: { ordinal: true },
+      });
       const created = await transaction.interviewPreparationRound.create({
-        data: { id: randomUUID(), planId, ...input },
+        data: {
+          id: randomUUID(),
+          planId,
+          ...input,
+          ordinal: (current._max.ordinal ?? -1) + 1,
+        },
       });
       await transaction.interviewPreparationPlan.update({
         where: { id: planId },
-        data: { readinessInvalidatedAt: new Date(), readinessRevision: { increment: 1 } },
+        data: { readinessRevision: { increment: 1 } },
       });
       return created;
     });
@@ -328,7 +340,6 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
           type: input.type,
           title: input.title,
           weight: input.weight,
-          ordinal: input.ordinal,
           version: { increment: 1 },
         },
       });
@@ -339,7 +350,7 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
         });
         await transaction.interviewPreparationPlan.update({
           where: { id: round.planId },
-          data: { readinessInvalidatedAt: new Date(), readinessRevision: { increment: 1 } },
+          data: { readinessRevision: { increment: 1 } },
         });
       }
       return updated;
@@ -369,6 +380,13 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
     if (!plan) return null;
     if (!plan.rounds.some((round) => round.id === input.roundId)) return null;
     const task = await this.prisma.$transaction(async (transaction) => {
+      await transaction.$queryRaw(Prisma.sql`
+        SELECT "id" FROM "InterviewPreparationPlan" WHERE "id" = ${planId} FOR UPDATE
+      `);
+      const current = await transaction.preparationTask.aggregate({
+        where: { planId },
+        _max: { ordinal: true },
+      });
       const created = await transaction.preparationTask.create({
         data: {
           id: randomUUID(),
@@ -381,12 +399,12 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
           resourceType: input.resourceType ?? null,
           resourceId: input.resourceId ?? null,
           deepLink: input.deepLink ?? null,
-          ordinal: input.ordinal,
+          ordinal: (current._max.ordinal ?? -1) + 1,
         },
       });
       await transaction.interviewPreparationPlan.update({
         where: { id: planId },
-        data: { readinessInvalidatedAt: new Date(), readinessRevision: { increment: 1 } },
+        data: { readinessRevision: { increment: 1 } },
       });
       return created;
     });
@@ -404,7 +422,6 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
         title: input.title,
         description: input.description,
         dueAt: input.dueAt === undefined ? undefined : input.dueAt === null ? null : new Date(input.dueAt),
-        ordinal: input.ordinal,
         version: { increment: 1 },
       },
     });
@@ -435,7 +452,7 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
       if (updated.count > 0) {
         await transaction.interviewPreparationPlan.update({
           where: { id: task.planId },
-          data: { readinessInvalidatedAt: new Date(), readinessRevision: { increment: 1 } },
+          data: { readinessRevision: { increment: 1 } },
         });
       }
       return updated;
@@ -447,18 +464,24 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
     userId: string,
     planId: string,
     snapshot: Omit<ReadinessSnapshotDto, 'id'>,
-  ): Promise<ReadinessSnapshotDto | null> {
+  ): Promise<ReadinessSnapshotDto | 'STALE_REVISION' | null> {
     const plan = await this.prisma.interviewPreparationPlan.findFirst({
       where: { id: planId, userId },
       select: { id: true },
     });
     if (!plan) return null;
     const created = await this.prisma.$transaction(async (transaction) => {
-      const record = await transaction.readinessSnapshot.create({
+      const current = await transaction.interviewPreparationPlan.updateMany({
+        where: { id: planId, userId, readinessRevision: snapshot.sourceRevision },
+        data: { readinessRevision: { increment: 0 } },
+      });
+      if (current.count === 0) return null;
+      return transaction.readinessSnapshot.create({
         data: {
           id: randomUUID(),
           planId,
           formulaVersion: snapshot.formulaVersion,
+          sourceRevision: snapshot.sourceRevision,
           score: snapshot.score,
           status: snapshot.status,
           confidence: snapshot.confidence,
@@ -470,23 +493,24 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
           calculatedAt: new Date(snapshot.calculatedAt),
         },
       });
-      await transaction.interviewPreparationPlan.update({
-        where: { id: planId },
-        data: { readinessInvalidatedAt: null },
-      });
-      return record;
     });
-    return InterviewPreparationMapper.toSnapshot(created);
+    return created ? InterviewPreparationMapper.toSnapshot(created) : 'STALE_REVISION';
   }
 
   async saveSnapshotExplanation(
     userId: string,
     planId: string,
     snapshotId: string,
+    sourceRevision: number,
     explanation: string,
   ): Promise<ReadinessSnapshotDto | null> {
     const result = await this.prisma.readinessSnapshot.updateMany({
-      where: { id: snapshotId, planId, plan: { userId } },
+      where: {
+        id: snapshotId,
+        planId,
+        sourceRevision,
+        plan: { userId, readinessRevision: sourceRevision },
+      },
       data: { aiExplanation: explanation, aiSnapshotId: snapshotId },
     });
     if (result.count === 0) return null;
@@ -587,7 +611,7 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
         });
         await transaction.interviewPreparationPlan.update({
           where: { id: session.planId },
-          data: { readinessInvalidatedAt: new Date(), readinessRevision: { increment: 1 } },
+          data: { readinessRevision: { increment: 1 } },
         });
         return created;
       });

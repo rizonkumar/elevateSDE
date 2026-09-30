@@ -19,7 +19,7 @@ export class ReadinessNarrativeService {
     if (!plan) throw new NotFoundException('Preparation plan not found');
     const snapshot = plan.snapshots.find((item) => item.id === snapshotId);
     if (!snapshot) throw new NotFoundException('Readiness snapshot not found');
-    if (plan.snapshots[0]?.id !== snapshotId) {
+    if (plan.latestReadiness === null || plan.snapshots[0]?.id !== snapshotId) {
       return this.fallback(snapshot, 'This snapshot is no longer current. Refresh readiness before generating a new explanation.');
     }
     if (process.env.INTERVIEW_READINESS_AI_ENABLED !== 'true') {
@@ -44,6 +44,7 @@ export class ReadinessNarrativeService {
         userId,
         planId,
         snapshotId,
+        snapshot.sourceRevision,
         result.explanation,
       );
       if (!saved) throw new NotFoundException('Readiness snapshot not found');
