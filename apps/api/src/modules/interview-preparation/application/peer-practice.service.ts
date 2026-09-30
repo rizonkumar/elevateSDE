@@ -25,6 +25,22 @@ export class PeerPracticeService {
     return this.findSession(userId, sessionId);
   }
 
+  async syncPreparationReminders(userId: string): Promise<void> {
+    const overview = await this.repository.getOverview(userId);
+    const now = Date.now();
+    const horizon = now + 7 * 86_400_000;
+    for (const plan of overview.plans) {
+      const target = new Date(plan.targetAt).getTime();
+      if (plan.status !== 'ACTIVE' || target < now || target > horizon) continue;
+      this.eventEmitter.emit(NOTIFICATION_EVENTS.PREPARATION_REMINDER, {
+        recipientId: userId,
+        planId: plan.id,
+        company: plan.company,
+        dedupeKey: `preparation-reminder:${plan.id}:${plan.targetAt.slice(0, 10)}`,
+      });
+    }
+  }
+
   async create(
     organizerId: string,
     planId: string,

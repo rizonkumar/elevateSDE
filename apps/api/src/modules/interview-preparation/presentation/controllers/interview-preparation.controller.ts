@@ -52,6 +52,12 @@ export class InterviewPreparationController {
     private readonly peerPracticeService: PeerPracticeService,
   ) {}
 
+  @Post('reminders/sync')
+  @ApiOperation({ summary: 'Create idempotent reminders for due preparation plans' })
+  async syncReminders(@Req() req: RequestWithUser): Promise<void> {
+    await this.peerPracticeService.syncPreparationReminders(req.user.getId());
+  }
+
   @Get('templates')
   @ApiOperation({ summary: 'List editable interview loop templates' })
   getTemplates(): InterviewLoopTemplateDto[] {

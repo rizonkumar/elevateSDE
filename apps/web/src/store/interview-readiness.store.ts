@@ -101,6 +101,7 @@ export const useInterviewReadinessStore = create<InterviewReadinessState>((set, 
     set({ isLoading: true, error: null });
     try {
       const response = await api.get<InterviewPreparationOverviewDto>(`${ENDPOINT}/overview`);
+      await api.post(`${ENDPOINT}/reminders/sync`).catch(() => undefined);
       set({ overview: response.data, isLoading: false });
     } catch (error) {
       set({ isLoading: false, error: messageFor(error, 'Could not load interview preparation.') });
@@ -284,7 +285,10 @@ export const useInterviewReadinessStore = create<InterviewReadinessState>((set, 
         version: session.version,
       });
       const current = get().plan;
-      if (current) set({ plan: replacePeerSession(current, response.data) });
+      set({
+        plan: current ? replacePeerSession(current, response.data) : current,
+        peerSession: get().peerSession?.id === response.data.id ? response.data : get().peerSession,
+      });
       useToastStore.getState().addToast('Peer practice rescheduled.', 'success');
       return true;
     } catch (error) {
@@ -297,7 +301,9 @@ export const useInterviewReadinessStore = create<InterviewReadinessState>((set, 
     try {
       await api.post(`${ENDPOINT}/peer-sessions/${sessionId}/scorecards`, input);
       const current = get().plan;
+      const peerSession = get().peerSession;
       if (current) await get().loadPlan(current.id);
+      if (peerSession) await get().loadPeerSession(peerSession.id);
       useToastStore.getState().addToast('Peer feedback submitted.', 'success');
       return true;
     } catch (error) {

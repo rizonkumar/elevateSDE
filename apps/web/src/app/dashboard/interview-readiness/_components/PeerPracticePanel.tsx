@@ -107,7 +107,7 @@ interface ScorecardModalProps {
   onClose: () => void;
 }
 
-function ScorecardModal({ session, open, onClose }: ScorecardModalProps) {
+export function ScorecardModal({ session, open, onClose }: ScorecardModalProps) {
   const submit = useInterviewReadinessStore((state) => state.submitPeerScorecard);
   const [scores, setScores] = React.useState({ communication: 80, problemSolving: 80, technicalDepth: 80, structure: 80 });
   const [strengths, setStrengths] = React.useState('');
@@ -157,7 +157,7 @@ function ScorecardModal({ session, open, onClose }: ScorecardModalProps) {
   );
 }
 
-function SessionCard({
+export function PeerSessionCard({
   session,
   currentUserId,
   onReschedule,
@@ -221,7 +221,7 @@ export function PeerPracticePanel({ plan }: { plan: InterviewPreparationPlanDto 
       </div>
       <div className="mt-5 grid gap-3 lg:grid-cols-2">
         {plan.peerSessions.map((session) => (
-          <SessionCard
+          <PeerSessionCard
             key={session.id}
             session={session}
             currentUserId={userId}
