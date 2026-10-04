@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { NotificationType, Prisma } from '@prisma/client';
+import { NotificationType } from '@prisma/client';
 import { PrismaService } from '../../../../infrastructure/prisma/prisma.service';
+import { isUniqueConstraintViolation } from '../../../../infrastructure/prisma/prisma-errors';
 import { INotificationRepository } from '../../domain/interfaces/notification-repository.interface';
 import { Notification } from '../../domain/entities/notification';
 import { NotificationPreferenceView } from '../../domain/read-models/notification-view';
@@ -25,11 +26,7 @@ export class NotificationRepository implements INotificationRepository {
         },
       });
     } catch (error) {
-      if (
-        notification.getDedupeKey() !== null &&
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === 'P2002'
-      ) {
+      if (notification.getDedupeKey() !== null && isUniqueConstraintViolation(error)) {
         return;
       }
       throw error;

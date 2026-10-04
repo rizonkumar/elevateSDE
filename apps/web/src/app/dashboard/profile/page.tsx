@@ -70,7 +70,11 @@ export default function ProfilePage() {
   const { assessments, leaderboard } = stats;
   const tiles = [
     { icon: Zap, label: 'Points', value: leaderboard.points.toLocaleString() },
-    { icon: Trophy, label: 'Global rank', value: leaderboard.rank ? `#${leaderboard.rank}` : '—' },
+    {
+      icon: Trophy,
+      label: 'Leaderboard rank',
+      value: leaderboard.rank ? `#${leaderboard.rank}` : '—',
+    },
     {
       icon: Flame,
       label: 'Current streak',

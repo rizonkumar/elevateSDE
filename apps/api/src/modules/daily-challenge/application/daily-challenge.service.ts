@@ -18,6 +18,7 @@ import {
   NOTIFICATION_EVENTS,
   StreakMilestoneEvent,
 } from '../../notification/domain/events/notification-events';
+import { PointsService } from '../../leaderboard/application/points.service';
 
 const STREAK_CALENDAR_DAYS = 119;
 const GLOBAL_SCOPE: string | null = null;
@@ -31,6 +32,7 @@ export class DailyChallengeService {
   constructor(
     private readonly repository: IDailyChallengeRepository,
     private readonly eventEmitter: EventEmitter2,
+    private readonly pointsService: PointsService,
   ) {}
 
   async getToday(userId: string): Promise<DailyChallengeView | null> {
@@ -63,6 +65,7 @@ export class DailyChallengeService {
     if (!scheduled || scheduled.problemId !== problemId) {
       return;
     }
+    await this.pointsService.awardDailyChallenge(userId, scheduled.id);
     if (await this.repository.hasCompletion(userId, scheduled.id)) {
       return;
     }
@@ -78,6 +81,10 @@ export class DailyChallengeService {
         streakDays: updated.getStreakDays(),
       } satisfies StreakMilestoneEvent);
     }
+  }
+
+  async expireStreaks(now: Date = new Date()): Promise<number> {
+    return this.repository.expireStreaksLastActiveBefore(StreakState.expiryCutoff(now));
   }
 
   async listSchedule(from: Date, to: Date): Promise<DailyChallengeScheduleView[]> {

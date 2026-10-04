@@ -1,6 +1,13 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+function redirectWithinApp(request: NextRequest, pathname: string): NextResponse {
+  const destination = request.nextUrl.clone();
+  destination.pathname = pathname;
+  destination.search = '';
+  return NextResponse.redirect(destination);
+}
+
 export function proxy(request: NextRequest) {
   const token = request.cookies.get('accessToken')?.value;
   const userCookie = request.cookies.get('user')?.value;
@@ -18,13 +25,13 @@ export function proxy(request: NextRequest) {
 
   if (pathname === '/login') {
     if (token && isAdmin) {
-      return NextResponse.redirect(new URL('/', request.url));
+      return redirectWithinApp(request, '/');
     }
     return NextResponse.next();
   }
 
   if (!token || !isAdmin) {
-    return NextResponse.redirect(new URL('/login', request.url));
+    return redirectWithinApp(request, '/login');
   }
 
   return NextResponse.next();

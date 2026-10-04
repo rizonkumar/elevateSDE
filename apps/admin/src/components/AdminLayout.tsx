@@ -25,6 +25,7 @@ import {
   PanelLeftOpen,
 } from 'lucide-react';
 import { useAuthStore } from '../store/auth.store';
+import { signOut } from '../lib/api';
 import { useToastStore } from '../store/toast.store';
 
 interface AdminLayoutProps {
@@ -36,7 +37,7 @@ const COLLAPSE_KEY = 'admin-sidebar-collapsed';
 export function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, clearAuth } = useAuthStore();
+  const { user } = useAuthStore();
   const addToast = useToastStore((state) => state.addToast);
   const [theme, setTheme] = React.useState<'light' | 'dark'>('dark');
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
@@ -71,8 +72,8 @@ export function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
     });
   };
 
-  const handleLogout = () => {
-    clearAuth();
+  const handleLogout = async () => {
+    await signOut();
     addToast('Logged out successfully.', 'success');
     router.push('/login');
   };

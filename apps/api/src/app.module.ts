@@ -24,6 +24,7 @@ import { ContestModule } from './modules/contest/contest.module';
 import { LearningPathModule } from './modules/learning-path/learning-path.module';
 import { ResumeModule } from './modules/resume/resume.module';
 import { InterviewPreparationModule } from './modules/interview-preparation/interview-preparation.module';
+import { SchedulerModule } from './modules/scheduler/scheduler.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { InterviewPreparationModule } from './modules/interview-preparation/inte
     LearningPathModule,
     ResumeModule,
     InterviewPreparationModule,
+    SchedulerModule,
   ],
   controllers: [AppController],
   providers: [AppService],

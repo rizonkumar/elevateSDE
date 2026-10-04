@@ -1,5 +1,11 @@
 import { ContestStatus } from '@prisma/client';
 
+const FINALIZATION_GRACE_MS = 2 * 60_000;
+
+export function finalizationCutoff(now: Date): Date {
+  return new Date(now.getTime() - FINALIZATION_GRACE_MS);
+}
+
 export function deriveContestStatus(
   storedStatus: ContestStatus,
   startsAt: Date,

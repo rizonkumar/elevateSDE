@@ -1,4 +1,5 @@
-import { DAY_MS, startOfUtcDay } from '../daily-date';
+import { clampNonNegative } from '../../../../shared/domain/clamp-non-negative';
+import { DAY_MS, addDays, startOfUtcDay } from '../daily-date';
 
 export interface StreakStateProps {
   streakDays: number;
@@ -15,6 +16,10 @@ export class StreakState {
       longestStreak: clampNonNegative(props.longestStreak),
       lastActiveDate: props.lastActiveDate,
     });
+  }
+
+  static expiryCutoff(now: Date): Date {
+    return addDays(now, -1);
   }
 
   registerActivity(activityDate: Date): StreakState {
@@ -43,8 +48,4 @@ export class StreakState {
   getLastActiveDate(): Date | null {
     return this.props.lastActiveDate;
   }
-}
-
-function clampNonNegative(value: number): number {
-  return Number.isFinite(value) && value > 0 ? Math.round(value) : 0;
 }

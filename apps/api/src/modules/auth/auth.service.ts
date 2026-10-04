@@ -6,8 +6,12 @@ import { LoginDto } from './dtos/login.dto';
 import { AuthResponseDto } from '@elevatesde/shared-types';
 import * as bcrypt from 'bcrypt';
 import { UserRole } from '@prisma/client';
-import { UserMapper } from '../users/infrastructure/mappers/user.mapper';
 import { TokenService } from './application/token.service';
+import {
+  IRefreshTokenRepository,
+  StoredRefreshToken,
+} from './domain/interfaces/refresh-token-repository.interface';
+import { isWithinReuseGrace } from './domain/refresh-token-rotation';
 
 @Injectable()
 export class AuthService {
@@ -15,6 +19,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly tokenService: TokenService,
     private readonly prisma: PrismaService,
+    private readonly refreshTokens: IRefreshTokenRepository,
   ) {}
 
   async register(dto: RegisterDto): Promise<AuthResponseDto> {
@@ -72,30 +77,56 @@ export class AuthService {
   }
 
   async refresh(token: string): Promise<AuthResponseDto> {
-    const record = await this.prisma.refreshToken.findUnique({
-      where: { token },
-      include: { user: true },
-    });
-
-    if (!record || record.expiresAt < new Date()) {
-      if (record) {
-        await this.prisma.refreshToken.delete({ where: { id: record.id } });
-      }
-      throw new UnauthorizedException('Invalid or expired refresh token');
+    const now = new Date();
+    const stored = await this.refreshTokens.findByToken(token);
+    if (!stored || stored.expiresAt <= now) {
+      throw invalidRefreshToken();
     }
-
-    await this.prisma.refreshToken.delete({ where: { id: record.id } });
-
-    const user = UserMapper.toDomain(record.user);
-    return this.tokenService.issueFor(user);
+    if (stored.rotatedAt === null) {
+      const rotated = await this.tryRotate(stored, now);
+      if (rotated) {
+        return rotated;
+      }
+    }
+    return this.resumeRotatedSession(stored, now);
   }
 
   async logout(token: string): Promise<void> {
-    const record = await this.prisma.refreshToken.findUnique({
-      where: { token },
-    });
-    if (record) {
-      await this.prisma.refreshToken.delete({ where: { id: record.id } });
+    const familyId = await this.refreshTokens.findFamilyId(token);
+    if (familyId) {
+      await this.refreshTokens.revokeFamily(familyId);
     }
   }
+
+  async pruneExpiredRefreshTokens(now: Date = new Date()): Promise<number> {
+    return this.refreshTokens.deleteExpired(now);
+  }
+
+  private async tryRotate(stored: StoredRefreshToken, now: Date): Promise<AuthResponseDto | null> {
+    const successor = await this.tokenService.signRefreshToken(stored.user, stored.familyId);
+    const rotated = await this.refreshTokens.rotate(stored.id, successor.record, now);
+    return rotated ? this.tokenService.respond(stored.user, successor.token) : null;
+  }
+
+  private async resumeRotatedSession(
+    stored: StoredRefreshToken,
+    now: Date,
+  ): Promise<AuthResponseDto> {
+    const rotation = await this.refreshTokens.findRotation(stored.id);
+    const successor = rotation?.liveSuccessor;
+    if (
+      !rotation ||
+      !successor ||
+      successor.expiresAt <= now ||
+      !isWithinReuseGrace(rotation.rotatedAt, now)
+    ) {
+      await this.refreshTokens.revokeFamily(stored.familyId);
+      throw invalidRefreshToken();
+    }
+    return this.tokenService.respond(stored.user, successor.token);
+  }
+}
+
+function invalidRefreshToken(): UnauthorizedException {
+  return new UnauthorizedException('Invalid or expired refresh token');
 }

@@ -12,6 +12,7 @@ import {
   ScheduledChallengeRef,
 } from '../domain/read-models/daily-challenge-view';
 import { addDays, startOfUtcDay } from '../domain/daily-date';
+import { PointsService } from '../../leaderboard/application/points.service';
 
 const USER_ID = 'user-1';
 const PROBLEM_ID = 'problem-1';
@@ -30,6 +31,7 @@ class FakeDailyChallengeRepository implements IDailyChallengeRepository {
   scheduled_ids = new Set<string>();
   publishedProblems = new Map<string, PublishedProblemRef>();
   scheduledChallenges: DailyChallenge[] = [];
+  expiryCutoff: Date | null = null;
 
   async findDailyView(): Promise<DailyChallengeView | null> {
     return this.dailyView;
@@ -58,6 +60,11 @@ class FakeDailyChallengeRepository implements IDailyChallengeRepository {
 
   async saveStreakState(_userId: string, state: StreakState): Promise<void> {
     this.savedStreak = state;
+  }
+
+  async expireStreaksLastActiveBefore(cutoff: Date): Promise<number> {
+    this.expiryCutoff = cutoff;
+    return 2;
   }
 
   async listCompletionDates(): Promise<Date[]> {
@@ -96,10 +103,14 @@ class FakeDailyChallengeRepository implements IDailyChallengeRepository {
 describe('DailyChallengeService', () => {
   let repository: FakeDailyChallengeRepository;
   let service: DailyChallengeService;
+  let awardDailyChallenge: jest.Mock;
 
   beforeEach(() => {
     repository = new FakeDailyChallengeRepository();
-    service = new DailyChallengeService(repository, new EventEmitter2());
+    awardDailyChallenge = jest.fn().mockResolvedValue(true);
+    service = new DailyChallengeService(repository, new EventEmitter2(), {
+      awardDailyChallenge,
+    } as unknown as PointsService);
   });
 
   describe('getStreakSummary', () => {
@@ -162,6 +173,22 @@ describe('DailyChallengeService', () => {
       expect(repository.savedStreak?.getLongestStreak()).toBe(5);
     });
 
+    it('awards the daily challenge points for today challenge', async () => {
+      repository.scheduled = { id: CHALLENGE_ID, problemId: PROBLEM_ID };
+
+      await service.registerCompletion(USER_ID, PROBLEM_ID, 'submission-1');
+
+      expect(awardDailyChallenge).toHaveBeenCalledWith(USER_ID, CHALLENGE_ID);
+    });
+
+    it('does not award points for a problem that is not today challenge', async () => {
+      repository.scheduled = { id: CHALLENGE_ID, problemId: 'other-problem' };
+
+      await service.registerCompletion(USER_ID, PROBLEM_ID, 'submission-1');
+
+      expect(awardDailyChallenge).not.toHaveBeenCalled();
+    });
+
     it('does not double-count an already completed challenge', async () => {
       repository.scheduled = { id: CHALLENGE_ID, problemId: PROBLEM_ID };
       repository.completed.add(`${USER_ID}:${CHALLENGE_ID}`);
@@ -170,6 +197,16 @@ describe('DailyChallengeService', () => {
 
       expect(repository.recordedCompletions).toHaveLength(0);
       expect(repository.savedStreak).toBeNull();
+    });
+  });
+
+  describe('expireStreaks', () => {
+    it('expires streaks whose last activity is before yesterday', async () => {
+      const now = new Date('2026-10-04T00:05:00.000Z');
+
+      await expect(service.expireStreaks(now)).resolves.toBe(2);
+
+      expect(repository.expiryCutoff).toEqual(new Date('2026-10-03T00:00:00.000Z'));
     });
   });
 
@@ -216,6 +253,11 @@ describe('DailyChallengeService', () => {
 });
 
 describe('StreakState', () => {
+  it('keeps a streak alive through yesterday', () => {
+    const now = new Date('2026-10-04T18:30:00.000Z');
+    expect(StreakState.expiryCutoff(now)).toEqual(new Date('2026-10-03T00:00:00.000Z'));
+  });
+
   it('resets to one after a gap', () => {
     const today = startOfUtcDay(new Date());
     const state = StreakState.create({

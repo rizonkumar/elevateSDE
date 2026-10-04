@@ -5,6 +5,7 @@ import { PrismaService } from '../../../../infrastructure/prisma/prisma.service'
 import { ILeaderboardRepository } from '../../domain/interfaces/leaderboard-repository.interface';
 import { UserStats } from '../../domain/entities/user-stats';
 import { LeaderboardEntryView } from '../../domain/read-models/leaderboard-entry-view';
+import { LeaderboardScope } from '../../domain/leaderboard-scope';
 import { UserStatsMapper } from '../mappers/user-stats.mapper';
 
 const pointsColumn: Record<LeaderboardTimeframe, keyof Prisma.UserStatsOrderByWithRelationInput> = {
@@ -17,9 +18,13 @@ const pointsColumn: Record<LeaderboardTimeframe, keyof Prisma.UserStatsOrderByWi
 export class LeaderboardRepository implements ILeaderboardRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async listByTimeframe(timeframe: LeaderboardTimeframe): Promise<LeaderboardEntryView[]> {
+  async listByTimeframe(
+    timeframe: LeaderboardTimeframe,
+    scope: LeaderboardScope,
+  ): Promise<LeaderboardEntryView[]> {
     const column = pointsColumn[timeframe];
     const records = await this.prisma.userStats.findMany({
+      where: toScopeFilter(scope),
       orderBy: [{ [column]: 'desc' }, { assessmentsCompleted: 'desc' }],
       include: {
         user: { select: { firstName: true, lastName: true, headline: true } },
@@ -38,26 +43,20 @@ export class LeaderboardRepository implements ILeaderboardRepository {
   }
 
   async findByUser(userId: string): Promise<UserStats | null> {
-    const record = await this.prisma.userStats.findUnique({ where: { userId } });
+    const record = await this.prisma.userStats.findUnique({
+      where: { userId },
+      select: { userId: true, badges: true },
+    });
     if (!record) {
       return null;
     }
     return UserStatsMapper.toDomain(record);
   }
 
-  async save(stats: UserStats): Promise<void> {
-    const data = UserStatsMapper.toPersistence(stats);
-    await this.prisma.userStats.upsert({
-      where: { userId: data.userId },
-      update: {
-        points: data.points,
-        monthlyPoints: data.monthlyPoints,
-        weeklyPoints: data.weeklyPoints,
-        assessmentsCompleted: data.assessmentsCompleted,
-        badges: data.badges,
-        streakDays: data.streakDays,
-      },
-      create: data,
+  async saveBadges(stats: UserStats): Promise<void> {
+    await this.prisma.userStats.update({
+      where: { userId: stats.getUserId() },
+      data: { badges: stats.getBadges() },
     });
   }
 }
@@ -73,4 +72,8 @@ function selectPoints(
     return record.weeklyPoints;
   }
   return record.points;
+}
+
+function toScopeFilter(scope: LeaderboardScope): Prisma.UserStatsWhereInput {
+  return scope.kind === 'tenant' ? { user: { tenantId: scope.tenantId } } : {};
 }

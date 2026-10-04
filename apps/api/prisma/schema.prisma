@@ -95,6 +95,13 @@ enum ContestStatus {
   ENDED
 }
 
+enum PointSource {
+  PROBLEM_SOLVED
+  DAILY_CHALLENGE
+  CONTEST_RESULT
+  ADMIN_ADJUSTMENT
+}
+
 enum PathLevel {
   BEGINNER
   INTERMEDIATE
@@ -220,19 +227,26 @@ model User {
   pathEnrollments               PathEnrollment[]
   contestParticipations         ContestParticipant[]
   resumes                       Resume[]
-  interviewPreparationPlans    InterviewPreparationPlan[]
-  organizedPeerSessions        PeerPracticeSession[]          @relation("PeerPracticeOrganizer")
-  invitedPeerSessions          PeerPracticeSession[]          @relation("PeerPracticeInvitee")
-  peerScorecards               PeerScorecard[]                 @relation("PeerScorecardEvaluator")
+  interviewPreparationPlans     InterviewPreparationPlan[]
+  organizedPeerSessions         PeerPracticeSession[]          @relation("PeerPracticeOrganizer")
+  invitedPeerSessions           PeerPracticeSession[]          @relation("PeerPracticeInvitee")
+  peerScorecards                PeerScorecard[]                @relation("PeerScorecardEvaluator")
+  pointLedgerEntries            PointLedger[]
 }
 
 model RefreshToken {
-  id        String   @id @default(uuid())
-  userId    String
-  token     String   @unique
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String    @id @default(uuid())
+  userId       String
+  familyId     String
+  token        String    @unique
+  expiresAt    DateTime
+  rotatedAt    DateTime?
+  replacedById String?
+  createdAt    DateTime  @default(now())
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([familyId])
+  @@index([expiresAt])
 }
 
 model AuditLog {
@@ -254,18 +268,18 @@ model FeatureFlag {
 }
 
 model JobApplication {
-  id                String               @id @default(uuid())
+  id                String                    @id @default(uuid())
   userId            String
   company           String
   role              String
-  status            JobApplicationStatus @default(APPLIED)
+  status            JobApplicationStatus      @default(APPLIED)
   salaryRange       String?
   jobDescriptionUrl String?
   interviewDate     DateTime?
-  boardPosition     Int                  @default(0)
-  createdAt         DateTime             @default(now())
-  updatedAt         DateTime             @updatedAt
-  user              User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  boardPosition     Int                       @default(0)
+  createdAt         DateTime                  @default(now())
+  updatedAt         DateTime                  @updatedAt
+  user              User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
   preparationPlan   InterviewPreparationPlan?
 
   @@index([userId, status])
@@ -433,6 +447,22 @@ model UserStats {
   user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model PointLedger {
+  id        String      @id @default(uuid())
+  userId    String
+  tenantId  String?
+  source    PointSource
+  refId     String
+  delta     Int
+  createdAt DateTime    @default(now())
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, source, refId])
+  @@index([userId, createdAt])
+  @@index([createdAt])
+  @@index([tenantId])
+}
+
 model Invitation {
   id          String           @id @default(uuid())
   tenantId    String
@@ -486,11 +516,13 @@ model Contest {
   status       ContestStatus        @default(DRAFT)
   tenantId     String?
   createdAt    DateTime             @default(now())
+  finalizedAt  DateTime?
   updatedAt    DateTime             @updatedAt
   problems     ContestProblem[]
   participants ContestParticipant[]
 
   @@index([status, startsAt])
+  @@index([finalizedAt, endsAt])
 }
 
 model ContestProblem {
@@ -507,12 +539,15 @@ model ContestProblem {
 }
 
 model ContestParticipant {
-  id           String   @id @default(uuid())
-  contestId    String
-  userId       String
-  registeredAt DateTime @default(now())
-  contest      Contest  @relation(fields: [contestId], references: [id], onDelete: Cascade)
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                  String   @id @default(uuid())
+  contestId           String
+  userId              String
+  registeredAt        DateTime @default(now())
+  finalRank           Int?
+  finalScore          Int?
+  finalPenaltySeconds Int?
+  contest             Contest  @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([contestId, userId])
   @@index([contestId])
@@ -769,38 +804,39 @@ model Resume {
 }
 
 model InterviewPreparationPlan {
-  id               String                           @id @default(uuid())
-  userId           String
-  jobApplicationId String                           @unique
-  targetAt         DateTime
-  timeZone         String
-  archetype        InterviewPreparationArchetype
-  status           InterviewPreparationPlanStatus  @default(ACTIVE)
-  version          Int                              @default(0)
-  readinessRevision Int                              @default(0)
-  createdAt        DateTime                         @default(now())
-  updatedAt        DateTime                         @updatedAt
-  user             User                             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  jobApplication   JobApplication                   @relation(fields: [jobApplicationId], references: [id], onDelete: Cascade)
-  rounds           InterviewPreparationRound[]
-  tasks            PreparationTask[]
-  snapshots        ReadinessSnapshot[]
-  peerSessions     PeerPracticeSession[]
+  id                String                         @id @default(uuid())
+  userId            String
+  jobApplicationId  String                         @unique
+  targetAt          DateTime
+  timeZone          String
+  archetype         InterviewPreparationArchetype
+  status            InterviewPreparationPlanStatus @default(ACTIVE)
+  version           Int                            @default(0)
+  readinessRevision Int                            @default(0)
+  createdAt         DateTime                       @default(now())
+  updatedAt         DateTime                       @updatedAt
+  user              User                           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobApplication    JobApplication                 @relation(fields: [jobApplicationId], references: [id], onDelete: Cascade)
+  rounds            InterviewPreparationRound[]
+  tasks             PreparationTask[]
+  snapshots         ReadinessSnapshot[]
+  peerSessions      PeerPracticeSession[]
 
   @@index([userId, status, targetAt])
+  @@index([status, targetAt])
 }
 
 model InterviewPreparationRound {
-  id           String                     @id @default(uuid())
+  id           String                   @id @default(uuid())
   planId       String
   type         InterviewRoundType
   title        String
   weight       Float
   ordinal      Int
-  version      Int                        @default(0)
-  createdAt    DateTime                   @default(now())
-  updatedAt    DateTime                   @updatedAt
-  plan         InterviewPreparationPlan   @relation(fields: [planId], references: [id], onDelete: Cascade)
+  version      Int                      @default(0)
+  createdAt    DateTime                 @default(now())
+  updatedAt    DateTime                 @updatedAt
+  plan         InterviewPreparationPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
   tasks        PreparationTask[]
   peerSessions PeerPracticeSession[]
 
@@ -834,7 +870,7 @@ model PreparationTask {
 }
 
 model ReadinessSnapshot {
-  id                           String                     @id @default(uuid())
+  id                           String                   @id @default(uuid())
   planId                       String
   formulaVersion               String
   sourceRevision               Int
@@ -846,8 +882,8 @@ model ReadinessSnapshot {
   deterministicRecommendations String[]
   aiExplanation                String?
   aiSnapshotId                 String?
-  calculatedAt                 DateTime                   @default(now())
-  plan                         InterviewPreparationPlan   @relation(fields: [planId], references: [id], onDelete: Cascade)
+  calculatedAt                 DateTime                 @default(now())
+  plan                         InterviewPreparationPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
 
   @@index([planId, calculatedAt(sort: Desc)])
 }
@@ -872,10 +908,10 @@ model PeerPracticeSession {
   invitee         User                      @relation("PeerPracticeInvitee", fields: [inviteeId], references: [id], onDelete: Cascade)
   scorecards      PeerScorecard[]
 
+  @@unique([roundId, organizerId, inviteeId, startsAt])
   @@index([organizerId, startsAt])
   @@index([inviteeId, startsAt])
   @@index([planId, status])
-  @@unique([roundId, organizerId, inviteeId, startsAt])
 }
 
 model PeerScorecard {

@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { isUniqueConstraintViolation } from '../../../../infrastructure/prisma/prisma-errors';
 import type {
   CreatePreparationRoundDto,
   CreatePreparationTaskDto,
@@ -26,6 +27,8 @@ import {
   CreatePlanRecordInput,
   InterviewPreparationEvidence,
   IInterviewPreparationRepository,
+  PreparationReminderCriteria,
+  PreparationReminderTarget,
 } from '../../domain/interfaces/interview-preparation-repository.interface';
 import {
   InterviewPreparationMapper,
@@ -74,6 +77,30 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
       plans: plans.map(InterviewPreparationMapper.toSummary),
       unplannedApplications: applications.map(toJobApplication),
     };
+  }
+
+  async listUpcomingPreparationTargets(
+    criteria: PreparationReminderCriteria,
+  ): Promise<PreparationReminderTarget[]> {
+    const plans = await this.prisma.interviewPreparationPlan.findMany({
+      where: {
+        userId: criteria.userId,
+        status: 'ACTIVE',
+        targetAt: { gte: criteria.from, lte: criteria.to },
+      },
+      select: {
+        id: true,
+        userId: true,
+        targetAt: true,
+        jobApplication: { select: { company: true } },
+      },
+    });
+    return plans.map((plan) => ({
+      planId: plan.id,
+      userId: plan.userId,
+      company: plan.jobApplication.company,
+      targetAt: plan.targetAt,
+    }));
   }
 
   async findOwnedJobApplication(
@@ -255,7 +282,7 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
       });
       return InterviewPreparationMapper.toPlan(plan);
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      if (isUniqueConstraintViolation(error)) {
         return 'DUPLICATE';
       }
       throw error;
@@ -535,7 +562,7 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
       });
       return InterviewPreparationMapper.toPeerSession(session);
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      if (isUniqueConstraintViolation(error)) {
         return 'DUPLICATE';
       }
       throw error;
@@ -617,7 +644,7 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
       });
       return InterviewPreparationMapper.toScorecard(scorecard);
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      if (isUniqueConstraintViolation(error)) {
         return 'DUPLICATE';
       }
       throw error;

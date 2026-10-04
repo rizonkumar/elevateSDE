@@ -5,12 +5,12 @@ import { useRouter } from 'next/navigation';
 import { LogOut, ChevronDown } from 'lucide-react';
 import { Badge } from '@elevatesde/ui';
 import { useAuthStore } from '@/store/auth.store';
-import { api } from '@/lib/api';
+import { signOut } from '@/lib/api';
 import { getDisplayName, getInitial } from '@/lib/user-display';
 
 export function UserMenu() {
   const router = useRouter();
-  const { user, isAuthenticated, clearAuth } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
   const [mounted, setMounted] = React.useState(false);
   const [open, setOpen] = React.useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -40,18 +40,8 @@ export function UserMenu() {
   if (!mounted || !isAuthenticated || !user) return null;
 
   const handleLogout = async () => {
-    try {
-      const Cookies = (await import('js-cookie')).default;
-      const token = Cookies.get('refreshToken');
-      if (token) {
-        await api.post('/api/v1/auth/logout', { refreshToken: token });
-      }
-    } catch {
-      clearAuth();
-    } finally {
-      clearAuth();
-      router.push('/login');
-    }
+    await signOut();
+    router.push('/login');
   };
 
   const name = getDisplayName(user);

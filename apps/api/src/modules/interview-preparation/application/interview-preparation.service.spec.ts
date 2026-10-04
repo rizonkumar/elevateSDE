@@ -52,6 +52,7 @@ const plan: InterviewPreparationPlanDto = {
 function repository(): jest.Mocked<IInterviewPreparationRepository> {
   return {
     getOverview: jest.fn(),
+    listUpcomingPreparationTargets: jest.fn().mockResolvedValue([]),
     findOwnedJobApplication: jest.fn().mockResolvedValue(application),
     findOwnedPlan: jest.fn().mockResolvedValue(plan),
     getReadinessEvidence: jest.fn().mockResolvedValue({

@@ -19,15 +19,17 @@ export class LeaderboardController {
   constructor(private readonly leaderboardService: LeaderboardService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get ranked leaderboard standings for a timeframe' })
+  @ApiOperation({
+    summary: "Get ranked standings for a timeframe within the viewer's organization",
+  })
   @ApiResponse({ status: 200, type: [LeaderboardEntryResponseDto] })
   async getStandings(
     @Query() query: LeaderboardQueryDto,
     @Req() req: RequestWithUser,
   ): Promise<LeaderboardEntryResponseDto[]> {
-    const standings = await this.leaderboardService.getStandings(
+    const standings = await this.leaderboardService.getStandingsFor(
+      req.user,
       query.timeframe ?? 'all-time',
-      req.user.getId(),
     );
     return standings.map((entry) => LeaderboardPresentationMapper.toResponse(entry));
   }
