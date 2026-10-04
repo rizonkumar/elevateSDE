@@ -13,7 +13,9 @@ import {
 export const CONTEST_STARTS_AT = new Date('2026-07-19T18:00:00.000Z');
 export const CONTEST_ENDS_AT = new Date('2026-07-19T19:30:00.000Z');
 
-export const buildContestDetail = (overrides: Partial<ContestDetailView> = {}): ContestDetailView => ({
+export const buildContestDetail = (
+  overrides: Partial<ContestDetailView> = {},
+): ContestDetailView => ({
   id: 'contest-1',
   slug: 'weekly-sprint',
   title: 'Weekly Sprint',

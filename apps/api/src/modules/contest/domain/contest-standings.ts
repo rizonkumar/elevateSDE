@@ -51,9 +51,7 @@ function aggregateTotals<T extends { userId: string }>(
     current.score += pointsByProblem.get(submission.problemId) ?? 0;
     current.penaltySeconds += Math.max(
       0,
-      Math.floor(
-        (submission.firstAcceptedAt.getTime() - input.startsAt.getTime()) / MS_PER_SECOND,
-      ),
+      Math.floor((submission.firstAcceptedAt.getTime() - input.startsAt.getTime()) / MS_PER_SECOND),
     );
     totals.set(submission.userId, current);
   }

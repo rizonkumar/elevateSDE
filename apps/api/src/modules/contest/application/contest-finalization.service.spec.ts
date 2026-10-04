@@ -28,11 +28,9 @@ describe('ContestFinalizationService', () => {
       { userId: 'u1', problemId: 'p1', firstAcceptedAt: new Date('2026-07-19T18:30:00.000Z') },
     ];
     awardContestResults = jest.fn().mockResolvedValue(2);
-    service = new ContestFinalizationService(
-      repository,
-      new ContestStandingsService(repository),
-      { awardContestResults } as unknown as PointsService,
-    );
+    service = new ContestFinalizationService(repository, new ContestStandingsService(repository), {
+      awardContestResults,
+    } as unknown as PointsService);
   });
 
   it('persists final ranks and awards contest points', async () => {
