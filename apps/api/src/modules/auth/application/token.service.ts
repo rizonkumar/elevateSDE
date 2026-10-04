@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../../../infrastructure/prisma/prisma.service';
@@ -20,6 +21,7 @@ export class TokenService {
 
     const refreshTokenString = await this.jwtService.signAsync(payload, {
       expiresIn: '7d',
+      jwtid: randomUUID(),
     });
 
     const expiresAt = new Date();
