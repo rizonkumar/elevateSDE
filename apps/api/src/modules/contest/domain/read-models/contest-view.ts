@@ -63,6 +63,13 @@ export interface ContestStandingRowView {
   isCurrentUser: boolean;
 }
 
+export interface ContestFinalResult {
+  userId: string;
+  rank: number;
+  score: number;
+  penaltySeconds: number;
+}
+
 export interface ContestProblemAssignment {
   problemId: string;
   ordinal: number;

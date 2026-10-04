@@ -7,6 +7,7 @@ import { Contest } from '../../domain/entities/contest';
 import {
   AcceptedSubmissionView,
   ContestDetailView,
+  ContestFinalResult,
   ContestParticipantView,
   ContestProblemAssignment,
   ContestSummaryView,
@@ -189,6 +190,44 @@ export class ContestRepository implements IContestRepository {
         ? [{ userId: row.userId, problemId: row.problemId, firstAcceptedAt: row._min.createdAt }]
         : [],
     );
+  }
+
+  async findFinalizableContestIds(now: Date): Promise<string[]> {
+    const rows = await this.prisma.contest.findMany({
+      where: { finalizedAt: null, endsAt: { lte: now }, status: { not: ContestStatus.DRAFT } },
+      orderBy: { endsAt: 'asc' },
+      select: { id: true },
+    });
+    return rows.map((row) => row.id);
+  }
+
+  async saveFinalResults(
+    contestId: string,
+    results: ContestFinalResult[],
+    finalizedAt: Date,
+  ): Promise<boolean> {
+    return this.prisma.$transaction(async (transaction) => {
+      const claimed = await transaction.contest.updateMany({
+        where: { id: contestId, finalizedAt: null },
+        data: { finalizedAt },
+      });
+      if (claimed.count === 0) {
+        return false;
+      }
+      await Promise.all(
+        results.map((result) =>
+          transaction.contestParticipant.update({
+            where: { contestId_userId: { contestId, userId: result.userId } },
+            data: {
+              finalRank: result.rank,
+              finalScore: result.score,
+              finalPenaltySeconds: result.penaltySeconds,
+            },
+          }),
+        ),
+      );
+      return true;
+    });
   }
 
   private toSummaryView(row: ContestRowWithCount): ContestSummaryView {

@@ -2,6 +2,7 @@ import { Contest } from '../entities/contest';
 import {
   AcceptedSubmissionView,
   ContestDetailView,
+  ContestFinalResult,
   ContestParticipantView,
   ContestProblemAssignment,
   ContestSummaryView,
@@ -30,4 +31,10 @@ export abstract class IContestRepository {
     from: Date,
     to: Date,
   ): Promise<AcceptedSubmissionView[]>;
+  abstract findFinalizableContestIds(now: Date): Promise<string[]>;
+  abstract saveFinalResults(
+    contestId: string,
+    results: ContestFinalResult[],
+    finalizedAt: Date,
+  ): Promise<boolean>;
 }

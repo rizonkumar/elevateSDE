@@ -9,18 +9,14 @@ import {
   ContestDetailView,
   ContestStandingRowView,
 } from '../domain/read-models/contest-view';
-
-interface ParticipantTotals {
-  solvedCount: number;
-  score: number;
-  penaltySeconds: number;
-}
-
-const EMPTY_TOTALS: ParticipantTotals = { solvedCount: 0, score: 0, penaltySeconds: 0 };
+import { ContestStandingsService } from './contest-standings.service';
 
 @Injectable()
 export class ContestParticipationService {
-  constructor(private readonly repository: IContestRepository) {}
+  constructor(
+    private readonly repository: IContestRepository,
+    private readonly standingsService: ContestStandingsService,
+  ) {}
 
   async listForUser(userId: string): Promise<ContestCandidateSummaryView[]> {
     const now = new Date();
@@ -70,54 +66,15 @@ export class ContestParticipationService {
     if (status === ContestStatus.SCHEDULED) {
       return [];
     }
-    const participants = await this.repository.listParticipants(detail.id);
-    const accepted = await this.repository.findFirstAcceptedInWindow(
-      detail.problems.map((problem) => problem.problemId),
-      participants.map((participant) => participant.userId),
-      detail.startsAt,
-      detail.endsAt,
-    );
-    const totals = this.aggregateTotals(detail, accepted);
-    const ranked = [...participants].sort((left, right) => {
-      const leftTotals = totals.get(left.userId) ?? EMPTY_TOTALS;
-      const rightTotals = totals.get(right.userId) ?? EMPTY_TOTALS;
-      if (rightTotals.score !== leftTotals.score) {
-        return rightTotals.score - leftTotals.score;
-      }
-      if (leftTotals.penaltySeconds !== rightTotals.penaltySeconds) {
-        return leftTotals.penaltySeconds - rightTotals.penaltySeconds;
-      }
-      return left.userId.localeCompare(right.userId);
-    });
-    return ranked.map((participant, index) => ({
-      rank: index + 1,
+    const ranked = await this.standingsService.rank(detail);
+    return ranked.map(({ participant, rank, totals }) => ({
+      rank,
       userId: participant.userId,
       firstName: participant.firstName,
       lastName: participant.lastName,
       isCurrentUser: participant.userId === userId,
-      ...(totals.get(participant.userId) ?? EMPTY_TOTALS),
+      ...totals,
     }));
-  }
-
-  private aggregateTotals(
-    detail: ContestDetailView,
-    accepted: { userId: string; problemId: string; firstAcceptedAt: Date }[],
-  ): Map<string, ParticipantTotals> {
-    const pointsByProblem = new Map(
-      detail.problems.map((problem) => [problem.problemId, problem.points]),
-    );
-    const totals = new Map<string, ParticipantTotals>();
-    for (const submission of accepted) {
-      const current = totals.get(submission.userId) ?? { ...EMPTY_TOTALS };
-      current.solvedCount += 1;
-      current.score += pointsByProblem.get(submission.problemId) ?? 0;
-      current.penaltySeconds += Math.max(
-        0,
-        Math.floor((submission.firstAcceptedAt.getTime() - detail.startsAt.getTime()) / 1000),
-      );
-      totals.set(submission.userId, current);
-    }
-    return totals;
   }
 
   private async candidateProblems(
