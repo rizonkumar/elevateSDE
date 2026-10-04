@@ -34,26 +34,20 @@ class FakeLeaderboardRepository implements ILeaderboardRepository {
 
 describe('LeaderboardService', () => {
   let repository: FakeLeaderboardRepository;
-  let adjust: jest.Mock;
+  let adjustTo: jest.Mock;
   let service: LeaderboardService;
 
   beforeEach(() => {
     repository = new FakeLeaderboardRepository();
-    adjust = jest.fn().mockResolvedValue(true);
-    service = new LeaderboardService(repository, { adjust } as unknown as PointsService);
+    adjustTo = jest.fn().mockResolvedValue(true);
+    service = new LeaderboardService(repository, { adjustTo } as unknown as PointsService);
   });
 
   describe('adjustPoints', () => {
-    it('records the difference to the target as a ledger adjustment', async () => {
+    it('delegates the absolute target to the points ledger', async () => {
       await service.adjustPoints('admin-1', 'user-1', 200, ['first-blood']);
 
-      expect(adjust).toHaveBeenCalledWith('user-1', 80);
-    });
-
-    it('records a negative difference when lowering points', async () => {
-      await service.adjustPoints('admin-1', 'user-1', 20, []);
-
-      expect(adjust).toHaveBeenCalledWith('user-1', -100);
+      expect(adjustTo).toHaveBeenCalledWith('user-1', 200);
     });
 
     it('persists normalized badges', async () => {
@@ -68,7 +62,7 @@ describe('LeaderboardService', () => {
       await expect(service.adjustPoints('admin-1', 'missing', 10, [])).rejects.toBeInstanceOf(
         NotFoundException,
       );
-      expect(adjust).not.toHaveBeenCalled();
+      expect(adjustTo).not.toHaveBeenCalled();
     });
   });
 });

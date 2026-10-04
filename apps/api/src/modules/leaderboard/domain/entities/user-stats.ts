@@ -1,3 +1,5 @@
+import { clampNonNegative } from '../clamp-non-negative';
+
 export interface UserStatsState {
   points: number;
   monthlyPoints: number;
@@ -42,10 +44,6 @@ export class UserStats {
     );
   }
 
-  pointsDeltaTo(targetPoints: number): number {
-    return clampNonNegative(targetPoints) - this.points;
-  }
-
   withBadges(badges: string[]): UserStats {
     return new UserStats(
       this.userId,
@@ -85,10 +83,6 @@ export class UserStats {
   getStreakDays(): number {
     return this.streakDays;
   }
-}
-
-function clampNonNegative(value: number): number {
-  return Number.isFinite(value) && value > 0 ? Math.round(value) : 0;
 }
 
 function normalizeBadges(badges: string[]): string[] {

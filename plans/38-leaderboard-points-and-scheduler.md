@@ -1,6 +1,6 @@
 # Feature Plan: Earned Leaderboard Points + Background Scheduler
 
-Makes the leaderboard reflect real activity and adds recurring background jobs for time-based state (period resets, streak expiry, contest finalization, interview-prep reminders).
+Makes the leaderboard reflect real activity and adds recurring background jobs for time-based state (period rollovers, streak expiry, contest finalization, interview-prep reminders).
 
 ---
 
@@ -9,7 +9,7 @@ Makes the leaderboard reflect real activity and adds recurring background jobs f
 - Award points automatically for solving problems, completing the daily challenge, and finishing contests.
 - Make every award idempotent so BullMQ retries (`attempts: 3`) can never double-count.
 - Keep an auditable history of every point change (`PointLedger`).
-- Reset weekly / monthly totals on schedule, expire broken streaks nightly, finalize ended contests, and sweep interview-prep reminders server-side.
+- Roll weekly / monthly totals over on schedule, rebuilding them from the ledger, expire broken streaks nightly, finalize ended contests, and sweep interview-prep reminders server-side.
 - Preserve the admin "set absolute points" UX while recording it as a ledger delta.
 
 ---
@@ -48,8 +48,11 @@ Migrations:
 ### Leaderboard
 - `domain/entities/point-award.ts`: a value object with factories per source that encapsulate the rules.
 - `domain/interfaces/point-ledger-repository.interface.ts` and `infrastructure/repositories/point-ledger.repository.ts`. The repository writes the ledger row and increments `UserStats` in one transaction. A unique-key violation means "already awarded" and returns `false`.
-- `application/points.service.ts`: `awardProblemSolved`, `awardDailyChallenge`, `awardContestResults`, `adjustTo`, `resetWeekly`, `resetMonthly`.
+- `application/points.service.ts`: `awardProblemSolved`, `awardDailyChallenge`, `awardContestResults`, `adjustTo`, `refreshPeriodTotals`.
 - `LeaderboardService.adjustPoints` now records the change through the ledger and only overwrites badges.
+- **Admin adjustments are race-free.** `PointLedgerRepository.adjustTo` reads the current total with `SELECT … FOR UPDATE` inside the same transaction that writes the delta. A concurrent award is either already counted or waits until the adjustment commits.
+- **Period rollovers can't lose points.** `refreshPeriodTotals(period)` rebuilds `weeklyPoints` / `monthlyPoints` from the ledger since the start of the current UTC week or month, excluding admin adjustments. A late, retried or manual run therefore keeps points earned after the boundary.
+  - The rebuild holds an exclusive Postgres advisory lock. Every award holds the shared side of the same lock, so no in-flight award is missed by the rebuild's snapshot.
 
 ### Award wiring
 - `CodeExecutionProcessor` on ACCEPTED, in order:
@@ -72,8 +75,8 @@ Migrations:
 
   | Job | Cron (UTC) |
   |---|---|
-  | `leaderboard.reset-weekly` | `0 0 * * 1` |
-  | `leaderboard.reset-monthly` | `0 0 1 * *` |
+  | `leaderboard.rollover-weekly` | `0 0 * * 1` |
+  | `leaderboard.rollover-monthly` | `0 0 1 * *` |
   | `streaks.expire` | `5 0 * * *` |
   | `contests.finalize` | `*/5 * * * *` |
   | `preparation.reminders-sweep` | `0 8 * * *` |
@@ -106,8 +109,6 @@ Migrations:
 
 ## 7. Known Limitations / Follow-ups
 
-- The admin adjustment delta is computed from a read taken just before the write. An award that lands in between makes the final total miss the target by that award.
-- Weekly and monthly totals are reset counters. A reset that runs late also clears points earned after the period boundary. Deriving period totals from the ledger would remove this.
 - `ContestParticipant.final*` columns are persisted for future rating and history work. Standings are still computed live.
 
 ## 8. Out of Scope

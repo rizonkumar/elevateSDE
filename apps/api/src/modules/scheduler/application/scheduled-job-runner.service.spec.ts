@@ -6,18 +6,17 @@ import { PeerPracticeService } from '../../interview-preparation/application/pee
 import { SCHEDULED_JOBS, ScheduledJobName } from '../domain/scheduled-jobs';
 
 function buildRunner(): { runner: ScheduledJobRunner; handlers: Record<string, jest.Mock> } {
+  const refreshPeriodTotals = jest.fn((period: string) =>
+    Promise.resolve(period === 'weekly' ? 1 : 2),
+  );
   const handlers = {
-    resetWeekly: jest.fn().mockResolvedValue(1),
-    resetMonthly: jest.fn().mockResolvedValue(2),
+    refreshPeriodTotals,
     expireStreaks: jest.fn().mockResolvedValue(3),
     finalizeEnded: jest.fn().mockResolvedValue(4),
     sweepPreparationReminders: jest.fn().mockResolvedValue(5),
   };
   const runner = new ScheduledJobRunner(
-    {
-      resetWeekly: handlers.resetWeekly,
-      resetMonthly: handlers.resetMonthly,
-    } as unknown as PointsService,
+    { refreshPeriodTotals } as unknown as PointsService,
     { expireStreaks: handlers.expireStreaks } as unknown as DailyChallengeService,
     { finalizeEnded: handlers.finalizeEnded } as unknown as ContestFinalizationService,
     {
@@ -28,9 +27,18 @@ function buildRunner(): { runner: ScheduledJobRunner; handlers: Record<string, j
 }
 
 describe('ScheduledJobRunner', () => {
+  it.each<[ScheduledJobName, 'weekly' | 'monthly', number]>([
+    [SCHEDULED_JOBS.ROLLOVER_WEEKLY_POINTS, 'weekly', 1],
+    [SCHEDULED_JOBS.ROLLOVER_MONTHLY_POINTS, 'monthly', 2],
+  ])('dispatches %s to a %s totals refresh', async (jobName, period, affected) => {
+    const { runner, handlers } = buildRunner();
+
+    await expect(runner.run(jobName)).resolves.toBe(affected);
+
+    expect(handlers.refreshPeriodTotals).toHaveBeenCalledWith(period);
+  });
+
   it.each<[ScheduledJobName, string, number]>([
-    [SCHEDULED_JOBS.RESET_WEEKLY_POINTS, 'resetWeekly', 1],
-    [SCHEDULED_JOBS.RESET_MONTHLY_POINTS, 'resetMonthly', 2],
     [SCHEDULED_JOBS.EXPIRE_STREAKS, 'expireStreaks', 3],
     [SCHEDULED_JOBS.FINALIZE_CONTESTS, 'finalizeEnded', 4],
     [SCHEDULED_JOBS.SWEEP_PREPARATION_REMINDERS, 'sweepPreparationReminders', 5],

@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { Injectable } from '@nestjs/common';
 import { IPointLedgerRepository } from '../domain/interfaces/point-ledger-repository.interface';
 import { ContestPlacement, PointAward } from '../domain/entities/point-award';
+import { PointPeriod, periodStart } from '../domain/point-periods';
 
 @Injectable()
 export class PointsService {
@@ -33,16 +34,11 @@ export class PointsService {
     return awardedCount;
   }
 
-  async adjust(userId: string, delta: number): Promise<boolean> {
-    const award = PointAward.adminAdjustment(userId, randomUUID(), delta);
-    return award ? this.repository.award(award) : false;
+  async adjustTo(userId: string, targetPoints: number): Promise<boolean> {
+    return this.repository.adjustTo(userId, targetPoints, randomUUID());
   }
 
-  async resetWeekly(): Promise<number> {
-    return this.repository.resetWeeklyPoints();
-  }
-
-  async resetMonthly(): Promise<number> {
-    return this.repository.resetMonthlyPoints();
+  async refreshPeriodTotals(period: PointPeriod, now: Date = new Date()): Promise<number> {
+    return this.repository.recalculatePeriodTotals(period, periodStart(period, now));
   }
 }

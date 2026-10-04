@@ -1,5 +1,8 @@
 import { AssessmentDifficulty, PointSource } from '@prisma/client';
 import { POINT_RULES } from '@elevatesde/shared-types';
+import { clampNonNegative } from '../clamp-non-negative';
+
+export const NON_PERIOD_SOURCES: readonly PointSource[] = [PointSource.ADMIN_ADJUSTMENT];
 
 export interface ContestPlacement {
   userId: string;
@@ -44,7 +47,13 @@ export class PointAward {
       : null;
   }
 
-  static adminAdjustment(userId: string, adjustmentId: string, delta: number): PointAward | null {
+  static adminAdjustmentTo(
+    userId: string,
+    adjustmentId: string,
+    currentPoints: number,
+    targetPoints: number,
+  ): PointAward | null {
+    const delta = clampNonNegative(targetPoints) - currentPoints;
     return delta === 0
       ? null
       : new PointAward(userId, PointSource.ADMIN_ADJUSTMENT, adjustmentId, delta);
@@ -55,7 +64,7 @@ export class PointAward {
   }
 
   affectsPeriodTotals(): boolean {
-    return this.source !== PointSource.ADMIN_ADJUSTMENT;
+    return !NON_PERIOD_SOURCES.includes(this.source);
   }
 
   getUserId(): string {

@@ -2,14 +2,15 @@ import { AssessmentDifficulty, PointSource } from '@prisma/client';
 import { PointsService } from './points.service';
 import { IPointLedgerRepository } from '../domain/interfaces/point-ledger-repository.interface';
 import { PointAward } from '../domain/entities/point-award';
+import { PointPeriod } from '../domain/point-periods';
 
 const USER_ID = 'user-1';
 
 class FakePointLedgerRepository implements IPointLedgerRepository {
   awards: PointAward[] = [];
   difficulties = new Map<string, AssessmentDifficulty>();
-  weeklyResets = 0;
-  monthlyResets = 0;
+  storedPoints = new Map<string, number>();
+  recalculations: Array<{ period: PointPeriod; since: Date }> = [];
 
   async award(award: PointAward): Promise<boolean> {
     const duplicate = this.awards.some(
@@ -29,14 +30,22 @@ class FakePointLedgerRepository implements IPointLedgerRepository {
     return this.difficulties.get(problemId) ?? null;
   }
 
-  async resetWeeklyPoints(): Promise<number> {
-    this.weeklyResets += 1;
-    return 3;
+  async adjustTo(userId: string, targetPoints: number, adjustmentId: string): Promise<boolean> {
+    const current = this.storedPoints.get(userId);
+    if (current === undefined) {
+      return false;
+    }
+    const award = PointAward.adminAdjustmentTo(userId, adjustmentId, current, targetPoints);
+    if (!award) {
+      return false;
+    }
+    this.storedPoints.set(userId, current + award.getDelta());
+    return this.award(award);
   }
 
-  async resetMonthlyPoints(): Promise<number> {
-    this.monthlyResets += 1;
-    return 4;
+  async recalculatePeriodTotals(period: PointPeriod, since: Date): Promise<number> {
+    this.recalculations.push({ period, since });
+    return 3;
   }
 
   totalFor(userId: string): number {
@@ -130,9 +139,11 @@ describe('PointsService', () => {
     });
   });
 
-  describe('adjust', () => {
-    it('records a non-periodic admin adjustment', async () => {
-      await expect(service.adjust(USER_ID, -25)).resolves.toBe(true);
+  describe('adjustTo', () => {
+    it('records the difference to the target as a non-periodic adjustment', async () => {
+      repository.storedPoints.set(USER_ID, 125);
+
+      await expect(service.adjustTo(USER_ID, 100)).resolves.toBe(true);
 
       const award = repository.awards[0];
       expect(award?.getSource()).toBe(PointSource.ADMIN_ADJUSTMENT);
@@ -141,25 +152,47 @@ describe('PointsService', () => {
       expect(award?.countsAsAssessment()).toBe(false);
     });
 
-    it('records each adjustment separately', async () => {
-      await service.adjust(USER_ID, 5);
-      await service.adjust(USER_ID, 5);
+    it('records each adjustment with its own reference', async () => {
+      repository.storedPoints.set(USER_ID, 0);
 
-      expect(repository.totalFor(USER_ID)).toBe(10);
+      await service.adjustTo(USER_ID, 5);
+      await service.adjustTo(USER_ID, 10);
+
+      expect(repository.awards.map((award) => award.getDelta())).toEqual([5, 5]);
+      expect(new Set(repository.awards.map((award) => award.getRefId())).size).toBe(2);
     });
 
-    it('skips a zero adjustment', async () => {
-      await expect(service.adjust(USER_ID, 0)).resolves.toBe(false);
+    it('skips an adjustment that matches the current total', async () => {
+      repository.storedPoints.set(USER_ID, 40);
+
+      await expect(service.adjustTo(USER_ID, 40)).resolves.toBe(false);
       expect(repository.awards).toHaveLength(0);
+    });
+
+    it('clamps negative targets to zero', async () => {
+      repository.storedPoints.set(USER_ID, 30);
+
+      await service.adjustTo(USER_ID, -10);
+
+      expect(repository.awards[0]?.getDelta()).toBe(-30);
     });
   });
 
-  describe('period resets', () => {
-    it('delegates weekly and monthly resets to the repository', async () => {
-      await expect(service.resetWeekly()).resolves.toBe(3);
-      await expect(service.resetMonthly()).resolves.toBe(4);
-      expect(repository.weeklyResets).toBe(1);
-      expect(repository.monthlyResets).toBe(1);
+  describe('refreshPeriodTotals', () => {
+    it('recalculates weekly totals from the start of the current UTC week', async () => {
+      const now = new Date('2026-10-07T09:30:00.000Z');
+
+      await expect(service.refreshPeriodTotals('weekly', now)).resolves.toBe(3);
+
+      expect(repository.recalculations).toEqual([
+        { period: 'weekly', since: new Date('2026-10-05T00:00:00.000Z') },
+      ]);
+    });
+
+    it('recalculates monthly totals from the first of the current UTC month', async () => {
+      await service.refreshPeriodTotals('monthly', new Date('2026-10-07T09:30:00.000Z'));
+
+      expect(repository.recalculations[0]?.since).toEqual(new Date('2026-10-01T00:00:00.000Z'));
     });
   });
 });

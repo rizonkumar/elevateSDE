@@ -48,7 +48,7 @@ describe('SchedulerRegistrar', () => {
     await registrar.register();
 
     expect([...queue.schedules.keys()].sort()).toEqual([...SCHEDULED_JOB_NAMES].sort());
-    expect(queue.schedules.get(SCHEDULED_JOBS.RESET_WEEKLY_POINTS)).toBe('0 0 * * 1');
+    expect(queue.schedules.get(SCHEDULED_JOBS.ROLLOVER_WEEKLY_POINTS)).toBe('0 0 * * 1');
   });
 
   it('removes schedulers that are no longer defined', async () => {

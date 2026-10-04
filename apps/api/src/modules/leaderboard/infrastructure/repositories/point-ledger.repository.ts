@@ -1,39 +1,51 @@
 import { Injectable } from '@nestjs/common';
-import { AssessmentDifficulty } from '@prisma/client';
+import { AssessmentDifficulty, Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../infrastructure/prisma/prisma.service';
 import { isUniqueConstraintViolation } from '../../../../infrastructure/prisma/prisma-errors';
 import { IPointLedgerRepository } from '../../domain/interfaces/point-ledger-repository.interface';
-import { PointAward } from '../../domain/entities/point-award';
+import { NON_PERIOD_SOURCES, PointAward } from '../../domain/entities/point-award';
+import { PointPeriod } from '../../domain/point-periods';
 import { PointAwardMapper } from '../mappers/point-award.mapper';
+
+const PERIOD_TOTALS_LOCK_KEY = 7_340_031;
+
+const PERIOD_COLUMNS: Readonly<Record<PointPeriod, Prisma.Sql>> = {
+  weekly: Prisma.raw('"weeklyPoints"'),
+  monthly: Prisma.raw('"monthlyPoints"'),
+};
+
+type LedgerWork = (transaction: Prisma.TransactionClient) => Promise<boolean>;
 
 @Injectable()
 export class PointLedgerRepository implements IPointLedgerRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async award(award: PointAward): Promise<boolean> {
-    const userId = award.getUserId();
-    try {
-      await this.prisma.$transaction(async (transaction) => {
-        const user = await transaction.user.findUniqueOrThrow({
-          where: { id: userId },
-          select: { tenantId: true },
-        });
-        await transaction.pointLedger.create({
-          data: PointAwardMapper.toLedgerRecord(award, user.tenantId),
-        });
-        await transaction.userStats.upsert({
-          where: { userId },
-          update: PointAwardMapper.toStatsIncrement(award),
-          create: PointAwardMapper.toStatsCreate(award),
-        });
-      });
+    return this.withinLedgerTransaction(async (transaction) => {
+      await applyAward(transaction, award);
       return true;
-    } catch (error) {
-      if (isUniqueConstraintViolation(error)) {
+    });
+  }
+
+  async adjustTo(userId: string, targetPoints: number, adjustmentId: string): Promise<boolean> {
+    return this.withinLedgerTransaction(async (transaction) => {
+      const [current] = await transaction.$queryRaw<{ points: number }[]>`
+        SELECT "points" FROM "UserStats" WHERE "userId" = ${userId} FOR UPDATE`;
+      if (!current) {
         return false;
       }
-      throw error;
-    }
+      const award = PointAward.adminAdjustmentTo(
+        userId,
+        adjustmentId,
+        current.points,
+        targetPoints,
+      );
+      if (!award) {
+        return false;
+      }
+      await applyAward(transaction, award);
+      return true;
+    });
   }
 
   async findProblemDifficulty(problemId: string): Promise<AssessmentDifficulty | null> {
@@ -44,19 +56,56 @@ export class PointLedgerRepository implements IPointLedgerRepository {
     return problem?.difficulty ?? null;
   }
 
-  async resetWeeklyPoints(): Promise<number> {
-    const result = await this.prisma.userStats.updateMany({
-      where: { weeklyPoints: { not: 0 } },
-      data: { weeklyPoints: 0 },
+  async recalculatePeriodTotals(period: PointPeriod, since: Date): Promise<number> {
+    const column = PERIOD_COLUMNS[period];
+    const excludedSources = Prisma.join(
+      NON_PERIOD_SOURCES.map((source) => Prisma.sql`${source}::"PointSource"`),
+    );
+    return this.prisma.$transaction(async (transaction) => {
+      await transaction.$executeRaw`SELECT pg_advisory_xact_lock(${PERIOD_TOTALS_LOCK_KEY}::bigint)`;
+      return transaction.$executeRaw`
+        UPDATE "UserStats" AS stats
+        SET ${column} = totals.total
+        FROM (
+          SELECT member."userId", COALESCE(SUM(ledger."delta"), 0)::int AS total
+          FROM "UserStats" AS member
+          LEFT JOIN "PointLedger" AS ledger
+            ON ledger."userId" = member."userId"
+            AND ledger."createdAt" >= (${since.toISOString()}::timestamptz AT TIME ZONE 'UTC')
+            AND ledger."source" NOT IN (${excludedSources})
+          GROUP BY member."userId"
+        ) AS totals
+        WHERE stats."userId" = totals."userId" AND stats.${column} <> totals.total`;
     });
-    return result.count;
   }
 
-  async resetMonthlyPoints(): Promise<number> {
-    const result = await this.prisma.userStats.updateMany({
-      where: { monthlyPoints: { not: 0 } },
-      data: { monthlyPoints: 0 },
-    });
-    return result.count;
+  private async withinLedgerTransaction(work: LedgerWork): Promise<boolean> {
+    try {
+      return await this.prisma.$transaction(async (transaction) => {
+        await transaction.$executeRaw`SELECT pg_advisory_xact_lock_shared(${PERIOD_TOTALS_LOCK_KEY}::bigint)`;
+        return work(transaction);
+      });
+    } catch (error) {
+      if (isUniqueConstraintViolation(error)) {
+        return false;
+      }
+      throw error;
+    }
   }
+}
+
+async function applyAward(transaction: Prisma.TransactionClient, award: PointAward): Promise<void> {
+  const userId = award.getUserId();
+  const user = await transaction.user.findUniqueOrThrow({
+    where: { id: userId },
+    select: { tenantId: true },
+  });
+  await transaction.pointLedger.create({
+    data: PointAwardMapper.toLedgerRecord(award, user.tenantId),
+  });
+  await transaction.userStats.upsert({
+    where: { userId },
+    update: PointAwardMapper.toStatsIncrement(award),
+    create: PointAwardMapper.toStatsCreate(award),
+  });
 }

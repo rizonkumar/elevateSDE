@@ -33,7 +33,7 @@ export class LeaderboardService {
     if (!stats) {
       throw new NotFoundException('Leaderboard entry not found');
     }
-    await this.pointsService.adjust(userId, stats.pointsDeltaTo(points));
+    await this.pointsService.adjustTo(userId, points);
     await this.leaderboardRepository.saveBadges(stats.withBadges(badges));
     return this.getStandings('all-time', viewerId);
   }

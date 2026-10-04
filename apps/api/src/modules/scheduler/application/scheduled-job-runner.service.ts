@@ -19,8 +19,8 @@ export class ScheduledJobRunner {
     peerPracticeService: PeerPracticeService,
   ) {
     this.handlers = {
-      [SCHEDULED_JOBS.RESET_WEEKLY_POINTS]: () => pointsService.resetWeekly(),
-      [SCHEDULED_JOBS.RESET_MONTHLY_POINTS]: () => pointsService.resetMonthly(),
+      [SCHEDULED_JOBS.ROLLOVER_WEEKLY_POINTS]: () => pointsService.refreshPeriodTotals('weekly'),
+      [SCHEDULED_JOBS.ROLLOVER_MONTHLY_POINTS]: () => pointsService.refreshPeriodTotals('monthly'),
       [SCHEDULED_JOBS.EXPIRE_STREAKS]: () => dailyChallengeService.expireStreaks(),
       [SCHEDULED_JOBS.FINALIZE_CONTESTS]: () => contestFinalizationService.finalizeEnded(),
       [SCHEDULED_JOBS.SWEEP_PREPARATION_REMINDERS]: () =>
