@@ -370,6 +370,20 @@ export interface AdminForumPostDto {
 
 export type LeaderboardTimeframe = 'all-time' | 'monthly' | 'weekly';
 
+export interface PointRules {
+  problemSolved: Readonly<Record<AssessmentDifficulty, number>>;
+  dailyChallenge: number;
+  contestScoreDivisor: number;
+  contestPodiumBonus: readonly number[];
+}
+
+export const POINT_RULES: PointRules = {
+  problemSolved: { EASY: 10, MEDIUM: 20, HARD: 40 },
+  dailyChallenge: 15,
+  contestScoreDivisor: 10,
+  contestPodiumBonus: [50, 30, 20],
+};
+
 export interface LeaderboardEntryDto {
   rank: number;
   userId: string;

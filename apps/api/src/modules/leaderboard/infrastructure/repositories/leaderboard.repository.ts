@@ -45,19 +45,10 @@ export class LeaderboardRepository implements ILeaderboardRepository {
     return UserStatsMapper.toDomain(record);
   }
 
-  async save(stats: UserStats): Promise<void> {
-    const data = UserStatsMapper.toPersistence(stats);
-    await this.prisma.userStats.upsert({
-      where: { userId: data.userId },
-      update: {
-        points: data.points,
-        monthlyPoints: data.monthlyPoints,
-        weeklyPoints: data.weeklyPoints,
-        assessmentsCompleted: data.assessmentsCompleted,
-        badges: data.badges,
-        streakDays: data.streakDays,
-      },
-      create: data,
+  async saveBadges(stats: UserStats): Promise<void> {
+    await this.prisma.userStats.update({
+      where: { userId: stats.getUserId() },
+      data: { badges: stats.getBadges() },
     });
   }
 }

@@ -5,5 +5,5 @@ import { LeaderboardEntryView } from '../read-models/leaderboard-entry-view';
 export abstract class ILeaderboardRepository {
   abstract listByTimeframe(timeframe: LeaderboardTimeframe): Promise<LeaderboardEntryView[]>;
   abstract findByUser(userId: string): Promise<UserStats | null>;
-  abstract save(stats: UserStats): Promise<void>;
+  abstract saveBadges(stats: UserStats): Promise<void>;
 }

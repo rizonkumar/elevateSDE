@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { isUniqueConstraintViolation } from '../../../../infrastructure/prisma/prisma-errors';
 import type {
   CreatePreparationRoundDto,
   CreatePreparationTaskDto,
@@ -255,7 +256,7 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
       });
       return InterviewPreparationMapper.toPlan(plan);
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      if (isUniqueConstraintViolation(error)) {
         return 'DUPLICATE';
       }
       throw error;
@@ -535,7 +536,7 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
       });
       return InterviewPreparationMapper.toPeerSession(session);
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      if (isUniqueConstraintViolation(error)) {
         return 'DUPLICATE';
       }
       throw error;
@@ -617,7 +618,7 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
       });
       return InterviewPreparationMapper.toScorecard(scorecard);
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      if (isUniqueConstraintViolation(error)) {
         return 'DUPLICATE';
       }
       throw error;

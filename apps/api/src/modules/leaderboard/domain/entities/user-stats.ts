@@ -42,10 +42,14 @@ export class UserStats {
     );
   }
 
-  adjust(points: number, badges: string[]): UserStats {
+  pointsDeltaTo(targetPoints: number): number {
+    return clampNonNegative(targetPoints) - this.points;
+  }
+
+  withBadges(badges: string[]): UserStats {
     return new UserStats(
       this.userId,
-      clampNonNegative(points),
+      this.points,
       this.monthlyPoints,
       this.weeklyPoints,
       this.assessmentsCompleted,

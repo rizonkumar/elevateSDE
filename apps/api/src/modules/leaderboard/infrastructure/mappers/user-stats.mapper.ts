@@ -12,27 +12,4 @@ export class UserStatsMapper {
       streakDays: record.streakDays,
     });
   }
-
-  static toPersistence(
-    stats: UserStats,
-  ): Pick<
-    PrismaUserStats,
-    | 'userId'
-    | 'points'
-    | 'monthlyPoints'
-    | 'weeklyPoints'
-    | 'assessmentsCompleted'
-    | 'badges'
-    | 'streakDays'
-  > {
-    return {
-      userId: stats.getUserId(),
-      points: stats.getPoints(),
-      monthlyPoints: stats.getMonthlyPoints(),
-      weeklyPoints: stats.getWeeklyPoints(),
-      assessmentsCompleted: stats.getAssessmentsCompleted(),
-      badges: stats.getBadges(),
-      streakDays: stats.getStreakDays(),
-    };
-  }
 }
