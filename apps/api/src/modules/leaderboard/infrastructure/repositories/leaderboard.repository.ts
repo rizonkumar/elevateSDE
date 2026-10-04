@@ -38,7 +38,10 @@ export class LeaderboardRepository implements ILeaderboardRepository {
   }
 
   async findByUser(userId: string): Promise<UserStats | null> {
-    const record = await this.prisma.userStats.findUnique({ where: { userId } });
+    const record = await this.prisma.userStats.findUnique({
+      where: { userId },
+      select: { userId: true, badges: true },
+    });
     if (!record) {
       return null;
     }

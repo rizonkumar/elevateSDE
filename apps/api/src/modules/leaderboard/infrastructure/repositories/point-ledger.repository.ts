@@ -7,7 +7,8 @@ import { NON_PERIOD_SOURCES, PointAward } from '../../domain/entities/point-awar
 import { PointPeriod } from '../../domain/point-periods';
 import { PointAwardMapper } from '../mappers/point-award.mapper';
 
-const PERIOD_TOTALS_LOCK_KEY = 7_340_031;
+const PERIOD_TOTALS_LOCK_NAME = 'leaderboard.period-totals';
+const LEDGER_TRANSACTION_OPTIONS = { maxWait: 10_000, timeout: 20_000 };
 
 const PERIOD_COLUMNS: Readonly<Record<PointPeriod, Prisma.Sql>> = {
   weekly: Prisma.raw('"weeklyPoints"'),
@@ -61,9 +62,9 @@ export class PointLedgerRepository implements IPointLedgerRepository {
     const excludedSources = Prisma.join(
       NON_PERIOD_SOURCES.map((source) => Prisma.sql`${source}::"PointSource"`),
     );
-    return this.prisma.$transaction(async (transaction) => {
-      await transaction.$executeRaw`SELECT pg_advisory_xact_lock(${PERIOD_TOTALS_LOCK_KEY}::bigint)`;
-      return transaction.$executeRaw`
+    const [, updatedCount] = await this.prisma.$transaction([
+      this.prisma.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${PERIOD_TOTALS_LOCK_NAME}))`,
+      this.prisma.$executeRaw`
         UPDATE "UserStats" AS stats
         SET ${column} = totals.total
         FROM (
@@ -75,16 +76,17 @@ export class PointLedgerRepository implements IPointLedgerRepository {
             AND ledger."source" NOT IN (${excludedSources})
           GROUP BY member."userId"
         ) AS totals
-        WHERE stats."userId" = totals."userId" AND stats.${column} <> totals.total`;
-    });
+        WHERE stats."userId" = totals."userId" AND stats.${column} <> totals.total`,
+    ]);
+    return updatedCount;
   }
 
   private async withinLedgerTransaction(work: LedgerWork): Promise<boolean> {
     try {
       return await this.prisma.$transaction(async (transaction) => {
-        await transaction.$executeRaw`SELECT pg_advisory_xact_lock_shared(${PERIOD_TOTALS_LOCK_KEY}::bigint)`;
+        await transaction.$executeRaw`SELECT pg_advisory_xact_lock_shared(hashtext(${PERIOD_TOTALS_LOCK_NAME}))`;
         return work(transaction);
-      });
+      }, LEDGER_TRANSACTION_OPTIONS);
     } catch (error) {
       if (isUniqueConstraintViolation(error)) {
         return false;

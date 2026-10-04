@@ -453,6 +453,7 @@ model PointLedger {
 
   @@unique([userId, source, refId])
   @@index([userId, createdAt])
+  @@index([createdAt])
   @@index([tenantId])
 }
 

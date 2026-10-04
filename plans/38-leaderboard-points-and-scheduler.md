@@ -51,7 +51,9 @@ Migrations:
 - `application/points.service.ts`: `awardProblemSolved`, `awardDailyChallenge`, `awardContestResults`, `adjustTo`, `refreshPeriodTotals`.
 - `LeaderboardService.adjustPoints` now records the change through the ledger and only overwrites badges.
 - **Admin adjustments are race-free.** `PointLedgerRepository.adjustTo` reads the current total with `SELECT … FOR UPDATE` inside the same transaction that writes the delta. A concurrent award is either already counted or waits until the adjustment commits.
-- **Period rollovers can't lose points.** `refreshPeriodTotals(period)` rebuilds `weeklyPoints` / `monthlyPoints` from the ledger since the start of the current UTC week or month, excluding admin adjustments. A late, retried or manual run therefore keeps points earned after the boundary.
+- **Period rollovers can't lose ledger-recorded points.** `refreshPeriodTotals(period)` rebuilds `weeklyPoints` / `monthlyPoints` from the ledger since the start of the current UTC week or month, excluding admin adjustments. A late, retried or manual run therefore keeps points earned after the boundary.
+  - Before this feature nothing increased `weeklyPoints` / `monthlyPoints`, so their existing values come only from seed data. The first rollover (or a manual run) normalizes them to the ledger, which is the intended source of truth.
+  - The rebuild runs as a batch transaction, so it has no interactive timeout. Award transactions use explicit `maxWait` / `timeout` budgets.
   - The rebuild holds an exclusive Postgres advisory lock. Every award holds the shared side of the same lock, so no in-flight award is missed by the rebuild's snapshot.
 
 ### Award wiring
@@ -104,6 +106,9 @@ Migrations:
 - Contest finalization: ranks persisted, points awarded, re-run is a no-op.
 - Scheduler: registrar upsert/cleanup/disabled, runner dispatch, processor delegation.
 - Code-execution processor: points awarded before achievements.
+- `PointAward` domain rules, including clamping and period exclusion.
+- Database-backed `PointLedgerRepository` spec, skipped by default. It covers atomic award and duplicate rejection, exact admin targets, period rebuild exclusions, and awards racing a rollover. Run it against a disposable database:
+  `RUN_DATABASE_INTEGRATION=1 DATABASE_URL=<test db> pnpm --filter @elevatesde/api exec jest point-ledger.repository.integration`
 
 ---
 

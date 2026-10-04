@@ -5,14 +5,7 @@ import { ILeaderboardRepository } from '../domain/interfaces/leaderboard-reposit
 import { UserStats } from '../domain/entities/user-stats';
 import { LeaderboardEntryView } from '../domain/read-models/leaderboard-entry-view';
 
-const STATS = UserStats.reconstitute('user-1', {
-  points: 120,
-  monthlyPoints: 40,
-  weeklyPoints: 10,
-  assessmentsCompleted: 6,
-  badges: ['first-blood'],
-  streakDays: 2,
-});
+const STATS = UserStats.reconstitute('user-1', { badges: ['first-blood'] });
 
 class FakeLeaderboardRepository implements ILeaderboardRepository {
   stats: UserStats | null = STATS;

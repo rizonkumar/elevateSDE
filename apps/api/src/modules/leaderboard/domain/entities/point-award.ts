@@ -1,6 +1,6 @@
 import { AssessmentDifficulty, PointSource } from '@prisma/client';
 import { POINT_RULES } from '@elevatesde/shared-types';
-import { clampNonNegative } from '../clamp-non-negative';
+import { clampNonNegative } from '../../../../shared/domain/clamp-non-negative';
 
 export const NON_PERIOD_SOURCES: readonly PointSource[] = [PointSource.ADMIN_ADJUSTMENT];
 

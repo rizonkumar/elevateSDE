@@ -1,3 +1,4 @@
+import { clampNonNegative } from '../../../../shared/domain/clamp-non-negative';
 import { DAY_MS, addDays, startOfUtcDay } from '../daily-date';
 
 export interface StreakStateProps {
@@ -47,8 +48,4 @@ export class StreakState {
   getLastActiveDate(): Date | null {
     return this.props.lastActiveDate;
   }
-}
-
-function clampNonNegative(value: number): number {
-  return Number.isFinite(value) && value > 0 ? Math.round(value) : 0;
 }

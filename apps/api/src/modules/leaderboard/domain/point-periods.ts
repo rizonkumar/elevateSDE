@@ -1,14 +1,14 @@
+import { addDays } from '../../daily-challenge/domain/daily-date';
+
 export type PointPeriod = 'weekly' | 'monthly';
 
 const DAYS_PER_WEEK = 7;
 const MONDAY_OFFSET = 6;
 
 export function periodStart(period: PointPeriod, now: Date): Date {
-  const year = now.getUTCFullYear();
-  const month = now.getUTCMonth();
   if (period === 'monthly') {
-    return new Date(Date.UTC(year, month, 1));
+    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
   }
   const daysSinceMonday = (now.getUTCDay() + MONDAY_OFFSET) % DAYS_PER_WEEK;
-  return new Date(Date.UTC(year, month, now.getUTCDate() - daysSinceMonday));
+  return addDays(now, -daysSinceMonday);
 }

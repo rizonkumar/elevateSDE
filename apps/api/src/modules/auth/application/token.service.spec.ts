@@ -15,8 +15,12 @@ const USER = User.reconstitute(
   'Lovelace',
 );
 
+interface RefreshTokenCreateCall {
+  data: { userId: string; token: string; expiresAt: Date };
+}
+
 describe('TokenService', () => {
-  let create: jest.Mock;
+  let create: jest.Mock<Promise<void>, [RefreshTokenCreateCall]>;
   let service: TokenService;
 
   beforeEach(() => {
@@ -24,7 +28,7 @@ describe('TokenService', () => {
       now: new Date('2026-10-04T12:00:00.000Z'),
       doNotFake: ['nextTick', 'setImmediate', 'setTimeout', 'queueMicrotask'],
     });
-    create = jest.fn().mockResolvedValue(undefined);
+    create = jest.fn<Promise<void>, [RefreshTokenCreateCall]>().mockResolvedValue(undefined);
     service = new TokenService(new JwtService({ secret: 'test-secret' }), {
       refreshToken: { create },
     } as unknown as PrismaService);
