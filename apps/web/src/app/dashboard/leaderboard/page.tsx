@@ -8,6 +8,7 @@ import { PageContainer } from '@/components/dashboard/PageContainer';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { LeaderboardPodium } from '@/components/dashboard/leaderboard/LeaderboardPodium';
 import { LeaderboardRow, LeaderboardCard } from '@/components/dashboard/leaderboard/LeaderboardRow';
+import { PointRulesPanel } from '@/components/dashboard/leaderboard/PointRulesPanel';
 import { useLeaderboardStore } from '@/store/leaderboard.store';
 
 const TIMEFRAME_TABS: TabItem[] = [
@@ -92,6 +93,8 @@ export default function LeaderboardPage() {
             </div>
           </div>
         )}
+
+        <PointRulesPanel />
 
         <LeaderboardPodium entries={podium} />
 
