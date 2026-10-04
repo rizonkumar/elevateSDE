@@ -9,7 +9,8 @@
     "dev:clients": "turbo run dev --filter=@elevatesde/web --filter=@elevatesde/admin",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
-    "type-check": "turbo run type-check"
+    "type-check": "turbo run type-check",
+    "test": "turbo run test"
   },
   "devDependencies": {
     "prettier": "^3.2.5",
