@@ -3,6 +3,7 @@ import { UserRole } from '@prisma/client';
 import { TokenService } from './token.service';
 import { PrismaService } from '../../../infrastructure/prisma/prisma.service';
 import { User } from '../../users/domain/entities/user';
+import { AuthTokenPayload } from '../domain/auth-token';
 
 const USER = User.reconstitute(
   'user-1',
@@ -45,6 +46,17 @@ describe('TokenService', () => {
     expect(first.refreshToken).not.toBe(second.refreshToken);
     const persisted = create.mock.calls.map(([args]) => args.data.token);
     expect(new Set(persisted).size).toBe(2);
+  });
+
+  it('marks access and refresh tokens with their token type', async () => {
+    const jwt = new JwtService({ secret: 'test-secret' });
+    const issued = await service.issueFor(USER);
+
+    const access = await jwt.verifyAsync<AuthTokenPayload>(issued.accessToken);
+    const refresh = await jwt.verifyAsync<AuthTokenPayload>(issued.refreshToken);
+
+    expect(access).toMatchObject({ sub: 'user-1', typ: 'access' });
+    expect(refresh).toMatchObject({ sub: 'user-1', typ: 'refresh' });
   });
 
   it('persists the refresh token with a seven day expiry', async () => {

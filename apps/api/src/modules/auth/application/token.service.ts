@@ -5,6 +5,7 @@ import { PrismaService } from '../../../infrastructure/prisma/prisma.service';
 import { User } from '../../users/domain/entities/user';
 import { UserPresentationMapper } from '../../users/presentation/mappers/user-presentation.mapper';
 import { AuthResponseDto } from '@elevatesde/shared-types';
+import { AUTH_TOKEN_TYPES, AuthTokenPayload, AuthTokenType } from '../domain/auth-token';
 
 @Injectable()
 export class TokenService {
@@ -14,15 +15,15 @@ export class TokenService {
   ) {}
 
   async issueFor(user: User): Promise<AuthResponseDto> {
-    const payload = { sub: user.getId(), email: user.getEmail() };
-    const accessToken = await this.jwtService.signAsync(payload, {
-      expiresIn: '15m',
-    });
+    const accessToken = await this.jwtService.signAsync(
+      this.payloadFor(user, AUTH_TOKEN_TYPES.ACCESS),
+      { expiresIn: '15m' },
+    );
 
-    const refreshTokenString = await this.jwtService.signAsync(payload, {
-      expiresIn: '7d',
-      jwtid: randomUUID(),
-    });
+    const refreshTokenString = await this.jwtService.signAsync(
+      this.payloadFor(user, AUTH_TOKEN_TYPES.REFRESH),
+      { expiresIn: '7d', jwtid: randomUUID() },
+    );
 
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7);
@@ -40,5 +41,9 @@ export class TokenService {
       refreshToken: refreshTokenString,
       user: UserPresentationMapper.toResponse(user),
     };
+  }
+
+  private payloadFor(user: User, typ: AuthTokenType): AuthTokenPayload {
+    return { sub: user.getId(), email: user.getEmail(), typ };
   }
 }
