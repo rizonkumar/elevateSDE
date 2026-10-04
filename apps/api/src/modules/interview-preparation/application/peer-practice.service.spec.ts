@@ -25,6 +25,7 @@ const session: PeerPracticeSessionDto = {
 function repository(): jest.Mocked<IInterviewPreparationRepository> {
   return {
     getOverview: jest.fn(),
+    listUpcomingPreparationTargets: jest.fn().mockResolvedValue([]),
     findOwnedJobApplication: jest.fn(),
     findOwnedPlan: jest.fn(),
     getReadinessEvidence: jest.fn(),
@@ -117,5 +118,51 @@ describe('PeerPracticeService', () => {
         improvements: ['State tradeoffs earlier'],
       }),
     ).rejects.toBeInstanceOf(ConflictException);
+  });
+  describe('preparation reminders', () => {
+    const target = {
+      planId: 'plan-1',
+      userId: 'user-1',
+      company: 'Acme',
+      targetAt: new Date('2026-10-03T09:00:00.000Z'),
+    };
+
+    it('scopes a client sync to the requesting user within a seven day window', async () => {
+      const repo = repository();
+      repo.listUpcomingPreparationTargets.mockResolvedValue([target]);
+      const events = emitter();
+      const service = new PeerPracticeService(repo, users(), events);
+
+      await service.syncPreparationReminders('user-1');
+
+      expect(repo.listUpcomingPreparationTargets).toHaveBeenCalledWith({
+        userId: 'user-1',
+        from: new Date('2026-09-30T12:00:00.000Z'),
+        to: new Date('2026-10-07T12:00:00.000Z'),
+      });
+      expect(events.emit).toHaveBeenCalledWith('notification.preparation-reminder', {
+        recipientId: 'user-1',
+        planId: 'plan-1',
+        company: 'Acme',
+        dedupeKey: 'preparation-reminder:plan-1:2026-10-03',
+      });
+    });
+
+    it('sweeps upcoming plans across all users', async () => {
+      const repo = repository();
+      repo.listUpcomingPreparationTargets.mockResolvedValue([
+        target,
+        { ...target, planId: 'plan-2', userId: 'user-2' },
+      ]);
+      const events = emitter();
+      const service = new PeerPracticeService(repo, users(), events);
+
+      await expect(service.sweepPreparationReminders()).resolves.toBe(2);
+
+      expect(repo.listUpcomingPreparationTargets).toHaveBeenCalledWith(
+        expect.objectContaining({ userId: undefined }),
+      );
+      expect(events.emit).toHaveBeenCalledTimes(2);
+    });
   });
 });

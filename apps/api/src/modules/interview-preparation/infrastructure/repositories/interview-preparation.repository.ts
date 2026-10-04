@@ -27,6 +27,8 @@ import {
   CreatePlanRecordInput,
   InterviewPreparationEvidence,
   IInterviewPreparationRepository,
+  PreparationReminderCriteria,
+  PreparationReminderTarget,
 } from '../../domain/interfaces/interview-preparation-repository.interface';
 import {
   InterviewPreparationMapper,
@@ -75,6 +77,30 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
       plans: plans.map(InterviewPreparationMapper.toSummary),
       unplannedApplications: applications.map(toJobApplication),
     };
+  }
+
+  async listUpcomingPreparationTargets(
+    criteria: PreparationReminderCriteria,
+  ): Promise<PreparationReminderTarget[]> {
+    const plans = await this.prisma.interviewPreparationPlan.findMany({
+      where: {
+        userId: criteria.userId,
+        status: 'ACTIVE',
+        targetAt: { gte: criteria.from, lte: criteria.to },
+      },
+      select: {
+        id: true,
+        userId: true,
+        targetAt: true,
+        jobApplication: { select: { company: true } },
+      },
+    });
+    return plans.map((plan) => ({
+      planId: plan.id,
+      userId: plan.userId,
+      company: plan.jobApplication.company,
+      targetAt: plan.targetAt,
+    }));
   }
 
   async findOwnedJobApplication(

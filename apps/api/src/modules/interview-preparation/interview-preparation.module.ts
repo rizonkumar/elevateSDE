@@ -21,6 +21,6 @@ import { InterviewPreparationController } from './presentation/controllers/inter
     { provide: IReadinessNarrativeProvider, useClass: OpenAiCompatibleReadinessProvider },
     { provide: IInterviewPreparationRepository, useClass: InterviewPreparationRepository },
   ],
-  exports: [InterviewPreparationService],
+  exports: [InterviewPreparationService, PeerPracticeService],
 })
 export class InterviewPreparationModule {}

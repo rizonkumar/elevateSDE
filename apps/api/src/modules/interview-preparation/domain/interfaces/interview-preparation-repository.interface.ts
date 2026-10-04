@@ -44,8 +44,24 @@ export interface CreatePeerSessionRecordInput {
   meetingUrl: string;
 }
 
+export interface PreparationReminderCriteria {
+  from: Date;
+  to: Date;
+  userId?: string;
+}
+
+export interface PreparationReminderTarget {
+  planId: string;
+  userId: string;
+  company: string;
+  targetAt: Date;
+}
+
 export abstract class IInterviewPreparationRepository {
   abstract getOverview(userId: string): Promise<InterviewPreparationOverviewDto>;
+  abstract listUpcomingPreparationTargets(
+    criteria: PreparationReminderCriteria,
+  ): Promise<PreparationReminderTarget[]>;
   abstract findOwnedJobApplication(
     userId: string,
     jobApplicationId: string,

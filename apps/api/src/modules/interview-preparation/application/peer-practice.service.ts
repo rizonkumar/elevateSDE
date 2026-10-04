@@ -9,9 +9,18 @@ import type {
   SubmitPeerScorecardDto,
 } from '@elevatesde/shared-types';
 import { UsersService } from '../../users/application/users.service';
-import { NOTIFICATION_EVENTS } from '../../notification/domain/events/notification-events';
+import {
+  NOTIFICATION_EVENTS,
+  PreparationReminderEvent,
+} from '../../notification/domain/events/notification-events';
 import { PeerPracticeSession, PeerParticipantRole } from '../domain/entities/peer-practice-session';
 import { IInterviewPreparationRepository } from '../domain/interfaces/interview-preparation-repository.interface';
+
+const REMINDER_HORIZON_MS = 7 * 86_400_000;
+
+function toDateKey(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
 
 @Injectable()
 export class PeerPracticeService {
@@ -26,19 +35,11 @@ export class PeerPracticeService {
   }
 
   async syncPreparationReminders(userId: string): Promise<void> {
-    const overview = await this.repository.getOverview(userId);
-    const now = Date.now();
-    const horizon = now + 7 * 86_400_000;
-    for (const plan of overview.plans) {
-      const target = new Date(plan.targetAt).getTime();
-      if (plan.status !== 'ACTIVE' || target < now || target > horizon) continue;
-      this.eventEmitter.emit(NOTIFICATION_EVENTS.PREPARATION_REMINDER, {
-        recipientId: userId,
-        planId: plan.id,
-        company: plan.company,
-        dedupeKey: `preparation-reminder:${plan.id}:${plan.targetAt.slice(0, 10)}`,
-      });
-    }
+    await this.emitUpcomingReminders(userId);
+  }
+
+  async sweepPreparationReminders(): Promise<number> {
+    return this.emitUpcomingReminders();
   }
 
   async create(
@@ -154,6 +155,21 @@ export class PeerPracticeService {
     if (scorecard === null) throw new NotFoundException('Completed peer session not found');
     if (scorecard === 'DUPLICATE') throw new ConflictException('You already submitted feedback');
     return scorecard;
+  }
+
+  private async emitUpcomingReminders(userId?: string): Promise<number> {
+    const from = new Date();
+    const to = new Date(from.getTime() + REMINDER_HORIZON_MS);
+    const targets = await this.repository.listUpcomingPreparationTargets({ userId, from, to });
+    for (const target of targets) {
+      this.eventEmitter.emit(NOTIFICATION_EVENTS.PREPARATION_REMINDER, {
+        recipientId: target.userId,
+        planId: target.planId,
+        company: target.company,
+        dedupeKey: `preparation-reminder:${target.planId}:${toDateKey(target.targetAt)}`,
+      } satisfies PreparationReminderEvent);
+    }
+    return targets.length;
   }
 
   private validateSchedule(
