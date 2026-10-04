@@ -96,7 +96,18 @@ Migrations:
 ### Auth hardening (found during review)
 - Tokens carry a `typ` claim, and the JWT strategy only accepts `typ=access`, so a refresh token can no longer be used as a bearer token.
 - Refresh tokens are consumed atomically. A concurrent second use gets a 401 instead of a 500, and logout is idempotent.
-- The web and admin clients share one in-flight refresh, so parallel 401s don't log the user out.
+- Refresh tokens rotate within a **family** (one per sign-in) and are marked `rotatedAt` instead of being deleted:
+  - Reuse of a rotated token within 30 seconds (another browser tab) is accepted.
+  - Reuse after the grace window is treated as theft and revokes the whole family. Other sign-ins are unaffected.
+  - Logout revokes the whole family.
+  - A daily `auth.prune-refresh-tokens` job (`30 3 * * *`) deletes expired tokens.
+  - Persistence sits behind `IRefreshTokenRepository`.
+- `@elevatesde/api-client` is a new workspace package, shared by web and admin:
+  - `createSessionStore`: cookie-backed session store
+  - `createRefreshCoordinator`: one in-flight refresh per tab
+  - `createApiClient`: bearer header plus 401 refresh-and-retry
+  - Only a failed refresh ends the session. The admin client redirects to `/admin/login`, and the admin route guard keeps the `/admin` base path.
+- `pnpm test` runs every workspace's test suite through turbo.
 
 ## 5. Frontend
 
