@@ -89,6 +89,15 @@ Migrations:
 
 ---
 
+### Leaderboard tenant scoping
+- Members see only their own organization's leaderboard. Individual candidates (no tenant) see only other individual candidates. Platform admins in the admin console keep the platform-wide view.
+- The dashboard and profile rank are computed within the same scope.
+
+### Auth hardening (found during review)
+- Tokens carry a `typ` claim, and the JWT strategy only accepts `typ=access`, so a refresh token can no longer be used as a bearer token.
+- Refresh tokens are consumed atomically. A concurrent second use gets a 401 instead of a 500, and logout is idempotent.
+- The web and admin clients share one in-flight refresh, so parallel 401s don't log the user out.
+
 ## 5. Frontend
 
 - `apps/web` leaderboard: a "How points work" disclosure driven by `POINT_RULES`.

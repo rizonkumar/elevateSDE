@@ -3,6 +3,12 @@ import { LeaderboardTimeframe } from '@elevatesde/shared-types';
 import { ILeaderboardRepository } from '../domain/interfaces/leaderboard-repository.interface';
 import { RankedLeaderboardEntry } from '../domain/read-models/leaderboard-entry-view';
 import { PointsService } from './points.service';
+import {
+  LeaderboardScope,
+  LeaderboardViewer,
+  PLATFORM_SCOPE,
+  scopeForViewer,
+} from '../domain/leaderboard-scope';
 
 @Injectable()
 export class LeaderboardService {
@@ -11,16 +17,15 @@ export class LeaderboardService {
     private readonly pointsService: PointsService,
   ) {}
 
-  async getStandings(
+  async getStandingsFor(
+    viewer: LeaderboardViewer,
     timeframe: LeaderboardTimeframe,
-    viewerId: string,
   ): Promise<RankedLeaderboardEntry[]> {
-    const views = await this.leaderboardRepository.listByTimeframe(timeframe);
-    return views.map((view, index) => ({
-      view,
-      rank: index + 1,
-      isCurrentUser: view.userId === viewerId,
-    }));
+    return this.rank(timeframe, viewer.getId(), scopeForViewer(viewer));
+  }
+
+  async getPlatformStandings(viewerId: string): Promise<RankedLeaderboardEntry[]> {
+    return this.rank('all-time', viewerId, PLATFORM_SCOPE);
   }
 
   async adjustPoints(
@@ -35,6 +40,19 @@ export class LeaderboardService {
     }
     await this.pointsService.adjustTo(userId, points);
     await this.leaderboardRepository.saveBadges(stats.withBadges(badges));
-    return this.getStandings('all-time', viewerId);
+    return this.getPlatformStandings(viewerId);
+  }
+
+  private async rank(
+    timeframe: LeaderboardTimeframe,
+    viewerId: string,
+    scope: LeaderboardScope,
+  ): Promise<RankedLeaderboardEntry[]> {
+    const views = await this.leaderboardRepository.listByTimeframe(timeframe, scope);
+    return views.map((view, index) => ({
+      view,
+      rank: index + 1,
+      isCurrentUser: view.userId === viewerId,
+    }));
   }
 }

@@ -26,7 +26,7 @@ export class LeaderboardManagementController {
   @ApiOperation({ summary: 'List all-time leaderboard standings for management' })
   @ApiResponse({ status: 200, type: [LeaderboardEntryResponseDto] })
   async listStandings(@Req() req: RequestWithUser): Promise<LeaderboardEntryResponseDto[]> {
-    const standings = await this.leaderboardService.getStandings('all-time', req.user.getId());
+    const standings = await this.leaderboardService.getPlatformStandings(req.user.getId());
     return standings.map((entry) => LeaderboardPresentationMapper.toResponse(entry));
   }
 

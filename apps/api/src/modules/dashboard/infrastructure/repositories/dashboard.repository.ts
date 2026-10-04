@@ -137,7 +137,10 @@ export class DashboardRepository implements IDashboardRepository {
   }
 
   private async getLeaderboard(userId: string): Promise<DashboardLeaderboardView> {
-    const stats = await this.prisma.userStats.findUnique({ where: { userId } });
+    const stats = await this.prisma.userStats.findUnique({
+      where: { userId },
+      include: { user: { select: { tenantId: true } } },
+    });
 
     if (!stats) {
       return {
@@ -150,7 +153,7 @@ export class DashboardRepository implements IDashboardRepository {
     }
 
     const ahead = await this.prisma.userStats.count({
-      where: { points: { gt: stats.points } },
+      where: { points: { gt: stats.points }, user: { tenantId: stats.user.tenantId } },
     });
 
     return {
