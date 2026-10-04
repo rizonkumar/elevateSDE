@@ -13,7 +13,7 @@ export const SCHEDULED_JOB_PATTERNS: Readonly<Record<ScheduledJobName, string>> 
   [SCHEDULED_JOBS.RESET_MONTHLY_POINTS]: '0 0 1 * *',
   [SCHEDULED_JOBS.EXPIRE_STREAKS]: '5 0 * * *',
   [SCHEDULED_JOBS.FINALIZE_CONTESTS]: '*/5 * * * *',
-  [SCHEDULED_JOBS.SWEEP_PREPARATION_REMINDERS]: '0 * * * *',
+  [SCHEDULED_JOBS.SWEEP_PREPARATION_REMINDERS]: '0 8 * * *',
 };
 
 export const SCHEDULED_JOB_NAMES: readonly ScheduledJobName[] = Object.values(SCHEDULED_JOBS);

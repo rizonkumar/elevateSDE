@@ -95,6 +95,20 @@ describe('ContestParticipationService', () => {
       expect(rows[1]?.isCurrentUser).toBe(true);
     });
 
+    it('assigns shared ranks to exact ties and skips the next rank', async () => {
+      freezeAt('2026-07-19T19:00:00.000Z');
+      repository.accepted = [
+        { userId: 'u1', problemId: 'p1', firstAcceptedAt: new Date('2026-07-19T18:20:00.000Z') },
+        { userId: 'u2', problemId: 'p1', firstAcceptedAt: new Date('2026-07-19T18:20:00.000Z') },
+      ];
+      const rows = await service.standings('weekly-sprint', 'u1');
+      expect(rows.map((row) => [row.userId, row.rank])).toEqual([
+        ['u1', 1],
+        ['u2', 1],
+        ['u3', 3],
+      ]);
+    });
+
     it('breaks score ties by lower penalty', async () => {
       freezeAt('2026-07-19T19:00:00.000Z');
       repository.accepted = [

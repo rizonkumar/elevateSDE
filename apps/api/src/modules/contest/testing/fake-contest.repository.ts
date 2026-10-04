@@ -41,6 +41,8 @@ export class FakeContestRepository implements IContestRepository {
   participantCounts = new Map<string, number>();
   addParticipantCalls: Array<{ contestId: string; userId: string }> = [];
   finalizableContestIds: string[] = [];
+  finalizableEndedBefore: Date | null = null;
+  pendingSubmissions = false;
   finalizedContests = new Map<string, { results: ContestFinalResult[]; finalizedAt: Date }>();
 
   async list(): Promise<ContestSummaryView[]> {
@@ -83,8 +85,12 @@ export class FakeContestRepository implements IContestRepository {
   async findFirstAcceptedInWindow(): Promise<AcceptedSubmissionView[]> {
     return this.accepted;
   }
-  async findFinalizableContestIds(): Promise<string[]> {
+  async findFinalizableContestIds(endedBefore: Date): Promise<string[]> {
+    this.finalizableEndedBefore = endedBefore;
     return this.finalizableContestIds.filter((id) => !this.finalizedContests.has(id));
+  }
+  async hasPendingSubmissionsInWindow(): Promise<boolean> {
+    return this.pendingSubmissions;
   }
   async saveFinalResults(
     contestId: string,

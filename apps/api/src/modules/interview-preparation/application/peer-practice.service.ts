@@ -13,14 +13,11 @@ import {
   NOTIFICATION_EVENTS,
   PreparationReminderEvent,
 } from '../../notification/domain/events/notification-events';
+import { DAY_MS, toDateKey } from '../../daily-challenge/domain/daily-date';
 import { PeerPracticeSession, PeerParticipantRole } from '../domain/entities/peer-practice-session';
 import { IInterviewPreparationRepository } from '../domain/interfaces/interview-preparation-repository.interface';
 
-const REMINDER_HORIZON_MS = 7 * 86_400_000;
-
-function toDateKey(date: Date): string {
-  return date.toISOString().slice(0, 10);
-}
+const REMINDER_HORIZON_DAYS = 7;
 
 @Injectable()
 export class PeerPracticeService {
@@ -159,7 +156,7 @@ export class PeerPracticeService {
 
   private async emitUpcomingReminders(userId?: string): Promise<number> {
     const from = new Date();
-    const to = new Date(from.getTime() + REMINDER_HORIZON_MS);
+    const to = new Date(from.getTime() + REMINDER_HORIZON_DAYS * DAY_MS);
     const targets = await this.repository.listUpcomingPreparationTargets({ userId, from, to });
     for (const target of targets) {
       this.eventEmitter.emit(NOTIFICATION_EVENTS.PREPARATION_REMINDER, {

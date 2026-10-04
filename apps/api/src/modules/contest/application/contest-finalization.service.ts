@@ -1,7 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PointsService } from '../../leaderboard/application/points.service';
 import { IContestRepository } from '../domain/interfaces/contest-repository.interface';
-import { ContestFinalResult } from '../domain/read-models/contest-view';
+import { ContestDetailView, ContestFinalResult } from '../domain/read-models/contest-view';
+import { finalizationCutoff } from '../domain/contest-status';
 import { ContestStandingsService } from './contest-standings.service';
 
 @Injectable()
@@ -15,7 +16,7 @@ export class ContestFinalizationService {
   ) {}
 
   async finalizeEnded(now: Date = new Date()): Promise<number> {
-    const contestIds = await this.repository.findFinalizableContestIds(now);
+    const contestIds = await this.repository.findFinalizableContestIds(finalizationCutoff(now));
     let finalizedCount = 0;
     for (const contestId of contestIds) {
       if (await this.finalize(contestId, now)) {
@@ -27,7 +28,7 @@ export class ContestFinalizationService {
 
   private async finalize(contestId: string, finalizedAt: Date): Promise<boolean> {
     const detail = await this.repository.findDetail(contestId);
-    if (!detail) {
+    if (!detail || (await this.hasPendingSubmissions(detail))) {
       return false;
     }
     const ranked = await this.standingsService.rank(detail);
@@ -45,5 +46,17 @@ export class ContestFinalizationService {
       );
     }
     return finalized;
+  }
+
+  private async hasPendingSubmissions(detail: ContestDetailView): Promise<boolean> {
+    const pending = await this.repository.hasPendingSubmissionsInWindow(
+      detail.problems.map((problem) => problem.problemId),
+      detail.startsAt,
+      detail.endsAt,
+    );
+    if (pending) {
+      this.logger.log(`Deferring contest ${detail.id} finalization until judging completes`);
+    }
+    return pending;
   }
 }

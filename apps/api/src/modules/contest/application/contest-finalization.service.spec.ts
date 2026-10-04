@@ -55,6 +55,33 @@ describe('ContestFinalizationService', () => {
     expect(repository.finalizedContests.has('contest-1')).toBe(false);
   });
 
+  it('only considers contests that ended before the grace period', async () => {
+    await service.finalizeEnded(FINALIZED_AT);
+
+    expect(repository.finalizableEndedBefore).toEqual(new Date('2026-07-19T19:33:00.000Z'));
+  });
+
+  it('defers finalization while contest submissions are still being judged', async () => {
+    repository.pendingSubmissions = true;
+
+    await expect(service.finalizeEnded(FINALIZED_AT)).resolves.toBe(0);
+
+    expect(awardContestResults).not.toHaveBeenCalled();
+    expect(repository.finalizedContests.has('contest-1')).toBe(false);
+  });
+
+  it('gives tied participants the same final rank', async () => {
+    repository.accepted = [
+      { userId: 'u1', problemId: 'p1', firstAcceptedAt: new Date('2026-07-19T18:10:00.000Z') },
+      { userId: 'u2', problemId: 'p1', firstAcceptedAt: new Date('2026-07-19T18:10:00.000Z') },
+    ];
+
+    await service.finalizeEnded(FINALIZED_AT);
+
+    const results = repository.finalizedContests.get('contest-1')?.results ?? [];
+    expect(results.map((result) => result.rank)).toEqual([1, 1]);
+  });
+
   it('is a no-op once a contest is finalized', async () => {
     await service.finalizeEnded(FINALIZED_AT);
 

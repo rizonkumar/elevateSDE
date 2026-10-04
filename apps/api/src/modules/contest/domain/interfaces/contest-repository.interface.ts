@@ -31,7 +31,12 @@ export abstract class IContestRepository {
     from: Date,
     to: Date,
   ): Promise<AcceptedSubmissionView[]>;
-  abstract findFinalizableContestIds(now: Date): Promise<string[]>;
+  abstract findFinalizableContestIds(endedBefore: Date): Promise<string[]>;
+  abstract hasPendingSubmissionsInWindow(
+    problemIds: string[],
+    from: Date,
+    to: Date,
+  ): Promise<boolean>;
   abstract saveFinalResults(
     contestId: string,
     results: ContestFinalResult[],

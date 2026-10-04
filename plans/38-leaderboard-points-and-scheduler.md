@@ -37,7 +37,9 @@ The rules are shared, so the web leaderboard's "How points work" panel reads the
 - `ContestParticipant`: add `finalRank?`, `finalScore?`, `finalPenaltySeconds?`.
 - `InterviewPreparationPlan`: add `@@index([status, targetAt])` for the global reminder sweep.
 
-Migration: `20261004120000_points_ledger_and_contest_finalization`.
+Migrations:
+- `20261004120000_points_ledger_and_contest_finalization`: schema.
+- `20261004130000_backfill_point_ledger`: inserts zero-delta `PROBLEM_SOLVED` and `DAILY_CHALLENGE` rows for activity that happened before the ledger existed. Old solves are never re-awarded, and existing totals stay unchanged.
 
 ---
 
@@ -59,10 +61,11 @@ Migration: `20261004120000_points_ledger_and_contest_finalization`.
 
 ### Contest finalization
 - `contest/domain/contest-standings.ts`: a pure ranking function shared by live standings and finalization.
-- `ContestFinalizationService.finalizeEnded(now)` runs in this order:
-  1. award points (idempotent)
+- `ContestFinalizationService.finalizeEnded(now)` only considers contests that ended more than 2 minutes ago, and defers any contest that still has queued or running submissions in its window. It then runs in this order:
+  1. award points (idempotent, one participant at a time)
   2. persist final rank, score and penalty
   3. stamp `finalizedAt`
+- Exact ties (same score and penalty) share a rank, so they also get the same podium bonus.
 
 ### Scheduler (new `scheduler` module)
 - Queue `scheduled` (BullMQ job schedulers, so Redis deduplicates the schedules across instances).
@@ -73,7 +76,7 @@ Migration: `20261004120000_points_ledger_and_contest_finalization`.
   | `leaderboard.reset-monthly` | `0 0 1 * *` |
   | `streaks.expire` | `5 0 * * *` |
   | `contests.finalize` | `*/5 * * * *` |
-  | `preparation.reminders-sweep` | `0 * * * *` |
+  | `preparation.reminders-sweep` | `0 8 * * *` |
 
 - `SchedulerRegistrar` upserts the schedules on bootstrap and removes stale ones. Set `SCHEDULER_ENABLED=false` to opt out.
 - `ScheduledJobRunner` maps each job name to its handler. `ScheduledJobsProcessor` delegates to it.
@@ -101,7 +104,13 @@ Migration: `20261004120000_points_ledger_and_contest_finalization`.
 
 ---
 
-## 7. Out of Scope
+## 7. Known Limitations / Follow-ups
+
+- The admin adjustment delta is computed from a read taken just before the write. An award that lands in between makes the final total miss the target by that award.
+- Weekly and monthly totals are reset counters. A reset that runs late also clears points earned after the period boundary. Deriving period totals from the ledger would remove this.
+- `ContestParticipant.final*` columns are persisted for future rating and history work. Standings are still computed live.
+
+## 8. Out of Scope
 
 - Badge key vs display-name mismatch between achievements and the admin leaderboard page.
 - Contest rating (Elo).
@@ -111,14 +120,15 @@ Migration: `20261004120000_points_ledger_and_contest_finalization`.
 
 ---
 
-## 8. Progress
+## 9. Progress
 
 - [x] Schema + migration
-- [ ] Points ledger + service
-- [ ] Award wiring (processor, daily challenge)
-- [ ] Contest finalization
-- [ ] Streak expiry + reminder sweep
-- [ ] Scheduler module + admin trigger
-- [ ] Web "How points work"
-- [ ] Tests, lint, type-check, build
+- [x] Points ledger + service
+- [x] Award wiring (processor, daily challenge)
+- [x] Contest finalization
+- [x] Streak expiry + reminder sweep
+- [x] Scheduler module + admin trigger
+- [x] Web "How points work"
+- [x] Tests, lint, type-check, build
+- [x] Code review fixes (grace period, pending-judging guard, tie ranks, sequential writes, ledger backfill, shared date helpers)
 - [ ] Manual verification on seeded DB

@@ -27,15 +27,20 @@ export function rankContestParticipants<T extends { userId: string }>(
 ): RankedParticipant<T>[] {
   const totals = aggregateTotals(input);
   const totalsFor = (userId: string): ParticipantTotals => totals.get(userId) ?? EMPTY_TOTALS;
-  return [...input.participants]
-    .sort((left, right) =>
-      compareStanding(left.userId, totalsFor(left.userId), right.userId, totalsFor(right.userId)),
-    )
-    .map((participant, index) => ({
-      participant,
-      rank: index + 1,
-      totals: totalsFor(participant.userId),
-    }));
+  const sorted = [...input.participants].sort((left, right) =>
+    compareStanding(left.userId, totalsFor(left.userId), right.userId, totalsFor(right.userId)),
+  );
+  return sorted.reduce<RankedParticipant<T>[]>((ranked, participant, index) => {
+    const participantTotals = totalsFor(participant.userId);
+    const previous = ranked[index - 1];
+    const rank = previous && isTied(previous.totals, participantTotals) ? previous.rank : index + 1;
+    ranked.push({ participant, rank, totals: participantTotals });
+    return ranked;
+  }, []);
+}
+
+function isTied(left: ParticipantTotals, right: ParticipantTotals): boolean {
+  return left.score === right.score && left.penaltySeconds === right.penaltySeconds;
 }
 
 function aggregateTotals<T extends { userId: string }>(

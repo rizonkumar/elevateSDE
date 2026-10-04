@@ -15,6 +15,12 @@ import {
 } from '../../domain/read-models/contest-view';
 import { ContestMapper } from '../mappers/contest.mapper';
 
+const FINAL_RESULTS_TRANSACTION_TIMEOUT_MS = 30_000;
+const PENDING_SUBMISSION_STATUSES: SubmissionStatus[] = [
+  SubmissionStatus.QUEUED,
+  SubmissionStatus.RUNNING,
+];
+
 type ContestRowWithCount = Prisma.ContestGetPayload<{
   include: { _count: { select: { problems: true } } };
 }>;
@@ -192,9 +198,13 @@ export class ContestRepository implements IContestRepository {
     );
   }
 
-  async findFinalizableContestIds(now: Date): Promise<string[]> {
+  async findFinalizableContestIds(endedBefore: Date): Promise<string[]> {
     const rows = await this.prisma.contest.findMany({
-      where: { finalizedAt: null, endsAt: { lte: now }, status: { not: ContestStatus.DRAFT } },
+      where: {
+        finalizedAt: null,
+        endsAt: { lte: endedBefore },
+        status: { not: ContestStatus.DRAFT },
+      },
       orderBy: { endsAt: 'asc' },
       select: { id: true },
     });
@@ -206,28 +216,48 @@ export class ContestRepository implements IContestRepository {
     results: ContestFinalResult[],
     finalizedAt: Date,
   ): Promise<boolean> {
-    return this.prisma.$transaction(async (transaction) => {
-      const claimed = await transaction.contest.updateMany({
-        where: { id: contestId, finalizedAt: null },
-        data: { finalizedAt },
-      });
-      if (claimed.count === 0) {
-        return false;
-      }
-      await Promise.all(
-        results.map((result) =>
-          transaction.contestParticipant.update({
+    return this.prisma.$transaction(
+      async (transaction) => {
+        const claimed = await transaction.contest.updateMany({
+          where: { id: contestId, finalizedAt: null },
+          data: { finalizedAt },
+        });
+        if (claimed.count === 0) {
+          return false;
+        }
+        for (const result of results) {
+          await transaction.contestParticipant.update({
             where: { contestId_userId: { contestId, userId: result.userId } },
             data: {
               finalRank: result.rank,
               finalScore: result.score,
               finalPenaltySeconds: result.penaltySeconds,
             },
-          }),
-        ),
-      );
-      return true;
+          });
+        }
+        return true;
+      },
+      { timeout: FINAL_RESULTS_TRANSACTION_TIMEOUT_MS },
+    );
+  }
+
+  async hasPendingSubmissionsInWindow(
+    problemIds: string[],
+    from: Date,
+    to: Date,
+  ): Promise<boolean> {
+    if (problemIds.length === 0) {
+      return false;
+    }
+    const pending = await this.prisma.submission.findFirst({
+      where: {
+        problemId: { in: problemIds },
+        status: { in: PENDING_SUBMISSION_STATUSES },
+        createdAt: { gte: from, lte: to },
+      },
+      select: { id: true },
     });
+    return pending !== null;
   }
 
   private toSummaryView(row: ContestRowWithCount): ContestSummaryView {

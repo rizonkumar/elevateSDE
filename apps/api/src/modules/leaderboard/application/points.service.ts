@@ -24,8 +24,13 @@ export class PointsService {
       const award = PointAward.contestResult(contestId, placement);
       return award ? [award] : [];
     });
-    const outcomes = await Promise.all(awards.map((award) => this.repository.award(award)));
-    return outcomes.filter(Boolean).length;
+    let awardedCount = 0;
+    for (const award of awards) {
+      if (await this.repository.award(award)) {
+        awardedCount += 1;
+      }
+    }
+    return awardedCount;
   }
 
   async adjust(userId: string, delta: number): Promise<boolean> {
