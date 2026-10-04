@@ -79,16 +79,22 @@ export class AuthService {
   async refresh(token: string): Promise<AuthResponseDto> {
     const now = new Date();
     const stored = await this.refreshTokens.findByToken(token);
-    if (!stored || stored.expiresAt <= now || !(await this.mayRotate(stored, now))) {
+    if (!stored || stored.expiresAt <= now) {
       throw invalidRefreshToken();
     }
-    return this.tokenService.issueFor(stored.user, stored.familyId);
+    if (stored.rotatedAt === null) {
+      const rotated = await this.tryRotate(stored, now);
+      if (rotated) {
+        return rotated;
+      }
+    }
+    return this.resumeRotatedSession(stored, now);
   }
 
   async logout(token: string): Promise<void> {
-    const stored = await this.refreshTokens.findByToken(token);
-    if (stored) {
-      await this.refreshTokens.revokeFamily(stored.familyId);
+    const familyId = await this.refreshTokens.findFamilyId(token);
+    if (familyId) {
+      await this.refreshTokens.revokeFamily(familyId);
     }
   }
 
@@ -96,16 +102,28 @@ export class AuthService {
     return this.refreshTokens.deleteExpired(now);
   }
 
-  private async mayRotate(stored: StoredRefreshToken, now: Date): Promise<boolean> {
-    if (await this.refreshTokens.claimRotation(stored.id, now)) {
-      return true;
+  private async tryRotate(stored: StoredRefreshToken, now: Date): Promise<AuthResponseDto | null> {
+    const successor = await this.tokenService.signRefreshToken(stored.user, stored.familyId);
+    const rotated = await this.refreshTokens.rotate(stored.id, successor.record, now);
+    return rotated ? this.tokenService.respond(stored.user, successor.token) : null;
+  }
+
+  private async resumeRotatedSession(
+    stored: StoredRefreshToken,
+    now: Date,
+  ): Promise<AuthResponseDto> {
+    const rotation = await this.refreshTokens.findRotation(stored.id);
+    const successor = rotation?.liveSuccessor;
+    if (
+      !rotation ||
+      !successor ||
+      successor.expiresAt <= now ||
+      !isWithinReuseGrace(rotation.rotatedAt, now)
+    ) {
+      await this.refreshTokens.revokeFamily(stored.familyId);
+      throw invalidRefreshToken();
     }
-    const rotatedAt = await this.refreshTokens.findRotatedAt(stored.id);
-    if (rotatedAt && isWithinReuseGrace(rotatedAt, now)) {
-      return true;
-    }
-    await this.refreshTokens.revokeFamily(stored.familyId);
-    return false;
+    return this.tokenService.respond(stored.user, successor.token);
   }
 }
 

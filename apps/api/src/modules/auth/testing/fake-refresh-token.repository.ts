@@ -2,12 +2,15 @@ import { TEST_USER } from './auth-fixtures';
 import {
   IRefreshTokenRepository,
   NewRefreshToken,
+  RefreshTokenRotation,
+  RefreshTokenSuccessor,
   StoredRefreshToken,
 } from '../domain/interfaces/refresh-token-repository.interface';
 
 export interface FakeRefreshTokenRow extends NewRefreshToken {
   id: string;
   rotatedAt: Date | null;
+  replacedById: string | null;
 }
 
 export class FakeRefreshTokenRepository implements IRefreshTokenRepository {
@@ -15,8 +18,7 @@ export class FakeRefreshTokenRepository implements IRefreshTokenRepository {
   private sequence = 0;
 
   async create(token: NewRefreshToken): Promise<void> {
-    this.sequence += 1;
-    this.rows.push({ ...token, id: `rt-${this.sequence}`, rotatedAt: null });
+    this.insert(token);
   }
 
   async findByToken(token: string): Promise<StoredRefreshToken | null> {
@@ -32,17 +34,26 @@ export class FakeRefreshTokenRepository implements IRefreshTokenRepository {
       : null;
   }
 
-  async claimRotation(id: string, rotatedAt: Date): Promise<boolean> {
-    const row = this.rows.find((candidate) => candidate.id === id && candidate.rotatedAt === null);
-    if (!row) {
+  async findFamilyId(token: string): Promise<string | null> {
+    return this.rows.find((row) => row.token === token)?.familyId ?? null;
+  }
+
+  async rotate(storedId: string, successor: NewRefreshToken, rotatedAt: Date): Promise<boolean> {
+    const row = this.byId(storedId);
+    if (!row || row.rotatedAt !== null || row.familyId !== successor.familyId) {
       return false;
     }
     row.rotatedAt = rotatedAt;
+    row.replacedById = this.insert(successor).id;
     return true;
   }
 
-  async findRotatedAt(id: string): Promise<Date | null> {
-    return this.rows.find((candidate) => candidate.id === id)?.rotatedAt ?? null;
+  async findRotation(storedId: string): Promise<RefreshTokenRotation | null> {
+    const row = this.byId(storedId);
+    if (!row?.rotatedAt) {
+      return null;
+    }
+    return { rotatedAt: row.rotatedAt, liveSuccessor: this.liveSuccessor(row.replacedById) };
   }
 
   async revokeFamily(familyId: string): Promise<void> {
@@ -57,5 +68,27 @@ export class FakeRefreshTokenRepository implements IRefreshTokenRepository {
 
   tokensInFamily(familyId: string): string[] {
     return this.rows.filter((row) => row.familyId === familyId).map((row) => row.token);
+  }
+
+  private insert(token: NewRefreshToken): FakeRefreshTokenRow {
+    this.sequence += 1;
+    const row = { ...token, id: `rt-${this.sequence}`, rotatedAt: null, replacedById: null };
+    this.rows.push(row);
+    return row;
+  }
+
+  private byId(id: string | null): FakeRefreshTokenRow | undefined {
+    return this.rows.find((row) => row.id === id);
+  }
+
+  private liveSuccessor(id: string | null): RefreshTokenSuccessor | null {
+    const next = this.byId(id);
+    if (!next) {
+      return null;
+    }
+    if (next.rotatedAt === null) {
+      return { token: next.token, expiresAt: next.expiresAt };
+    }
+    return this.liveSuccessor(next.replacedById);
   }
 }

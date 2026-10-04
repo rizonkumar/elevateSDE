@@ -51,13 +51,18 @@ describe('TokenService', () => {
     expect(issued.user.email).toBe('candidate@example.com');
   });
 
-  it('starts a new token family for each sign-in and keeps it across rotations', async () => {
+  it('starts a new token family for each sign-in', async () => {
     await service.issueFor(TEST_USER);
     await service.issueFor(TEST_USER);
-    await service.issueFor(TEST_USER, 'family-1');
 
-    const [first, second, rotated] = repository.rows;
+    const [first, second] = repository.rows;
     expect(first?.familyId).not.toBe(second?.familyId);
-    expect(rotated?.familyId).toBe('family-1');
+  });
+
+  it('signs successor refresh tokens into an existing family without persisting them', async () => {
+    const signed = await service.signRefreshToken(TEST_USER, 'family-1');
+
+    expect(signed.record).toMatchObject({ familyId: 'family-1', token: signed.token });
+    expect(repository.rows).toHaveLength(0);
   });
 });

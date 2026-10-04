@@ -15,11 +15,22 @@ export interface StoredRefreshToken {
   user: User;
 }
 
+export interface RefreshTokenSuccessor {
+  token: string;
+  expiresAt: Date;
+}
+
+export interface RefreshTokenRotation {
+  rotatedAt: Date;
+  liveSuccessor: RefreshTokenSuccessor | null;
+}
+
 export abstract class IRefreshTokenRepository {
   abstract create(token: NewRefreshToken): Promise<void>;
   abstract findByToken(token: string): Promise<StoredRefreshToken | null>;
-  abstract claimRotation(id: string, rotatedAt: Date): Promise<boolean>;
-  abstract findRotatedAt(id: string): Promise<Date | null>;
+  abstract findFamilyId(token: string): Promise<string | null>;
+  abstract rotate(storedId: string, successor: NewRefreshToken, rotatedAt: Date): Promise<boolean>;
+  abstract findRotation(storedId: string): Promise<RefreshTokenRotation | null>;
   abstract revokeFamily(familyId: string): Promise<void>;
   abstract deleteExpired(now: Date): Promise<number>;
 }

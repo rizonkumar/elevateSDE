@@ -5,8 +5,18 @@ import { User } from '../../users/domain/entities/user';
 import { UserPresentationMapper } from '../../users/presentation/mappers/user-presentation.mapper';
 import { AuthResponseDto } from '@elevatesde/shared-types';
 import { AUTH_TOKEN_TYPES, AuthTokenPayload, AuthTokenType } from '../domain/auth-token';
-import { IRefreshTokenRepository } from '../domain/interfaces/refresh-token-repository.interface';
+import {
+  IRefreshTokenRepository,
+  NewRefreshToken,
+} from '../domain/interfaces/refresh-token-repository.interface';
 import { REFRESH_TOKEN_TTL_DAYS, refreshTokenExpiry } from '../domain/refresh-token-rotation';
+
+const ACCESS_TOKEN_TTL = '15m';
+
+export interface SignedRefreshToken {
+  record: NewRefreshToken;
+  token: string;
+}
 
 @Injectable()
 export class TokenService {
@@ -15,29 +25,29 @@ export class TokenService {
     private readonly refreshTokens: IRefreshTokenRepository,
   ) {}
 
-  async issueFor(user: User, familyId: string = randomUUID()): Promise<AuthResponseDto> {
+  async issueFor(user: User): Promise<AuthResponseDto> {
+    const refresh = await this.signRefreshToken(user, randomUUID());
+    await this.refreshTokens.create(refresh.record);
+    return this.respond(user, refresh.token);
+  }
+
+  async signRefreshToken(user: User, familyId: string): Promise<SignedRefreshToken> {
+    const token = await this.jwtService.signAsync(this.payloadFor(user, AUTH_TOKEN_TYPES.REFRESH), {
+      expiresIn: `${REFRESH_TOKEN_TTL_DAYS}d`,
+      jwtid: randomUUID(),
+    });
+    return {
+      token,
+      record: { userId: user.getId(), familyId, token, expiresAt: refreshTokenExpiry(new Date()) },
+    };
+  }
+
+  async respond(user: User, refreshToken: string): Promise<AuthResponseDto> {
     const accessToken = await this.jwtService.signAsync(
       this.payloadFor(user, AUTH_TOKEN_TYPES.ACCESS),
-      { expiresIn: '15m' },
+      { expiresIn: ACCESS_TOKEN_TTL },
     );
-
-    const refreshTokenString = await this.jwtService.signAsync(
-      this.payloadFor(user, AUTH_TOKEN_TYPES.REFRESH),
-      { expiresIn: `${REFRESH_TOKEN_TTL_DAYS}d`, jwtid: randomUUID() },
-    );
-
-    await this.refreshTokens.create({
-      userId: user.getId(),
-      familyId,
-      token: refreshTokenString,
-      expiresAt: refreshTokenExpiry(new Date()),
-    });
-
-    return {
-      accessToken,
-      refreshToken: refreshTokenString,
-      user: UserPresentationMapper.toResponse(user),
-    };
+    return { accessToken, refreshToken, user: UserPresentationMapper.toResponse(user) };
   }
 
   private payloadFor(user: User, typ: AuthTokenType): AuthTokenPayload {

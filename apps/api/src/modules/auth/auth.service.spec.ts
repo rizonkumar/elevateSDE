@@ -42,24 +42,42 @@ describe('AuthService refresh tokens', () => {
     expect(familyOf(rotated.refreshToken)).toBe(familyOf(session.refreshToken));
   });
 
-  it('lets concurrent refreshes from different tabs both succeed', async () => {
+  it('gives concurrent refreshes from different tabs the same successor token', async () => {
     const session = await tokens.issueFor(TEST_USER);
+    const family = familyOf(session.refreshToken);
 
     const outcomes = await Promise.all([
       service.refresh(session.refreshToken),
       service.refresh(session.refreshToken),
     ]);
 
-    expect(outcomes.map((outcome) => outcome.accessToken)).toHaveLength(2);
-    expect(new Set(outcomes.map((outcome) => outcome.refreshToken)).size).toBe(2);
+    expect(outcomes[0]?.refreshToken).toBe(outcomes[1]?.refreshToken);
+    expect(outcomes[0]?.refreshToken).not.toBe(session.refreshToken);
+    expect(repository.tokensInFamily(family)).toHaveLength(2);
   });
 
-  it('accepts reuse of a rotated token within the grace window', async () => {
+  it('returns the existing successor for reuse within the grace window without minting more', async () => {
     const session = await tokens.issueFor(TEST_USER);
-    await service.refresh(session.refreshToken);
+    const family = familyOf(session.refreshToken);
+    const rotated = await service.refresh(session.refreshToken);
     advance(REFRESH_REUSE_GRACE_MS);
 
-    await expect(service.refresh(session.refreshToken)).resolves.toHaveProperty('accessToken');
+    const replayed = await service.refresh(session.refreshToken);
+    const replayedAgain = await service.refresh(session.refreshToken);
+
+    expect(replayed.refreshToken).toBe(rotated.refreshToken);
+    expect(replayedAgain.refreshToken).toBe(rotated.refreshToken);
+    expect(repository.tokensInFamily(family)).toHaveLength(2);
+  });
+
+  it('follows the chain to the live token when the successor already rotated', async () => {
+    const session = await tokens.issueFor(TEST_USER);
+    const first = await service.refresh(session.refreshToken);
+    const second = await service.refresh(first.refreshToken);
+
+    await expect(service.refresh(session.refreshToken)).resolves.toMatchObject({
+      refreshToken: second.refreshToken,
+    });
   });
 
   it('treats reuse after the grace window as theft and revokes the whole family', async () => {
