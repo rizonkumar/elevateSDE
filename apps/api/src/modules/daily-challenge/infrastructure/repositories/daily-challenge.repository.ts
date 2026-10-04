@@ -101,6 +101,17 @@ export class DailyChallengeRepository implements IDailyChallengeRepository {
     });
   }
 
+  async expireStreaksLastActiveBefore(cutoff: Date): Promise<number> {
+    const result = await this.prisma.userStats.updateMany({
+      where: {
+        streakDays: { gt: 0 },
+        OR: [{ lastActiveDate: null }, { lastActiveDate: { lt: cutoff } }],
+      },
+      data: { streakDays: 0 },
+    });
+    return result.count;
+  }
+
   async listCompletionDates(userId: string, from: Date, to: Date): Promise<Date[]> {
     const rows = await this.prisma.dailyChallengeCompletion.findMany({
       where: { userId, dailyChallenge: { challengeDate: { gte: from, lte: to } } },

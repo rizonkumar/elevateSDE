@@ -25,6 +25,7 @@ export abstract class IDailyChallengeRepository {
   ): Promise<void>;
   abstract findStreakState(userId: string): Promise<StreakState | null>;
   abstract saveStreakState(userId: string, state: StreakState): Promise<void>;
+  abstract expireStreaksLastActiveBefore(cutoff: Date): Promise<number>;
   abstract listCompletionDates(userId: string, from: Date, to: Date): Promise<Date[]>;
   abstract listSchedule(
     from: Date,

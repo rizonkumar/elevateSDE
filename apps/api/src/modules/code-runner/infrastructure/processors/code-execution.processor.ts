@@ -7,6 +7,7 @@ import { QUEUE_NAMES } from '../../../queues/domain/queue-names';
 import { CodeExecutionJobData } from '../../../queues/domain/interfaces/code-execution-queue.interface';
 import { DailyChallengeService } from '../../../daily-challenge/application/daily-challenge.service';
 import { AchievementService } from '../../../achievement/application/achievement.service';
+import { PointsService } from '../../../leaderboard/application/points.service';
 import {
   NOTIFICATION_EVENTS,
   SubmissionAcceptedEvent,
@@ -25,6 +26,7 @@ export class CodeExecutionProcessor extends WorkerHost {
     private readonly submissionService: SubmissionService,
     private readonly dailyChallengeService: DailyChallengeService,
     private readonly achievementService: AchievementService,
+    private readonly pointsService: PointsService,
     private readonly eventEmitter: EventEmitter2,
   ) {
     super();
@@ -37,6 +39,7 @@ export class CodeExecutionProcessor extends WorkerHost {
     await this.submissionService.applyResult(submissionId, outcome);
     if (outcome.status === SubmissionStatus.ACCEPTED) {
       await this.dailyChallengeService.registerCompletion(userId, problemId, submissionId);
+      await this.pointsService.awardProblemSolved(userId, problemId);
       await this.achievementService.evaluate(userId);
       this.eventEmitter.emit(NOTIFICATION_EVENTS.SUBMISSION_ACCEPTED, {
         userId,

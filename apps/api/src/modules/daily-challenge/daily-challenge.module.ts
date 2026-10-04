@@ -5,8 +5,10 @@ import { DailyChallengeService } from './application/daily-challenge.service';
 import { DailyChallengeController } from './presentation/controllers/daily-challenge.controller';
 import { DailyChallengeManagementController } from './presentation/controllers/daily-challenge-management.controller';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
+import { LeaderboardModule } from '../leaderboard/leaderboard.module';
 
 @Module({
+  imports: [LeaderboardModule],
   controllers: [DailyChallengeController, DailyChallengeManagementController],
   providers: [
     DailyChallengeService,
