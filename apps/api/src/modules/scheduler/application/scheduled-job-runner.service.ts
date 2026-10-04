@@ -3,6 +3,7 @@ import { PointsService } from '../../leaderboard/application/points.service';
 import { DailyChallengeService } from '../../daily-challenge/application/daily-challenge.service';
 import { ContestFinalizationService } from '../../contest/application/contest-finalization.service';
 import { PeerPracticeService } from '../../interview-preparation/application/peer-practice.service';
+import { AuthService } from '../../auth/auth.service';
 import { SCHEDULED_JOBS, ScheduledJobName } from '../domain/scheduled-jobs';
 
 type ScheduledJobHandler = () => Promise<number>;
@@ -17,6 +18,7 @@ export class ScheduledJobRunner {
     dailyChallengeService: DailyChallengeService,
     contestFinalizationService: ContestFinalizationService,
     peerPracticeService: PeerPracticeService,
+    authService: AuthService,
   ) {
     this.handlers = {
       [SCHEDULED_JOBS.ROLLOVER_WEEKLY_POINTS]: () => pointsService.refreshPeriodTotals('weekly'),
@@ -25,6 +27,7 @@ export class ScheduledJobRunner {
       [SCHEDULED_JOBS.FINALIZE_CONTESTS]: () => contestFinalizationService.finalizeEnded(),
       [SCHEDULED_JOBS.SWEEP_PREPARATION_REMINDERS]: () =>
         peerPracticeService.sweepPreparationReminders(),
+      [SCHEDULED_JOBS.PRUNE_REFRESH_TOKENS]: () => authService.pruneExpiredRefreshTokens(),
     };
   }
 

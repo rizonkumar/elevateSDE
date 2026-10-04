@@ -6,8 +6,12 @@ import { LoginDto } from './dtos/login.dto';
 import { AuthResponseDto } from '@elevatesde/shared-types';
 import * as bcrypt from 'bcrypt';
 import { UserRole } from '@prisma/client';
-import { UserMapper } from '../users/infrastructure/mappers/user.mapper';
 import { TokenService } from './application/token.service';
+import {
+  IRefreshTokenRepository,
+  StoredRefreshToken,
+} from './domain/interfaces/refresh-token-repository.interface';
+import { isWithinReuseGrace } from './domain/refresh-token-rotation';
 
 @Injectable()
 export class AuthService {
@@ -15,6 +19,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly tokenService: TokenService,
     private readonly prisma: PrismaService,
+    private readonly refreshTokens: IRefreshTokenRepository,
   ) {}
 
   async register(dto: RegisterDto): Promise<AuthResponseDto> {
@@ -72,27 +77,35 @@ export class AuthService {
   }
 
   async refresh(token: string): Promise<AuthResponseDto> {
-    const record = await this.prisma.refreshToken.findUnique({
-      where: { token },
-      include: { user: true },
-    });
-    if (!record) {
+    const now = new Date();
+    const stored = await this.refreshTokens.findByToken(token);
+    if (!stored || stored.expiresAt <= now || !(await this.mayRotate(stored, now))) {
       throw invalidRefreshToken();
     }
-    const consumed = await this.consumeRefreshToken(record.id);
-    if (!consumed || record.expiresAt <= new Date()) {
-      throw invalidRefreshToken();
-    }
-    return this.tokenService.issueFor(UserMapper.toDomain(record.user));
+    return this.tokenService.issueFor(stored.user, stored.familyId);
   }
 
   async logout(token: string): Promise<void> {
-    await this.prisma.refreshToken.deleteMany({ where: { token } });
+    const stored = await this.refreshTokens.findByToken(token);
+    if (stored) {
+      await this.refreshTokens.revokeFamily(stored.familyId);
+    }
   }
 
-  private async consumeRefreshToken(id: string): Promise<boolean> {
-    const { count } = await this.prisma.refreshToken.deleteMany({ where: { id } });
-    return count > 0;
+  async pruneExpiredRefreshTokens(now: Date = new Date()): Promise<number> {
+    return this.refreshTokens.deleteExpired(now);
+  }
+
+  private async mayRotate(stored: StoredRefreshToken, now: Date): Promise<boolean> {
+    if (await this.refreshTokens.claimRotation(stored.id, now)) {
+      return true;
+    }
+    const rotatedAt = await this.refreshTokens.findRotatedAt(stored.id);
+    if (rotatedAt && isWithinReuseGrace(rotatedAt, now)) {
+      return true;
+    }
+    await this.refreshTokens.revokeFamily(stored.familyId);
+    return false;
   }
 }
 

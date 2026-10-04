@@ -1,34 +1,22 @@
 import { UnauthorizedException } from '@nestjs/common';
-import { UserRole } from '@prisma/client';
 import { JwtStrategy } from './jwt.strategy';
 import { UsersService } from '../users/application/users.service';
-import { User } from '../users/domain/entities/user';
+import { TEST_USER } from './testing/auth-fixtures';
 import { AuthTokenPayload } from './domain/auth-token';
-
-const USER = User.reconstitute(
-  'user-1',
-  'candidate@example.com',
-  'hash',
-  UserRole.USER,
-  null,
-  new Date('2026-10-01T00:00:00.000Z'),
-  'Ada',
-  'Lovelace',
-);
 
 describe('JwtStrategy', () => {
   let findById: jest.Mock;
   let strategy: JwtStrategy;
 
   beforeEach(() => {
-    findById = jest.fn().mockResolvedValue(USER);
+    findById = jest.fn().mockResolvedValue(TEST_USER);
     strategy = new JwtStrategy({ findById } as unknown as UsersService);
   });
 
   it('accepts an access token for an existing user', async () => {
     await expect(
       strategy.validate({ sub: 'user-1', email: 'candidate@example.com', typ: 'access' }),
-    ).resolves.toBe(USER);
+    ).resolves.toBe(TEST_USER);
   });
 
   it.each<[string, Partial<AuthTokenPayload> & Record<string, unknown>]>([

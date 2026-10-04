@@ -11,6 +11,8 @@ import { GoogleAuthService } from './application/google-auth.service';
 import { GoogleAuthController } from './presentation/google-auth.controller';
 import { IGoogleTokenVerifier } from './domain/interfaces/google-token-verifier.interface';
 import { GoogleTokenVerifier } from './infrastructure/google-token-verifier';
+import { IRefreshTokenRepository } from './domain/interfaces/refresh-token-repository.interface';
+import { RefreshTokenRepository } from './infrastructure/repositories/refresh-token.repository';
 
 @Module({
   imports: [
@@ -30,6 +32,10 @@ import { GoogleTokenVerifier } from './infrastructure/google-token-verifier';
     {
       provide: IGoogleTokenVerifier,
       useClass: GoogleTokenVerifier,
+    },
+    {
+      provide: IRefreshTokenRepository,
+      useClass: RefreshTokenRepository,
     },
   ],
   exports: [AuthService, JwtStrategy, PassportModule],
