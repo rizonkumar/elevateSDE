@@ -76,26 +76,26 @@ export class AuthService {
       where: { token },
       include: { user: true },
     });
-
-    if (!record || record.expiresAt < new Date()) {
-      if (record) {
-        await this.prisma.refreshToken.delete({ where: { id: record.id } });
-      }
-      throw new UnauthorizedException('Invalid or expired refresh token');
+    if (!record) {
+      throw invalidRefreshToken();
     }
-
-    await this.prisma.refreshToken.delete({ where: { id: record.id } });
-
-    const user = UserMapper.toDomain(record.user);
-    return this.tokenService.issueFor(user);
+    const consumed = await this.consumeRefreshToken(record.id);
+    if (!consumed || record.expiresAt <= new Date()) {
+      throw invalidRefreshToken();
+    }
+    return this.tokenService.issueFor(UserMapper.toDomain(record.user));
   }
 
   async logout(token: string): Promise<void> {
-    const record = await this.prisma.refreshToken.findUnique({
-      where: { token },
-    });
-    if (record) {
-      await this.prisma.refreshToken.delete({ where: { id: record.id } });
-    }
+    await this.prisma.refreshToken.deleteMany({ where: { token } });
   }
+
+  private async consumeRefreshToken(id: string): Promise<boolean> {
+    const { count } = await this.prisma.refreshToken.deleteMany({ where: { id } });
+    return count > 0;
+  }
+}
+
+function invalidRefreshToken(): UnauthorizedException {
+  return new UnauthorizedException('Invalid or expired refresh token');
 }
