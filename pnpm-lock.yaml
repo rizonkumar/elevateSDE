@@ -259,9 +259,6 @@ importers:
       framer-motion:
         specifier: ^12.40.0
         version: 12.40.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      js-cookie:
-        specifier: ^3.0.8
-        version: 3.0.8
       lucide-react:
         specifier: ^1.18.0
         version: 1.18.0(react@19.2.4)
@@ -296,9 +293,6 @@ importers:
       '@tailwindcss/postcss':
         specifier: ^4
         version: 4.3.1
-      '@types/js-cookie':
-        specifier: ^3.0.6
-        version: 3.0.6
       '@types/node':
         specifier: ^20
         version: 20.19.43
@@ -336,6 +330,9 @@ importers:
         specifier: ^5.0.14
         version: 5.0.14(@types/react@19.2.17)(immer@11.1.8)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
     devDependencies:
+      '@elevatesde/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
       '@elevatesde/ts-config':
         specifier: workspace:*
         version: link:../ts-config
@@ -345,6 +342,9 @@ importers:
       '@types/js-cookie':
         specifier: ^3.0.6
         version: 3.0.6
+      eslint:
+        specifier: ^9.0.0
+        version: 9.39.4(jiti@2.7.0)
       jest:
         specifier: ^30.0.0
         version: 30.4.2(@types/node@24.13.2)(ts-node@10.9.2(@types/node@24.13.2)(typescript@5.9.3))
@@ -3166,6 +3166,7 @@ packages:
   eslint@9.39.4:
     resolution: {integrity: sha512-XoMjdBOwe/esVgEvLmNsD3IRHkm7fbKIUGvrleloJXUZgDHig2IPWNniv+GwjyJXzuNqVjlr5+4yVUZjycJwfQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
     peerDependencies:
       jiti: '*'
