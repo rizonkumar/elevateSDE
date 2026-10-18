@@ -50,14 +50,14 @@ export function NotificationBell() {
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        aria-label="Notifications"
+        aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}
         aria-haspopup="menu"
         aria-expanded={open}
-        className="relative rounded-full border border-(--color-border-subtle) p-2 text-(--color-text-primary) transition-colors hover:bg-(--color-badge-bg) cursor-pointer"
+        className="relative flex h-9 w-9 items-center justify-center rounded-(--radius-sm) text-(--color-text-muted) transition-colors hover:bg-(--color-badge-bg) hover:text-(--color-text-primary) cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--color-accent)"
       >
         <Bell className="h-4 w-4" />
         {unreadCount > 0 && (
-          <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-(--color-danger) px-1 text-[10px] font-semibold text-white">
+          <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-(--color-danger) px-1 text-[10px] font-semibold leading-none text-white ring-2 ring-(--color-bg)">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
@@ -66,7 +66,7 @@ export function NotificationBell() {
       {open && (
         <div
           role="menu"
-          className="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-(--radius-lg) border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-soft)"
+          className="absolute right-0 z-50 mt-2 w-[calc(100vw-2rem)] max-w-sm overflow-hidden rounded-(--radius-md) border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-popover) sm:w-96"
         >
           <div className="flex items-center justify-between border-b border-(--color-border-subtle) px-4 py-3">
             <span className="text-sm font-semibold text-(--color-text-primary)">Notifications</span>

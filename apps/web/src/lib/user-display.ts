@@ -19,3 +19,13 @@ export function getDisplayName(user: UserDto | null): string {
 export function getInitial(user: UserDto | null): string {
   return getDisplayName(user).charAt(0).toUpperCase() || 'U';
 }
+
+const ROLE_LABELS: Record<string, string> = {
+  ADMIN: 'Admin',
+  TENANT_ADMIN: 'Org admin',
+};
+
+export function getRoleLabel(role: string | undefined): string {
+  if (!role) return 'Member';
+  return ROLE_LABELS[role] ?? 'Member';
+}
