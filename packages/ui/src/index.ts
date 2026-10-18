@@ -8,3 +8,4 @@ export * from './Tabs';
 export * from './DatePicker';
 export * from './ConfirmDialog';
 export * from './GoogleSignInButton';
+export * from './shell';
