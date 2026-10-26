@@ -3,8 +3,9 @@
 import * as React from 'react';
 import { motion } from 'framer-motion';
 import { Mic, MicOff, PhoneOff, Send } from 'lucide-react';
-import { Badge, Button, Input } from '@elevatesde/ui';
-import { ROLE_LABELS, STYLE_LABELS, TOPIC_LABELS } from '@/lib/interview-engine';
+import { Badge, Button, Textarea } from '@elevatesde/ui';
+import { MOCK_INTERVIEW_MAX_ANSWER_LENGTH } from '@elevatesde/shared-types';
+import { ROLE_LABELS, STYLE_LABELS, TOPIC_LABELS } from '@/lib/mock-interview-options';
 import { useMockInterviewStore } from '@/store/mock-interview.store';
 import { InterviewerWaveform } from './InterviewerWaveform';
 import { SessionTimer } from './SessionTimer';
@@ -12,26 +13,37 @@ import { TranscriptStream } from './TranscriptStream';
 
 export function InterviewConsole() {
   const {
-    config,
+    session,
     transcript,
+    isThinking,
     isAiSpeaking,
     isMicActive,
     micLevel,
     remainingSeconds,
     speechSupported,
     toggleMic,
-    submitTypedAnswer,
+    submitAnswer,
     end,
   } = useMockInterviewStore();
   const [draft, setDraft] = React.useState('');
 
-  if (!config) return null;
+  if (!session) return null;
+  const { config } = session;
+  const questionNumber = session.turns.length;
 
   const handleSend = (event: React.SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (draft.trim().length === 0) return;
-    submitTypedAnswer(draft);
+    const answer = draft.trim();
+    if (answer.length === 0 || isThinking) return;
     setDraft('');
+    void submitAnswer(answer);
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+      event.preventDefault();
+      event.currentTarget.form?.requestSubmit();
+    }
   };
 
   const handleMicToggle = () => {
@@ -39,7 +51,9 @@ export function InterviewConsole() {
   };
 
   let statusLabel: string;
-  if (isAiSpeaking) {
+  if (isThinking) {
+    statusLabel = 'Interviewer is evaluating your answer';
+  } else if (isAiSpeaking) {
     statusLabel = 'Interviewer is speaking';
   } else if (isMicActive) {
     statusLabel = 'Listening — answer now';
@@ -64,56 +78,67 @@ export function InterviewConsole() {
           <SessionTimer remainingSeconds={remainingSeconds} />
         </div>
 
-        <div className="flex flex-col items-center gap-4 py-4">
+        <div className="flex flex-col items-center gap-4 py-2">
           <InterviewerWaveform
             micLevel={micLevel}
-            isAiSpeaking={isAiSpeaking}
+            isAiSpeaking={isAiSpeaking || isThinking}
             isMicActive={isMicActive}
           />
-          <span className="text-xs font-semibold uppercase tracking-[0.14em] text-(--color-text-muted)">
+          <span
+            className="text-xs font-semibold uppercase tracking-[0.14em] text-(--color-text-muted)"
+            aria-live="polite"
+          >
             {statusLabel}
+          </span>
+          <span className="text-xs text-(--color-text-muted)">
+            Question {questionNumber} of up to {session.maxTurns}
           </span>
         </div>
 
-        {speechSupported ? (
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <Button variant={isMicActive ? 'secondary' : 'primary'} onClick={handleMicToggle}>
-              <span className="inline-flex items-center gap-2">
-                {isMicActive ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-                {isMicActive ? 'Stop microphone' : 'Start microphone'}
-              </span>
-            </Button>
-            <Button variant="secondary" onClick={end}>
-              <span className="inline-flex items-center gap-2">
-                <PhoneOff className="h-4 w-4" />
-                End interview
-              </span>
-            </Button>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-3">
-            <form onSubmit={handleSend} className="flex items-end gap-2">
-              <Input
-                label="Your answer"
-                placeholder="Type your response and press send"
-                value={draft}
-                onChange={(event) => setDraft(event.target.value)}
-              />
-              <Button type="submit" className="shrink-0">
-                <span className="inline-flex items-center gap-2">
-                  <Send className="h-4 w-4" />
-                  Send
-                </span>
+        <form onSubmit={handleSend} className="flex flex-col gap-3">
+          <Textarea
+            label="Your answer"
+            placeholder="Type your response. Press ⌘/Ctrl + Enter to send."
+            value={draft}
+            rows={4}
+            maxLength={MOCK_INTERVIEW_MAX_ANSWER_LENGTH}
+            disabled={isThinking}
+            onChange={(event) => setDraft(event.target.value)}
+            onKeyDown={handleKeyDown}
+          />
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span className="text-xs tabular-nums text-(--color-text-muted)">
+              {draft.length}/{MOCK_INTERVIEW_MAX_ANSWER_LENGTH}
+            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              {speechSupported && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={handleMicToggle}
+                  disabled={isThinking}
+                >
+                  {isMicActive ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                  {isMicActive ? 'Stop microphone' : 'Answer by voice'}
+                </Button>
+              )}
+              <Button type="submit" disabled={isThinking || draft.trim().length === 0}>
+                <Send className="h-4 w-4" />
+                {isThinking ? 'Evaluating…' : 'Send answer'}
               </Button>
-            </form>
-            <Button variant="secondary" className="self-center" onClick={end}>
-              <span className="inline-flex items-center gap-2">
-                <PhoneOff className="h-4 w-4" />
-                End interview
-              </span>
-            </Button>
+            </div>
           </div>
-        )}
+        </form>
+
+        <Button
+          variant="tertiary"
+          className="self-center"
+          onClick={() => void end()}
+          disabled={isThinking}
+        >
+          <PhoneOff className="h-4 w-4" />
+          End interview
+        </Button>
       </div>
 
       <div className="card flex h-112 flex-col gap-3 lg:h-auto">

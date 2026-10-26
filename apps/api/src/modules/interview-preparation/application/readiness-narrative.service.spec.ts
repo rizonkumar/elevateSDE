@@ -60,6 +60,8 @@ function repository(): jest.Mocked<IInterviewPreparationRepository> {
     updateRound: jest.fn(),
     createTask: jest.fn(),
     updateTask: jest.fn(),
+    invalidateActivePlans: jest.fn().mockResolvedValue(0),
+    completeMockInterviewTask: jest.fn().mockResolvedValue(false),
     setTaskCompletion: jest.fn(),
     createSnapshot: jest.fn(),
     saveSnapshotExplanation: jest.fn().mockResolvedValue(snapshot),

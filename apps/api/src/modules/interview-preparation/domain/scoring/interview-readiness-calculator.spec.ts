@@ -46,7 +46,7 @@ describe('calculateInterviewReadinessV1', () => {
       ]),
     );
 
-    expect(result.formulaVersion).toBe('v1');
+    expect(result.formulaVersion).toBe('v2');
     expect(result.score).toBeCloseTo(86.67, 2);
     expect(result.status).toBe('READY');
     expect(result.coverage).toBe(1);

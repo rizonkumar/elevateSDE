@@ -57,6 +57,8 @@ function toJobApplication(record: {
   };
 }
 
+const MOCK_INTERVIEW_EVIDENCE_LIMIT = 30;
+
 @Injectable()
 export class InterviewPreparationRepository implements IInterviewPreparationRepository {
   constructor(private readonly prisma: PrismaService) {}
@@ -140,6 +142,7 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
       learningObservation,
       latestResume,
       peerScores,
+      mockInterviews,
     ] = await Promise.all([
         Promise.all([
           this.prisma.submission.count({ where: { userId } }),
@@ -199,6 +202,12 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
           _avg: { communication: true, problemSolving: true, technicalDepth: true, structure: true },
           _max: { submittedAt: true },
         }),
+        this.prisma.mockInterviewSession.findMany({
+          where: { userId, status: 'COMPLETED', overallScore: { not: null }, endedAt: { not: null } },
+          orderBy: { endedAt: 'desc' },
+          take: MOCK_INTERVIEW_EVIDENCE_LIMIT,
+          select: { topic: true, overallScore: true, endedAt: true },
+        }),
       ]);
     const [totalSubmissions, acceptedSubmissions] = submissionCounts;
     const [trackedReviews, dueReviews] = reviewCounts;
@@ -238,7 +247,40 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
             : Math.round(peerValues.reduce((total, value) => total + value, 0) / peerValues.length),
         observedAt: peerScores._max.submittedAt,
       },
+      mockInterviews: mockInterviews.flatMap((session) =>
+        session.overallScore === null || session.endedAt === null
+          ? []
+          : [{ topic: session.topic, score: session.overallScore, observedAt: session.endedAt }],
+      ),
     };
+  }
+
+  async invalidateActivePlans(userId: string): Promise<number> {
+    const result = await this.prisma.interviewPreparationPlan.updateMany({
+      where: { userId, status: 'ACTIVE' },
+      data: { readinessRevision: { increment: 1 } },
+    });
+    return result.count;
+  }
+
+  async completeMockInterviewTask(userId: string, taskId: string): Promise<boolean> {
+    return this.prisma.$transaction(async (transaction) => {
+      const task = await transaction.preparationTask.findFirst({
+        where: { id: taskId, type: 'RUN_MOCK_INTERVIEW', status: 'PENDING', plan: { userId } },
+        select: { id: true, planId: true, version: true },
+      });
+      if (!task) return false;
+      const updated = await transaction.preparationTask.updateMany({
+        where: { id: task.id, version: task.version, status: 'PENDING' },
+        data: { status: 'COMPLETED', completedAt: new Date(), version: { increment: 1 } },
+      });
+      if (updated.count === 0) return false;
+      await transaction.interviewPreparationPlan.update({
+        where: { id: task.planId },
+        data: { readinessRevision: { increment: 1 } },
+      });
+      return true;
+    });
   }
 
   async createPlan(

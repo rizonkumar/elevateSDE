@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import type {
   InterviewConfig,
   InterviewSessionStatus,
-  MockInterviewFeedback,
+  MockInterviewSessionDto,
   TranscriptEntry,
 } from '@elevatesde/shared-types';
 import { useToastStore } from '@/store/toast.store';
@@ -13,39 +13,47 @@ import {
   type MicAnalyser,
   type SpeechSession,
 } from '@/lib/speech';
-import { generateFeedback, getFollowUp, getOpeningQuestion } from '@/lib/interview-engine';
+import {
+  activeSessionIdFrom,
+  answerMockInterview,
+  endMockInterview,
+  getActiveMockInterview,
+  getMockInterview,
+  mockInterviewErrorMessage,
+  startMockInterview,
+} from '@/lib/mock-interview-api';
+
+const SCORING_POLL_MS = 2000;
+const SCORING_POLL_LIMIT = 45;
 
 interface MockInterviewState {
   status: InterviewSessionStatus;
-  config: InterviewConfig | null;
+  session: MockInterviewSessionDto | null;
   transcript: TranscriptEntry[];
-  feedback: MockInterviewFeedback | null;
+  isHydrated: boolean;
+  isStarting: boolean;
+  isThinking: boolean;
   isAiSpeaking: boolean;
   isMicActive: boolean;
   micLevel: number;
   remainingSeconds: number;
-  answeredCount: number;
   speechSupported: boolean;
-  start: (config: InterviewConfig) => void;
+  hydrate: () => Promise<void>;
+  start: (config: InterviewConfig, preparationTaskId: string | null) => Promise<void>;
   toggleMic: () => Promise<void>;
-  submitTypedAnswer: (text: string) => void;
-  end: () => void;
+  submitAnswer: (text: string) => Promise<void>;
+  end: () => Promise<void>;
   reset: () => void;
 }
 
 let timerId: ReturnType<typeof setInterval> | null = null;
 let aiSpeakingId: ReturnType<typeof setTimeout> | null = null;
+let pollId: ReturnType<typeof setTimeout> | null = null;
 let micAnalyser: MicAnalyser | null = null;
 let recognition: SpeechSession | null = null;
 let levelFrame: number | null = null;
-let liveEntryId: string | null = null;
-
-function newId(): string {
-  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
-    return crypto.randomUUID();
-  }
-  return `interview-${Date.now()}-${Math.round(performance.now())}`;
-}
+let liveEntry: TranscriptEntry | null = null;
+let pendingAnswer: TranscriptEntry | null = null;
 
 function clearTimer(): void {
   if (timerId !== null) {
@@ -58,6 +66,13 @@ function clearAiSpeaking(): void {
   if (aiSpeakingId !== null) {
     clearTimeout(aiSpeakingId);
     aiSpeakingId = null;
+  }
+}
+
+function clearPoll(): void {
+  if (pollId !== null) {
+    clearTimeout(pollId);
+    pollId = null;
   }
 }
 
@@ -78,74 +93,144 @@ function teardownMic(): void {
     micAnalyser.stop();
     micAnalyser = null;
   }
-  liveEntryId = null;
+  liveEntry = null;
+}
+
+function toast(message: string, kind: 'success' | 'error' | 'info'): void {
+  useToastStore.getState().addToast(message, kind);
+}
+
+function secondsUntil(iso: string): number {
+  return Math.max(0, Math.ceil((new Date(iso).getTime() - Date.now()) / 1000));
+}
+
+function buildTranscript(session: MockInterviewSessionDto | null): TranscriptEntry[] {
+  if (!session) return [];
+  const entries = session.turns.flatMap((turn) => {
+    const question: TranscriptEntry = {
+      id: `${turn.id}-question`,
+      speaker: 'AI',
+      text: turn.question,
+      createdAt: turn.askedAt,
+      isFinal: true,
+    };
+    if (turn.answer === null) return [question];
+    const answer: TranscriptEntry = {
+      id: `${turn.id}-answer`,
+      speaker: 'CANDIDATE',
+      text: turn.answer,
+      createdAt: turn.answeredAt ?? turn.askedAt,
+      isFinal: true,
+    };
+    return [question, answer];
+  });
+  return [pendingAnswer, liveEntry].reduce<TranscriptEntry[]>(
+    (all, entry) => (entry ? [...all, entry] : all),
+    entries,
+  );
+}
+
+function speakingDuration(text: string): number {
+  const words = text.split(/\s+/).filter(Boolean).length;
+  return Math.max(1500, Math.min(6000, words * 320));
 }
 
 export const useMockInterviewStore = create<MockInterviewState>((set, get) => {
-  const speakQuestion = (text: string) => {
-    const entry: TranscriptEntry = {
-      id: newId(),
-      speaker: 'AI',
-      text,
-      createdAt: new Date().toISOString(),
-      isFinal: true,
-    };
-    set((state) => ({ transcript: [...state.transcript, entry], isAiSpeaking: true }));
+  const refreshTranscript = () => set({ transcript: buildTranscript(get().session) });
+
+  const announceQuestion = (question: string) => {
     clearAiSpeaking();
-    const words = text.split(/\s+/).filter(Boolean).length;
-    const duration = Math.max(1500, Math.min(6000, words * 320));
+    set({ isAiSpeaking: true });
     aiSpeakingId = setTimeout(() => {
       set({ isAiSpeaking: false });
       aiSpeakingId = null;
-    }, duration);
+    }, speakingDuration(question));
   };
 
-  const handleAnswer = (text: string) => {
-    const { config, answeredCount } = get();
-    if (!config) return;
-    set({ answeredCount: answeredCount + 1 });
-    const followUp = getFollowUp(config, answeredCount, text);
-    setTimeout(() => {
-      if (get().status === 'ACTIVE') {
-        speakQuestion(followUp);
+  const startTimer = (deadlineAt: string) => {
+    clearTimer();
+    set({ remainingSeconds: secondsUntil(deadlineAt) });
+    timerId = setInterval(() => {
+      const remaining = secondsUntil(deadlineAt);
+      set({ remainingSeconds: remaining });
+      if (remaining <= 0) {
+        clearTimer();
+        if (!get().isThinking) void get().end();
       }
-    }, 700);
+    }, 1000);
+  };
+
+  const pollScoring = (sessionId: string, attempt: number) => {
+    clearPoll();
+    pollId = setTimeout(() => {
+      getMockInterview(sessionId)
+        .then((latest) => {
+          if (get().session?.id !== sessionId) return;
+          applySession(latest);
+          if (latest.status === 'SCORING' && attempt + 1 < SCORING_POLL_LIMIT) {
+            pollScoring(sessionId, attempt + 1);
+          }
+        })
+        .catch(() => {
+          if (attempt + 1 < SCORING_POLL_LIMIT) pollScoring(sessionId, attempt + 1);
+        });
+    }, SCORING_POLL_MS);
+  };
+
+  const applySession = (session: MockInterviewSessionDto) => {
+    const previous = get().session;
+    const previousQuestionId = previous?.id === session.id ? previous.turns.at(-1)?.id : undefined;
+    set({ session, status: session.status });
+    refreshTranscript();
+
+    if (session.status === 'ACTIVE') {
+      startTimer(session.deadlineAt);
+      const current = session.turns.at(-1);
+      if (current && current.answer === null && current.id !== previousQuestionId) {
+        announceQuestion(current.question);
+      }
+      return;
+    }
+
+    teardownMic();
+    clearTimer();
+    clearAiSpeaking();
+    set({ isAiSpeaking: false, isMicActive: false, micLevel: 0 });
+    if (session.status === 'SCORING' && previous?.status !== 'SCORING') {
+      pollScoring(session.id, 0);
+    }
+    if (session.status === 'COMPLETED' && previous?.status === 'SCORING') {
+      toast('Interview scored. Review your feedback below.', 'success');
+    }
+  };
+
+  const resumeSession = async (sessionId: string) => {
+    const session = await getMockInterview(sessionId);
+    applySession(session);
   };
 
   const handleSpeechResult = (text: string, isFinal: boolean) => {
-    if (get().status !== 'ACTIVE') return;
-    if (liveEntryId === null) {
-      const id = newId();
-      liveEntryId = id;
-      const entry: TranscriptEntry = {
-        id,
-        speaker: 'CANDIDATE',
-        text,
-        createdAt: new Date().toISOString(),
-        isFinal: false,
-      };
-      set((state) => ({ transcript: [...state.transcript, entry] }));
-    } else {
-      const id = liveEntryId;
-      set((state) => ({
-        transcript: state.transcript.map((entry) =>
-          entry.id === id ? { ...entry, text, isFinal } : entry,
-        ),
-      }));
-    }
-
+    if (get().status !== 'ACTIVE' || get().isThinking) return;
+    liveEntry = {
+      id: liveEntry?.id ?? `live-${Date.now()}`,
+      speaker: 'CANDIDATE',
+      text,
+      createdAt: liveEntry?.createdAt ?? new Date().toISOString(),
+      isFinal,
+    };
     if (isFinal) {
-      liveEntryId = null;
-      handleAnswer(text);
+      liveEntry = null;
+      void get().submitAnswer(text);
+      return;
     }
+    refreshTranscript();
   };
 
   const runLevelLoop = () => {
     const tickLevel = () => {
       if (!micAnalyser) return;
       const next = micAnalyser.getLevel();
-      const current = get().micLevel;
-      if (Math.abs(next - current) > 0.03) {
+      if (Math.abs(next - get().micLevel) > 0.03) {
         set({ micLevel: next });
       }
       levelFrame = requestAnimationFrame(tickLevel);
@@ -155,69 +240,80 @@ export const useMockInterviewStore = create<MockInterviewState>((set, get) => {
 
   return {
     status: 'IDLE',
-    config: null,
+    session: null,
     transcript: [],
-    feedback: null,
+    isHydrated: false,
+    isStarting: false,
+    isThinking: false,
     isAiSpeaking: false,
     isMicActive: false,
     micLevel: 0,
     remainingSeconds: 0,
-    answeredCount: 0,
     speechSupported: true,
 
-    start: (config) => {
+    hydrate: async () => {
+      set({ speechSupported: isSpeechRecognitionSupported() });
+      if (get().session) {
+        set({ isHydrated: true });
+        return;
+      }
+      try {
+        const active = await getActiveMockInterview();
+        if (active) applySession(active);
+      } catch {
+        toast('Could not check for an interview in progress.', 'error');
+      } finally {
+        set({ isHydrated: true });
+      }
+    },
+
+    start: async (config, preparationTaskId) => {
+      if (get().isStarting) return;
       teardownMic();
-      clearTimer();
-      clearAiSpeaking();
-      set({
-        status: 'ACTIVE',
-        config,
-        transcript: [],
-        feedback: null,
-        isAiSpeaking: false,
-        isMicActive: false,
-        micLevel: 0,
-        remainingSeconds: config.durationMinutes * 60,
-        answeredCount: 0,
-        speechSupported: isSpeechRecognitionSupported(),
-      });
-      speakQuestion(getOpeningQuestion(config));
-      timerId = setInterval(() => {
-        const remaining = get().remainingSeconds - 1;
-        if (remaining <= 0) {
-          set({ remainingSeconds: 0 });
-          get().end();
+      clearPoll();
+      pendingAnswer = null;
+      set({ isStarting: true, speechSupported: isSpeechRecognitionSupported() });
+      try {
+        const session = await startMockInterview({
+          ...config,
+          ...(preparationTaskId ? { preparationTaskId } : {}),
+        });
+        applySession(session);
+      } catch (error) {
+        const activeId = activeSessionIdFrom(error);
+        if (activeId) {
+          toast('Resuming the interview you already have in progress.', 'info');
+          await resumeSession(activeId).catch(() => undefined);
         } else {
-          set({ remainingSeconds: remaining });
+          toast(mockInterviewErrorMessage(error, 'Could not start the interview.'), 'error');
         }
-      }, 1000);
+      } finally {
+        set({ isStarting: false });
+      }
     },
 
     toggleMic: async () => {
       if (get().isMicActive) {
         teardownMic();
         set({ isMicActive: false, micLevel: 0 });
+        refreshTranscript();
         return;
       }
 
-      const session = createSpeechRecognition({
+      const speech = createSpeechRecognition({
         onResult: handleSpeechResult,
         onError: (error) => {
           if (error === 'not-allowed' || error === 'service-not-allowed') {
-            useToastStore
-              .getState()
-              .addToast('Microphone access was blocked. Enable it to answer by voice.', 'error');
+            toast('Microphone access was blocked. Enable it to answer by voice.', 'error');
             teardownMic();
             set({ isMicActive: false, micLevel: 0 });
           }
         },
       });
 
-      if (!session) {
+      if (!speech) {
         set({ speechSupported: false });
-        useToastStore
-          .getState()
-          .addToast('Voice input is not supported here. Type your answer instead.', 'info');
+        toast('Voice input is not supported here. Type your answer instead.', 'info');
         return;
       }
 
@@ -229,65 +325,73 @@ export const useMockInterviewStore = create<MockInterviewState>((set, get) => {
       }
 
       try {
-        session.start();
-        recognition = session;
+        speech.start();
+        recognition = speech;
         set({ isMicActive: true });
       } catch {
         teardownMic();
         set({ isMicActive: false, micLevel: 0 });
-        useToastStore
-          .getState()
-          .addToast('Could not start the microphone. Type your answer instead.', 'error');
+        toast('Could not start the microphone. Type your answer instead.', 'error');
       }
     },
 
-    submitTypedAnswer: (text) => {
+    submitAnswer: async (text) => {
       const trimmed = text.trim();
-      if (trimmed.length === 0 || get().status !== 'ACTIVE') return;
-      const entry: TranscriptEntry = {
-        id: newId(),
+      const { session, status, isThinking } = get();
+      const current = session?.turns.at(-1);
+      if (!session || status !== 'ACTIVE' || isThinking || !current || current.answer !== null) return;
+      if (trimmed.length === 0) return;
+      pendingAnswer = {
+        id: `pending-${current.id}`,
         speaker: 'CANDIDATE',
         text: trimmed,
         createdAt: new Date().toISOString(),
         isFinal: true,
       };
-      set((state) => ({ transcript: [...state.transcript, entry] }));
-      handleAnswer(trimmed);
+      set({ isThinking: true });
+      refreshTranscript();
+      try {
+        const next = await answerMockInterview(session, current.id, trimmed);
+        pendingAnswer = null;
+        applySession(next);
+      } catch (error) {
+        pendingAnswer = null;
+        refreshTranscript();
+        toast(mockInterviewErrorMessage(error, 'Your answer could not be submitted. Try again.'), 'error');
+        await resumeSession(session.id).catch(() => undefined);
+      } finally {
+        set({ isThinking: false });
+      }
     },
 
-    end: () => {
-      const { config, transcript, status } = get();
-      if (status !== 'ACTIVE') return;
+    end: async () => {
+      const { session, status } = get();
+      if (!session || status !== 'ACTIVE') return;
       teardownMic();
       clearTimer();
-      clearAiSpeaking();
-      const feedback = config ? generateFeedback(config, transcript) : null;
-      set({
-        status: 'COMPLETED',
-        feedback,
-        isAiSpeaking: false,
-        isMicActive: false,
-        micLevel: 0,
-      });
-      useToastStore
-        .getState()
-        .addToast('Interview complete. Review your feedback below.', 'success');
+      try {
+        applySession(await endMockInterview(session.id));
+      } catch (error) {
+        toast(mockInterviewErrorMessage(error, 'Could not end the interview.'), 'error');
+        await resumeSession(session.id).catch(() => undefined);
+      }
     },
 
     reset: () => {
       teardownMic();
       clearTimer();
       clearAiSpeaking();
+      clearPoll();
+      pendingAnswer = null;
       set({
         status: 'IDLE',
-        config: null,
+        session: null,
         transcript: [],
-        feedback: null,
+        isThinking: false,
         isAiSpeaking: false,
         isMicActive: false,
         micLevel: 0,
         remainingSeconds: 0,
-        answeredCount: 0,
       });
     },
   };

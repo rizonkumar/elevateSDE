@@ -3,7 +3,7 @@ import type {
   InterviewPreparationPlanDto,
   JobApplicationDto,
 } from '@elevatesde/shared-types';
-import { InterviewPreparationService } from './interview-preparation.service';
+import { InterviewPreparationService, mockInterviewMetricFor } from './interview-preparation.service';
 import { IInterviewPreparationRepository } from '../domain/interfaces/interview-preparation-repository.interface';
 
 const application: JobApplicationDto = {
@@ -62,6 +62,7 @@ function repository(): jest.Mocked<IInterviewPreparationRepository> {
       learning: { score: null, observedAt: null },
       resume: { score: null, observedAt: null },
       peer: { score: null, observedAt: null },
+      mockInterviews: [],
     }),
     createPlan: jest.fn().mockResolvedValue(plan),
     updatePlan: jest.fn().mockResolvedValue(plan),
@@ -70,6 +71,8 @@ function repository(): jest.Mocked<IInterviewPreparationRepository> {
     updateRound: jest.fn(),
     createTask: jest.fn(),
     updateTask: jest.fn(),
+    invalidateActivePlans: jest.fn().mockResolvedValue(0),
+    completeMockInterviewTask: jest.fn().mockResolvedValue(false),
     setTaskCompletion: jest.fn(),
     createSnapshot: jest.fn(),
     saveSnapshotExplanation: jest.fn(),
@@ -149,5 +152,71 @@ describe('InterviewPreparationService', () => {
     expect(snapshot.score).toBeNull();
     expect(snapshot.status).toBe('INSUFFICIENT_EVIDENCE');
     expect(snapshot.rounds[0]?.missingEvidence).toContain('CODING_SUBMISSIONS');
+  });
+
+  it('counts the latest matching mock interviews as round evidence', async () => {
+    const repo = repository();
+    repo.getReadinessEvidence.mockResolvedValue({
+      revision: 0,
+      coding: { score: null, observedAt: null },
+      review: { score: null, observedAt: null },
+      learning: { score: null, observedAt: null },
+      resume: { score: null, observedAt: null },
+      peer: { score: null, observedAt: null },
+      mockInterviews: [
+        { topic: 'DSA', score: 80, observedAt: new Date('2026-09-29T12:00:00.000Z') },
+        { topic: 'SYSTEM_DESIGN', score: 20, observedAt: new Date('2026-09-29T13:00:00.000Z') },
+      ],
+    });
+    repo.createSnapshot.mockImplementation(async (_userId, _planId, snapshot) => ({
+      id: 'snapshot-1',
+      ...snapshot,
+    }));
+    const service = new InterviewPreparationService(repo);
+
+    const snapshot = await service.refreshSnapshot('user-1', plan.id);
+
+    expect(snapshot.formulaVersion).toBe('v2');
+    const evidence = snapshot.rounds[0]?.evidence.find((item) => item.source === 'MOCK_INTERVIEW');
+    expect(evidence?.score).toBe(80);
+    expect(snapshot.rounds[0]?.missingEvidence).not.toContain('MOCK_INTERVIEW');
+  });
+
+  it('records a completed mock interview against its task and active plans', async () => {
+    const repo = repository();
+    const service = new InterviewPreparationService(repo);
+
+    await service.recordMockInterviewCompleted('user-1', 'task-1');
+    await service.recordMockInterviewCompleted('user-1', null);
+
+    expect(repo.completeMockInterviewTask).toHaveBeenCalledTimes(1);
+    expect(repo.completeMockInterviewTask).toHaveBeenCalledWith('user-1', 'task-1');
+    expect(repo.invalidateActivePlans).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('mockInterviewMetricFor', () => {
+  const at = (hour: number): Date => new Date(`2026-09-29T${String(hour).padStart(2, '0')}:00:00.000Z`);
+
+  it('averages the three most recent sessions for the round topics', () => {
+    const metric = mockInterviewMetricFor('CODING', [
+      { topic: 'CODING', score: 10, observedAt: at(1) },
+      { topic: 'DSA', score: 60, observedAt: at(2) },
+      { topic: 'CODING', score: 70, observedAt: at(3) },
+      { topic: 'BEHAVIORAL', score: 100, observedAt: at(4) },
+      { topic: 'DSA', score: 80, observedAt: at(5) },
+    ]);
+
+    expect(metric).toEqual({ score: 70, observedAt: at(5) });
+  });
+
+  it('maps role-fit rounds to behavioral sessions and reports missing evidence', () => {
+    expect(
+      mockInterviewMetricFor('RESUME_ROLE_FIT', [{ topic: 'BEHAVIORAL', score: 64, observedAt: at(1) }]),
+    ).toEqual({ score: 64, observedAt: at(1) });
+    expect(mockInterviewMetricFor('SYSTEM_DESIGN', [{ topic: 'CODING', score: 90, observedAt: at(1) }])).toEqual({
+      score: null,
+      observedAt: null,
+    });
   });
 });

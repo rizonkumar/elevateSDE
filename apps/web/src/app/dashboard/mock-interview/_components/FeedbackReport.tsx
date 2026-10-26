@@ -1,27 +1,28 @@
 'use client';
 
 import * as React from 'react';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { RadialBarChart, RadialBar, PolarAngleAxis, ResponsiveContainer } from 'recharts';
-import { CheckCircle2, ArrowUpRight, RotateCcw } from 'lucide-react';
+import { CheckCircle2, ArrowUpRight, Info, RotateCcw } from 'lucide-react';
 import { Badge, Button } from '@elevatesde/ui';
-import type { BadgeVariant } from '@elevatesde/ui';
-import type { InterviewCompetencySeverity, MockInterviewFeedback } from '@elevatesde/shared-types';
+import {
+  MOCK_INTERVIEW_RUBRICS,
+  type MockInterviewFeedback,
+  type MockInterviewSessionDto,
+} from '@elevatesde/shared-types';
 import { scoreBand } from '@/lib/score-band';
-import { useMockInterviewStore } from '@/store/mock-interview.store';
+import { ROLE_LABELS, STYLE_LABELS, TOPIC_LABELS } from '@/lib/mock-interview-options';
+import { SEVERITY_VARIANT } from '@/lib/mock-interview-severity';
+import { QuestionBreakdown } from './QuestionBreakdown';
 
 interface FeedbackReportProps {
+  readonly session: MockInterviewSessionDto;
   readonly feedback: MockInterviewFeedback;
+  readonly onReset?: () => void;
 }
 
-const SEVERITY_VARIANT: Record<InterviewCompetencySeverity, BadgeVariant> = {
-  good: 'success',
-  warning: 'warning',
-  critical: 'danger',
-};
-
-export function FeedbackReport({ feedback }: FeedbackReportProps) {
-  const reset = useMockInterviewStore((state) => state.reset);
+export function FeedbackReport({ session, feedback, onReset }: FeedbackReportProps) {
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
@@ -77,17 +78,39 @@ export function FeedbackReport({ feedback }: FeedbackReportProps) {
             </h2>
             <Badge variant={band.badgeVariant}>{band.label}</Badge>
           </div>
+          <p className="m-0 text-xs text-(--color-text-muted)">
+            {TOPIC_LABELS[session.config.topic]} · {ROLE_LABELS[session.config.roleLevel]} ·{' '}
+            {STYLE_LABELS[session.config.companyStyle]}
+          </p>
           <p className="m-0 text-sm leading-relaxed text-(--color-text-muted)">
             {feedback.summary}
           </p>
-          <Button className="mt-1 self-center sm:self-start" onClick={reset}>
-            <span className="inline-flex items-center gap-2">
+          {onReset ? (
+            <Button className="mt-1 self-center sm:self-start" onClick={onReset}>
               <RotateCcw className="h-4 w-4" />
               Start new interview
-            </span>
-          </Button>
+            </Button>
+          ) : (
+            <Link
+              href="/dashboard/mock-interview"
+              className="mt-1 inline-flex items-center gap-2 self-center text-sm font-medium text-(--color-accent) sm:self-start"
+            >
+              <RotateCcw className="h-4 w-4" />
+              Start new interview
+            </Link>
+          )}
         </div>
       </div>
+
+      {session.engine === 'DETERMINISTIC' && (
+        <div className="flex items-start gap-2.5 rounded-(--radius-md) border border-(--color-border-subtle) bg-(--color-bg-soft) px-4 py-3 text-sm text-(--color-text-muted)">
+          <Info className="mt-0.5 h-4 w-4 shrink-0 text-(--color-accent)" />
+          <span>
+            Practice scoring: some answers in this session were scored with keyword heuristics
+            instead of the AI interviewer, so treat the numbers as a rough guide.
+          </span>
+        </div>
+      )}
 
       <div className="card flex flex-col gap-4">
         <h3 className="m-0 text-sm font-semibold uppercase tracking-wider text-(--color-text-muted)">
@@ -95,7 +118,7 @@ export function FeedbackReport({ feedback }: FeedbackReportProps) {
         </h3>
         <div className="flex flex-col gap-4">
           {feedback.competencies.map((competency) => (
-            <div key={competency.label} className="flex flex-col gap-1.5">
+            <div key={competency.key} className="flex flex-col gap-1.5">
               <div className="flex items-center justify-between gap-3">
                 <span className="text-sm font-medium text-(--color-text-primary)">
                   {competency.label}
@@ -142,6 +165,11 @@ export function FeedbackReport({ feedback }: FeedbackReportProps) {
           </ul>
         </div>
       </div>
+
+      <QuestionBreakdown
+        turns={session.turns}
+        rubric={MOCK_INTERVIEW_RUBRICS[session.config.topic]}
+      />
     </motion.div>
   );
 }

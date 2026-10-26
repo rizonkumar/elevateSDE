@@ -5,6 +5,7 @@ import { ContestModule } from '../contest/contest.module';
 import { InterviewPreparationModule } from '../interview-preparation/interview-preparation.module';
 import { AuditLogModule } from '../audit-log/audit-log.module';
 import { AuthModule } from '../auth/auth.module';
+import { MockInterviewModule } from '../mock-interview/mock-interview.module';
 import { SchedulerRegistrar } from './application/scheduler-registrar.service';
 import { SchedulerService } from './application/scheduler.service';
 import { ScheduledJobRunner } from './application/scheduled-job-runner.service';
@@ -19,6 +20,7 @@ import { SchedulerManagementController } from './presentation/controllers/schedu
     InterviewPreparationModule,
     AuditLogModule,
     AuthModule,
+    MockInterviewModule,
   ],
   controllers: [SchedulerManagementController],
   providers: [SchedulerRegistrar, SchedulerService, ScheduledJobRunner, ScheduledJobsProcessor],

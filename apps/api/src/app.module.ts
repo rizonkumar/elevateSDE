@@ -24,6 +24,7 @@ import { ContestModule } from './modules/contest/contest.module';
 import { LearningPathModule } from './modules/learning-path/learning-path.module';
 import { ResumeModule } from './modules/resume/resume.module';
 import { InterviewPreparationModule } from './modules/interview-preparation/interview-preparation.module';
+import { MockInterviewModule } from './modules/mock-interview/mock-interview.module';
 import { SchedulerModule } from './modules/scheduler/scheduler.module';
 
 @Module({
@@ -51,6 +52,7 @@ import { SchedulerModule } from './modules/scheduler/scheduler.module';
     LearningPathModule,
     ResumeModule,
     InterviewPreparationModule,
+    MockInterviewModule,
     SchedulerModule,
   ],
   controllers: [AppController],

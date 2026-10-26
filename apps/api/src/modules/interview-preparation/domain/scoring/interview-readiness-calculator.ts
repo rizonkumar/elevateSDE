@@ -56,7 +56,7 @@ export interface InterviewReadinessResult {
   rounds: CalculatedRoundReadiness[];
 }
 
-const FORMULA_VERSION: InterviewReadinessFormulaVersion = 'v1';
+const FORMULA_VERSION: InterviewReadinessFormulaVersion = 'v2';
 const DEFAULT_MAX_AGE_DAYS = 90;
 const MILLISECONDS_PER_DAY = 86_400_000;
 const MINIMUM_MEANINGFUL_COVERAGE = 0.35;

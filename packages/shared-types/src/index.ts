@@ -126,7 +126,22 @@ export type InterviewCompanyStyle = 'GENERIC' | 'FAANG' | 'STARTUP' | 'ENTERPRIS
 
 export type InterviewSpeaker = 'AI' | 'CANDIDATE';
 
-export type InterviewSessionStatus = 'IDLE' | 'ACTIVE' | 'COMPLETED';
+export type MockInterviewSessionStatus =
+  | 'ACTIVE'
+  | 'SCORING'
+  | 'COMPLETED'
+  | 'FAILED'
+  | 'ABANDONED';
+
+export type InterviewSessionStatus = 'IDLE' | MockInterviewSessionStatus;
+
+export type MockInterviewEngine = 'LLM' | 'DETERMINISTIC';
+
+export const MOCK_INTERVIEW_DURATIONS: readonly number[] = [10, 20, 30, 45];
+
+export const MOCK_INTERVIEW_MAX_TURNS = 12;
+
+export const MOCK_INTERVIEW_MAX_ANSWER_LENGTH = 4000;
 
 export interface InterviewConfig {
   topic: MockInterviewTopic;
@@ -146,6 +161,7 @@ export interface TranscriptEntry {
 export type InterviewCompetencySeverity = 'good' | 'warning' | 'critical';
 
 export interface InterviewCompetencyScore {
+  key: string;
   label: string;
   score: number;
   severity: InterviewCompetencySeverity;
@@ -159,15 +175,238 @@ export interface MockInterviewFeedback {
   summary: string;
 }
 
-export interface MockInterviewSession {
+export interface MockInterviewRubricDimension {
+  key: string;
+  label: string;
+  descriptors: readonly [string, string, string, string];
+}
+
+export const MOCK_INTERVIEW_RUBRICS: Readonly<
+  Record<MockInterviewTopic, readonly MockInterviewRubricDimension[]>
+> = {
+  CODING: [
+    {
+      key: 'problemSolving',
+      label: 'Problem Solving',
+      descriptors: [
+        'No workable approach or jumps to code without understanding the problem.',
+        'Reaches a partial approach with significant gaps or hints needed.',
+        'Reaches a correct approach and handles the main cases.',
+        'Clarifies requirements, compares approaches, and covers edge cases unprompted.',
+      ],
+    },
+    {
+      key: 'technicalDepth',
+      label: 'Technical Depth',
+      descriptors: [
+        'Concepts are missing or incorrect.',
+        'Uses relevant concepts superficially.',
+        'Applies the right data structures and language features correctly.',
+        'Shows deep understanding, including internals and production concerns.',
+      ],
+    },
+    {
+      key: 'complexity',
+      label: 'Complexity Analysis',
+      descriptors: [
+        'No discussion of time or space cost.',
+        'States complexity incorrectly or only when asked.',
+        'States correct time and space complexity.',
+        'Analyses complexity precisely and proposes justified optimizations.',
+      ],
+    },
+    {
+      key: 'communication',
+      label: 'Communication',
+      descriptors: [
+        'Reasoning is hard to follow or absent.',
+        'Explains some steps but leaves gaps.',
+        'Narrates reasoning clearly throughout.',
+        'Explains crisply, checks understanding, and adapts to feedback.',
+      ],
+    },
+  ],
+  DSA: [
+    {
+      key: 'problemSolving',
+      label: 'Problem Solving',
+      descriptors: [
+        'No workable approach.',
+        'Brute-force or partial approach with gaps.',
+        'Correct approach covering the main cases.',
+        'Optimal approach reached methodically with edge cases covered.',
+      ],
+    },
+    {
+      key: 'technicalDepth',
+      label: 'Technical Depth',
+      descriptors: [
+        'Data structure or algorithm choice is wrong.',
+        'Reasonable choice with weak justification.',
+        'Correct choice with sound justification.',
+        'Compares alternatives and explains invariants precisely.',
+      ],
+    },
+    {
+      key: 'complexity',
+      label: 'Complexity Analysis',
+      descriptors: [
+        'No discussion of time or space cost.',
+        'States complexity incorrectly or only when asked.',
+        'States correct time and space complexity.',
+        'Proves bounds and identifies the true bottleneck.',
+      ],
+    },
+    {
+      key: 'communication',
+      label: 'Communication',
+      descriptors: [
+        'Reasoning is hard to follow or absent.',
+        'Explains some steps but leaves gaps.',
+        'Thinks out loud clearly and verifies with examples.',
+        'Explains crisply, walks through examples, and adapts to hints.',
+      ],
+    },
+  ],
+  SYSTEM_DESIGN: [
+    {
+      key: 'requirements',
+      label: 'Requirements',
+      descriptors: [
+        'Skips requirements entirely.',
+        'Lists a few requirements without scale estimates.',
+        'Covers functional and non-functional requirements with rough estimates.',
+        'Prioritizes requirements, quantifies scale, and states explicit assumptions.',
+      ],
+    },
+    {
+      key: 'architecture',
+      label: 'Architecture',
+      descriptors: [
+        'No coherent design.',
+        'A basic design with unclear component responsibilities.',
+        'A sound design with clear components, data model, and APIs.',
+        'A well-reasoned design whose components map directly to requirements.',
+      ],
+    },
+    {
+      key: 'tradeoffs',
+      label: 'Trade-offs',
+      descriptors: [
+        'No trade-offs discussed.',
+        'Mentions trade-offs vaguely.',
+        'Compares concrete alternatives and justifies choices.',
+        'Weighs alternatives against requirements and revisits decisions as constraints change.',
+      ],
+    },
+    {
+      key: 'scalability',
+      label: 'Scalability & Reliability',
+      descriptors: [
+        'Ignores scale and failure.',
+        'Mentions scaling or caching without specifics.',
+        'Addresses bottlenecks, replication, and failure handling concretely.',
+        'Designs for failure, observability, and growth with specific mechanisms.',
+      ],
+    },
+  ],
+  BEHAVIORAL: [
+    {
+      key: 'structure',
+      label: 'Structure (STAR)',
+      descriptors: [
+        'The story is unclear or missing.',
+        'Some situation and action, but the result is missing.',
+        'Clear situation, task, action, and result.',
+        'A tight STAR story with a reflection on what was learned.',
+      ],
+    },
+    {
+      key: 'ownership',
+      label: 'Ownership',
+      descriptors: [
+        'Describes what others did or deflects responsibility.',
+        'Personal role is vague.',
+        'Clearly describes personal decisions and actions.',
+        'Drives the outcome, owns mistakes, and influences beyond their role.',
+      ],
+    },
+    {
+      key: 'impact',
+      label: 'Impact',
+      descriptors: [
+        'No outcome described.',
+        'Outcome described without evidence.',
+        'Concrete outcome with some measurable result.',
+        'Quantified impact tied to team or business goals.',
+      ],
+    },
+    {
+      key: 'communication',
+      label: 'Communication',
+      descriptors: [
+        'Rambling or hard to follow.',
+        'Understandable with unnecessary detail.',
+        'Clear and appropriately concise.',
+        'Compelling, concise, and tailored to the question.',
+      ],
+    },
+  ],
+};
+
+export type MockInterviewDimensionScores = Record<string, number>;
+
+export interface MockInterviewTurnDto {
   id: string;
-  userId: string;
+  ordinal: number;
+  question: string;
+  askedAt: string;
+  answer: string | null;
+  answeredAt: string | null;
+  score: number | null;
+  dimensionScores: MockInterviewDimensionScores | null;
+  feedback: string | null;
+}
+
+export interface MockInterviewSessionDto {
+  id: string;
   config: InterviewConfig;
-  status: InterviewSessionStatus;
-  transcript: TranscriptEntry[];
-  feedback: MockInterviewFeedback | null;
-  startedAt: string | null;
+  status: MockInterviewSessionStatus;
+  engine: MockInterviewEngine;
+  preparationTaskId: string | null;
+  startedAt: string;
+  deadlineAt: string;
   endedAt: string | null;
+  turns: MockInterviewTurnDto[];
+  feedback: MockInterviewFeedback | null;
+  failureReason: string | null;
+  version: number;
+  maxTurns: number;
+}
+
+export interface MockInterviewSummaryDto {
+  id: string;
+  config: InterviewConfig;
+  status: MockInterviewSessionStatus;
+  engine: MockInterviewEngine;
+  startedAt: string;
+  endedAt: string | null;
+  overallScore: number | null;
+  answeredCount: number;
+}
+
+export interface MockInterviewHistoryDto {
+  items: MockInterviewSummaryDto[];
+  nextCursor: string | null;
+}
+
+export interface StartMockInterviewDto extends InterviewConfig {
+  preparationTaskId?: string;
+}
+
+export interface SubmitMockInterviewAnswerDto {
+  answer: string;
+  version: number;
 }
 
 export type AssessmentLanguage = 'javascript' | 'python' | 'cpp';
@@ -915,7 +1154,7 @@ export interface AdminLearningPathInput {
 
 export type ReorderDirection = 'up' | 'down';
 
-export type InterviewReadinessFormulaVersion = 'v1';
+export type InterviewReadinessFormulaVersion = 'v1' | 'v2';
 
 export type InterviewPreparationArchetype = 'GENERAL' | 'FAANG' | 'STARTUP' | 'ENTERPRISE';
 
