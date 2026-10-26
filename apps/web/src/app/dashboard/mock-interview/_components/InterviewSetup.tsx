@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { motion } from 'framer-motion';
-import { Mic2, MessageSquare, Clock, Sparkles } from 'lucide-react';
+import { Mic2, MessageSquare, Clock, Sparkles, Target } from 'lucide-react';
 import { Button, Select } from '@elevatesde/ui';
 import type {
   InterviewCompanyStyle,
@@ -15,26 +15,32 @@ import {
   ROLE_OPTIONS,
   STYLE_OPTIONS,
   TOPIC_OPTIONS,
-} from '@/lib/interview-engine';
+} from '@/lib/mock-interview-options';
 import { useMockInterviewStore } from '@/store/mock-interview.store';
 
 const EXPECTATIONS = [
-  { icon: MessageSquare, text: 'An AI interviewer asks role-specific questions and follow-ups.' },
+  { icon: MessageSquare, text: 'The interviewer asks role-specific questions and follows up on what you actually said.' },
   { icon: Mic2, text: 'Answer by voice or type — your responses appear in the live transcript.' },
   { icon: Clock, text: 'A countdown keeps the session realistic and focused.' },
-  { icon: Sparkles, text: 'Get a scored feedback report when the round ends.' },
+  { icon: Sparkles, text: 'Every answer is scored against a rubric, and the round ends with a full report.' },
 ];
 
-export function InterviewSetup() {
+interface InterviewSetupProps {
+  readonly preparationTaskId: string | null;
+  readonly initialTopic: MockInterviewTopic | null;
+}
+
+export function InterviewSetup({ preparationTaskId, initialTopic }: InterviewSetupProps) {
   const start = useMockInterviewStore((state) => state.start);
-  const [topic, setTopic] = React.useState<MockInterviewTopic>('SYSTEM_DESIGN');
+  const isStarting = useMockInterviewStore((state) => state.isStarting);
+  const [topic, setTopic] = React.useState<MockInterviewTopic>(initialTopic ?? 'SYSTEM_DESIGN');
   const [roleLevel, setRoleLevel] = React.useState<InterviewRoleLevel>('SENIOR');
   const [companyStyle, setCompanyStyle] = React.useState<InterviewCompanyStyle>('FAANG');
   const [durationMinutes, setDurationMinutes] = React.useState(20);
 
   const handleStart = () => {
     const config: InterviewConfig = { topic, roleLevel, companyStyle, durationMinutes };
-    start(config);
+    void start(config, preparationTaskId);
   };
 
   return (
@@ -53,6 +59,16 @@ export function InterviewSetup() {
             Tailor the interviewer to the role you are preparing for.
           </p>
         </div>
+
+        {preparationTaskId && (
+          <div className="flex items-start gap-2.5 rounded-(--radius-md) border border-(--color-border-subtle) bg-(--color-bg-soft) px-3.5 py-3 text-sm text-(--color-text-primary)">
+            <Target className="mt-0.5 h-4 w-4 shrink-0 text-(--color-accent)" />
+            <span>
+              This round is linked to your preparation plan. Finishing it completes the task and
+              counts toward your readiness.
+            </span>
+          </div>
+        )}
 
         <div className="grid gap-4 sm:grid-cols-2">
           <Select
@@ -81,10 +97,14 @@ export function InterviewSetup() {
           />
         </div>
 
-        <Button className="w-full sm:w-auto sm:self-start" onClick={handleStart}>
+        <Button
+          className="w-full sm:w-auto sm:self-start"
+          onClick={handleStart}
+          disabled={isStarting}
+        >
           <span className="inline-flex items-center gap-2">
             <Mic2 className="h-4 w-4" />
-            Start interview
+            {isStarting ? 'Preparing your interviewer…' : 'Start interview'}
           </span>
         </Button>
       </div>

@@ -5,6 +5,7 @@ import type {
   InterviewPreparationPlanDto,
   InterviewPreparationPlanStatus,
   JobApplicationDto,
+  MockInterviewTopic,
   PeerPracticeSessionDto,
   PeerPracticeStatus,
   PeerScorecardDto,
@@ -31,6 +32,13 @@ export interface InterviewPreparationEvidence {
   learning: { score: number | null; observedAt: Date | null };
   resume: { score: number | null; observedAt: Date | null };
   peer: { score: number | null; observedAt: Date | null };
+  mockInterviews: MockInterviewEvidence[];
+}
+
+export interface MockInterviewEvidence {
+  topic: MockInterviewTopic;
+  score: number;
+  observedAt: Date;
 }
 
 export interface CreatePeerSessionRecordInput {
@@ -106,6 +114,8 @@ export abstract class IInterviewPreparationRepository {
     taskId: string,
     input: UpdatePreparationTaskDto,
   ): Promise<PreparationTaskDto | 'VERSION_CONFLICT' | null>;
+  abstract invalidateActivePlans(userId: string): Promise<number>;
+  abstract completeMockInterviewTask(userId: string, taskId: string): Promise<boolean>;
   abstract setTaskCompletion(
     userId: string,
     taskId: string,

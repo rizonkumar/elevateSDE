@@ -5,6 +5,8 @@ import { ICodeExecutionQueue } from './domain/interfaces/code-execution-queue.in
 import { CodeExecutionQueue } from './application/code-execution.queue';
 import { IResumeAnalysisQueue } from './domain/interfaces/resume-analysis-queue.interface';
 import { ResumeAnalysisQueue } from './application/resume-analysis.queue';
+import { IMockInterviewScoringQueue } from './domain/interfaces/mock-interview-scoring-queue.interface';
+import { MockInterviewScoringQueue } from './application/mock-interview-scoring.queue';
 import { IScheduledJobQueue } from './domain/interfaces/scheduled-job-queue.interface';
 import { ScheduledJobQueue } from './application/scheduled-job.queue';
 import { buildRedisConnection } from './infrastructure/redis-connection';
@@ -18,14 +20,22 @@ import { buildRedisConnection } from './infrastructure/redis-connection';
     BullModule.registerQueue(
       { name: QUEUE_NAMES.CODE_EXECUTION },
       { name: QUEUE_NAMES.RESUME },
+      { name: QUEUE_NAMES.MOCK_INTERVIEW },
       { name: QUEUE_NAMES.SCHEDULED },
     ),
   ],
   providers: [
     { provide: ICodeExecutionQueue, useClass: CodeExecutionQueue },
     { provide: IResumeAnalysisQueue, useClass: ResumeAnalysisQueue },
+    { provide: IMockInterviewScoringQueue, useClass: MockInterviewScoringQueue },
     { provide: IScheduledJobQueue, useClass: ScheduledJobQueue },
   ],
-  exports: [ICodeExecutionQueue, IResumeAnalysisQueue, IScheduledJobQueue, BullModule],
+  exports: [
+    ICodeExecutionQueue,
+    IResumeAnalysisQueue,
+    IMockInterviewScoringQueue,
+    IScheduledJobQueue,
+    BullModule,
+  ],
 })
 export class QueuesModule {}

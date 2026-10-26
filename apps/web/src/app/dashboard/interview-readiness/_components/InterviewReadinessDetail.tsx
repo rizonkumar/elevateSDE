@@ -27,6 +27,7 @@ import type {
 import { PageContainer } from '@/components/dashboard/PageContainer';
 import { ReadinessIndicator } from '@/components/dashboard/ReadinessIndicator';
 import { useInterviewReadinessStore } from '@/store/interview-readiness.store';
+import { preparationTaskLink } from '@/lib/mock-interview-options';
 import { PlanSettingsModal } from './PlanSettingsModal';
 import { PeerPracticePanel } from './PeerPracticePanel';
 
@@ -136,6 +137,7 @@ function RoundWorkspace({ round }: { round: PreparationRoundDto }) {
           <div className="divide-y divide-(--color-border-subtle)">
             {round.tasks.map((task) => {
               const complete = task.status === 'COMPLETED';
+              const taskLink = preparationTaskLink(task, round.type);
               return (
                 <div key={task.id} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
                   <button
@@ -157,8 +159,8 @@ function RoundWorkspace({ round }: { round: PreparationRoundDto }) {
                     </div>
                     {task.description && <p className="mb-0 mt-1 text-xs">{task.description}</p>}
                   </div>
-                  {task.deepLink && (
-                    <Link href={task.deepLink} aria-label={`Open ${task.title}`} className="rounded-(--radius-sm) p-1.5 text-(--color-text-muted) hover:bg-(--color-badge-bg) hover:text-(--color-accent)">
+                  {taskLink && (
+                    <Link href={taskLink} aria-label={`Open ${task.title}`} className="rounded-(--radius-sm) p-1.5 text-(--color-text-muted) hover:bg-(--color-badge-bg) hover:text-(--color-accent)">
                       <ArrowUpRight className="h-4 w-4" />
                     </Link>
                   )}

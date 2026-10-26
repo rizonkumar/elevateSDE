@@ -4,6 +4,7 @@ import { UsersModule } from '../users/users.module';
 import { InterviewPreparationService } from './application/interview-preparation.service';
 import { PeerPracticeService } from './application/peer-practice.service';
 import { ReadinessNarrativeService } from './application/readiness-narrative.service';
+import { MockInterviewCompletedListener } from './application/listeners/mock-interview-completed.listener';
 import { IReadinessNarrativeProvider } from './domain/interfaces/readiness-narrative-provider.interface';
 import { IInterviewPreparationRepository } from './domain/interfaces/interview-preparation-repository.interface';
 import { InterviewPreparationRepository } from './infrastructure/repositories/interview-preparation.repository';
@@ -17,6 +18,7 @@ import { InterviewPreparationController } from './presentation/controllers/inter
     InterviewPreparationService,
     PeerPracticeService,
     ReadinessNarrativeService,
+    MockInterviewCompletedListener,
     PrismaService,
     { provide: IReadinessNarrativeProvider, useClass: OpenAiCompatibleReadinessProvider },
     { provide: IInterviewPreparationRepository, useClass: InterviewPreparationRepository },

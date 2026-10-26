@@ -11,6 +11,7 @@ import type {
   InterviewLoopTemplateDto,
   InterviewPreparationOverviewDto,
   InterviewPreparationPlanDto,
+  MockInterviewTopic,
   PreviewInterviewPreparationPlanDto,
   PreparationRoundDto,
   PreparationTaskDto,
@@ -23,6 +24,7 @@ import type {
 import {
   InterviewPreparationEvidence,
   IInterviewPreparationRepository,
+  MockInterviewEvidence,
 } from '../domain/interfaces/interview-preparation-repository.interface';
 import { InterviewPreparationPlan } from '../domain/entities/interview-preparation-plan';
 import { PreparationTask } from '../domain/entities/preparation-task';
@@ -47,12 +49,39 @@ const TASK_BLUEPRINTS: Record<ReadinessEvidenceSource, { title: string; deepLink
   PEER_SCORECARD: { title: 'Schedule peer practice', deepLink: '/dashboard/interview-readiness' },
 };
 
-function evidenceSourcesFor(roundType: PreviewInterviewPreparationPlanDto['rounds'][number]['type']): ReadinessEvidenceSource[] {
-  if (roundType === 'CODING') return ['CODING_SUBMISSIONS', 'SPACED_REPETITION', 'TASK_COMPLETION'];
-  if (roundType === 'SYSTEM_DESIGN') return ['LEARNING_PATH', 'TASK_COMPLETION', 'PEER_SCORECARD'];
-  if (roundType === 'BEHAVIORAL') return ['TASK_COMPLETION', 'PEER_SCORECARD'];
-  if (roundType === 'RESUME_ROLE_FIT') return ['RESUME_ANALYSIS', 'TASK_COMPLETION'];
-  return ['TASK_COMPLETION', 'PEER_SCORECARD'];
+type RoundType = PreviewInterviewPreparationPlanDto['rounds'][number]['type'];
+
+const MOCK_INTERVIEW_TOPICS_BY_ROUND: Record<RoundType, readonly MockInterviewTopic[]> = {
+  CODING: ['CODING', 'DSA'],
+  SYSTEM_DESIGN: ['SYSTEM_DESIGN'],
+  BEHAVIORAL: ['BEHAVIORAL'],
+  RESUME_ROLE_FIT: ['BEHAVIORAL'],
+  CUSTOM: ['CODING', 'DSA', 'SYSTEM_DESIGN', 'BEHAVIORAL'],
+};
+
+const MOCK_INTERVIEW_SESSIONS_PER_METRIC = 3;
+
+function evidenceSourcesFor(roundType: RoundType): ReadinessEvidenceSource[] {
+  if (roundType === 'CODING') return ['CODING_SUBMISSIONS', 'SPACED_REPETITION', 'TASK_COMPLETION', 'MOCK_INTERVIEW'];
+  if (roundType === 'SYSTEM_DESIGN') return ['LEARNING_PATH', 'TASK_COMPLETION', 'PEER_SCORECARD', 'MOCK_INTERVIEW'];
+  if (roundType === 'BEHAVIORAL') return ['TASK_COMPLETION', 'PEER_SCORECARD', 'MOCK_INTERVIEW'];
+  if (roundType === 'RESUME_ROLE_FIT') return ['RESUME_ANALYSIS', 'TASK_COMPLETION', 'MOCK_INTERVIEW'];
+  return ['TASK_COMPLETION', 'PEER_SCORECARD', 'MOCK_INTERVIEW'];
+}
+
+export function mockInterviewMetricFor(
+  roundType: RoundType,
+  sessions: readonly MockInterviewEvidence[],
+): { score: number | null; observedAt: Date | null } {
+  const topics = MOCK_INTERVIEW_TOPICS_BY_ROUND[roundType];
+  const recent = [...sessions]
+    .filter((session) => topics.includes(session.topic))
+    .sort((a, b) => b.observedAt.getTime() - a.observedAt.getTime())
+    .slice(0, MOCK_INTERVIEW_SESSIONS_PER_METRIC);
+  const latest = recent[0];
+  if (!latest) return { score: null, observedAt: null };
+  const total = recent.reduce((sum, session) => sum + session.score, 0);
+  return { score: Math.round(total / recent.length), observedAt: latest.observedAt };
 }
 
 function taskTypeFor(source: ReadinessEvidenceSource): CreatePreparationTaskDto['type'] {
@@ -68,7 +97,7 @@ function taskTypeFor(source: ReadinessEvidenceSource): CreatePreparationTaskDto[
 function buildGeneratedTasks(rounds: PreviewInterviewPreparationPlanDto['rounds']): GeneratedTask[] {
   let ordinal = 0;
   return rounds.flatMap((round, roundOrdinal) =>
-    [...evidenceSourcesFor(round.type), 'MOCK_INTERVIEW' as const]
+    [...new Set<ReadinessEvidenceSource>([...evidenceSourcesFor(round.type), 'MOCK_INTERVIEW'])]
       .filter((source) => source !== 'TASK_COMPLETION')
       .slice(0, 2)
       .map((source) => {
@@ -88,6 +117,7 @@ function buildGeneratedTasks(rounds: PreviewInterviewPreparationPlanDto['rounds'
 
 function metricForSource(
   source: ReadinessEvidenceSource,
+  roundType: RoundType,
   durable: InterviewPreparationEvidence,
   taskMetric: { score: number | null; observedAt: Date | null },
 ): { score: number | null; observedAt: Date | null } {
@@ -96,6 +126,7 @@ function metricForSource(
   if (source === 'LEARNING_PATH') return durable.learning;
   if (source === 'RESUME_ANALYSIS') return durable.resume;
   if (source === 'PEER_SCORECARD') return durable.peer;
+  if (source === 'MOCK_INTERVIEW') return mockInterviewMetricFor(roundType, durable.mockInterviews);
   if (source === 'TASK_COMPLETION') return taskMetric;
   return { score: null, observedAt: null };
 }
@@ -241,6 +272,11 @@ export class InterviewPreparationService {
     return this.resolveVersioned(result, 'Preparation task');
   }
 
+  async recordMockInterviewCompleted(userId: string, preparationTaskId: string | null): Promise<void> {
+    if (preparationTaskId) await this.repository.completeMockInterviewTask(userId, preparationTaskId);
+    await this.repository.invalidateActivePlans(userId);
+  }
+
   async refreshSnapshot(userId: string, planId: string): Promise<ReadinessSnapshotDto> {
     const plan = await this.getPlan(userId, planId);
     const calculatedAt = new Date();
@@ -266,7 +302,7 @@ export class InterviewPreparationService {
           title: round.title,
           weight: round.weight,
           evidence: evidenceSourcesFor(round.type).map((source) => {
-            const metric = metricForSource(source, durable, taskMetric);
+            const metric = metricForSource(source, round.type, durable, taskMetric);
             return {
               source,
               score: metric.score,

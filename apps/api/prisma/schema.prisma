@@ -167,6 +167,40 @@ enum InterviewReadinessStatus {
   READY
 }
 
+enum MockInterviewTopic {
+  SYSTEM_DESIGN
+  BEHAVIORAL
+  CODING
+  DSA
+}
+
+enum MockInterviewRoleLevel {
+  JUNIOR
+  MID
+  SENIOR
+  STAFF
+}
+
+enum MockInterviewCompanyStyle {
+  GENERIC
+  FAANG
+  STARTUP
+  ENTERPRISE
+}
+
+enum MockInterviewStatus {
+  ACTIVE
+  SCORING
+  COMPLETED
+  FAILED
+  ABANDONED
+}
+
+enum MockInterviewEngine {
+  LLM
+  DETERMINISTIC
+}
+
 enum PeerPracticeStatus {
   PENDING
   ACCEPTED
@@ -232,6 +266,7 @@ model User {
   invitedPeerSessions           PeerPracticeSession[]          @relation("PeerPracticeInvitee")
   peerScorecards                PeerScorecard[]                @relation("PeerScorecardEvaluator")
   pointLedgerEntries            PointLedger[]
+  mockInterviewSessions         MockInterviewSession[]
 }
 
 model RefreshToken {
@@ -845,24 +880,25 @@ model InterviewPreparationRound {
 }
 
 model PreparationTask {
-  id           String                    @id @default(uuid())
-  planId       String
-  roundId      String
-  type         PreparationTaskType
-  title        String
-  description  String?
-  status       PreparationTaskStatus     @default(PENDING)
-  dueAt        DateTime?
-  completedAt  DateTime?
-  resourceType PreparationResourceType?
-  resourceId   String?
-  deepLink     String?
-  ordinal      Int
-  version      Int                       @default(0)
-  createdAt    DateTime                  @default(now())
-  updatedAt    DateTime                  @updatedAt
-  plan         InterviewPreparationPlan  @relation(fields: [planId], references: [id], onDelete: Cascade)
-  round        InterviewPreparationRound @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  id                    String                    @id @default(uuid())
+  planId                String
+  roundId               String
+  type                  PreparationTaskType
+  title                 String
+  description           String?
+  status                PreparationTaskStatus     @default(PENDING)
+  dueAt                 DateTime?
+  completedAt           DateTime?
+  resourceType          PreparationResourceType?
+  resourceId            String?
+  deepLink              String?
+  ordinal               Int
+  version               Int                       @default(0)
+  createdAt             DateTime                  @default(now())
+  updatedAt             DateTime                  @updatedAt
+  plan                  InterviewPreparationPlan  @relation(fields: [planId], references: [id], onDelete: Cascade)
+  round                 InterviewPreparationRound @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  mockInterviewSessions MockInterviewSession[]
 
   @@unique([planId, ordinal])
   @@index([planId, status, dueAt])
@@ -930,4 +966,55 @@ model PeerScorecard {
 
   @@unique([sessionId, evaluatorId])
   @@index([evaluatorId, submittedAt])
+}
+
+model MockInterviewSession {
+  id                String                    @id @default(uuid())
+  userId            String
+  tenantId          String?
+  topic             MockInterviewTopic
+  roleLevel         MockInterviewRoleLevel
+  companyStyle      MockInterviewCompanyStyle
+  durationMinutes   Int
+  status            MockInterviewStatus       @default(ACTIVE)
+  engine            MockInterviewEngine
+  preparationTaskId String?
+  startedAt         DateTime                  @default(now())
+  deadlineAt        DateTime
+  endedAt           DateTime?
+  overallScore      Int?
+  competencies      Json?
+  strengths         String[]
+  improvements      String[]
+  summary           String?
+  failureReason     String?
+  version           Int                       @default(0)
+  createdAt         DateTime                  @default(now())
+  updatedAt         DateTime                  @updatedAt
+  user              User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  preparationTask   PreparationTask?          @relation(fields: [preparationTaskId], references: [id], onDelete: SetNull)
+  turns             MockInterviewTurn[]
+
+  @@index([userId, startedAt(sort: Desc)])
+  @@index([userId, status])
+  @@index([userId, topic, status, endedAt(sort: Desc)])
+  @@index([status, deadlineAt])
+  @@index([tenantId])
+  @@index([preparationTaskId])
+}
+
+model MockInterviewTurn {
+  id         String               @id @default(uuid())
+  sessionId  String
+  ordinal    Int
+  question   String
+  askedAt    DateTime             @default(now())
+  answer     String?
+  answeredAt DateTime?
+  scores     Json?
+  score      Int?
+  feedback   String?
+  session    MockInterviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, ordinal])
 }

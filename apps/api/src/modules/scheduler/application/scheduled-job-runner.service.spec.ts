@@ -4,6 +4,7 @@ import { DailyChallengeService } from '../../daily-challenge/application/daily-c
 import { ContestFinalizationService } from '../../contest/application/contest-finalization.service';
 import { PeerPracticeService } from '../../interview-preparation/application/peer-practice.service';
 import { AuthService } from '../../auth/auth.service';
+import { MockInterviewService } from '../../mock-interview/application/mock-interview.service';
 import { SCHEDULED_JOBS, ScheduledJobName } from '../domain/scheduled-jobs';
 
 function buildRunner(): { runner: ScheduledJobRunner; handlers: Record<string, jest.Mock> } {
@@ -16,6 +17,7 @@ function buildRunner(): { runner: ScheduledJobRunner; handlers: Record<string, j
     finalizeEnded: jest.fn().mockResolvedValue(4),
     sweepPreparationReminders: jest.fn().mockResolvedValue(5),
     pruneExpiredRefreshTokens: jest.fn().mockResolvedValue(6),
+    sweep: jest.fn().mockResolvedValue(7),
   };
   const runner = new ScheduledJobRunner(
     { refreshPeriodTotals } as unknown as PointsService,
@@ -27,6 +29,7 @@ function buildRunner(): { runner: ScheduledJobRunner; handlers: Record<string, j
     {
       pruneExpiredRefreshTokens: handlers.pruneExpiredRefreshTokens,
     } as unknown as AuthService,
+    { sweep: handlers.sweep } as unknown as MockInterviewService,
   );
   return { runner, handlers };
 }
@@ -48,6 +51,7 @@ describe('ScheduledJobRunner', () => {
     [SCHEDULED_JOBS.FINALIZE_CONTESTS, 'finalizeEnded', 4],
     [SCHEDULED_JOBS.SWEEP_PREPARATION_REMINDERS, 'sweepPreparationReminders', 5],
     [SCHEDULED_JOBS.PRUNE_REFRESH_TOKENS, 'pruneExpiredRefreshTokens', 6],
+    [SCHEDULED_JOBS.SWEEP_MOCK_INTERVIEWS, 'sweep', 7],
   ])('dispatches %s to %s', async (jobName, handlerName, affected) => {
     const { runner, handlers } = buildRunner();
 
