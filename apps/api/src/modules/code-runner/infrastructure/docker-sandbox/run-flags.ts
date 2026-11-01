@@ -6,7 +6,10 @@ export interface DockerRunOptions {
   readOnly: boolean;
   command: string[];
   pidsLimit?: number;
+  user?: string;
 }
+
+export const SANDBOX_RUN_USER = '65534:65534';
 
 export function buildDockerRunArgs(options: DockerRunOptions): string[] {
   const mountMode = options.readOnly ? 'ro' : 'rw';
@@ -26,6 +29,9 @@ export function buildDockerRunArgs(options: DockerRunOptions): string[] {
     '--security-opt',
     'no-new-privileges',
   ];
+  if (options.user) {
+    args.push('--user', options.user);
+  }
   if (options.readOnly) {
     args.push('--read-only', '--tmpfs', '/tmp:rw,noexec,nosuid,size=16m');
   }

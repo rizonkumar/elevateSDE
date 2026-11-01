@@ -7,7 +7,7 @@ import { RawCaseResult, RawRunOutput } from '../../domain/value-objects/raw-run-
 import { buildHarness } from './harness-builder';
 import { WorkdirManager } from './workdir.manager';
 import { LANGUAGE_IMAGES } from '../docker-sandbox/images.config';
-import { buildDockerRunArgs } from '../docker-sandbox/run-flags';
+import { buildDockerRunArgs, SANDBOX_RUN_USER } from '../docker-sandbox/run-flags';
 import { JS_RESULT_SENTINEL } from '../docker-sandbox/drivers/javascript.driver';
 
 const MAX_OUTPUT_BYTES = 512 * 1024;
@@ -65,6 +65,7 @@ export class DockerSandboxRunner extends ISandboxRunner {
         name: runName,
         readOnly: true,
         command: config.run,
+        user: SANDBOX_RUN_USER,
       });
       const executed = await this.exec(runArgs, wallTimeout, runName);
       const parsed = this.parseStdout(executed.stdout);
