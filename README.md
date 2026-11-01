@@ -5,6 +5,7 @@ ElevateSDE is an enterprise-grade AI-driven interview preparation platform built
 ## Documentation
 
 - **Architecture:** Detailed technical stack, monorepo structure, DDD pattern, database schemas, and advanced systems are documented in [architecture.md](./architecture.md).
+- **Deployment:** Self-hosted production runbook in [docs/deployment-self-hosted.md](./docs/deployment-self-hosted.md). When a custom domain is ready, follow its **section 10** checklist: the API only accepts browser requests from origins listed in `CORS_ALLOWED_ORIGINS` (never `*`) and refuses to start in production without it.
 - **Developer Guidelines:** Guidelines for development, coding standards (no comments), git branching strategy, and UI rules for AI assistants are documented in [CLAUDE.md](./CLAUDE.md).
 
 ## System Architecture Diagram

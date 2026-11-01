@@ -33,7 +33,7 @@ Read this whole file first, then run the phases in order. Do not skip a verifica
 | `ADMIN_URL` | Vercel admin project production URL, phase 6 |
 | `WEB_URL` | Vercel web project production URL, phase 6 |
 
-**Phase order:** 1 laptop prerequisites, 2 keep awake, 3 backend, 4 Ollama, 5 Tailscale, 6 Vercel, 7 wire CORS, 8 backups, 9 smoke test.
+**Phase order:** 1 laptop prerequisites, 2 keep awake, 3 backend, 4 Ollama, 5 Tailscale, 6 Vercel, 7 wire CORS, 8 backups, 9 smoke test. Section 10 is the checklist for switching to a custom domain later.
 
 ---
 
@@ -346,7 +346,43 @@ Report pass or fail for each item.
 
 ---
 
-## 10. Updating after code changes
+## 10. Moving to a custom domain (CORS and origins)
+
+The API never allows every origin. In production it **refuses to start** unless `CORS_ALLOWED_ORIGINS` lists the exact web origins, and there is no `*` fallback. Until a domain is ready, list the Vercel URLs from phase 7. When the domain arrives, change every item below in one go. Missing one breaks sign-in or Google login.
+
+Example: web on `https://elevatesde.com`, admin served at `https://elevatesde.com/admin` (through the web rewrite), API on `https://api.elevatesde.com`.
+
+| Where | Setting | New value |
+| --- | --- | --- |
+| `apps/api/.env` (server) | `CORS_ALLOWED_ORIGINS` | `https://elevatesde.com,https://www.elevatesde.com`. Exact scheme and host, no trailing slash, no paths, never `*`. Add the admin Vercel origin only if people open it directly instead of through `/admin`. |
+| `apps/api/.env` (server) | `WEB_APP_URL` | `https://elevatesde.com` (used in invitation links) |
+| `apps/api/.env` (server) | `TRUST_PROXY` | Re-run smoke test 9 if a new proxy or CDN now sits in front of the API |
+| Vercel web project | `NEXT_PUBLIC_API_URL` | `https://api.elevatesde.com`, then **redeploy**. The value is baked in at build time and also feeds the CSP `connect-src`, so the browser blocks API calls to any other host. |
+| Vercel admin project | `NEXT_PUBLIC_API_URL` | Same API URL, then **redeploy** |
+| Vercel web project | `ADMIN_APP_URL` | Admin project URL (unchanged unless the admin project moves) |
+| Vercel | Domains | Attach the domain to the web project |
+| Google Cloud Console | OAuth client, Authorized JavaScript origins | Add `https://elevatesde.com` (and `www`), and remove old URLs once they are no longer used |
+
+Then on the server:
+
+```bash
+pm2 restart elevatesde-api --update-env
+```
+
+**Gate:**
+
+```bash
+curl -s -o /dev/null -D - -X OPTIONS https://api.elevatesde.com/api/v1/auth/login \
+  -H 'Origin: https://elevatesde.com' -H 'Access-Control-Request-Method: POST' | grep -i access-control-allow-origin
+curl -s -o /dev/null -D - -X OPTIONS https://api.elevatesde.com/api/v1/auth/login \
+  -H 'Origin: https://evil.example' -H 'Access-Control-Request-Method: POST' | grep -i access-control-allow-origin
+```
+
+The first command prints `access-control-allow-origin: https://elevatesde.com`. The second prints nothing.
+
+**What CORS does and does not do:** CORS only stops *browsers on other websites* from calling the API on behalf of signed-in users. The API URL stays reachable from the internet, so scripts and tools like `curl` can still send requests. Those requests are protected by sign-in (JWT), the admin approval gate for new accounts, role checks, and rate limiting, not by CORS.
+
+## 11. Updating after code changes
 
 ```bash
 cd ~/elevateSDE
@@ -362,7 +398,7 @@ The Vercel projects redeploy automatically on every push to `main`. Pushes to ot
 
 ---
 
-## 11. Troubleshooting
+## 12. Troubleshooting
 
 | Symptom | Likely cause and fix |
 |---|---|
