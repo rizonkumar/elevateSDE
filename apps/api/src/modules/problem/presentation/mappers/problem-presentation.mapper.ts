@@ -1,5 +1,6 @@
-import { CodingProblemDto } from '@elevatesde/shared-types';
+import { CodingProblemDto, ProblemProgressStatus } from '@elevatesde/shared-types';
 import { Problem } from '../../domain/entities/problem';
+import { ProblemListItemResponseDto } from '../dtos/problem-list-item-response.dto';
 import { CodingProblemResponseDto } from '../dtos/coding-problem-response.dto';
 import { ProblemSummaryResponseDto } from '../dtos/problem-summary-response.dto';
 import { AdminCodingProblemResponseDto } from '../dtos/admin-coding-problem-response.dto';
@@ -13,6 +14,19 @@ export class ProblemPresentationMapper {
     dto.difficulty = problem.getDifficulty();
     dto.tags = problem.getTags();
     dto.timeLimitMinutes = problem.getTimeLimitMinutes();
+    return dto;
+  }
+
+  static toListItem(problem: Problem, status: ProblemProgressStatus): ProblemListItemResponseDto {
+    const dto = new ProblemListItemResponseDto();
+    dto.id = problem.getId();
+    dto.title = problem.getTitle();
+    dto.difficulty = problem.getDifficulty();
+    dto.tags = problem.getTags();
+    dto.timeLimitMinutes = problem.getTimeLimitMinutes();
+    dto.topics = problem.getTopics().map((topic) => ({ ...topic }));
+    dto.companies = problem.getCompanies().map((company) => ({ ...company }));
+    dto.status = status;
     return dto;
   }
 
@@ -51,6 +65,8 @@ export class ProblemPresentationMapper {
       expectedOutput: testCase.getExpectedOutput(),
       isHidden: testCase.isHidden(),
     }));
+    dto.topics = problem.getTopics().map((topic) => ({ ...topic }));
+    dto.companies = problem.getCompanies().map((company) => ({ ...company }));
     dto.isPublished = problem.isPublished();
     dto.createdAt = problem.getCreatedAt().toISOString();
     dto.updatedAt = problem.getUpdatedAt().toISOString();

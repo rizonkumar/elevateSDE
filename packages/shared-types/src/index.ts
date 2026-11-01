@@ -496,14 +496,37 @@ export interface ProblemSummaryDto {
   timeLimitMinutes: number;
 }
 
+export type ProblemProgressStatus = 'SOLVED' | 'ATTEMPTED' | 'TODO';
+
+export interface TopicRefDto {
+  id: string;
+  slug: string;
+  name: string;
+}
+
+export interface CompanyRefDto {
+  id: string;
+  slug: string;
+  name: string;
+  frequency: number;
+}
+
+export interface ProblemListItemDto extends ProblemSummaryDto {
+  topics: TopicRefDto[];
+  companies: CompanyRefDto[];
+  status: ProblemProgressStatus;
+}
+
 export interface ProblemListDto {
-  items: ProblemSummaryDto[];
+  items: ProblemListItemDto[];
   total: number;
   page: number;
   pageSize: number;
 }
 
 export interface AdminCodingProblemDto extends CodingProblemDto {
+  topics: TopicRefDto[];
+  companies: CompanyRefDto[];
   isPublished: boolean;
   createdAt: string;
   updatedAt: string;
@@ -532,11 +555,36 @@ export interface AdminCodingProblemInput {
   difficulty: AssessmentDifficulty;
   description: string;
   constraints: string[];
-  tags: string[];
+  topicIds: string[];
+  companies: AdminProblemCompanyInput[];
   starterCode: Record<AssessmentLanguage, string>;
   timeLimitMinutes: number;
   isPublished: boolean;
   testCases: AdminTestCaseInput[];
+}
+
+export interface AdminProblemCompanyInput {
+  companyId: string;
+  frequency: number;
+}
+
+export interface TopicDto {
+  id: string;
+  slug: string;
+  name: string;
+  problemCount: number;
+}
+
+export interface CompanyDto {
+  id: string;
+  slug: string;
+  name: string;
+  problemCount: number;
+  solvedCount: number;
+}
+
+export interface AdminTaxonomyInput {
+  name: string;
 }
 
 export interface AssessmentRunRequestDto {

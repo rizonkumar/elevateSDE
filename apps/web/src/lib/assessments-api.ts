@@ -4,6 +4,7 @@ import type {
   AssessmentRunResultDto,
   CodingProblemDto,
   ProblemListDto,
+  ProblemProgressStatus,
   SubmissionAcceptedDto,
   SubmissionDetailDto,
 } from '@elevatesde/shared-types';
@@ -15,10 +16,16 @@ export interface ListProblemsParams {
   search?: string;
   difficulty?: AssessmentDifficulty;
   hasTestCases?: boolean;
+  topics?: string[];
+  company?: string;
+  status?: ProblemProgressStatus;
 }
 
 export async function listProblems(params: ListProblemsParams): Promise<ProblemListDto> {
-  const response = await api.get<ProblemListDto>('/api/v1/problems', { params });
+  const { topics, ...rest } = params;
+  const response = await api.get<ProblemListDto>('/api/v1/problems', {
+    params: { ...rest, topics: topics && topics.length > 0 ? topics.join(',') : undefined },
+  });
   return response.data;
 }
 

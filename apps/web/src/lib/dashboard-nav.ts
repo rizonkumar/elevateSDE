@@ -7,6 +7,7 @@ import {
   MessagesSquare,
   Trophy,
   Building2,
+  Building,
   Flame,
   Award,
   Bell,
@@ -58,6 +59,12 @@ const PRACTICE_GROUP: NavGroup = {
       label: 'Problems',
       icon: Code2,
       keywords: ['code editor', 'assessment', 'coding', 'questions'],
+    },
+    {
+      href: '/dashboard/companies',
+      label: 'Companies',
+      icon: Building,
+      keywords: ['company tags', 'top questions', 'frequency', 'amazon', 'google'],
     },
     {
       href: '/dashboard/review',

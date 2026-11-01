@@ -1,11 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { AdminCodingProblemDto } from '@elevatesde/shared-types';
 import { CodingProblemResponseDto } from './coding-problem-response.dto';
+import { CompanyRefResponseDto, TopicRefResponseDto } from './taxonomy-ref-response.dto';
 
 export class AdminCodingProblemResponseDto
   extends CodingProblemResponseDto
   implements AdminCodingProblemDto
 {
+  @ApiProperty({ type: [TopicRefResponseDto] })
+  topics!: TopicRefResponseDto[];
+
+  @ApiProperty({ type: [CompanyRefResponseDto] })
+  companies!: CompanyRefResponseDto[];
+
   @ApiProperty({ example: true })
   isPublished!: boolean;
 

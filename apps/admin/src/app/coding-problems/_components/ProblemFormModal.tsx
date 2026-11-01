@@ -12,7 +12,9 @@ import {
   useCodingProblemsStore,
   type ProblemFormValues,
 } from '../../../store/coding-problems.store';
-import { TagsInput } from './TagsInput';
+import { TopicPicker } from './TopicPicker';
+import { CompanyFrequencyEditor } from './CompanyFrequencyEditor';
+import { useTaxonomyStore } from '../../../store/taxonomy.store';
 import { TestCaseEditor } from './TestCaseEditor';
 import { ProblemGuidancePanel } from './ProblemGuidancePanel';
 
@@ -47,7 +49,8 @@ function toFormValues(problem: AdminCodingProblemDto | null): ProblemFormValues 
       title: '',
       difficulty: 'EASY',
       timeLimitMinutes: 30,
-      tags: [],
+      topicIds: [],
+      companies: [],
       description: '',
       constraints: [],
       starterCode: { ...EMPTY_STARTER_CODE },
@@ -59,7 +62,11 @@ function toFormValues(problem: AdminCodingProblemDto | null): ProblemFormValues 
     title: problem.title,
     difficulty: problem.difficulty,
     timeLimitMinutes: problem.timeLimitMinutes,
-    tags: [...problem.tags],
+    topicIds: problem.topics.map((topic) => topic.id),
+    companies: problem.companies.map((company) => ({
+      companyId: company.id,
+      frequency: company.frequency,
+    })),
     description: problem.description,
     constraints: [...problem.constraints],
     starterCode: { ...problem.starterCode },
@@ -74,6 +81,9 @@ export function ProblemFormModal() {
   const savingId = useCodingProblemsStore((state) => state.savingId);
   const closeModal = useCodingProblemsStore((state) => state.closeModal);
   const saveProblem = useCodingProblemsStore((state) => state.saveProblem);
+  const topics = useTaxonomyStore((state) => state.terms.topic);
+  const companies = useTaxonomyStore((state) => state.terms.company);
+  const loadTaxonomy = useTaxonomyStore((state) => state.load);
 
   const [values, setValues] = React.useState<ProblemFormValues>(() => toFormValues(editingProblem));
   const [activeLanguage, setActiveLanguage] = React.useState<AssessmentLanguage>('javascript');
@@ -86,11 +96,13 @@ export function ProblemFormModal() {
     if (!isModalOpen) {
       return;
     }
+    void loadTaxonomy('topic', true);
+    void loadTaxonomy('company', true);
     setValues(toFormValues(editingProblem));
     setActiveLanguage('javascript');
     setShowErrors(false);
     setSection('problem');
-  }, [isModalOpen, editingProblem]);
+  }, [isModalOpen, editingProblem, loadTaxonomy]);
 
   const saving = savingId !== null;
   const titleError = showErrors && !values.title.trim() ? 'Title is required.' : undefined;
@@ -167,11 +179,16 @@ export function ProblemFormModal() {
             />
           </div>
 
-          <TagsInput
-            label="Tags"
-            value={values.tags}
-            onChange={(tags) => updateValues({ tags })}
-            placeholder="Add a tag and press Enter"
+          <TopicPicker
+            topics={topics}
+            value={values.topicIds}
+            onChange={(topicIds) => updateValues({ topicIds })}
+          />
+
+          <CompanyFrequencyEditor
+            companies={companies}
+            value={values.companies}
+            onChange={(nextCompanies) => updateValues({ companies: nextCompanies })}
           />
 
           <Textarea

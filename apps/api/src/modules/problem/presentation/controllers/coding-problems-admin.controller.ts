@@ -40,7 +40,8 @@ export class CodingProblemsAdminController {
     const pageSize = query.pageSize ?? 100;
     const result = await this.problemService.listForAdmin({
       difficulty: query.difficulty,
-      tag: query.tag,
+      topics: query.topics,
+      company: query.company,
       search: query.search,
       hasTestCases: query.hasTestCases,
       page,

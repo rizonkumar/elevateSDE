@@ -37,6 +37,8 @@ function buildProblem(): Problem {
         isHidden: true,
       }),
     ],
+    topics: [{ id: 't1', slug: 'array', name: 'Array' }],
+    companies: [{ id: 'c1', slug: 'amazon', name: 'Amazon', frequency: 90 }],
     createdAt: new Date(),
     updatedAt: new Date(),
   });

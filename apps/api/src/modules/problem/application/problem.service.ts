@@ -1,4 +1,5 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { ProblemProgressStatus } from '@elevatesde/shared-types';
 import { Problem } from '../domain/entities/problem';
 import {
   IProblemRepository,
@@ -7,12 +8,33 @@ import {
   ProblemWriteInput,
 } from '../domain/interfaces/problem-repository.interface';
 
+export interface ProblemListEntry {
+  problem: Problem;
+  status: ProblemProgressStatus;
+}
+
+export interface ProblemListPage {
+  items: ProblemListEntry[];
+  total: number;
+}
+
 @Injectable()
 export class ProblemService {
   constructor(private readonly problemRepository: IProblemRepository) {}
 
-  async list(filter: ProblemListFilter): Promise<ProblemListResult> {
-    return this.problemRepository.findPublished(filter);
+  async list(filter: ProblemListFilter & { viewerId: string }): Promise<ProblemListPage> {
+    const result = await this.problemRepository.findPublished(filter);
+    const statuses = await this.problemRepository.findViewerStatuses(
+      filter.viewerId,
+      result.items.map((problem) => problem.getId()),
+    );
+    return {
+      items: result.items.map((problem) => ({
+        problem,
+        status: statuses.get(problem.getId()) ?? 'TODO',
+      })),
+      total: result.total,
+    };
   }
 
   async getById(id: string): Promise<Problem> {
@@ -36,7 +58,7 @@ export class ProblemService {
   }
 
   async create(input: ProblemWriteInput): Promise<Problem> {
-    return this.problemRepository.create(input);
+    return this.problemRepository.create(await this.validateTaxonomy(input));
   }
 
   async update(id: string, input: Partial<ProblemWriteInput>): Promise<Problem> {
@@ -46,7 +68,13 @@ export class ProblemService {
       difficulty: input.difficulty ?? existing.getDifficulty(),
       description: input.description ?? existing.getDescription(),
       constraints: input.constraints ?? existing.getConstraints(),
-      tags: input.tags ?? existing.getTags(),
+      topicIds: input.topicIds ?? existing.getTopics().map((topic) => topic.id),
+      companies:
+        input.companies ??
+        existing.getCompanies().map((company) => ({
+          companyId: company.id,
+          frequency: company.frequency,
+        })),
       starterCode: input.starterCode ?? existing.getStarterCode(),
       timeLimitMinutes: input.timeLimitMinutes ?? existing.getTimeLimitMinutes(),
       isPublished: input.isPublished ?? existing.isPublished(),
@@ -58,7 +86,7 @@ export class ProblemService {
           isHidden: testCase.isHidden(),
         })),
     };
-    return this.problemRepository.update(id, merged);
+    return this.problemRepository.update(id, await this.validateTaxonomy(merged));
   }
 
   async setPublished(id: string, isPublished: boolean): Promise<Problem> {
@@ -69,5 +97,24 @@ export class ProblemService {
   async remove(id: string): Promise<void> {
     await this.getByIdForAdmin(id);
     await this.problemRepository.delete(id);
+  }
+
+  private async validateTaxonomy(input: ProblemWriteInput): Promise<ProblemWriteInput> {
+    const topicIds = [...new Set(input.topicIds)];
+    const companyIds = input.companies.map((company) => company.companyId);
+    if (new Set(companyIds).size !== companyIds.length) {
+      throw new BadRequestException('Each company can only be added to a problem once.');
+    }
+    const [topicCount, companyCount] = await Promise.all([
+      this.problemRepository.countExistingTopics(topicIds),
+      this.problemRepository.countExistingCompanies(companyIds),
+    ]);
+    if (topicCount !== topicIds.length) {
+      throw new BadRequestException('One or more topics do not exist.');
+    }
+    if (companyCount !== companyIds.length) {
+      throw new BadRequestException('One or more companies do not exist.');
+    }
+    return { ...input, topicIds };
   }
 }

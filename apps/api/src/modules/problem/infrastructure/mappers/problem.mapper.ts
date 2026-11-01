@@ -1,13 +1,43 @@
-import { Problem as PrismaProblem, ProblemTestCase as PrismaProblemTestCase } from '@prisma/client';
+import {
+  Company as PrismaCompany,
+  Problem as PrismaProblem,
+  ProblemCompany as PrismaProblemCompany,
+  ProblemTestCase as PrismaProblemTestCase,
+  ProblemTopic as PrismaProblemTopic,
+  Topic as PrismaTopic,
+} from '@prisma/client';
 import {
   LanguageCodeMap,
   Problem,
   ProblemExample,
+  ProblemCompanyRef,
   ProblemHarness,
+  ProblemTopicRef,
 } from '../../domain/entities/problem';
 import { ProblemTestCase } from '../../domain/entities/problem-test-case';
 
-type PrismaProblemWithTestCases = PrismaProblem & { testCases?: PrismaProblemTestCase[] };
+type PrismaProblemWithTestCases = PrismaProblem & {
+  testCases?: PrismaProblemTestCase[];
+  topics?: (PrismaProblemTopic & { topic: PrismaTopic })[];
+  companies?: (PrismaProblemCompany & { company: PrismaCompany })[];
+};
+
+function toTopicRefs(record: PrismaProblemWithTestCases): ProblemTopicRef[] {
+  return (record.topics ?? [])
+    .map(({ topic }) => ({ id: topic.id, slug: topic.slug, name: topic.name }))
+    .sort((left, right) => left.name.localeCompare(right.name));
+}
+
+function toCompanyRefs(record: PrismaProblemWithTestCases): ProblemCompanyRef[] {
+  return (record.companies ?? [])
+    .map(({ company, frequency }) => ({
+      id: company.id,
+      slug: company.slug,
+      name: company.name,
+      frequency,
+    }))
+    .sort((left, right) => right.frequency - left.frequency || left.name.localeCompare(right.name));
+}
 
 export class ProblemMapper {
   static toDomain(record: PrismaProblemWithTestCases): Problem {
@@ -41,6 +71,8 @@ export class ProblemMapper {
       timeLimitMinutes: record.timeLimitMinutes,
       isPublished: record.isPublished,
       testCases,
+      topics: toTopicRefs(record),
+      companies: toCompanyRefs(record),
       createdAt: record.createdAt,
       updatedAt: record.updatedAt,
     });

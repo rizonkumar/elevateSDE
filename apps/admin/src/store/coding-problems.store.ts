@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type {
   AdminCodingProblemDto,
   AdminCodingProblemInput,
+  AdminProblemCompanyInput,
   AdminProblemSummaryDto,
   AssessmentDifficulty,
   AssessmentLanguage,
@@ -23,9 +24,10 @@ export interface ProblemFormValues {
   title: string;
   difficulty: AssessmentDifficulty;
   timeLimitMinutes: number;
-  tags: string[];
   description: string;
   constraints: string[];
+  topicIds: string[];
+  companies: AdminProblemCompanyInput[];
   starterCode: Record<AssessmentLanguage, string>;
   testCases: AssessmentTestCase[];
   isPublished: boolean;
@@ -79,7 +81,8 @@ const toInput = (values: ProblemFormValues): AdminCodingProblemInput => ({
   difficulty: values.difficulty,
   description: values.description,
   constraints: values.constraints,
-  tags: values.tags,
+  topicIds: values.topicIds,
+  companies: values.companies.map((company) => ({ ...company })),
   starterCode: values.starterCode,
   timeLimitMinutes: values.timeLimitMinutes,
   isPublished: values.isPublished,

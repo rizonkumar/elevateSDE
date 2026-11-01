@@ -1,6 +1,6 @@
 # Feature Plan: Coding Practice Upgrade
 
-> **Status: IN PROGRESS.** Approved with the default answers to the open questions. Phase A is done. Branch: `feature/coding-practice-upgrade`.
+> **Status: IN PROGRESS.** Approved with the default answers to the open questions. Phases A and B are done. Branch: `feature/coding-practice-upgrade`.
 
 Five improvements to the problem-solving loop:
 
@@ -134,9 +134,10 @@ model ProblemCompany {
 - `Problem.tags` stays as a denormalised copy of the topic names. The problem service writes it on every topic change, so `daily-challenge`, `learning-path`, `forum` and `problem-social` keep working unchanged. Dropping the column is a follow-up.
 
 ### Backend
-- `ListProblemsQueryDto` gains `topic`, `company`, `status` (`SOLVED | ATTEMPTED | TODO`, computed from the viewer's submissions) and `sort` (`DEFAULT | DIFFICULTY | FREQUENCY`). `FREQUENCY` requires `company`.
-- `GET /v1/topics` and `GET /v1/companies` return lists with problem counts.
-- `GET /v1/companies/:slug/problems?limit=50` returns the company's problems ordered by frequency, with the viewer's solved state and the solved count out of total.
+- A new `taxonomy` module owns topics and companies: admin CRUD at `/v1/admin/topics` and `/v1/admin/companies`, plus `GET /v1/topics`, `GET /v1/companies` and `GET /v1/companies/:slug` with the viewer's solved count. Renaming or deleting a topic re-syncs `Problem.tags` in the same transaction.
+- `ListProblemsQueryDto` gains `topics` (comma-separated slugs, matching any), `company` and `status` (`SOLVED | ATTEMPTED | TODO`). There is no `sort` parameter: a company-filtered list is always ordered by frequency.
+- Each list item carries its topics, companies and the viewer's `status`.
+- Seed scripts link topics from tags after seeding, since on a fresh database the migration backfill runs before any problems exist.
 - Admin: CRUD for topics and companies at `/v1/admin/topics` and `/v1/admin/companies`, plus assigning them to problems with a frequency in the problem form.
 
 ### Frontend

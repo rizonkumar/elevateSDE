@@ -4,6 +4,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
 import * as bcrypt from 'bcrypt';
 import { seedProblems } from './seed-data/problems-seeder';
+import { seedTopicsFromTags } from './seed-data/topics-seeder';
 import { seedCommunity } from './seed-data/community-seeder';
 import { seedBadges } from './seed-data/badges-seeder';
 
@@ -151,6 +152,9 @@ async function main() {
 
   const totalProblems = await seedProblems(prisma);
   console.log(`Seeded coding problems. Total problems in database: ${totalProblems}`);
+
+  const linkedTopics = await seedTopicsFromTags(prisma);
+  console.log(`Linked ${linkedTopics} problem topics from tags.`);
 
   const totalBadges = await seedBadges(prisma);
   console.log(`Seeded badges. Total badges in database: ${totalBadges}`);

@@ -17,6 +17,19 @@ export interface ProblemHarness {
   cpp: { signature: string };
 }
 
+export interface ProblemTopicRef {
+  id: string;
+  slug: string;
+  name: string;
+}
+
+export interface ProblemCompanyRef {
+  id: string;
+  slug: string;
+  name: string;
+  frequency: number;
+}
+
 export interface ProblemProps {
   id: string;
   tenantId: string | null;
@@ -35,6 +48,8 @@ export interface ProblemProps {
   timeLimitMinutes: number;
   isPublished: boolean;
   testCases: ProblemTestCase[];
+  topics: ProblemTopicRef[];
+  companies: ProblemCompanyRef[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -116,6 +131,14 @@ export class Problem {
 
   getVisibleTestCases(): ProblemTestCase[] {
     return this.props.testCases.filter((testCase) => !testCase.isHidden());
+  }
+
+  getTopics(): ProblemTopicRef[] {
+    return this.props.topics;
+  }
+
+  getCompanies(): ProblemCompanyRef[] {
+    return this.props.companies;
   }
 
   getCreatedAt(): Date {

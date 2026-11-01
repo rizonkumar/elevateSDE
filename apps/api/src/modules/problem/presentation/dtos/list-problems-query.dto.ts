@@ -1,7 +1,30 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
-import { IsBoolean, IsEnum, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import {
+  ArrayMaxSize,
+  IsArray,
+  IsBoolean,
+  IsEnum,
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+} from 'class-validator';
 import { AssessmentDifficulty } from '@prisma/client';
+import { ProblemProgressStatus } from '@elevatesde/shared-types';
+
+const PROGRESS_STATUSES: ProblemProgressStatus[] = ['SOLVED', 'ATTEMPTED', 'TODO'];
+
+function toStringList(value: unknown): string[] | undefined {
+  if (value === undefined || value === null || value === '') {
+    return undefined;
+  }
+  const raw = Array.isArray(value) ? value : String(value).split(',');
+  return raw.map((item) => String(item).trim()).filter((item) => item.length > 0);
+}
 
 export class ListProblemsQueryDto {
   @ApiPropertyOptional({ enum: AssessmentDifficulty })
@@ -9,10 +32,31 @@ export class ListProblemsQueryDto {
   @IsOptional()
   difficulty?: AssessmentDifficulty;
 
-  @ApiPropertyOptional({ example: 'Array' })
-  @IsString()
+  @ApiPropertyOptional({
+    example: 'sliding-window,two-pointers',
+    description: 'Comma-separated topic slugs. Matches problems with any of them.',
+  })
+  @Transform(({ value }) => toStringList(value))
+  @IsArray()
+  @ArrayMaxSize(10)
+  @IsString({ each: true })
+  @MaxLength(80, { each: true })
   @IsOptional()
-  tag?: string;
+  topics?: string[];
+
+  @ApiPropertyOptional({
+    example: 'amazon',
+    description: 'Company slug. Results are ordered by how often the company asks them.',
+  })
+  @IsString()
+  @MaxLength(80)
+  @IsOptional()
+  company?: string;
+
+  @ApiPropertyOptional({ enum: PROGRESS_STATUSES })
+  @IsIn(PROGRESS_STATUSES)
+  @IsOptional()
+  status?: ProblemProgressStatus;
 
   @ApiPropertyOptional({ example: 'two sum' })
   @IsString()

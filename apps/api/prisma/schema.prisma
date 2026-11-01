@@ -372,6 +372,8 @@ model Problem {
   editorial         ProblemEditorial?
   hints             ProblemHint[]
   assistances       ProblemAssistance[]
+  topics            ProblemTopic[]
+  companies         ProblemCompany[]
 
   @@index([difficulty, isPublished])
 }
@@ -387,6 +389,45 @@ model ProblemTestCase {
 
   @@unique([problemId, ordinal])
   @@index([problemId, isHidden])
+}
+
+model Topic {
+  id        String         @id @default(uuid())
+  slug      String         @unique
+  name      String
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  problems  ProblemTopic[]
+}
+
+model ProblemTopic {
+  problemId String
+  topicId   String
+  problem   Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  topic     Topic   @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@id([problemId, topicId])
+  @@index([topicId])
+}
+
+model Company {
+  id        String           @id @default(uuid())
+  slug      String           @unique
+  name      String
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  problems  ProblemCompany[]
+}
+
+model ProblemCompany {
+  problemId String
+  companyId String
+  frequency Int
+  problem   Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@id([problemId, companyId])
+  @@index([companyId, frequency(sort: Desc)])
 }
 
 model ProblemEditorial {
