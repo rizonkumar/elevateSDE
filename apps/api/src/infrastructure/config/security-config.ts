@@ -50,3 +50,8 @@ export function assertSecurityConfig(): void {
     throw new Error('DATABASE_URL must be set');
   }
 }
+
+export function isOwnerAdminEmail(email: string): boolean {
+  const owner = process.env.SEED_ADMIN_EMAIL?.trim().toLowerCase() ?? '';
+  return owner.length > 0 && owner === email.trim().toLowerCase();
+}

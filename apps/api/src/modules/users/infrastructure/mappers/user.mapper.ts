@@ -14,10 +14,16 @@ export class UserMapper {
       prismaUser.lastName,
       prismaUser.headline,
       prismaUser.googleId,
+      prismaUser.status,
     );
   }
 
-  static toPersistence(user: User): Omit<PrismaUser, 'createdAt' | 'updatedAt' | 'headline'> {
+  static toPersistence(
+    user: User,
+  ): Omit<
+    PrismaUser,
+    'createdAt' | 'updatedAt' | 'headline' | 'reviewedAt' | 'reviewedById' | 'rejectionReason'
+  > {
     return {
       id: user.getId(),
       tenantId: user.getTenantId(),
@@ -27,6 +33,7 @@ export class UserMapper {
       role: user.getRole(),
       firstName: user.getFirstName(),
       lastName: user.getLastName(),
+      status: user.getStatus(),
     };
   }
 }

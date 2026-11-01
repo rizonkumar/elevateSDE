@@ -29,6 +29,8 @@ import { ToggleFeatureFlagDto } from '../dtos/toggle-feature-flag.dto';
 import { UpdateRolloutDto } from '../dtos/update-rollout.dto';
 import { AdminDashboardStatsDto } from '../dtos/dashboard-stats.dto';
 import { AdminPresentationMapper } from '../mappers/admin-presentation.mapper';
+import { UpdateUserRoleDto } from '../dtos/account-review.dto';
+import { isOwnerAdminEmail } from '../../../../infrastructure/config/security-config';
 
 interface RequestWithUser {
   user: User;
@@ -76,13 +78,17 @@ export class AdminController {
   @ApiResponse({ status: 200, type: UserResponseDto })
   async updateRole(
     @Param('id') id: string,
-    @Body('role') role: UserRole,
+    @Body() dto: UpdateUserRoleDto,
     @Req() req: RequestWithUser,
   ): Promise<UserResponseDto> {
+    const role = dto.role;
     if (req.user.getId() === id) {
       throw new ForbiddenException('You cannot change your own role');
     }
     const oldUser = await this.usersService.findById(id);
+    if (isOwnerAdminEmail(oldUser.getEmail())) {
+      throw new ForbiddenException('The owner admin role cannot be changed');
+    }
     const updated = await this.usersService.updateRole(id, role);
     await this.auditLogService.create(req.user.getId(), 'USER_ROLE_UPDATED', {
       targetUserId: id,

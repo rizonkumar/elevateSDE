@@ -12,8 +12,7 @@ const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 async function hashPassword(plain: string): Promise<string> {
-  const salt = await bcrypt.genSalt();
-  return bcrypt.hash(plain, salt);
+  return bcrypt.hash(plain, 12);
 }
 
 const LEGACY_ADMIN_EMAIL = 'admin@elevatesde.dev';
@@ -45,8 +44,8 @@ async function seedOwnerAdmin(credentials: OwnerCredentials) {
   });
   return prisma.user.upsert({
     where: { email: credentials.email },
-    update: { passwordHash, role: 'ADMIN' },
-    create: { email: credentials.email, passwordHash, role: 'ADMIN' },
+    update: { passwordHash, role: 'ADMIN', status: 'ACTIVE' },
+    create: { email: credentials.email, passwordHash, role: 'ADMIN', status: 'ACTIVE' },
   });
 }
 

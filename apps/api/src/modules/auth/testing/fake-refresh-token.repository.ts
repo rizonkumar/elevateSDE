@@ -1,4 +1,5 @@
 import { TEST_USER } from './auth-fixtures';
+import { User } from '../../users/domain/entities/user';
 import {
   IRefreshTokenRepository,
   NewRefreshToken,
@@ -15,6 +16,7 @@ export interface FakeRefreshTokenRow extends NewRefreshToken {
 
 export class FakeRefreshTokenRepository implements IRefreshTokenRepository {
   rows: FakeRefreshTokenRow[] = [];
+  storedUser: User = TEST_USER;
   private sequence = 0;
 
   async create(token: NewRefreshToken): Promise<void> {
@@ -29,7 +31,7 @@ export class FakeRefreshTokenRepository implements IRefreshTokenRepository {
           familyId: row.familyId,
           expiresAt: row.expiresAt,
           rotatedAt: row.rotatedAt,
-          user: TEST_USER,
+          user: this.storedUser,
         }
       : null;
   }

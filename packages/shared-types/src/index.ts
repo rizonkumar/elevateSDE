@@ -6,7 +6,35 @@ export interface UserDto {
   lastName: string | null;
   headline: string | null;
   role: string;
+  status: AccountStatusDto;
   createdAt: string;
+}
+
+export type AccountStatusDto = 'PENDING_APPROVAL' | 'ACTIVE' | 'REJECTED';
+
+export interface RegistrationResultDto {
+  status: 'PENDING_APPROVAL';
+  email: string;
+}
+
+export interface PendingAccountDto {
+  id: string;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+  role: string;
+  companyName: string | null;
+  signUpMethod: 'PASSWORD' | 'GOOGLE';
+  createdAt: string;
+}
+
+export interface PendingAccountListDto {
+  items: PendingAccountDto[];
+  total: number;
+}
+
+export interface PendingAccountCountDto {
+  count: number;
 }
 
 export interface TenantDto {

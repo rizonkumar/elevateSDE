@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { NotificationDraft } from '../../domain/entities/notification';
 import {
+  AccountPendingApprovalEvent,
   BadgeAwardedEvent,
   ForumReplyEvent,
   ForumUpvoteEvent,
@@ -20,6 +21,20 @@ export class NotificationListener {
   private readonly logger = new Logger(NotificationListener.name);
 
   constructor(private readonly notificationService: NotificationService) {}
+
+  @OnEvent(NOTIFICATION_EVENTS.ACCOUNT_PENDING_APPROVAL)
+  async onAccountPendingApproval(event: AccountPendingApprovalEvent): Promise<void> {
+    for (const recipientId of event.recipientIds) {
+      await this.safeNotify({
+        userId: recipientId,
+        type: 'SYSTEM',
+        title: 'New account awaiting approval',
+        body: `${event.email} signed up and is waiting for your approval.`,
+        linkUrl: '/admin/users?tab=pending',
+        dedupeKey: `account-pending:${event.pendingUserId}:${recipientId}`,
+      });
+    }
+  }
 
   @OnEvent(NOTIFICATION_EVENTS.BADGE_AWARDED)
   async onBadgeAwarded(event: BadgeAwardedEvent): Promise<void> {

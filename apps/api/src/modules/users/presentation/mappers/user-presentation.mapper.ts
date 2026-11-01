@@ -11,6 +11,7 @@ export class UserPresentationMapper {
     dto.lastName = user.getLastName();
     dto.headline = user.getHeadline();
     dto.role = user.getRole();
+    dto.status = user.getStatus();
     dto.createdAt = user.getCreatedAt().toISOString();
     return dto;
   }

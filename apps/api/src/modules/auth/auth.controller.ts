@@ -4,7 +4,7 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from './dtos/register.dto';
 import { LoginDto } from './dtos/login.dto';
 import { RefreshTokenDto } from './dtos/refresh-token.dto';
-import { AuthResponseDto } from '@elevatesde/shared-types';
+import { AuthResponseDto, RegistrationResultDto } from '@elevatesde/shared-types';
 
 @ApiTags('Auth')
 @Controller({ path: 'auth', version: '1' })
@@ -13,9 +13,9 @@ export class AuthController {
 
   @Post('register')
   @ApiOperation({ summary: 'Register a new B2C candidate or B2B tenant admin' })
-  @ApiResponse({ status: 201, description: 'User successfully registered.' })
+  @ApiResponse({ status: 201, description: 'Registration received and awaiting admin approval.' })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
-  register(@Body() dto: RegisterDto): Promise<AuthResponseDto> {
+  register(@Body() dto: RegisterDto): Promise<RegistrationResultDto> {
     return this.authService.register(dto);
   }
 
@@ -24,6 +24,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Log in user and return access and refresh tokens' })
   @ApiResponse({ status: 200, description: 'Successfully logged in.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({ status: 403, description: 'Account pending approval or rejected.' })
   login(@Body() dto: LoginDto): Promise<AuthResponseDto> {
     return this.authService.login(dto);
   }

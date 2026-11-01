@@ -1,7 +1,8 @@
 import { UnauthorizedException } from '@nestjs/common';
 import { JwtStrategy } from './jwt.strategy';
 import { UsersService } from '../users/application/users.service';
-import { TEST_USER } from './testing/auth-fixtures';
+import { AccountStatus } from '@prisma/client';
+import { TEST_USER, userWithStatus } from './testing/auth-fixtures';
 import { AuthTokenPayload } from './domain/auth-token';
 
 describe('JwtStrategy', () => {
@@ -35,4 +36,15 @@ describe('JwtStrategy', () => {
       strategy.validate({ sub: 'gone', email: 'gone@example.com', typ: 'access' }),
     ).rejects.toBeInstanceOf(UnauthorizedException);
   });
+
+  it.each([AccountStatus.PENDING_APPROVAL, AccountStatus.REJECTED])(
+    'rejects an access token for a %s account',
+    async (status) => {
+      findById.mockResolvedValue(userWithStatus(status));
+
+      await expect(
+        strategy.validate({ sub: 'user-1', email: 'candidate@example.com', typ: 'access' }),
+      ).rejects.toBeInstanceOf(UnauthorizedException);
+    },
+  );
 });

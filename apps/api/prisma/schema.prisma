@@ -12,6 +12,12 @@ enum UserRole {
   ADMIN
 }
 
+enum AccountStatus {
+  PENDING_APPROVAL
+  ACTIVE
+  REJECTED
+}
+
 enum JobApplicationStatus {
   APPLIED
   OA
@@ -232,9 +238,15 @@ model User {
   lastName                      String?
   headline                      String?
   role                          UserRole                       @default(USER)
+  status                        AccountStatus                  @default(ACTIVE)
+  reviewedAt                    DateTime?
+  reviewedById                  String?
+  rejectionReason               String?
   createdAt                     DateTime                       @default(now())
   updatedAt                     DateTime                       @updatedAt
   tenant                        Tenant?                        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  reviewedBy                    User?                          @relation("UserReviews", fields: [reviewedById], references: [id], onDelete: SetNull)
+  reviewedUsers                 User[]                         @relation("UserReviews")
   refreshTokens                 RefreshToken[]
   auditLogs                     AuditLog[]
   jobApplications               JobApplication[]
@@ -267,6 +279,8 @@ model User {
   peerScorecards                PeerScorecard[]                @relation("PeerScorecardEvaluator")
   pointLedgerEntries            PointLedger[]
   mockInterviewSessions         MockInterviewSession[]
+
+  @@index([status, createdAt])
 }
 
 model RefreshToken {

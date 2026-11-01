@@ -8,7 +8,14 @@ export const NOTIFICATION_EVENTS = {
   PEER_INVITATION: 'notification.peer-invitation',
   PEER_SESSION_CHANGED: 'notification.peer-session-changed',
   SCORECARD_REQUEST: 'notification.scorecard-request',
+  ACCOUNT_PENDING_APPROVAL: 'notification.account-pending-approval',
 } as const;
+
+export interface AccountPendingApprovalEvent {
+  recipientIds: string[];
+  pendingUserId: string;
+  email: string;
+}
 
 export interface BadgeAwardedEvent {
   userId: string;
