@@ -9,6 +9,7 @@ import { Button, Input, GoogleSignInButton } from '@elevatesde/ui';
 import { AuthLayout } from '../../components/AuthLayout';
 import { RoleGuide } from '../../components/RoleGuide';
 import { GoogleOnboardingPanel } from '../../components/GoogleOnboardingPanel';
+import { PendingApprovalPanel } from '../../components/PendingApprovalPanel';
 import { useAuthStore } from '../../store/auth.store';
 import { useToastStore } from '../../store/toast.store';
 import { api } from '../../lib/api';
@@ -19,6 +20,7 @@ interface AxiosErrorResponse {
   response?: {
     data?: {
       message?: string;
+      code?: string;
     };
   };
 }
@@ -46,6 +48,7 @@ export default function LoginPage() {
   const [loading, setLoading] = React.useState(false);
   const [redirectTo, setRedirectTo] = React.useState('/dashboard');
   const [onboarding, setOnboarding] = React.useState<GoogleOnboardingDto | null>(null);
+  const [pendingEmail, setPendingEmail] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     setRedirectTo(readSafeRedirect());
@@ -73,6 +76,10 @@ export default function LoginPage() {
       handleAuthenticated(response.data, 'Welcome back! Successfully logged in.');
     } catch (err) {
       const axiosError = err as AxiosErrorResponse;
+      if (axiosError.response?.data?.code === 'ACCOUNT_PENDING_APPROVAL') {
+        setPendingEmail(email);
+        return;
+      }
       addToast(
         axiosError.response?.data?.message || 'Failed to sign in. Please verify your credentials.',
         'error',
@@ -98,6 +105,14 @@ export default function LoginPage() {
     }
   };
 
+  if (pendingEmail) {
+    return (
+      <AuthLayout>
+        <PendingApprovalPanel email={pendingEmail} />
+      </AuthLayout>
+    );
+  }
+
   if (onboarding) {
     return (
       <AuthLayout>
@@ -106,7 +121,10 @@ export default function LoginPage() {
           firstName={onboarding.firstName}
           lastName={onboarding.lastName}
           onboardingToken={onboarding.onboardingToken}
-          onComplete={(auth) => handleAuthenticated(auth, 'Welcome to ElevateSDE! Account created.')}
+          onComplete={(result) => {
+            setOnboarding(null);
+            setPendingEmail(result.email);
+          }}
         />
       </AuthLayout>
     );
