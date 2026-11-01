@@ -5,6 +5,8 @@ import {
   parseNarrative,
   parseOpeningQuestion,
   readProviderConfig,
+  readSummaryTimeoutMs,
+  readTurnTimeoutMs,
 } from './openai-compatible-mock-interviewer';
 
 const validScores = { structure: 3, ownership: 4, impact: 2, communication: 3 };
@@ -110,5 +112,19 @@ describe('OpenAI-compatible mock interviewer configuration', () => {
       fetchSpy.mockRestore();
       process.env = previous;
     }
+  });
+
+  it('uses default timeouts when none are configured', () => {
+    expect(readTurnTimeoutMs({})).toBe(15_000);
+    expect(readSummaryTimeoutMs({})).toBe(30_000);
+  });
+
+  it('reads configured timeouts', () => {
+    expect(readTurnTimeoutMs({ MOCK_INTERVIEW_AI_TURN_TIMEOUT_MS: '90000' })).toBe(90_000);
+    expect(readSummaryTimeoutMs({ MOCK_INTERVIEW_AI_SUMMARY_TIMEOUT_MS: '120000' })).toBe(120_000);
+  });
+
+  it.each(['abc', '0', '-5', '1.5', ''])('ignores the invalid timeout %p', (raw) => {
+    expect(readTurnTimeoutMs({ MOCK_INTERVIEW_AI_TURN_TIMEOUT_MS: raw })).toBe(15_000);
   });
 });
