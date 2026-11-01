@@ -118,7 +118,7 @@ export default function LoginPage() {
           <Input
             type="email"
             label="Email Address"
-            placeholder="admin@elevatesde.com"
+            placeholder="you@company.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={loading}

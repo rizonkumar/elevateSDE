@@ -5,6 +5,7 @@ ElevateSDE is an enterprise-grade AI-driven interview preparation platform built
 ## Documentation
 
 - **Architecture:** Detailed technical stack, monorepo structure, DDD pattern, database schemas, and advanced systems are documented in [architecture.md](./architecture.md).
+- **Deployment:** Self-hosted production runbook in [docs/deployment-self-hosted.md](./docs/deployment-self-hosted.md). When a custom domain is ready, follow its **section 10** checklist: the API only accepts browser requests from origins listed in `CORS_ALLOWED_ORIGINS` (never `*`) and refuses to start in production without it.
 - **Developer Guidelines:** Guidelines for development, coding standards (no comments), git branching strategy, and UI rules for AI assistants are documented in [CLAUDE.md](./CLAUDE.md).
 
 ## System Architecture Diagram
@@ -118,9 +119,9 @@ Audit Logs are implemented to track administrative actions, mutations, and authe
 ```text
 elevatesde/
 ├── apps/
-│   ├── web/                 (Next.js 16.2.9 Frontend - Candidate Portal, port 3001)
+│   ├── web/                 (Next.js 16.4.3 Frontend - Candidate Portal, port 3001)
 │   ├── api/                 (NestJS Backend - Core API, port 4400)
-│   └── admin/               (Next.js 16.2.9 Frontend - Admin Backoffice, internal port 3002, served at /admin)
+│   └── admin/               (Next.js 16.4.3 Frontend - Admin Backoffice, internal port 3002, served at /admin)
 ├── packages/
 │   ├── shared-types/        (TypeScript Interfaces used across apps)
 │   ├── ui/                  (Shared Tailwind components)
@@ -189,11 +190,12 @@ The API requires a PostgreSQL database (and Redis for caching/queues). Both are 
 
 > Everything is reached through the single web origin on **port 3001**. The backoffice is a separate Next.js app (`apps/admin`) that runs internally on port `3002` with `basePath: '/admin'`; `apps/web/next.config.ts` rewrites `/admin/:path*` to it, so you always visit `localhost:3001/admin` (a reverse proxy does the same under one domain in production). Do not open port `3002` directly.
 
-Seeded demo logins (all use the password `Password123!`):
+The seed creates one owner admin from `SEED_ADMIN_EMAIL` and `SEED_ADMIN_PASSWORD` in `apps/api/.env` (gitignored, never commit real values). New registrations stay in `PENDING_APPROVAL` until an admin approves them from **Users → Pending approval** in the backoffice.
+
+For local development only, `SEED_DEMO_ACCOUNTS="true"` also seeds these demo logins (password `Password123!`). They are never created when `NODE_ENV=production`:
 
 | Email                      | Role           |
 | -------------------------- | -------------- |
-| `admin@elevatesde.dev`     | `ADMIN`        |
 | `org@elevatesde.dev`       | `TENANT_ADMIN` |
 | `candidate@elevatesde.dev` | `USER`         |
 

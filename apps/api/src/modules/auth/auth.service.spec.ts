@@ -7,6 +7,7 @@ import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { FakeRefreshTokenRepository } from './testing/fake-refresh-token.repository';
 import { TEST_USER } from './testing/auth-fixtures';
 import { REFRESH_REUSE_GRACE_MS } from './domain/refresh-token-rotation';
+import { AccountReviewService } from '../users/application/account-review.service';
 
 const START = new Date('2026-10-04T12:00:00.000Z');
 
@@ -26,7 +27,13 @@ describe('AuthService refresh tokens', () => {
     });
     repository = new FakeRefreshTokenRepository();
     tokens = new TokenService(new JwtService({ secret: 'test-secret' }), repository);
-    service = new AuthService({} as UsersService, tokens, {} as PrismaService, repository);
+    service = new AuthService(
+      {} as UsersService,
+      tokens,
+      {} as PrismaService,
+      repository,
+      {} as AccountReviewService,
+    );
   });
 
   afterEach(() => {

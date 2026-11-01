@@ -12,11 +12,44 @@ const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 async function hashPassword(plain: string): Promise<string> {
-  const salt = await bcrypt.genSalt();
-  return bcrypt.hash(plain, salt);
+  return bcrypt.hash(plain, 12);
 }
 
-async function main() {
+const LEGACY_ADMIN_EMAIL = 'admin@elevatesde.dev';
+const MIN_OWNER_PASSWORD_LENGTH = 8;
+
+interface OwnerCredentials {
+  email: string;
+  password: string;
+}
+
+function readOwnerCredentials(): OwnerCredentials {
+  const email = process.env.SEED_ADMIN_EMAIL?.trim().toLowerCase() ?? '';
+  const password = process.env.SEED_ADMIN_PASSWORD ?? '';
+  if (!email || !email.includes('@')) {
+    throw new Error('SEED_ADMIN_EMAIL must be set to the owner admin email in apps/api/.env');
+  }
+  if (password.length < MIN_OWNER_PASSWORD_LENGTH) {
+    throw new Error(
+      `SEED_ADMIN_PASSWORD must be set in apps/api/.env and be at least ${MIN_OWNER_PASSWORD_LENGTH} characters`,
+    );
+  }
+  return { email, password };
+}
+
+async function seedOwnerAdmin(credentials: OwnerCredentials) {
+  const passwordHash = await hashPassword(credentials.password);
+  await prisma.user.deleteMany({
+    where: { email: LEGACY_ADMIN_EMAIL, NOT: { email: credentials.email } },
+  });
+  return prisma.user.upsert({
+    where: { email: credentials.email },
+    update: { passwordHash, role: 'ADMIN', status: 'ACTIVE' },
+    create: { email: credentials.email, passwordHash, role: 'ADMIN', status: 'ACTIVE' },
+  });
+}
+
+async function seedDemoAccounts(adminId: string, adminEmail: string): Promise<void> {
   const password = await hashPassword('Password123!');
 
   const tenant = await prisma.tenant.upsert({
@@ -26,16 +59,6 @@ async function main() {
       id: 'seed-tenant-acme',
       name: 'Acme Corp',
       subscriptionPlan: 'TEAM',
-    },
-  });
-
-  const admin = await prisma.user.upsert({
-    where: { email: 'admin@elevatesde.dev' },
-    update: { passwordHash: password, role: 'ADMIN' },
-    create: {
-      email: 'admin@elevatesde.dev',
-      passwordHash: password,
-      role: 'ADMIN',
     },
   });
 
@@ -75,6 +98,24 @@ async function main() {
     });
   }
 
+  const auditActions = [
+    { action: 'USER_REGISTERED', metadata: { email: 'candidate@elevatesde.dev', role: 'USER' } },
+    { action: 'TENANT_CREATED', metadata: { name: 'Acme Corp', plan: 'TEAM' } },
+    { action: 'FEATURE_FLAG_ENABLED', metadata: { flagKey: 'AI_MOCK_INTERVIEW_BETA' } },
+    { action: 'ROLE_CHANGED', metadata: { from: 'USER', to: 'ADMIN', target: adminEmail } },
+  ];
+
+  for (const entry of auditActions) {
+    await prisma.auditLog.create({
+      data: { userId: adminId, action: entry.action, metadata: entry.metadata },
+    });
+  }
+
+  const totalMembers = await seedCommunity(prisma, password);
+  console.log(`Seeded community. Total roster members: ${totalMembers}`);
+}
+
+async function seedFeatureFlags(): Promise<void> {
   const flags = [
     { flagKey: 'AI_MOCK_INTERVIEW_BETA', isEnabled: true, percentageRollout: 100 },
     { flagKey: 'RESUME_ATS_SCORING', isEnabled: true, percentageRollout: 75 },
@@ -85,29 +126,31 @@ async function main() {
   for (const flag of flags) {
     await prisma.featureFlag.upsert({
       where: { flagKey: flag.flagKey },
-      update: { isEnabled: flag.isEnabled, percentageRollout: flag.percentageRollout },
+      update: {},
       create: flag,
     });
   }
+}
 
-  const auditActions = [
-    { action: 'USER_REGISTERED', metadata: { email: 'candidate@elevatesde.dev', role: 'USER' } },
-    { action: 'TENANT_CREATED', metadata: { name: 'Acme Corp', plan: 'TEAM' } },
-    { action: 'FEATURE_FLAG_ENABLED', metadata: { flagKey: 'AI_MOCK_INTERVIEW_BETA' } },
-    { action: 'ROLE_CHANGED', metadata: { from: 'USER', to: 'ADMIN', target: admin.email } },
-  ];
+function shouldSeedDemoAccounts(): boolean {
+  if (process.env.NODE_ENV === 'production') {
+    return false;
+  }
+  return process.env.SEED_DEMO_ACCOUNTS === 'true';
+}
 
-  for (const entry of auditActions) {
-    await prisma.auditLog.create({
-      data: { userId: admin.id, action: entry.action, metadata: entry.metadata },
-    });
+async function main() {
+  const owner = await seedOwnerAdmin(readOwnerCredentials());
+  console.log('Seeded owner admin account.');
+
+  await seedFeatureFlags();
+
+  if (shouldSeedDemoAccounts()) {
+    await seedDemoAccounts(owner.id, owner.email);
   }
 
   const totalProblems = await seedProblems(prisma);
   console.log(`Seeded coding problems. Total problems in database: ${totalProblems}`);
-
-  const totalMembers = await seedCommunity(prisma, password);
-  console.log(`Seeded community. Total roster members: ${totalMembers}`);
 
   const totalBadges = await seedBadges(prisma);
   console.log(`Seeded badges. Total badges in database: ${totalBadges}`);

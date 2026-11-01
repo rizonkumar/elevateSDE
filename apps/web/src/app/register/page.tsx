@@ -10,16 +10,24 @@ import { AuthLayout } from '../../components/AuthLayout';
 import { RoleGuide } from '../../components/RoleGuide';
 import { RoleToggle } from '../../components/RoleToggle';
 import { GoogleOnboardingPanel } from '../../components/GoogleOnboardingPanel';
+import { PendingApprovalPanel } from '../../components/PendingApprovalPanel';
 import { useAuthStore } from '../../store/auth.store';
 import { useToastStore } from '../../store/toast.store';
 import { api } from '../../lib/api';
 import { signInWithGoogle } from '../../lib/google-auth';
-import { AuthResponseDto, GoogleOnboardingDto } from '@elevatesde/shared-types';
+import {
+  AuthResponseDto,
+  GoogleOnboardingDto,
+  RegistrationResultDto,
+  PASSWORD_POLICY,
+  isStrongPassword,
+} from '@elevatesde/shared-types';
 
 interface AxiosErrorResponse {
   response?: {
     data?: {
       message?: string;
+      code?: string;
     };
   };
 }
@@ -40,6 +48,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = React.useState(false);
   const [redirectTo, setRedirectTo] = React.useState('/dashboard');
   const [onboarding, setOnboarding] = React.useState<GoogleOnboardingDto | null>(null);
+  const [pendingEmail, setPendingEmail] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     if (globalThis.window === undefined) return;
@@ -67,6 +76,10 @@ export default function RegisterPage() {
       }
     } catch (err) {
       const axiosError = err as AxiosErrorResponse;
+      if (axiosError.response?.data?.code === 'ACCOUNT_PENDING_APPROVAL') {
+        setPendingEmail('');
+        return;
+      }
       addToast(axiosError.response?.data?.message || 'Google sign-in failed.', 'error');
     }
   };
@@ -77,8 +90,8 @@ export default function RegisterPage() {
       addToast('Please fill in all required fields.', 'error');
       return;
     }
-    if (password.length < 8) {
-      addToast('Password must be at least 8 characters long.', 'error');
+    if (!isStrongPassword(password)) {
+      addToast(`Password must be ${PASSWORD_POLICY.description}.`, 'error');
       return;
     }
     setLoading(true);
@@ -86,15 +99,13 @@ export default function RegisterPage() {
     try {
       const payload: {
         email: string;
-        password?: string;
-        role: string;
+        password: string;
         companyName?: string;
         firstName?: string;
         lastName?: string;
       } = {
         email,
         password,
-        role,
       };
       if (firstName.trim()) {
         payload.firstName = firstName.trim();
@@ -106,19 +117,26 @@ export default function RegisterPage() {
         payload.companyName = companyName;
       }
 
-      const response = await api.post<AuthResponseDto>('/api/v1/auth/register', payload);
-      handleAuthenticated(response.data, 'Welcome to ElevateSDE! Account created.');
+      const response = await api.post<RegistrationResultDto>('/api/v1/auth/register', payload);
+      setPendingEmail(response.data.email);
     } catch (err) {
       const axiosError = err as AxiosErrorResponse;
       addToast(
-        axiosError.response?.data?.message ||
-          'Failed to create account. Email may already be registered.',
+        axiosError.response?.data?.message || 'Failed to create account. Please try again.',
         'error',
       );
     } finally {
       setLoading(false);
     }
   };
+
+  if (pendingEmail !== null) {
+    return (
+      <AuthLayout>
+        <PendingApprovalPanel email={pendingEmail} />
+      </AuthLayout>
+    );
+  }
 
   if (onboarding) {
     return (
@@ -128,9 +146,10 @@ export default function RegisterPage() {
           firstName={onboarding.firstName}
           lastName={onboarding.lastName}
           onboardingToken={onboarding.onboardingToken}
-          onComplete={(auth) =>
-            handleAuthenticated(auth, 'Welcome to ElevateSDE! Account created.')
-          }
+          onComplete={(result) => {
+            setOnboarding(null);
+            setPendingEmail(result.email);
+          }}
         />
       </AuthLayout>
     );
@@ -200,7 +219,7 @@ export default function RegisterPage() {
           <Input
             type="password"
             label="Password"
-            placeholder="Min. 8 characters"
+            placeholder={`Min. ${PASSWORD_POLICY.minLength} characters, a letter and a number`}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={loading}

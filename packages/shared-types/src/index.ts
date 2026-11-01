@@ -6,7 +6,35 @@ export interface UserDto {
   lastName: string | null;
   headline: string | null;
   role: string;
+  status: AccountStatusDto;
   createdAt: string;
+}
+
+export type AccountStatusDto = 'PENDING_APPROVAL' | 'ACTIVE' | 'REJECTED';
+
+export interface RegistrationResultDto {
+  status: 'PENDING_APPROVAL';
+  email: string;
+}
+
+export interface PendingAccountDto {
+  id: string;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+  role: string;
+  companyName: string | null;
+  signUpMethod: 'PASSWORD' | 'GOOGLE';
+  createdAt: string;
+}
+
+export interface PendingAccountListDto {
+  items: PendingAccountDto[];
+  total: number;
+}
+
+export interface PendingAccountCountDto {
+  count: number;
 }
 
 export interface TenantDto {
@@ -112,6 +140,23 @@ export interface ResumeDto {
 }
 
 export const MAX_RESUME_SIZE_BYTES = 5 * 1024 * 1024;
+
+export const PASSWORD_POLICY = {
+  minLength: 10,
+  maxLength: 72,
+  letterPattern: /[A-Za-z]/,
+  digitPattern: /\d/,
+  description: 'at least 10 characters, including a letter and a number',
+} as const;
+
+export function isStrongPassword(value: string): boolean {
+  return (
+    value.length >= PASSWORD_POLICY.minLength &&
+    value.length <= PASSWORD_POLICY.maxLength &&
+    PASSWORD_POLICY.letterPattern.test(value) &&
+    PASSWORD_POLICY.digitPattern.test(value)
+  );
+}
 
 export const ACCEPTED_RESUME_MIME_TYPES: readonly string[] = [
   'application/pdf',

@@ -8,6 +8,19 @@ import { ADMIN_NAV_GROUPS, findActiveAdminItem } from '../lib/admin-nav';
 import { AdminBrandMark } from './AdminBrandMark';
 import { AdminUserMenu } from './AdminUserMenu';
 import { AdminCommandPalette } from './AdminCommandPalette';
+import { usePendingAccountsStore } from '../store/pending-accounts.store';
+import type { ShellNavGroupConfig } from '@elevatesde/ui';
+
+const USERS_HREF = '/users';
+
+function withPendingBadge(groups: ShellNavGroupConfig[], count: number): ShellNavGroupConfig[] {
+  return groups.map((group) => ({
+    ...group,
+    items: group.items.map((item) =>
+      item.href === USERS_HREF ? { ...item, badgeCount: count } : item,
+    ),
+  }));
+}
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -18,6 +31,16 @@ const COLLAPSE_KEY = 'admin-sidebar-collapsed';
 export function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
+  const pendingCount = usePendingAccountsStore((state) => state.count);
+  const refreshPendingCount = usePendingAccountsStore((state) => state.refreshCountIfStale);
+  const navGroups = React.useMemo(
+    () => withPendingBadge(ADMIN_NAV_GROUPS, pendingCount),
+    [pendingCount],
+  );
+
+  React.useEffect(() => {
+    void refreshPendingCount();
+  }, [refreshPendingCount]);
 
   React.useEffect(() => {
     setSidebarOpen(false);
@@ -32,7 +55,7 @@ export function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
   return (
     <div className="flex min-h-screen bg-(--color-bg) text-(--color-text-primary)">
       <ShellSidebar
-        groups={ADMIN_NAV_GROUPS}
+        groups={navGroups}
         activeHref={match?.item.href ?? null}
         renderBrand={(compact) => <AdminBrandMark compact={compact} />}
         LinkComponent={Link}

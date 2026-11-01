@@ -122,7 +122,7 @@ export class CodeRunnerService {
       totalCount: cases.length,
       totalRuntimeMs,
       peakMemoryKb,
-      stdout: raw.compileError ?? raw.userStdout,
+      stdout: raw.compileError ?? (cases.some((testCase) => testCase.isHidden()) ? '' : raw.userStdout),
     };
   }
 

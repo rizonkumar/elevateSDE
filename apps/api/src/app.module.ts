@@ -1,5 +1,9 @@
 import { Module } from '@nestjs/common';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { RateLimitGuard } from './infrastructure/security/rate-limit.guard';
+import { GLOBAL_RATE_LIMIT } from './infrastructure/security/rate-limits';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
@@ -30,6 +34,7 @@ import { SchedulerModule } from './modules/scheduler/scheduler.module';
 @Module({
   imports: [
     EventEmitterModule.forRoot(),
+    ThrottlerModule.forRoot({ throttlers: [{ name: 'default', ...GLOBAL_RATE_LIMIT }] }),
     QueuesModule,
     AuthModule,
     UsersModule,
@@ -56,6 +61,6 @@ import { SchedulerModule } from './modules/scheduler/scheduler.module';
     SchedulerModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, { provide: APP_GUARD, useClass: RateLimitGuard }],
 })
 export class AppModule {}

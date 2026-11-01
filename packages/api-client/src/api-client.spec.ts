@@ -10,6 +10,7 @@ const USER: UserDto = {
   lastName: 'Lovelace',
   headline: null,
   role: 'USER',
+  status: 'ACTIVE',
   createdAt: '2026-10-01T00:00:00.000Z',
 };
 

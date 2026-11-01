@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { UserRole } from '@prisma/client';
-import { UserDto } from '@elevatesde/shared-types';
+import { AccountStatus, UserRole } from '@prisma/client';
+import { AccountStatusDto, UserDto } from '@elevatesde/shared-types';
 
 export class UserResponseDto implements UserDto {
   @ApiProperty({ example: 'uuid-string' })
@@ -23,6 +23,9 @@ export class UserResponseDto implements UserDto {
 
   @ApiProperty({ enum: UserRole })
   role!: string;
+
+  @ApiProperty({ enum: AccountStatus })
+  status!: AccountStatusDto;
 
   @ApiProperty({ example: '2026-06-15T08:11:29Z' })
   createdAt!: string;

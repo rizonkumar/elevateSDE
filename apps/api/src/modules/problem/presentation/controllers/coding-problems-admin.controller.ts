@@ -28,7 +28,7 @@ import { ProblemPresentationMapper } from '../mappers/problem-presentation.mappe
 @ApiBearerAuth()
 @Controller({ path: 'admin/coding-problems', version: '1' })
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.ADMIN, UserRole.TENANT_ADMIN)
+@Roles(UserRole.ADMIN)
 export class CodingProblemsAdminController {
   constructor(private readonly problemService: ProblemService) {}
 

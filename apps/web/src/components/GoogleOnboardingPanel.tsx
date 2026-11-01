@@ -7,7 +7,7 @@ import { Button, Input } from '@elevatesde/ui';
 import { RoleToggle } from './RoleToggle';
 import { completeGoogleSignup } from '../lib/google-auth';
 import { useToastStore } from '../store/toast.store';
-import { AuthResponseDto } from '@elevatesde/shared-types';
+import { RegistrationResultDto } from '@elevatesde/shared-types';
 
 interface AxiosErrorResponse {
   response?: {
@@ -22,7 +22,7 @@ interface GoogleOnboardingPanelProps {
   firstName: string | null;
   lastName: string | null;
   onboardingToken: string;
-  onComplete: (auth: AuthResponseDto) => void;
+  onComplete: (result: RegistrationResultDto) => void;
 }
 
 export function GoogleOnboardingPanel({
@@ -48,12 +48,12 @@ export function GoogleOnboardingPanel({
     setLoading(true);
 
     try {
-      const auth = await completeGoogleSignup(
+      const result = await completeGoogleSignup(
         onboardingToken,
         role,
         role === 'TENANT_ADMIN' ? companyName.trim() : undefined,
       );
-      onComplete(auth);
+      onComplete(result);
     } catch (err) {
       const axiosError = err as AxiosErrorResponse;
       addToast(

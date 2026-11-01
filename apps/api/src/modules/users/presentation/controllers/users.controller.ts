@@ -6,7 +6,6 @@ import {
   Body,
   UseGuards,
   Req,
-  ForbiddenException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { UsersService } from '../../application/users.service';
@@ -17,6 +16,7 @@ import { UserRole } from '@prisma/client';
 import { User } from '../../domain/entities/user';
 import { UserResponseDto } from '../dtos/user-response.dto';
 import { UserPresentationMapper } from '../mappers/user-presentation.mapper';
+import { UpdateUserRoleDto } from '../dtos/update-user-role.dto';
 
 interface RequestWithUser {
   user: User;
@@ -49,13 +49,10 @@ export class UsersController {
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   async updateRole(
     @Param('id') id: string,
-    @Body('role') role: UserRole,
+    @Body() dto: UpdateUserRoleDto,
     @Req() req: RequestWithUser,
   ): Promise<UserResponseDto> {
-    if (req.user.getId() === id) {
-      throw new ForbiddenException('You cannot change your own role');
-    }
-    const updatedUser = await this.usersService.updateRole(id, role);
-    return UserPresentationMapper.toResponse(updatedUser);
+    const change = await this.usersService.updateRole(req.user.getId(), id, dto.role);
+    return UserPresentationMapper.toResponse(change.user);
   }
 }

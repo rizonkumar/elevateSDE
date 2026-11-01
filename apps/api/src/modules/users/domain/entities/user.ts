@@ -1,4 +1,4 @@
-import { UserRole } from '@prisma/client';
+import { AccountStatus, UserRole } from '@prisma/client';
 
 export class User {
   private constructor(
@@ -12,6 +12,7 @@ export class User {
     private readonly lastName: string | null,
     private readonly headline: string | null,
     private readonly createdAt: Date,
+    private readonly status: AccountStatus,
   ) {}
 
   static create(
@@ -24,6 +25,7 @@ export class User {
     lastName: string | null = null,
     headline: string | null = null,
     googleId: string | null = null,
+    status: AccountStatus = AccountStatus.PENDING_APPROVAL,
   ): User {
     if (!email || !email.includes('@')) {
       throw new Error('Invalid email address');
@@ -42,6 +44,7 @@ export class User {
       lastName,
       headline,
       new Date(),
+      status,
     );
   }
 
@@ -56,6 +59,7 @@ export class User {
     lastName: string | null,
     headline: string | null = null,
     googleId: string | null = null,
+    status: AccountStatus = AccountStatus.ACTIVE,
   ): User {
     return new User(
       id,
@@ -68,6 +72,7 @@ export class User {
       lastName,
       headline,
       createdAt,
+      status,
     );
   }
 
@@ -83,6 +88,23 @@ export class User {
       this.lastName,
       this.headline,
       this.createdAt,
+      this.status,
+    );
+  }
+
+  withPasswordHash(passwordHash: string): User {
+    return new User(
+      this.id,
+      this.tenantId,
+      this.email,
+      passwordHash,
+      this.googleId,
+      this.role,
+      this.firstName,
+      this.lastName,
+      this.headline,
+      this.createdAt,
+      this.status,
     );
   }
 
@@ -98,6 +120,7 @@ export class User {
       this.lastName,
       this.headline,
       this.createdAt,
+      this.status,
     );
   }
 
@@ -143,5 +166,13 @@ export class User {
 
   getHeadline(): string | null {
     return this.headline;
+  }
+
+  getStatus(): AccountStatus {
+    return this.status;
+  }
+
+  isActive(): boolean {
+    return this.status === AccountStatus.ACTIVE;
   }
 }

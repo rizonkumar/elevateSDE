@@ -33,7 +33,7 @@ Read this whole file first, then run the phases in order. Do not skip a verifica
 | `ADMIN_URL` | Vercel admin project production URL, phase 6 |
 | `WEB_URL` | Vercel web project production URL, phase 6 |
 
-**Phase order:** 1 laptop prerequisites, 2 keep awake, 3 backend, 4 Ollama, 5 Tailscale, 6 Vercel, 7 wire CORS, 8 backups, 9 smoke test.
+**Phase order:** 1 laptop prerequisites, 2 keep awake, 3 backend, 4 Ollama, 5 Tailscale, 6 Vercel, 7 wire CORS, 8 backups, 9 smoke test. Section 10 is the checklist for switching to a custom domain later.
 
 ---
 
@@ -43,7 +43,7 @@ Read this whole file first, then run the phases in order. Do not skip a verifica
 sudo apt update && sudo apt install -y git curl ca-certificates openssl
 curl -fsSL https://get.docker.com | sh
 sudo usermod -aG docker "$USER"
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
 sudo apt install -y nodejs
 sudo npm install -g pnpm@10.33.0 pm2 vercel
 ```
@@ -58,7 +58,7 @@ docker pull gcc:13
 
 The three images are the code-execution sandbox languages (JavaScript, Python, C++). Pull them now so the first submission does not time out downloading.
 
-**Gate:** `docker run --rm hello-world`, `node -v` (v20 or newer), `pnpm -v`, `pm2 -v` all succeed.
+**Gate:** `docker run --rm hello-world`, `node -v` (v24 LTS; do not use odd-numbered or pre-release Node versions), `pnpm -v`, `pm2 -v` all succeed.
 
 ---
 
@@ -99,8 +99,11 @@ cp apps/api/.env.production.example apps/api/.env
 
 Edit `apps/api/.env` and set:
 - `DATABASE_URL="postgresql://postgres:<DB_PASSWORD>@127.0.0.1:5432/elevatesde"`
-- `JWT_SECRET="<JWT_SECRET>"`
-- Leave `WEB_APP_URL` and `CORS_ALLOWED_ORIGINS` for phase 7.
+- `JWT_SECRET="<JWT_SECRET>"` (the API refuses to start if it is shorter than 32 characters)
+- `SEED_ADMIN_EMAIL` and `SEED_ADMIN_PASSWORD` for the owner admin (see 3.5). Type them on the server only.
+- `CORS_ALLOWED_ORIGINS="https://placeholder.invalid"` for now. In production the API refuses to start without an explicit origin list; phase 7 replaces it with the real Vercel URLs.
+- Leave `WEB_APP_URL` for phase 7.
+- Keep `SWAGGER_ENABLED="false"` (API docs are off in production) and `TRUST_PROXY="1"` (see the rate-limit check in section 9).
 - Leave the `MOCK_INTERVIEW_AI_*` values as they are if Ollama will be installed in phase 4. Otherwise set `MOCK_INTERVIEW_AI_ENABLED="false"`.
 
 ### 3.3 Start Postgres and Redis
@@ -136,28 +139,22 @@ docker exec elevatesde-postgres psql -U postgres -d elevatesde -c 'select count(
 
 and expect a count of about 2,788 or more. If the table name differs, check `apps/api/prisma/schema.prisma` for the model's mapped name.
 
-### 3.5 Replace the demo passwords (required before the API is public)
+### 3.5 Owner admin account (required before the API is public)
 
-The seed creates demo accounts (`admin@elevatesde.dev`, `candidate@elevatesde.dev`, `org@elevatesde.dev`, and community members) that all share the password `Password123!`. These are public knowledge from the repo, so replace the hashes before exposing the API.
+The seed creates exactly one admin from `SEED_ADMIN_EMAIL` and `SEED_ADMIN_PASSWORD` in `apps/api/.env`, and refuses to run if either is missing. Set them on the server only; never commit them and never put them in the web or admin env files (those are exposed to the browser).
 
-```bash
-cd apps/api
-NEW_HASH="$(node -e "require('bcrypt').hash(process.argv[1], 10).then(h => process.stdout.write(h))" "$(openssl rand -base64 18)")"
-docker exec elevatesde-postgres psql -U postgres -d elevatesde -c "update \"User\" set \"passwordHash\" = '$NEW_HASH' where email like '%@elevatesde.dev';"
-cd ../..
-```
-
-That sets one random password for every seeded account, which makes them unusable. Then set a known admin password for yourself:
+Keep `SEED_DEMO_ACCOUNTS="false"` in production. Demo accounts with the public password `Password123!` are never seeded when `NODE_ENV=production`. If an older database still has `*@elevatesde.dev` demo accounts, disable them:
 
 ```bash
 cd apps/api
-ADMIN_PASSWORD="<choose a strong password>"
-ADMIN_HASH="$(node -e "require('bcrypt').hash(process.argv[1], 10).then(h => process.stdout.write(h))" "$ADMIN_PASSWORD")"
-docker exec elevatesde-postgres psql -U postgres -d elevatesde -c "update \"User\" set \"passwordHash\" = '$ADMIN_HASH' where email = 'admin@elevatesde.dev';"
+NEW_HASH="$(node -e "require('bcrypt').hash(process.argv[1], 12).then(h => process.stdout.write(h))" "$(openssl rand -base64 18)")"
+docker exec elevatesde-postgres psql -U postgres -d elevatesde -c "update \"User\" set \"passwordHash\" = '$NEW_HASH', status = 'REJECTED' where email like '%@elevatesde.dev';"
 cd ../..
 ```
 
-If the `"User"` table name is wrong, check the model mapping in `apps/api/prisma/schema.prisma`. To create testers, register new accounts through the app UI instead of using the seeded ones.
+Every new registration stays in `PENDING_APPROVAL` until the owner approves it from **Users → Pending approval** in the backoffice.
+
+On a server that was already deployed, set both variables and run `pnpm --filter @elevatesde/api db:migrate && pnpm --filter @elevatesde/api db:seed` once. The migration keeps every existing account active; the seed creates or updates the owner admin and deletes `admin@elevatesde.dev`.
 
 ### 3.6 Build and run the API
 
@@ -170,7 +167,7 @@ pm2 startup
 
 Run the command that `pm2 startup` prints (it needs sudo).
 
-**Gate:** `curl -sI http://127.0.0.1:4400/api/docs` returns `200`, and `pm2 status` shows `elevatesde-api` as `online`.
+**Gate:** `curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:4400/api/v1/problems` returns `401` (the API is up and requires sign-in), `curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:4400/api/docs` returns `404` (docs are off in production), and `pm2 status` shows `elevatesde-api` as `online`. If pm2 shows it errored, `pm2 logs elevatesde-api` names the missing or weak env var.
 
 ---
 
@@ -337,17 +334,55 @@ Adjust the path if the repo was cloned elsewhere.
 Report pass or fail for each item.
 
 1. `WEB_URL` loads and the landing page renders.
-2. Register a new account, sign out, sign in.
+2. Register a new account. The web app shows "Registration received" and signing in says the account is awaiting approval.
+   Sign in to `WEB_URL/admin` as the owner admin, open **Users → Pending approval**, approve the account, then sign in with it on `WEB_URL`.
 3. The dashboard loads with no failed API calls.
 4. The problem list shows the seeded problems, and a `rp-` problem opens in the editor.
 5. Submit a correct solution to a `rp-` problem. It should be judged through the Docker sandbox (check `docker ps -a` briefly shows `elevate-*` containers, and `pm2 logs` has no sandbox errors).
 6. Start a mock interview and finish it through to the report. Check `pm2 logs elevatesde-api` for `Falling back to deterministic` to see whether the model answered.
 7. `WEB_URL/admin` loads the admin login. Sign in with the admin account from step 3.5.
 8. `pm2 logs elevatesde-api` shows scheduler startup with no errors.
+9. Rate limiting sees real client IPs. From two different networks (for example laptop Wi-Fi and a phone on mobile data), try signing in with a wrong password 11 times on one of them. Only that network should get `429 Too Many Requests`; the other must still be able to sign in. If both are blocked, the API sees every visitor as the same proxy IP: change `TRUST_PROXY` in `apps/api/.env` (try `2`) and `pm2 restart elevatesde-api --update-env`.
 
 ---
 
-## 10. Updating after code changes
+## 10. Moving to a custom domain (CORS and origins)
+
+The API never allows every origin. In production it **refuses to start** unless `CORS_ALLOWED_ORIGINS` lists the exact web origins, and there is no `*` fallback. Until a domain is ready, list the Vercel URLs from phase 7. When the domain arrives, change every item below in one go. Missing one breaks sign-in or Google login.
+
+Example: web on `https://elevatesde.com`, admin served at `https://elevatesde.com/admin` (through the web rewrite), API on `https://api.elevatesde.com`.
+
+| Where | Setting | New value |
+| --- | --- | --- |
+| `apps/api/.env` (server) | `CORS_ALLOWED_ORIGINS` | `https://elevatesde.com,https://www.elevatesde.com`. Exact scheme and host, no trailing slash, no paths, never `*`. Add the admin Vercel origin only if people open it directly instead of through `/admin`. |
+| `apps/api/.env` (server) | `WEB_APP_URL` | `https://elevatesde.com` (used in invitation links) |
+| `apps/api/.env` (server) | `TRUST_PROXY` | Re-run smoke test 9 if a new proxy or CDN now sits in front of the API |
+| Vercel web project | `NEXT_PUBLIC_API_URL` | `https://api.elevatesde.com`, then **redeploy**. The value is baked in at build time and also feeds the CSP `connect-src`, so the browser blocks API calls to any other host. |
+| Vercel admin project | `NEXT_PUBLIC_API_URL` | Same API URL, then **redeploy** |
+| Vercel web project | `ADMIN_APP_URL` | Admin project URL (unchanged unless the admin project moves) |
+| Vercel | Domains | Attach the domain to the web project |
+| Google Cloud Console | OAuth client, Authorized JavaScript origins | Add `https://elevatesde.com` (and `www`), and remove old URLs once they are no longer used |
+
+Then on the server:
+
+```bash
+pm2 restart elevatesde-api --update-env
+```
+
+**Gate:**
+
+```bash
+curl -s -o /dev/null -D - -X OPTIONS https://api.elevatesde.com/api/v1/auth/login \
+  -H 'Origin: https://elevatesde.com' -H 'Access-Control-Request-Method: POST' | grep -i access-control-allow-origin
+curl -s -o /dev/null -D - -X OPTIONS https://api.elevatesde.com/api/v1/auth/login \
+  -H 'Origin: https://evil.example' -H 'Access-Control-Request-Method: POST' | grep -i access-control-allow-origin
+```
+
+The first command prints `access-control-allow-origin: https://elevatesde.com`. The second prints nothing.
+
+**What CORS does and does not do:** CORS only stops *browsers on other websites* from calling the API on behalf of signed-in users. The API URL stays reachable from the internet, so scripts and tools like `curl` can still send requests. Those requests are protected by sign-in (JWT), the admin approval gate for new accounts, role checks, and rate limiting, not by CORS.
+
+## 11. Updating after code changes
 
 ```bash
 cd ~/elevateSDE
@@ -363,7 +398,7 @@ The Vercel projects redeploy automatically on every push to `main`. Pushes to ot
 
 ---
 
-## 11. Troubleshooting
+## 12. Troubleshooting
 
 | Symptom | Likely cause and fix |
 |---|---|

@@ -14,6 +14,7 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import type { MockInterviewHistoryDto, MockInterviewSessionDto } from '@elevatesde/shared-types';
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
+import { AiRateLimit } from '../../../../infrastructure/security/rate-limits';
 import { User } from '../../../users/domain/entities/user';
 import { MockInterviewService } from '../../application/mock-interview.service';
 import {
@@ -35,6 +36,7 @@ export class MockInterviewController {
   constructor(private readonly service: MockInterviewService) {}
 
   @Post()
+  @AiRateLimit()
   @ApiOperation({ summary: 'Start a mock interview and receive the opening question' })
   @ApiResponse({ status: 409, description: 'Another mock interview is already in progress' })
   @ApiResponse({ status: 429, description: 'Daily mock interview limit reached' })
@@ -84,6 +86,7 @@ export class MockInterviewController {
   }
 
   @Post(':id/turns/:turnId/answer')
+  @AiRateLimit()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Answer the current question and receive the next one' })
   @ApiResponse({ status: 409, description: 'The session changed since it was loaded' })
@@ -104,6 +107,7 @@ export class MockInterviewController {
   }
 
   @Post(':id/end')
+  @AiRateLimit()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'End a mock interview early and start scoring' })
   async end(

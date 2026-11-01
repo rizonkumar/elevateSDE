@@ -7,7 +7,6 @@ import {
   Body,
   UseGuards,
   Req,
-  ForbiddenException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { UsersService } from '../../../users/application/users.service';
@@ -29,6 +28,7 @@ import { ToggleFeatureFlagDto } from '../dtos/toggle-feature-flag.dto';
 import { UpdateRolloutDto } from '../dtos/update-rollout.dto';
 import { AdminDashboardStatsDto } from '../dtos/dashboard-stats.dto';
 import { AdminPresentationMapper } from '../mappers/admin-presentation.mapper';
+import { UpdateUserRoleDto } from '../../../users/presentation/dtos/update-user-role.dto';
 
 interface RequestWithUser {
   user: User;
@@ -76,20 +76,16 @@ export class AdminController {
   @ApiResponse({ status: 200, type: UserResponseDto })
   async updateRole(
     @Param('id') id: string,
-    @Body('role') role: UserRole,
+    @Body() dto: UpdateUserRoleDto,
     @Req() req: RequestWithUser,
   ): Promise<UserResponseDto> {
-    if (req.user.getId() === id) {
-      throw new ForbiddenException('You cannot change your own role');
-    }
-    const oldUser = await this.usersService.findById(id);
-    const updated = await this.usersService.updateRole(id, role);
+    const change = await this.usersService.updateRole(req.user.getId(), id, dto.role);
     await this.auditLogService.create(req.user.getId(), 'USER_ROLE_UPDATED', {
       targetUserId: id,
-      oldRole: oldUser.getRole(),
-      newRole: role,
+      oldRole: change.previousRole,
+      newRole: dto.role,
     });
-    return UserPresentationMapper.toResponse(updated);
+    return UserPresentationMapper.toResponse(change.user);
   }
 
   @Get('tenants')

@@ -56,11 +56,41 @@ gatedDescribe('DockerSandboxRunner (integration)', () => {
     const output = await runner.run(
       spec({
         userCode:
-          'function twoSum(nums, target){ require("http").get("http://example.com"); return []; }',
+          'function twoSum(nums, target){ require("child_process").execSync("wget -q -T 3 -O- http://example.com"); return []; }',
       }),
     );
-    expect(output.caseResults[0]?.status).not.toBe('ok');
+    expect(output.caseResults[0]?.status).toBe('error');
   }, 30000);
+
+  it('runs user code as an unprivileged user', async () => {
+    const output = await runner.run(
+      spec({ userCode: 'function twoSum(nums, target){ return [process.getuid()]; }' }),
+    );
+    expect(output.caseResults[0]?.output).toBe('[65534]');
+  }, 30000);
+
+  it('cannot write outside the scratch tmpfs', async () => {
+    const output = await runner.run(
+      spec({
+        userCode:
+          'function twoSum(nums, target){ require("fs").writeFileSync("/sandbox/x", "1"); return []; }',
+      }),
+    );
+    expect(output.caseResults[0]?.status).toBe('error');
+  }, 30000);
+
+  it('compiles and runs a correct C++ solution as the unprivileged user', async () => {
+    const output = await runner.run(
+      spec({
+        language: 'cpp',
+        userCode:
+          'vector<int> twoSum(vector<int>& nums, int target) { for (int i = 0; i < (int)nums.size(); i++) for (int j = i + 1; j < (int)nums.size(); j++) if (nums[i] + nums[j] == target) return {i, j}; return {}; }',
+      }),
+    );
+    expect(output.compileError).toBeNull();
+    expect(output.caseResults[0]?.status).toBe('ok');
+    expect(output.caseResults[0]?.output).toBe('[0,1]');
+  }, 90000);
 
   it('reports a C++ compile error', async () => {
     const output = await runner.run(

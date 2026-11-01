@@ -1,9 +1,9 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../users/application/users.service';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { RegisterDto } from './dtos/register.dto';
 import { LoginDto } from './dtos/login.dto';
-import { AuthResponseDto } from '@elevatesde/shared-types';
+import { AuthResponseDto, RegistrationResultDto } from '@elevatesde/shared-types';
 import * as bcrypt from 'bcrypt';
 import { UserRole } from '@prisma/client';
 import { TokenService } from './application/token.service';
@@ -12,6 +12,9 @@ import {
   StoredRefreshToken,
 } from './domain/interfaces/refresh-token-repository.interface';
 import { isWithinReuseGrace } from './domain/refresh-token-rotation';
+import { assertAccountCanSignIn } from './domain/account-access';
+import { AccountReviewService } from '../users/application/account-review.service';
+import { hashPassword, needsRehash } from './domain/password-hashing';
 
 @Injectable()
 export class AuthService {
@@ -20,16 +23,17 @@ export class AuthService {
     private readonly tokenService: TokenService,
     private readonly prisma: PrismaService,
     private readonly refreshTokens: IRefreshTokenRepository,
+    private readonly accountReview: AccountReviewService,
   ) {}
 
-  async register(dto: RegisterDto): Promise<AuthResponseDto> {
-    const existing = await this.usersService.findByEmail(dto.email);
+  async register(dto: RegisterDto): Promise<RegistrationResultDto> {
+    const email = dto.email.trim();
+    const pending: RegistrationResultDto = { status: 'PENDING_APPROVAL', email };
+    const passwordHash = await hashPassword(dto.password);
+    const existing = await this.usersService.findByEmail(email);
     if (existing) {
-      throw new BadRequestException('Email is already registered');
+      return pending;
     }
-
-    const salt = await bcrypt.genSalt();
-    const passwordHash = await bcrypt.hash(dto.password, salt);
 
     let tenantId: string | undefined;
 
@@ -42,10 +46,10 @@ export class AuthService {
       tenantId = tenant.id;
     }
 
-    const role = dto.companyName ? UserRole.TENANT_ADMIN : dto.role || UserRole.USER;
+    const role = dto.companyName ? UserRole.TENANT_ADMIN : UserRole.USER;
 
     const user = await this.usersService.create({
-      email: dto.email,
+      email,
       passwordHash,
       role,
       tenantId,
@@ -53,33 +57,38 @@ export class AuthService {
       lastName: dto.lastName,
     });
 
-    return this.tokenService.issueFor(user);
+    await this.accountReview.announcePending(user);
+    return pending;
   }
 
   async login(dto: LoginDto): Promise<AuthResponseDto> {
-    const user = await this.usersService.findByEmail(dto.email);
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+    const user = await this.usersService.findByEmail(dto.email.trim());
+    const passwordHash = user?.getPasswordHash() ?? null;
+    if (!user || !passwordHash) {
+      await bcrypt.compare(dto.password, TIMING_SAFE_DUMMY_HASH);
+      throw invalidCredentials();
     }
 
-    if (!user.hasPassword()) {
-      throw new UnauthorizedException(
-        'This account uses Google sign-in. Please continue with Google.',
-      );
-    }
-
-    const isMatch = await bcrypt.compare(dto.password, user.getPasswordHash()!);
+    const isMatch = await bcrypt.compare(dto.password, passwordHash);
     if (!isMatch) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw invalidCredentials();
     }
 
-    return this.tokenService.issueFor(user);
+    assertAccountCanSignIn(user);
+    const current = needsRehash(passwordHash)
+      ? await this.usersService.replacePasswordHash(user, await hashPassword(dto.password))
+      : user;
+    return this.tokenService.issueFor(current);
   }
 
   async refresh(token: string): Promise<AuthResponseDto> {
     const now = new Date();
     const stored = await this.refreshTokens.findByToken(token);
     if (!stored || stored.expiresAt <= now) {
+      throw invalidRefreshToken();
+    }
+    if (!stored.user.isActive()) {
+      await this.refreshTokens.revokeFamily(stored.familyId);
       throw invalidRefreshToken();
     }
     if (stored.rotatedAt === null) {
@@ -125,6 +134,15 @@ export class AuthService {
     }
     return this.tokenService.respond(stored.user, successor.token);
   }
+}
+
+const TIMING_SAFE_DUMMY_HASH = '$2b$12$lEHOHk0sbjUEEQ.hx52zdOGHVHpvjn031m3rXIne.zbUp.OtCX9uO';
+
+export const INVALID_CREDENTIALS_MESSAGE =
+  'Invalid email or password. If you signed up with Google, use Continue with Google.';
+
+function invalidCredentials(): UnauthorizedException {
+  return new UnauthorizedException(INVALID_CREDENTIALS_MESSAGE);
 }
 
 function invalidRefreshToken(): UnauthorizedException {

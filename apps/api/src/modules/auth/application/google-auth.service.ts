@@ -3,6 +3,7 @@ import {
   UnauthorizedException,
   ForbiddenException,
   BadRequestException,
+  ConflictException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserRole } from '@prisma/client';
@@ -15,7 +16,9 @@ import {
 } from '../domain/interfaces/google-token-verifier.interface';
 import { TokenService } from './token.service';
 import { GoogleAuthContext } from '../dtos/google-sign-in.dto';
-import { AuthResponseDto, GoogleAuthResultDto } from '@elevatesde/shared-types';
+import { GoogleAuthResultDto, RegistrationResultDto } from '@elevatesde/shared-types';
+import { assertAccountCanSignIn } from '../domain/account-access';
+import { AccountReviewService } from '../../users/application/account-review.service';
 
 interface OnboardingTokenPayload {
   purpose: 'GOOGLE_ONBOARDING';
@@ -35,6 +38,7 @@ export class GoogleAuthService {
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
     private readonly googleTokenVerifier: IGoogleTokenVerifier,
+    private readonly accountReview: AccountReviewService,
   ) {}
 
   async signIn(idToken: string, context: GoogleAuthContext): Promise<GoogleAuthResultDto> {
@@ -58,6 +62,7 @@ export class GoogleAuthService {
       };
     }
 
+    assertAccountCanSignIn(user);
     return {
       status: 'AUTHENTICATED',
       auth: await this.tokenService.issueFor(user),
@@ -69,7 +74,7 @@ export class GoogleAuthService {
     onboardingToken: string,
     role: UserRole,
     companyName?: string,
-  ): Promise<AuthResponseDto> {
+  ): Promise<RegistrationResultDto> {
     const payload = await this.verifyOnboardingToken(onboardingToken);
 
     const existing =
@@ -77,10 +82,12 @@ export class GoogleAuthService {
       (await this.usersService.findByEmail(payload.email));
 
     if (existing) {
-      const linked = existing.getGoogleId()
-        ? existing
-        : await this.usersService.linkGoogleAccount(existing.getId(), payload.googleId);
-      return this.tokenService.issueFor(linked);
+      if (!existing.getGoogleId()) {
+        await this.usersService.linkGoogleAccount(existing.getId(), payload.googleId);
+      }
+      throw new ConflictException(
+        'An account already exists for this Google account. Please sign in instead.',
+      );
     }
 
     if (role === UserRole.TENANT_ADMIN && !companyName) {
@@ -102,7 +109,8 @@ export class GoogleAuthService {
       lastName: payload.lastName ?? undefined,
     });
 
-    return this.tokenService.issueFor(user);
+    await this.accountReview.announcePending(user);
+    return { status: 'PENDING_APPROVAL', email: user.getEmail() };
   }
 
   private async resolveExistingUser(identity: GoogleIdentity): Promise<User | null> {
@@ -126,6 +134,7 @@ export class GoogleAuthService {
     if (user.getRole() !== UserRole.ADMIN) {
       throw new ForbiddenException('Administrative permissions required');
     }
+    assertAccountCanSignIn(user);
     return {
       status: 'AUTHENTICATED',
       auth: await this.tokenService.issueFor(user),

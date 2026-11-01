@@ -25,6 +25,19 @@ const DETAIL_INCLUDE = {
   },
 } satisfies Prisma.LearningPathInclude;
 
+const PUBLIC_DETAIL_INCLUDE = {
+  modules: {
+    orderBy: { order: 'asc' },
+    include: {
+      items: {
+        where: { problem: { isPublished: true } },
+        orderBy: { order: 'asc' },
+        include: { problem: { select: { title: true, difficulty: true } } },
+      },
+    },
+  },
+} satisfies Prisma.LearningPathInclude;
+
 type DetailRow = Prisma.LearningPathGetPayload<{ include: typeof DETAIL_INCLUDE }>;
 
 @Injectable()
@@ -100,7 +113,11 @@ export class LearningPathRepository implements ILearningPathRepository {
       orderBy: [{ order: 'asc' }, { createdAt: 'desc' }],
       include: {
         _count: { select: { modules: true } },
-        modules: { select: { items: { select: { problemId: true } } } },
+        modules: {
+          select: {
+            items: { where: { problem: { isPublished: true } }, select: { problemId: true } },
+          },
+        },
       },
     });
     return rows.map((row) => ({
@@ -122,7 +139,7 @@ export class LearningPathRepository implements ILearningPathRepository {
   ): Promise<LearningPathDetailData | null> {
     const row = await this.prisma.learningPath.findFirst({
       where: { slug, isPublished: true, ...this.tenantScope(tenantId) },
-      include: DETAIL_INCLUDE,
+      include: PUBLIC_DETAIL_INCLUDE,
     });
     return row ? this.toDetailData(row) : null;
   }

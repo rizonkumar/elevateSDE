@@ -13,13 +13,14 @@ import { IGoogleTokenVerifier } from './domain/interfaces/google-token-verifier.
 import { GoogleTokenVerifier } from './infrastructure/google-token-verifier';
 import { IRefreshTokenRepository } from './domain/interfaces/refresh-token-repository.interface';
 import { RefreshTokenRepository } from './infrastructure/repositories/refresh-token.repository';
+import { requireJwtSecret } from '../../infrastructure/config/security-config';
 
 @Module({
   imports: [
     UsersModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
-    JwtModule.register({
-      secret: process.env.JWT_SECRET || 'super-secret-key-12345',
+    JwtModule.registerAsync({
+      useFactory: () => ({ secret: requireJwtSecret() }),
     }),
   ],
   controllers: [AuthController, GoogleAuthController],

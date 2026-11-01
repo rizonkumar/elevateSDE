@@ -135,6 +135,7 @@ describe('CodeRunnerService', () => {
     expect(outcome.results[0]?.status).toBe('PASS');
     expect(outcome.results[1]?.status).toBe('FAIL');
     expect(outcome.results[0]?.label).toBe('Case 1');
+    expect(outcome.stdout).toBe('logged');
   });
 
   it('runs all test cases when hidden cases are included, accepting a correct solution', async () => {
@@ -150,6 +151,7 @@ describe('CodeRunnerService', () => {
     expect(outcome.passedCount).toBe(3);
     expect(outcome.results[2]?.isHidden).toBe(true);
     expect(outcome.results[2]?.label).toBe('Hidden case 1');
+    expect(outcome.stdout).toBe('');
   });
 
   it('maps a runtime error case to ERROR and overall RUNTIME_ERROR', async () => {
