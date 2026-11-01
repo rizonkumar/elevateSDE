@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import {
+  ScanSearch,
   Award,
   Bell,
   CalendarClock,
@@ -38,6 +39,7 @@ const TYPE_META: Record<NotificationType, NotificationTypeMeta> = {
   PEER_INVITATION: { icon: Users, label: 'Peer invite', variant: 'accent' },
   PEER_SESSION_CHANGED: { icon: RefreshCw, label: 'Peer session', variant: 'neutral' },
   SCORECARD_REQUEST: { icon: ClipboardCheck, label: 'Feedback', variant: 'accent' },
+  CODE_REVIEW_READY: { icon: ScanSearch, label: 'Code review', variant: 'accent' },
   SYSTEM: { icon: Bell, label: 'System', variant: 'neutral' },
 };
 

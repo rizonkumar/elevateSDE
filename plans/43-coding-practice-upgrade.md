@@ -1,6 +1,6 @@
 # Feature Plan: Coding Practice Upgrade
 
-> **Status: IN PROGRESS.** Approved with the default answers to the open questions. Phases A to D are done. Branch: `feature/coding-practice-upgrade`.
+> **Status: DONE.** Approved with the default answers to the open questions. All five phases are implemented. Branch: `feature/coding-practice-upgrade`.
 
 Five improvements to the problem-solving loop:
 
@@ -237,8 +237,9 @@ Each finding has the shape `{ category: COMPLEXITY | READABILITY | EDGE_CASE | C
   - Its status must be `ACCEPTED`, `WRONG_ANSWER` or `TIME_LIMIT_EXCEEDED`.
   - Only one review per submission. Repeat calls return the existing review.
   - The problem must not be in a running contest the user is in.
-  - Gated by the `ai-code-review` feature flag.
-  - Limited to 10 reviews per user per day (a Redis counter, keyed by the verified user as in `rate-limits.ts`).
+  - Gated by the `AI_CODE_REVIEW` feature flag. The seed creates it enabled; an existing deployment must create it on the admin Feature Flags page, or reviews stay off.
+  - Limited to 10 reviews per user per UTC day. The count comes from `SubmissionReview` rows created since midnight UTC rather than a Redis counter, so it is exact and needs no extra dependency. Asking again for an already-reviewed submission returns the existing review and does not use quota.
+  - `RUNTIME_ERROR` submissions are reviewable too, alongside the three statuses above.
 - `GET /v1/submissions/:id/review` is polled by the client.
 - The review runs on a BullMQ `code-review` queue with 2 attempts and a 45 s timeout.
 - **Provider:** `OpenAiCompatibleCodeReviewer` follows the mock-interview pattern.
@@ -252,11 +253,12 @@ Each finding has the shape `{ category: COMPLEXITY | READABILITY | EDGE_CASE | C
   - Turns failed visible cases into `EDGE_CASE` findings.
   - Turns `TIME_LIMIT_EXCEEDED` into a `PERFORMANCE` finding.
 - A `ResilientCodeReviewer` decorator falls back to the deterministic reviewer and records `engine`.
-- A `CODE_REVIEW_COMPLETED` notification is sent through the existing notification module.
+- A `CODE_REVIEW_READY` notification is sent through the existing notification module (a new `NotificationType` value, added to the preference lists).
+- `GET /v1/code-reviews/quota` returns `{ limit, used, remaining, enabled }` for the button.
 
 ### Frontend
 - The submission detail view gets a **Review my code** button, and its quota shows remaining reviews for the day.
-- Results show complexity badges, a summary, and findings grouped by category. Each line number jumps the Monaco editor to that line and adds a line decoration.
+- Results show complexity badges, a summary, and findings grouped by category. The submission's code is shown with line numbers; lines with findings are tinted, and a finding's line link scrolls to and focuses that line.
 - Reviews from the deterministic engine are labelled "Automated review".
 
 ---
@@ -276,3 +278,12 @@ Each finding has the shape `{ category: COMPLEXITY | READABILITY | EDGE_CASE | C
 2. **Do hints cost anything?** **Default: free, with no point penalty.**
 3. **Company frequency data:** an admin enters it by hand for now. **Default: manual entry only**, with no scraping or import.
 4. **Can org admins see tenant users' AI reviews in org analytics?** **Default: no, reviews are private to the user.**
+
+---
+
+## Verification
+
+- `pnpm turbo run type-check lint test` passes: 467 API tests (24 skipped as integration-gated) and 15 api-client tests.
+- The sandbox integration suite was run against real Docker with `RUN_SANDBOX_INTEGRATION=1`: 16 of 16 pass, including the new Java and Go cases.
+- All migrations were applied to a throwaway Postgres 16 container. After seeding 2,888 problems, the tag backfill created 69 topics and 9,102 links with no mismatch between `Problem.tags` and the links. Renaming a topic re-synced the 64 affected problems with none left stale.
+- Not verified here: the full app running in a browser, and a live LLM provider for code review. The deterministic reviewer path is covered by unit tests.

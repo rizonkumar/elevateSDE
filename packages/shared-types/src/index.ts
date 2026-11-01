@@ -676,6 +676,48 @@ export interface HistogramBucketDto {
   count: number;
 }
 
+export type CodeReviewStatusValue = 'PENDING' | 'COMPLETED' | 'FAILED';
+
+export type CodeReviewEngineValue = 'LLM' | 'DETERMINISTIC';
+
+export type CodeReviewFindingCategory =
+  | 'COMPLEXITY'
+  | 'READABILITY'
+  | 'EDGE_CASE'
+  | 'CORRECTNESS'
+  | 'PERFORMANCE';
+
+export type CodeReviewFindingSeverity = 'INFO' | 'SUGGESTION' | 'ISSUE';
+
+export interface CodeReviewFindingDto {
+  category: CodeReviewFindingCategory;
+  severity: CodeReviewFindingSeverity;
+  line: number | null;
+  message: string;
+  suggestion: string | null;
+}
+
+export interface SubmissionReviewDto {
+  id: string;
+  submissionId: string;
+  status: CodeReviewStatusValue;
+  engine: CodeReviewEngineValue | null;
+  timeComplexity: string | null;
+  spaceComplexity: string | null;
+  summary: string | null;
+  findings: CodeReviewFindingDto[];
+  failureReason: string | null;
+  createdAt: string;
+  completedAt: string | null;
+}
+
+export interface CodeReviewQuotaDto {
+  limit: number;
+  used: number;
+  remaining: number;
+  enabled: boolean;
+}
+
 export interface PerformanceDistributionDto {
   problemId: string;
   language: AssessmentLanguage;
@@ -1063,6 +1105,7 @@ export type NotificationType =
   | 'PEER_INVITATION'
   | 'PEER_SESSION_CHANGED'
   | 'SCORECARD_REQUEST'
+  | 'CODE_REVIEW_READY'
   | 'SYSTEM';
 
 export interface NotificationDto {

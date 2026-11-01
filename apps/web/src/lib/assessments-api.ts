@@ -1,8 +1,10 @@
+import axios from 'axios';
 import type {
   AssessmentDifficulty,
   AssessmentRunRequestDto,
   AssessmentRunResultDto,
   AssessmentLanguage,
+  CodeReviewQuotaDto,
   CodingProblemDto,
   PerformanceDistributionDto,
   ProblemListDto,
@@ -10,6 +12,7 @@ import type {
   SubmissionAcceptedDto,
   SubmissionDetailDto,
   SubmissionPageDto,
+  SubmissionReviewDto,
 } from '@elevatesde/shared-types';
 import { api } from './api';
 
@@ -76,5 +79,31 @@ export async function getPerformanceDistribution(
   const response = await api.get<PerformanceDistributionDto>('/api/v1/assessments/insights', {
     params: { problemId, language },
   });
+  return response.data;
+}
+
+export async function getCodeReviewQuota(): Promise<CodeReviewQuotaDto> {
+  const response = await api.get<CodeReviewQuotaDto>('/api/v1/code-reviews/quota');
+  return response.data;
+}
+
+export async function getCodeReview(submissionId: string): Promise<SubmissionReviewDto | null> {
+  try {
+    const response = await api.get<SubmissionReviewDto>(
+      `/api/v1/submissions/${submissionId}/review`,
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      return null;
+    }
+    throw error;
+  }
+}
+
+export async function requestCodeReview(submissionId: string): Promise<SubmissionReviewDto> {
+  const response = await api.post<SubmissionReviewDto>(
+    `/api/v1/submissions/${submissionId}/review`,
+  );
   return response.data;
 }

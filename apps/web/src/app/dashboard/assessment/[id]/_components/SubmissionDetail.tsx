@@ -7,6 +7,8 @@ import { getPerformanceDistribution, getSubmission } from '@/lib/assessments-api
 import { formatRelativeTime } from '@/lib/relative-time';
 import { PerformanceHistogram } from './PerformanceHistogram';
 import { SegmentedControl } from './SegmentedControl';
+import { CodeReviewPanel } from './CodeReviewPanel';
+import { NumberedCode, codeLineId } from './NumberedCode';
 import {
   LANGUAGE_LABEL,
   SUBMISSION_STATUS_LABEL,
@@ -51,6 +53,22 @@ export function SubmissionDetail({ submissionId, onBack }: Readonly<SubmissionDe
   const [distribution, setDistribution] = React.useState<PerformanceDistributionDto | null>(null);
   const [metric, setMetric] = React.useState<Metric>('runtime');
   const [failed, setFailed] = React.useState(false);
+  const [findingLines, setFindingLines] = React.useState<ReadonlySet<number>>(new Set());
+  const [focusedLine, setFocusedLine] = React.useState<number | null>(null);
+
+  const handleFindingsChange = React.useCallback((lines: number[]) => {
+    setFindingLines(new Set(lines));
+  }, []);
+
+  const jumpToLine = React.useCallback(
+    (line: number) => {
+      setFocusedLine(line);
+      document
+        .getElementById(codeLineId(`submission-${submissionId}`, line))
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    },
+    [submissionId],
+  );
 
   React.useEffect(() => {
     let active = true;
@@ -106,6 +124,11 @@ export function SubmissionDetail({ submissionId, onBack }: Readonly<SubmissionDe
   }
 
   const accepted = detail.status === 'ACCEPTED';
+  const reviewable =
+    detail.status === 'ACCEPTED' ||
+    detail.status === 'WRONG_ANSWER' ||
+    detail.status === 'TIME_LIMIT_EXCEEDED' ||
+    detail.status === 'RUNTIME_ERROR';
   const buckets = distribution ? distribution[metric] : [];
 
   return (
@@ -169,11 +192,21 @@ export function SubmissionDetail({ submissionId, onBack }: Readonly<SubmissionDe
         </section>
       )}
 
+      <CodeReviewPanel
+        submissionId={detail.id}
+        reviewable={reviewable}
+        onFindingsChange={handleFindingsChange}
+        onJumpToLine={jumpToLine}
+      />
+
       <section className="flex flex-col gap-2">
         <h4 className="m-0 text-sm font-semibold text-(--color-text-primary)">Code</h4>
-        <pre className="m-0 max-h-96 overflow-auto rounded-(--radius-sm) border border-(--color-border-subtle) bg-(--color-bg-soft) p-4 font-mono text-xs leading-relaxed text-(--color-text-primary)">
-          <code>{detail.sourceCode}</code>
-        </pre>
+        <NumberedCode
+          code={detail.sourceCode}
+          highlightedLines={findingLines}
+          focusedLine={focusedLine}
+          idPrefix={`submission-${detail.id}`}
+        />
       </section>
     </div>
   );

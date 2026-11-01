@@ -98,6 +98,10 @@ export class ProblemAssistanceService {
     );
   }
 
+  async isLockedByContest(userId: string, problemId: string): Promise<boolean> {
+    return this.repository.isLockedByLiveContest(userId, problemId, new Date());
+  }
+
   async isAssisted(userId: string, problemId: string): Promise<boolean> {
     const assistance = await this.repository.findAssistance(userId, problemId);
     return assistance?.gaveUp() ?? false;

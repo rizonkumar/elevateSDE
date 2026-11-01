@@ -122,6 +122,7 @@ async function seedFeatureFlags(): Promise<void> {
     { flagKey: 'RESUME_ATS_SCORING', isEnabled: true, percentageRollout: 75 },
     { flagKey: 'CODE_EXECUTION_SANDBOX', isEnabled: true, percentageRollout: 100 },
     { flagKey: 'DISCUSSION_FORUMS', isEnabled: false, percentageRollout: 25 },
+    { flagKey: 'AI_CODE_REVIEW', isEnabled: true, percentageRollout: 100 },
   ];
 
   for (const flag of flags) {

@@ -49,6 +49,6 @@ import { PrismaService } from '../../infrastructure/prisma/prisma.service';
       useClass: SubmissionRepository,
     },
   ],
-  exports: [CodeRunnerService],
+  exports: [CodeRunnerService, SubmissionService],
 })
 export class CodeRunnerModule {}

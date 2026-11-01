@@ -93,6 +93,7 @@ enum NotificationType {
   PEER_INVITATION
   PEER_SESSION_CHANGED
   SCORECARD_REQUEST
+  CODE_REVIEW_READY
   SYSTEM
 }
 
@@ -108,6 +109,17 @@ enum PointSource {
   DAILY_CHALLENGE
   CONTEST_RESULT
   ADMIN_ADJUSTMENT
+}
+
+enum CodeReviewStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum CodeReviewEngine {
+  LLM
+  DETERMINISTIC
 }
 
 enum EditorialUnlockReason {
@@ -287,6 +299,7 @@ model User {
   pointLedgerEntries            PointLedger[]
   mockInterviewSessions         MockInterviewSession[]
   problemAssistances            ProblemAssistance[]
+  submissionReviews             SubmissionReview[]
 
   @@index([status, createdAt])
 }
@@ -491,11 +504,33 @@ model Submission {
   user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   problem           Problem            @relation(fields: [problemId], references: [id], onDelete: Cascade)
   results           SubmissionResult[]
+  review            SubmissionReview?
 
   @@index([userId, problemId])
   @@index([problemId, status])
   @@index([userId, problemId, createdAt(sort: Desc)])
   @@index([problemId, language, status, userId])
+}
+
+model SubmissionReview {
+  id              String            @id @default(uuid())
+  submissionId    String            @unique
+  userId          String
+  tenantId        String?
+  status          CodeReviewStatus  @default(PENDING)
+  engine          CodeReviewEngine?
+  timeComplexity  String?
+  spaceComplexity String?
+  summary         String?
+  findings        Json?
+  failureReason   String?
+  createdAt       DateTime          @default(now())
+  completedAt     DateTime?
+  submission      Submission        @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([tenantId])
 }
 
 model SubmissionResult {

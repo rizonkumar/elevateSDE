@@ -9,6 +9,8 @@ import { IMockInterviewScoringQueue } from './domain/interfaces/mock-interview-s
 import { MockInterviewScoringQueue } from './application/mock-interview-scoring.queue';
 import { IScheduledJobQueue } from './domain/interfaces/scheduled-job-queue.interface';
 import { ScheduledJobQueue } from './application/scheduled-job.queue';
+import { ICodeReviewQueue } from './domain/interfaces/code-review-queue.interface';
+import { CodeReviewQueue } from './application/code-review.queue';
 import { buildRedisConnection } from './infrastructure/redis-connection';
 
 @Global()
@@ -22,6 +24,7 @@ import { buildRedisConnection } from './infrastructure/redis-connection';
       { name: QUEUE_NAMES.RESUME },
       { name: QUEUE_NAMES.MOCK_INTERVIEW },
       { name: QUEUE_NAMES.SCHEDULED },
+      { name: QUEUE_NAMES.CODE_REVIEW },
     ),
   ],
   providers: [
@@ -29,12 +32,14 @@ import { buildRedisConnection } from './infrastructure/redis-connection';
     { provide: IResumeAnalysisQueue, useClass: ResumeAnalysisQueue },
     { provide: IMockInterviewScoringQueue, useClass: MockInterviewScoringQueue },
     { provide: IScheduledJobQueue, useClass: ScheduledJobQueue },
+    { provide: ICodeReviewQueue, useClass: CodeReviewQueue },
   ],
   exports: [
     ICodeExecutionQueue,
     IResumeAnalysisQueue,
     IMockInterviewScoringQueue,
     IScheduledJobQueue,
+    ICodeReviewQueue,
     BullModule,
   ],
 })
