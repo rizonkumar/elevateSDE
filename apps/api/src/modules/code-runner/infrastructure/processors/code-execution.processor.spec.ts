@@ -7,6 +7,7 @@ import { SubmissionService } from '../../application/submission.service';
 import { DailyChallengeService } from '../../../daily-challenge/application/daily-challenge.service';
 import { AchievementService } from '../../../achievement/application/achievement.service';
 import { PointsService } from '../../../leaderboard/application/points.service';
+import { ProblemAssistanceService } from '../../../problem-assistance/application/problem-assistance.service';
 import { AssessmentRunOutcome } from '../../application/assessment-outcome';
 import { CodeExecutionJobData } from '../../../queues/domain/interfaces/code-execution-queue.interface';
 
@@ -37,6 +38,7 @@ function buildProcessor(): {
   registerCompletion: jest.Mock;
   evaluateAchievements: jest.Mock;
   awardProblemSolved: jest.Mock;
+  isAssisted: jest.Mock;
 } {
   const evaluate = jest.fn().mockResolvedValue(OUTCOME);
   const markRunning = jest.fn().mockResolvedValue(undefined);
@@ -56,6 +58,8 @@ function buildProcessor(): {
     evaluate: evaluateAchievements,
   } as unknown as AchievementService;
   const pointsService = { awardProblemSolved } as unknown as PointsService;
+  const isAssisted = jest.fn().mockResolvedValue(false);
+  const problemAssistanceService = { isAssisted } as unknown as ProblemAssistanceService;
   return {
     processor: new CodeExecutionProcessor(
       codeRunnerService,
@@ -63,6 +67,7 @@ function buildProcessor(): {
       dailyChallengeService,
       achievementService,
       pointsService,
+      problemAssistanceService,
       new EventEmitter2(),
     ),
     evaluate,
@@ -72,6 +77,7 @@ function buildProcessor(): {
     registerCompletion,
     evaluateAchievements,
     awardProblemSolved,
+    isAssisted,
   };
 }
 
@@ -120,6 +126,20 @@ describe('CodeExecutionProcessor', () => {
     expect(registerCompletion).not.toHaveBeenCalled();
     expect(awardProblemSolved).not.toHaveBeenCalled();
     expect(evaluateAchievements).not.toHaveBeenCalled();
+  });
+
+  it('skips points and daily challenge credit when the user gave up before solving', async () => {
+    const { processor, isAssisted, registerCompletion, awardProblemSolved, evaluateAchievements } =
+      buildProcessor();
+    isAssisted.mockResolvedValue(true);
+    const job = { data: JOB_DATA } as Job<CodeExecutionJobData>;
+
+    await processor.process(job);
+
+    expect(isAssisted).toHaveBeenCalledWith('u1', 'p1');
+    expect(registerCompletion).not.toHaveBeenCalled();
+    expect(awardProblemSolved).not.toHaveBeenCalled();
+    expect(evaluateAchievements).toHaveBeenCalledWith('u1');
   });
 
   it('does not mark failed while retries remain', async () => {

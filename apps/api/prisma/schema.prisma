@@ -108,6 +108,11 @@ enum PointSource {
   ADMIN_ADJUSTMENT
 }
 
+enum EditorialUnlockReason {
+  SOLVED
+  GAVE_UP
+}
+
 enum PathLevel {
   BEGINNER
   INTERMEDIATE
@@ -279,6 +284,7 @@ model User {
   peerScorecards                PeerScorecard[]                @relation("PeerScorecardEvaluator")
   pointLedgerEntries            PointLedger[]
   mockInterviewSessions         MockInterviewSession[]
+  problemAssistances            ProblemAssistance[]
 
   @@index([status, createdAt])
 }
@@ -363,6 +369,9 @@ model Problem {
   reviewItems       ReviewItem[]
   contestProblems   ContestProblem[]
   learningPathItems LearningPathItem[]
+  editorial         ProblemEditorial?
+  hints             ProblemHint[]
+  assistances       ProblemAssistance[]
 
   @@index([difficulty, isPublished])
 }
@@ -378,6 +387,46 @@ model ProblemTestCase {
 
   @@unique([problemId, ordinal])
   @@index([problemId, isHidden])
+}
+
+model ProblemEditorial {
+  id              String   @id @default(uuid())
+  problemId       String   @unique
+  approach        String
+  timeComplexity  String
+  spaceComplexity String
+  isPublished     Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  problem         Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
+}
+
+model ProblemHint {
+  id        String  @id @default(uuid())
+  problemId String
+  ordinal   Int
+  content   String
+  problem   Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@unique([problemId, ordinal])
+}
+
+model ProblemAssistance {
+  id                    String                 @id @default(uuid())
+  userId                String
+  problemId             String
+  tenantId              String?
+  hintsRevealed         Int                    @default(0)
+  editorialUnlockedAt   DateTime?
+  editorialUnlockReason EditorialUnlockReason?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  user                  User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem               Problem                @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, problemId])
+  @@index([problemId])
+  @@index([tenantId])
 }
 
 model Submission {

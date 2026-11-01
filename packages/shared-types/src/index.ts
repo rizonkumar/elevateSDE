@@ -1045,6 +1045,59 @@ export interface ProblemNoteDto {
   updatedAt: string;
 }
 
+export type EditorialUnlockReason = 'SOLVED' | 'GAVE_UP';
+
+export type EditorialAvailability = 'UNAVAILABLE' | 'LOCKED' | 'UNLOCKED';
+
+export interface ProblemHintDto {
+  ordinal: number;
+  content: string;
+}
+
+export interface ProblemAssistanceDto {
+  problemId: string;
+  totalHints: number;
+  hints: ProblemHintDto[];
+  editorial: EditorialAvailability;
+  unlockReason: EditorialUnlockReason | null;
+  lockedByContest: boolean;
+}
+
+export interface ProblemEditorialDto {
+  problemId: string;
+  approach: string;
+  timeComplexity: string;
+  spaceComplexity: string;
+  solutions: Partial<Record<AssessmentLanguage, string>>;
+  unlockReason: EditorialUnlockReason;
+  updatedAt: string;
+}
+
+export interface AdminProblemEditorialDto {
+  approach: string;
+  timeComplexity: string;
+  spaceComplexity: string;
+  isPublished: boolean;
+  updatedAt: string;
+}
+
+export interface AdminProblemGuidanceDto {
+  problemId: string;
+  editorial: AdminProblemEditorialDto | null;
+  hints: string[];
+}
+
+export interface AdminProblemEditorialInput {
+  approach: string;
+  timeComplexity: string;
+  spaceComplexity: string;
+  isPublished: boolean;
+}
+
+export interface AdminProblemHintsInput {
+  hints: string[];
+}
+
 export interface ProblemCollectionItemDto {
   id: string;
   ordinal: number;

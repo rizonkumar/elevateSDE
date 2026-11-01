@@ -1,6 +1,8 @@
 import type {
   AdminCodingProblemDto,
   AdminCodingProblemInput,
+  AdminProblemEditorialInput,
+  AdminProblemGuidanceDto,
   AdminProblemListDto,
   AssessmentDifficulty,
 } from '@elevatesde/shared-types';
@@ -53,4 +55,25 @@ export async function setProblemPublished(
 
 export async function deleteProblem(id: string): Promise<void> {
   await api.delete(`${BASE_PATH}/${id}`);
+}
+
+export async function fetchProblemGuidance(id: string): Promise<AdminProblemGuidanceDto> {
+  const response = await api.get<AdminProblemGuidanceDto>(`${BASE_PATH}/${id}/guidance`);
+  return response.data;
+}
+
+export async function saveProblemEditorial(
+  id: string,
+  input: AdminProblemEditorialInput,
+): Promise<AdminProblemGuidanceDto> {
+  const response = await api.put<AdminProblemGuidanceDto>(`${BASE_PATH}/${id}/editorial`, input);
+  return response.data;
+}
+
+export async function saveProblemHints(
+  id: string,
+  hints: string[],
+): Promise<AdminProblemGuidanceDto> {
+  const response = await api.put<AdminProblemGuidanceDto>(`${BASE_PATH}/${id}/hints`, { hints });
+  return response.data;
 }

@@ -8,6 +8,7 @@ import { CodeExecutionJobData } from '../../../queues/domain/interfaces/code-exe
 import { DailyChallengeService } from '../../../daily-challenge/application/daily-challenge.service';
 import { AchievementService } from '../../../achievement/application/achievement.service';
 import { PointsService } from '../../../leaderboard/application/points.service';
+import { ProblemAssistanceService } from '../../../problem-assistance/application/problem-assistance.service';
 import {
   NOTIFICATION_EVENTS,
   SubmissionAcceptedEvent,
@@ -27,6 +28,7 @@ export class CodeExecutionProcessor extends WorkerHost {
     private readonly dailyChallengeService: DailyChallengeService,
     private readonly achievementService: AchievementService,
     private readonly pointsService: PointsService,
+    private readonly problemAssistanceService: ProblemAssistanceService,
     private readonly eventEmitter: EventEmitter2,
   ) {
     super();
@@ -38,8 +40,11 @@ export class CodeExecutionProcessor extends WorkerHost {
     const outcome = await this.codeRunnerService.evaluate(problemId, language, code, true);
     await this.submissionService.applyResult(submissionId, outcome);
     if (outcome.status === SubmissionStatus.ACCEPTED) {
-      await this.dailyChallengeService.registerCompletion(userId, problemId, submissionId);
-      await this.pointsService.awardProblemSolved(userId, problemId);
+      const assisted = await this.problemAssistanceService.isAssisted(userId, problemId);
+      if (!assisted) {
+        await this.dailyChallengeService.registerCompletion(userId, problemId, submissionId);
+        await this.pointsService.awardProblemSolved(userId, problemId);
+      }
       await this.achievementService.evaluate(userId);
       this.eventEmitter.emit(NOTIFICATION_EVENTS.SUBMISSION_ACCEPTED, {
         userId,

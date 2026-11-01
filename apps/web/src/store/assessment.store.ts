@@ -7,6 +7,7 @@ import type {
   SubmissionDetailDto,
   SubmissionStatusValue,
 } from '@elevatesde/shared-types';
+import { useProblemAssistanceStore } from '@/store/problem-assistance.store';
 import { useToastStore } from '@/store/toast.store';
 import { useAssessmentSettingsStore, type TimerMode } from '@/store/assessment-settings.store';
 import { useDailyChallengeStore } from '@/store/daily-challenge.store';
@@ -206,6 +207,7 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => {
     });
     if (detail.status === 'ACCEPTED') {
       useToastStore.getState().addToast('Accepted — all test cases passed!', 'success');
+      void useProblemAssistanceStore.getState().fetchAssistance(detail.problemId);
       if (useAssessmentSettingsStore.getState().autoReset) {
         get().resetTimer();
       }

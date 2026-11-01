@@ -4,6 +4,7 @@ import { DailyChallengeModule } from '../daily-challenge/daily-challenge.module'
 import { AchievementModule } from '../achievement/achievement.module';
 import { LeaderboardModule } from '../leaderboard/leaderboard.module';
 import { QueuesModule } from '../queues/queues.module';
+import { ProblemAssistanceModule } from '../problem-assistance/problem-assistance.module';
 import { ISandboxRunner } from './domain/interfaces/sandbox-runner.interface';
 import { ISubmissionRepository } from './domain/interfaces/submission-repository.interface';
 import { CodeRunnerService } from './application/code-runner.service';
@@ -22,6 +23,7 @@ import { PrismaService } from '../../infrastructure/prisma/prisma.service';
     DailyChallengeModule,
     AchievementModule,
     LeaderboardModule,
+    ProblemAssistanceModule,
   ],
   controllers: [AssessmentsController],
   providers: [

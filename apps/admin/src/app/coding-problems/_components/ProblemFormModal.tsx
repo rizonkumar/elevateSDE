@@ -14,6 +14,14 @@ import {
 } from '../../../store/coding-problems.store';
 import { TagsInput } from './TagsInput';
 import { TestCaseEditor } from './TestCaseEditor';
+import { ProblemGuidancePanel } from './ProblemGuidancePanel';
+
+type FormSection = 'problem' | 'guidance';
+
+const SECTION_TABS: { id: FormSection; label: string }[] = [
+  { id: 'problem', label: 'Problem' },
+  { id: 'guidance', label: 'Editorial & hints' },
+];
 
 const DIFFICULTY_OPTIONS = [
   { value: 'EASY', label: 'Easy' },
@@ -70,6 +78,7 @@ export function ProblemFormModal() {
   const [values, setValues] = React.useState<ProblemFormValues>(() => toFormValues(editingProblem));
   const [activeLanguage, setActiveLanguage] = React.useState<AssessmentLanguage>('javascript');
   const [showErrors, setShowErrors] = React.useState(false);
+  const [section, setSection] = React.useState<FormSection>('problem');
 
   const isEditing = editingProblem !== null;
 
@@ -80,6 +89,7 @@ export function ProblemFormModal() {
     setValues(toFormValues(editingProblem));
     setActiveLanguage('javascript');
     setShowErrors(false);
+    setSection('problem');
   }, [isModalOpen, editingProblem]);
 
   const saving = savingId !== null;
@@ -113,85 +123,97 @@ export function ProblemFormModal() {
       title={isEditing ? 'Edit coding problem' : 'New coding problem'}
       description="Author the problem statement, starter code, and test cases."
     >
-      <div className="flex flex-col gap-5">
-        <Input
-          label="Title"
-          value={values.title}
-          error={titleError}
-          onChange={(event) => updateValues({ title: event.target.value })}
-          placeholder="e.g. Two Sum"
+      {editingProblem && (
+        <Tabs
+          items={SECTION_TABS}
+          value={section}
+          onChange={(id) => setSection(id as FormSection)}
+          className="mb-5"
         />
+      )}
+      {editingProblem && section === 'guidance' ? (
+        <ProblemGuidancePanel problemId={editingProblem.id} />
+      ) : (
+        <div className="flex flex-col gap-5">
+          <Input
+            label="Title"
+            value={values.title}
+            error={titleError}
+            onChange={(event) => updateValues({ title: event.target.value })}
+            placeholder="e.g. Two Sum"
+          />
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="flex flex-col gap-2">
-            <span className="text-[13px] font-medium text-(--color-text-primary) select-none">
-              Difficulty
-            </span>
-            <Select
-              value={values.difficulty}
-              options={DIFFICULTY_OPTIONS}
-              onChange={(difficulty) =>
-                updateValues({ difficulty: difficulty as AssessmentDifficulty })
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="flex flex-col gap-2">
+              <span className="text-[13px] font-medium text-(--color-text-primary) select-none">
+                Difficulty
+              </span>
+              <Select
+                value={values.difficulty}
+                options={DIFFICULTY_OPTIONS}
+                onChange={(difficulty) =>
+                  updateValues({ difficulty: difficulty as AssessmentDifficulty })
+                }
+              />
+            </div>
+            <Input
+              label="Time limit (minutes)"
+              type="number"
+              min={1}
+              value={values.timeLimitMinutes}
+              onChange={(event) =>
+                updateValues({ timeLimitMinutes: Number(event.target.value) || 0 })
               }
             />
           </div>
-          <Input
-            label="Time limit (minutes)"
-            type="number"
-            min={1}
-            value={values.timeLimitMinutes}
-            onChange={(event) =>
-              updateValues({ timeLimitMinutes: Number(event.target.value) || 0 })
-            }
+
+          <TagsInput
+            label="Tags"
+            value={values.tags}
+            onChange={(tags) => updateValues({ tags })}
+            placeholder="Add a tag and press Enter"
           />
-        </div>
 
-        <TagsInput
-          label="Tags"
-          value={values.tags}
-          onChange={(tags) => updateValues({ tags })}
-          placeholder="Add a tag and press Enter"
-        />
-
-        <Textarea
-          label="Description (Markdown)"
-          value={values.description}
-          onChange={(event) => updateValues({ description: event.target.value })}
-          className="min-h-[120px]"
-          placeholder="Describe the problem, inputs, and expected output."
-        />
-
-        <div className="flex flex-col gap-2">
-          <span className="text-[13px] font-medium text-(--color-text-primary) select-none">
-            Starter code
-          </span>
-          <Tabs
-            items={LANGUAGE_TABS}
-            value={activeLanguage}
-            onChange={(language) => setActiveLanguage(language as AssessmentLanguage)}
-          />
           <Textarea
-            value={values.starterCode[activeLanguage] ?? ''}
-            onChange={(event) => setStarterCode(activeLanguage, event.target.value)}
-            className="min-h-[140px] font-mono text-xs"
-            placeholder="Starter code for the selected language."
+            label="Description (Markdown)"
+            value={values.description}
+            onChange={(event) => updateValues({ description: event.target.value })}
+            className="min-h-[120px]"
+            placeholder="Describe the problem, inputs, and expected output."
           />
-        </div>
 
-        <TestCaseEditor
-          testCases={values.testCases}
-          onChange={(testCases) => updateValues({ testCases })}
-        />
+          <div className="flex flex-col gap-2">
+            <span className="text-[13px] font-medium text-(--color-text-primary) select-none">
+              Starter code
+            </span>
+            <Tabs
+              items={LANGUAGE_TABS}
+              value={activeLanguage}
+              onChange={(language) => setActiveLanguage(language as AssessmentLanguage)}
+            />
+            <Textarea
+              value={values.starterCode[activeLanguage] ?? ''}
+              onChange={(event) => setStarterCode(activeLanguage, event.target.value)}
+              className="min-h-[140px] font-mono text-xs"
+              placeholder="Starter code for the selected language."
+            />
+          </div>
 
-        <div className="flex items-center justify-end gap-2 pt-1">
-          <Button type="button" variant="secondary" onClick={closeModal} disabled={saving}>
-            Cancel
-          </Button>
-          <Button type="button" onClick={handleSubmit} disabled={saving}>
-            {saving ? 'Saving…' : submitLabel}
-          </Button>
+          <TestCaseEditor
+            testCases={values.testCases}
+            onChange={(testCases) => updateValues({ testCases })}
+          />
+
+          <div className="flex items-center justify-end gap-2 pt-1">
+            <Button type="button" variant="secondary" onClick={closeModal} disabled={saving}>
+              Cancel
+            </Button>
+            <Button type="button" onClick={handleSubmit} disabled={saving}>
+              {saving ? 'Saving…' : submitLabel}
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
     </Modal>
   );
 }
