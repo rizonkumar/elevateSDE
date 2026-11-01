@@ -136,28 +136,20 @@ docker exec elevatesde-postgres psql -U postgres -d elevatesde -c 'select count(
 
 and expect a count of about 2,788 or more. If the table name differs, check `apps/api/prisma/schema.prisma` for the model's mapped name.
 
-### 3.5 Replace the demo passwords (required before the API is public)
+### 3.5 Owner admin account (required before the API is public)
 
-The seed creates demo accounts (`admin@elevatesde.dev`, `candidate@elevatesde.dev`, `org@elevatesde.dev`, and community members) that all share the password `Password123!`. These are public knowledge from the repo, so replace the hashes before exposing the API.
+The seed creates exactly one admin from `SEED_ADMIN_EMAIL` and `SEED_ADMIN_PASSWORD` in `apps/api/.env`, and refuses to run if either is missing. Set them on the server only; never commit them and never put them in the web or admin env files (those are exposed to the browser).
 
-```bash
-cd apps/api
-NEW_HASH="$(node -e "require('bcrypt').hash(process.argv[1], 10).then(h => process.stdout.write(h))" "$(openssl rand -base64 18)")"
-docker exec elevatesde-postgres psql -U postgres -d elevatesde -c "update \"User\" set \"passwordHash\" = '$NEW_HASH' where email like '%@elevatesde.dev';"
-cd ../..
-```
-
-That sets one random password for every seeded account, which makes them unusable. Then set a known admin password for yourself:
+Keep `SEED_DEMO_ACCOUNTS="false"` in production. Demo accounts with the public password `Password123!` are never seeded when `NODE_ENV=production`. If an older database still has `*@elevatesde.dev` demo accounts, disable them:
 
 ```bash
 cd apps/api
-ADMIN_PASSWORD="<choose a strong password>"
-ADMIN_HASH="$(node -e "require('bcrypt').hash(process.argv[1], 10).then(h => process.stdout.write(h))" "$ADMIN_PASSWORD")"
-docker exec elevatesde-postgres psql -U postgres -d elevatesde -c "update \"User\" set \"passwordHash\" = '$ADMIN_HASH' where email = 'admin@elevatesde.dev';"
+NEW_HASH="$(node -e "require('bcrypt').hash(process.argv[1], 12).then(h => process.stdout.write(h))" "$(openssl rand -base64 18)")"
+docker exec elevatesde-postgres psql -U postgres -d elevatesde -c "update \"User\" set \"passwordHash\" = '$NEW_HASH', status = 'REJECTED' where email like '%@elevatesde.dev';"
 cd ../..
 ```
 
-If the `"User"` table name is wrong, check the model mapping in `apps/api/prisma/schema.prisma`. To create testers, register new accounts through the app UI instead of using the seeded ones.
+Every new registration stays in `PENDING_APPROVAL` until the owner approves it from **Users → Pending approval** in the backoffice.
 
 ### 3.6 Build and run the API
 
