@@ -19,7 +19,7 @@ This file contains critical guidelines that MUST be read and followed by any AI 
     - Avoid the `any` type completely. Use exact interfaces, types, or generics.
     - Implement strict type check compliance.
     - Use proper type safety for React Server Components (RSC) and Client Components.
-- **Framework Constraints:** Next.js version is **16.2.9** with App Router. Ensure all app router APIs match this version.
+- **Framework Constraints:** Next.js version is **16.4.3** with App Router. Ensure all app router APIs match this version.
 
 ---
 

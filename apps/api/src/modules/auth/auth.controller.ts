@@ -5,6 +5,11 @@ import { RegisterDto } from './dtos/register.dto';
 import { LoginDto } from './dtos/login.dto';
 import { RefreshTokenDto } from './dtos/refresh-token.dto';
 import { AuthResponseDto, RegistrationResultDto } from '@elevatesde/shared-types';
+import {
+  SignInRateLimit,
+  SignUpRateLimit,
+  TokenRefreshRateLimit,
+} from '../../infrastructure/security/rate-limits';
 
 @ApiTags('Auth')
 @Controller({ path: 'auth', version: '1' })
@@ -12,6 +17,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
+  @SignUpRateLimit()
   @ApiOperation({ summary: 'Register a new B2C candidate or B2B tenant admin' })
   @ApiResponse({ status: 201, description: 'Registration received and awaiting admin approval.' })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
@@ -20,6 +26,7 @@ export class AuthController {
   }
 
   @Post('login')
+  @SignInRateLimit()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Log in user and return access and refresh tokens' })
   @ApiResponse({ status: 200, description: 'Successfully logged in.' })
@@ -30,6 +37,7 @@ export class AuthController {
   }
 
   @Post('refresh')
+  @TokenRefreshRateLimit()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Refresh access and refresh tokens' })
   @ApiResponse({ status: 200, description: 'Tokens successfully refreshed.' })
@@ -39,6 +47,7 @@ export class AuthController {
   }
 
   @Post('logout')
+  @TokenRefreshRateLimit()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Log out user by revoking refresh token' })
   @ApiResponse({ status: 200, description: 'Successfully logged out.' })

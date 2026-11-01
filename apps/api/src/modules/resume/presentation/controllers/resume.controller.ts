@@ -19,6 +19,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ACCEPTED_RESUME_MIME_TYPES, MAX_RESUME_SIZE_BYTES } from '@elevatesde/shared-types';
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
+import { UploadRateLimit } from '../../../../infrastructure/security/rate-limits';
 import { User } from '../../../users/domain/entities/user';
 import { IResumeAnalysisQueue } from '../../../queues/domain/interfaces/resume-analysis-queue.interface';
 import { IResumeTextExtractor } from '../../domain/interfaces/resume-text-extractor.interface';
@@ -45,6 +46,7 @@ export class ResumeController {
   ) {}
 
   @Post()
+  @UploadRateLimit()
   @HttpCode(HttpStatus.ACCEPTED)
   @UseInterceptors(FileInterceptor('file', { limits: { fileSize: MAX_RESUME_SIZE_BYTES } }))
   @ApiConsumes('multipart/form-data')

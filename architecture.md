@@ -12,7 +12,7 @@ This platform is built as a SaaS product, supporting individual users as well as
 
 ### Frontend
 
-- **Core:** Next.js 16.2.9 (App Router, Turbopack)
+- **Core:** Next.js 16.4.3 (App Router, Turbopack)
 - **Architecture:** React Server Components (RSC), Suspense, Error Boundaries, Optimistic Updates
 - **Styling & UI:** Tailwind CSS (v4) with custom, in-house components in `packages/ui` (no Shadcn). Theme is driven by CSS custom properties with light/dark modes; no gradients or glassmorphism.
 - **Icons & Charts:** `lucide-react` for icons, `recharts` for data visualisation (e.g. seat gauges, performance charts).
@@ -52,7 +52,7 @@ This platform is built as a SaaS product, supporting individual users as well as
 ```text
 elevatesde/
 ├── apps/
-│   ├── web/                 (Next.js 16.2.9 Frontend — Candidate Portal, port 3001)
+│   ├── web/                 (Next.js 16.4.3 Frontend — Candidate Portal, port 3001)
 │   ├── api/                 (NestJS Backend — Core API, port 4400)
 │   └── admin/               (Internal Super-Admin Dashboard, internal port 3002, served at /admin)
 │

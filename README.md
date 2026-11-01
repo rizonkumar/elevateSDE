@@ -118,9 +118,9 @@ Audit Logs are implemented to track administrative actions, mutations, and authe
 ```text
 elevatesde/
 ├── apps/
-│   ├── web/                 (Next.js 16.2.9 Frontend - Candidate Portal, port 3001)
+│   ├── web/                 (Next.js 16.4.3 Frontend - Candidate Portal, port 3001)
 │   ├── api/                 (NestJS Backend - Core API, port 4400)
-│   └── admin/               (Next.js 16.2.9 Frontend - Admin Backoffice, internal port 3002, served at /admin)
+│   └── admin/               (Next.js 16.4.3 Frontend - Admin Backoffice, internal port 3002, served at /admin)
 ├── packages/
 │   ├── shared-types/        (TypeScript Interfaces used across apps)
 │   ├── ui/                  (Shared Tailwind components)

@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
+import { CodeExecutionRateLimit } from '../../../../infrastructure/security/rate-limits';
 import { User } from '../../../users/domain/entities/user';
 import { ProblemService } from '../../../problem/application/problem.service';
 import { ICodeExecutionQueue } from '../../../queues/domain/interfaces/code-execution-queue.interface';
@@ -44,6 +45,7 @@ export class AssessmentsController {
   ) {}
 
   @Post('run')
+  @CodeExecutionRateLimit()
   @ApiOperation({ summary: 'Run candidate code against the visible test cases' })
   @ApiResponse({ status: 201, type: AssessmentRunResponseDto })
   async run(@Body() dto: RunAssessmentDto): Promise<AssessmentRunResponseDto> {
@@ -57,6 +59,7 @@ export class AssessmentsController {
   }
 
   @Post('submit')
+  @CodeExecutionRateLimit()
   @HttpCode(202)
   @ApiOperation({ summary: 'Queue candidate code for execution against all test cases' })
   @ApiResponse({ status: 202, type: SubmissionAcceptedResponseDto })

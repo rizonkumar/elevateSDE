@@ -4,6 +4,7 @@ import { GoogleAuthService } from '../application/google-auth.service';
 import { GoogleSignInDto, GoogleAuthContext } from '../dtos/google-sign-in.dto';
 import { CompleteGoogleSignupDto } from '../dtos/complete-google-signup.dto';
 import { GoogleAuthResultDto, RegistrationResultDto } from '@elevatesde/shared-types';
+import { SignInRateLimit, SignUpRateLimit } from '../../../infrastructure/security/rate-limits';
 
 @ApiTags('Auth')
 @Controller({ path: 'auth', version: '1' })
@@ -11,6 +12,7 @@ export class GoogleAuthController {
   constructor(private readonly googleAuthService: GoogleAuthService) {}
 
   @Post('google')
+  @SignInRateLimit()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Sign in with a Google ID token, auto-linking or starting onboarding as needed',
@@ -23,6 +25,7 @@ export class GoogleAuthController {
   }
 
   @Post('google/complete')
+  @SignUpRateLimit()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Complete a Google sign-up by selecting a role and, if applicable, a company',

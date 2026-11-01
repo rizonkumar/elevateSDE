@@ -13,6 +13,7 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UserRole } from '@prisma/client';
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
+import { InvitationRateLimit } from '../../../../infrastructure/security/rate-limits';
 import { RolesGuard } from '../../../auth/guards/roles.guard';
 import { Roles } from '../../../auth/decorators/roles.decorator';
 import { User } from '../../../users/domain/entities/user';
@@ -45,6 +46,7 @@ export class OrganizationController {
   }
 
   @Post('invitations')
+  @InvitationRateLimit()
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.TENANT_ADMIN)
@@ -74,6 +76,7 @@ export class OrganizationController {
   }
 
   @Get('invitations/preview/:token')
+  @InvitationRateLimit()
   @ApiOperation({ summary: 'Public preview of an invitation by token' })
   @ApiResponse({ status: 200, type: InvitePreviewResponseDto })
   @ApiResponse({ status: 404, description: 'Invitation not found.' })
@@ -83,6 +86,7 @@ export class OrganizationController {
   }
 
   @Post('invitations/accept/:token')
+  @InvitationRateLimit()
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Accept an invitation and join the organization' })
