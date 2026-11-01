@@ -9,8 +9,8 @@ import {
 } from '../../domain/interfaces/mock-interviewer.interface';
 import { isValidDimensionScores, rubricFor } from '../../domain/scoring/mock-interview-scoring';
 
-const TURN_TIMEOUT_MS = 15_000;
-const SUMMARY_TIMEOUT_MS = 30_000;
+const DEFAULT_TURN_TIMEOUT_MS = 15_000;
+const DEFAULT_SUMMARY_TIMEOUT_MS = 30_000;
 const HISTORY_WINDOW = 6;
 const MAX_QUESTION_LENGTH = 1_000;
 const MAX_FEEDBACK_LENGTH = 600;
@@ -48,6 +48,19 @@ export function readProviderConfig(
   const model = env.MOCK_INTERVIEW_AI_MODEL?.trim();
   if (!endpoint || !apiKey || !model) return null;
   return { endpoint, apiKey, model };
+}
+
+function readTimeoutMs(raw: string | undefined, fallback: number): number {
+  const parsed = Number(raw);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+export function readTurnTimeoutMs(env: NodeJS.ProcessEnv = process.env): number {
+  return readTimeoutMs(env.MOCK_INTERVIEW_AI_TURN_TIMEOUT_MS, DEFAULT_TURN_TIMEOUT_MS);
+}
+
+export function readSummaryTimeoutMs(env: NodeJS.ProcessEnv = process.env): number {
+  return readTimeoutMs(env.MOCK_INTERVIEW_AI_SUMMARY_TIMEOUT_MS, DEFAULT_SUMMARY_TIMEOUT_MS);
 }
 
 function asRecord(content: string): Record<string, unknown> {
@@ -142,7 +155,7 @@ export class OpenAiCompatibleMockInterviewer implements MockInterviewerPort {
         },
         { role: 'user', content: JSON.stringify({ topic: config.topic }) },
       ],
-      TURN_TIMEOUT_MS,
+      readTurnTimeoutMs(),
     );
     return parseOpeningQuestion(content);
   }
@@ -174,7 +187,7 @@ export class OpenAiCompatibleMockInterviewer implements MockInterviewerPort {
           }),
         },
       ],
-      TURN_TIMEOUT_MS,
+      readTurnTimeoutMs(),
     );
     return parseEvaluation(content, request.config.topic, request.askFollowUp);
   }
@@ -200,7 +213,7 @@ export class OpenAiCompatibleMockInterviewer implements MockInterviewerPort {
           }),
         },
       ],
-      SUMMARY_TIMEOUT_MS,
+      readSummaryTimeoutMs(),
     );
     return parseNarrative(content);
   }

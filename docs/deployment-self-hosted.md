@@ -1,0 +1,376 @@
+# Self-Hosted Deployment Runbook
+
+Backend (API, Postgres, Redis, Docker code sandbox, Ollama) on an Ubuntu laptop, exposed through Tailscale Funnel. Web and admin on Vercel. Background and reasoning: `plans/41-self-hosted-deployment.md`.
+
+This file is written so an AI coding agent on the Ubuntu laptop can execute it end to end. Humans can follow it too.
+
+---
+
+## 0. Instructions for the AI agent
+
+Read this whole file first, then run the phases in order. Do not skip a verification gate.
+
+**Ground rules**
+- Work in the cloned repo on branch `main` (after the deployment PR is merged) or on `feature/self-hosted-deployment` before it is.
+- Never print, log, or commit secrets. Generate secrets with `openssl rand -base64 48`.
+- Never commit `.env` files. They are gitignored on purpose.
+- Do not change application code to make a step pass. If a step fails, diagnose it, and report the cause to the user if it cannot be fixed by configuration.
+- Prefer the exact commands below. Ask the user only for items marked **HUMAN**.
+
+**HUMAN steps (the agent cannot do these, stop and ask the user, then continue)**
+1. Sudo password, if sudo prompts for one.
+2. `sudo tailscale up` login in a browser, and enabling HTTPS certificates and Funnel in the Tailscale admin console.
+3. `vercel login` in a browser.
+4. Adding the Vercel URLs to the Google OAuth client in Google Cloud Console (only if Google sign-in is wanted).
+
+**Values to collect and keep in a scratch note (outside the repo)**
+
+| Name | Where it comes from |
+|---|---|
+| `DB_PASSWORD` | generated in phase 3 |
+| `JWT_SECRET` | generated in phase 3 |
+| `API_URL` | `https://<machine>.<tailnet>.ts.net`, printed by Tailscale in phase 5 |
+| `ADMIN_URL` | Vercel admin project production URL, phase 6 |
+| `WEB_URL` | Vercel web project production URL, phase 6 |
+
+**Phase order:** 1 laptop prerequisites, 2 keep awake, 3 backend, 4 Ollama, 5 Tailscale, 6 Vercel, 7 wire CORS, 8 backups, 9 smoke test.
+
+---
+
+## 1. Laptop prerequisites
+
+```bash
+sudo apt update && sudo apt install -y git curl ca-certificates openssl
+curl -fsSL https://get.docker.com | sh
+sudo usermod -aG docker "$USER"
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+sudo npm install -g pnpm@10.33.0 pm2 vercel
+```
+
+The `docker` group applies after a new login. In the same shell use `newgrp docker`, or prefix with `sudo` until then.
+
+```bash
+docker pull node:20-alpine
+docker pull python:3.12-alpine
+docker pull gcc:13
+```
+
+The three images are the code-execution sandbox languages (JavaScript, Python, C++). Pull them now so the first submission does not time out downloading.
+
+**Gate:** `docker run --rm hello-world`, `node -v` (v20 or newer), `pnpm -v`, `pm2 -v` all succeed.
+
+---
+
+## 2. Keep the laptop awake
+
+```bash
+sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+sudo sed -i 's/^#\?HandleLidSwitch=.*/HandleLidSwitch=ignore/' /etc/systemd/logind.conf
+sudo sed -i 's/^#\?HandleLidSwitchExternalPower=.*/HandleLidSwitchExternalPower=ignore/' /etc/systemd/logind.conf
+sudo systemctl restart systemd-logind
+sudo systemctl enable docker
+```
+
+Keep the laptop on power, ideally on ethernet.
+
+**Gate:** `systemctl status sleep.target` shows `masked`.
+
+---
+
+## 3. Backend
+
+### 3.1 Get the code and install
+
+```bash
+git clone https://github.com/rizonkumar/elevateSDE.git
+cd elevateSDE
+pnpm install
+```
+
+### 3.2 Secrets and env files
+
+```bash
+DB_PASSWORD="$(openssl rand -hex 24)"
+JWT_SECRET="$(openssl rand -base64 48 | tr -d '\n')"
+echo "POSTGRES_PASSWORD=$DB_PASSWORD" > .env
+cp apps/api/.env.production.example apps/api/.env
+```
+
+Edit `apps/api/.env` and set:
+- `DATABASE_URL="postgresql://postgres:<DB_PASSWORD>@127.0.0.1:5432/elevatesde"`
+- `JWT_SECRET="<JWT_SECRET>"`
+- Leave `WEB_APP_URL` and `CORS_ALLOWED_ORIGINS` for phase 7.
+- Leave the `MOCK_INTERVIEW_AI_*` values as they are if Ollama will be installed in phase 4. Otherwise set `MOCK_INTERVIEW_AI_ENABLED="false"`.
+
+### 3.3 Start Postgres and Redis
+
+```bash
+docker compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml ps
+```
+
+**Gate:** both containers show `healthy`.
+
+### 3.4 Migrate and seed
+
+```bash
+pnpm --filter @elevatesde/api db:generate
+pnpm --filter @elevatesde/api db:migrate
+pnpm --filter @elevatesde/api db:seed
+pnpm --filter @elevatesde/api db:seed:runnable
+```
+
+What the seeds load:
+- `db:seed`: demo users, feature flags, badges, forum community content, and the **coding problem bank of 2,788 LeetCode-style problems** (`apps/api/prisma/seed-data/leetcode/problems.dataset.json`, committed to the repo).
+- `db:seed:runnable`: the problems that have real test cases and can actually be executed in the Docker sandbox (slug prefix `rp-`). Without this step, problems show up but code submissions cannot be judged.
+- `db:seed:problems` is only needed to re-seed problems on their own. `db:seed` already includes it.
+
+All seeds are idempotent and safe to re-run.
+
+**Gate:** run
+
+```bash
+docker exec elevatesde-postgres psql -U postgres -d elevatesde -c 'select count(*) from "Problem";'
+```
+
+and expect a count of about 2,788 or more. If the table name differs, check `apps/api/prisma/schema.prisma` for the model's mapped name.
+
+### 3.5 Replace the demo passwords (required before the API is public)
+
+The seed creates demo accounts (`admin@elevatesde.dev`, `candidate@elevatesde.dev`, `org@elevatesde.dev`, and community members) that all share the password `Password123!`. These are public knowledge from the repo, so replace the hashes before exposing the API.
+
+```bash
+cd apps/api
+NEW_HASH="$(node -e "require('bcrypt').hash(process.argv[1], 10).then(h => process.stdout.write(h))" "$(openssl rand -base64 18)")"
+docker exec elevatesde-postgres psql -U postgres -d elevatesde -c "update \"User\" set \"passwordHash\" = '$NEW_HASH' where email like '%@elevatesde.dev';"
+cd ../..
+```
+
+That sets one random password for every seeded account, which makes them unusable. Then set a known admin password for yourself:
+
+```bash
+cd apps/api
+ADMIN_PASSWORD="<choose a strong password>"
+ADMIN_HASH="$(node -e "require('bcrypt').hash(process.argv[1], 10).then(h => process.stdout.write(h))" "$ADMIN_PASSWORD")"
+docker exec elevatesde-postgres psql -U postgres -d elevatesde -c "update \"User\" set \"passwordHash\" = '$ADMIN_HASH' where email = 'admin@elevatesde.dev';"
+cd ../..
+```
+
+If the `"User"` table name is wrong, check the model mapping in `apps/api/prisma/schema.prisma`. To create testers, register new accounts through the app UI instead of using the seeded ones.
+
+### 3.6 Build and run the API
+
+```bash
+pnpm --filter @elevatesde/api build
+pm2 start ecosystem.config.cjs
+pm2 save
+pm2 startup
+```
+
+Run the command that `pm2 startup` prints (it needs sudo).
+
+**Gate:** `curl -sI http://127.0.0.1:4400/api/docs` returns `200`, and `pm2 status` shows `elevatesde-api` as `online`.
+
+---
+
+## 4. Ollama (local AI)
+
+Skip this phase if `MOCK_INTERVIEW_AI_ENABLED="false"`.
+
+```bash
+curl -fsSL https://ollama.com/install.sh | sh
+sudo systemctl edit ollama
+```
+
+In the editor that opens, add:
+
+```
+[Service]
+Environment="OLLAMA_KEEP_ALIVE=24h"
+```
+
+Then:
+
+```bash
+sudo systemctl restart ollama
+ollama pull qwen2.5:7b-instruct
+```
+
+**Gate:**
+
+```bash
+curl -s http://127.0.0.1:11434/v1/chat/completions \
+  -d '{"model":"qwen2.5:7b-instruct","response_format":{"type":"json_object"},"messages":[{"role":"user","content":"Return {\"ok\": true}"}]}'
+```
+
+returns JSON containing `"ok": true` (the first call can take a while to load the model).
+
+```bash
+pm2 restart elevatesde-api --update-env
+```
+
+Model notes: with 24–32 GB RAM, `qwen2.5:14b-instruct` also fits and scores better but is slower. A turn takes roughly 20–40 seconds on CPU, which is why the timeouts in `.env` are 90 s and 120 s. If a model returns invalid JSON, the API silently falls back to the built-in interviewer for that turn. Check `pm2 logs elevatesde-api` for `Falling back to deterministic` to see how often.
+
+---
+
+## 5. Tailscale Funnel (public HTTPS for the API)
+
+```bash
+curl -fsSL https://tailscale.com/install.sh | sh
+sudo tailscale up
+```
+
+**HUMAN:** complete the login in the browser. In the Tailscale admin console (https://login.tailscale.com/admin/dns) enable **MagicDNS** and **HTTPS Certificates**, and in the access controls allow **Funnel** for this machine.
+
+```bash
+sudo tailscale funnel --bg 4400
+tailscale funnel status
+```
+
+`tailscale funnel status` prints `https://<machine>.<tailnet>.ts.net`. That is `API_URL`.
+
+**Gate:** from a different network (a phone on mobile data), `https://<API_URL>/api/docs` loads. From the laptop itself `curl -sI "$API_URL/api/docs"` should return `200`.
+
+---
+
+## 6. Vercel (web and admin)
+
+Deploy **admin first**, because the web project needs the admin URL.
+
+### 6.1 Login
+
+```bash
+vercel login
+```
+
+**HUMAN:** complete the browser login.
+
+### 6.2 Create two projects (dashboard, once)
+
+In the Vercel dashboard, import the GitHub repository `rizonkumar/elevateSDE` twice:
+
+| Project name | Root Directory | Framework |
+|---|---|---|
+| `elevatesde-admin` | `apps/admin` | Next.js |
+| `elevatesde-web` | `apps/web` | Next.js |
+
+For both projects:
+- Turn on **Include source files outside of the Root Directory in the Build Step** (the workspace packages in `packages/` live outside the root directory).
+- Production Branch: `main`.
+- Leave Build Command and Output Directory on their defaults. The install runs at the repo root with pnpm, detected from `pnpm-lock.yaml` and the `packageManager` field.
+
+### 6.3 Admin environment variables, then deploy
+
+```bash
+cd apps/admin
+vercel link --yes --project elevatesde-admin
+printf '%s' "$API_URL" | vercel env add NEXT_PUBLIC_API_URL production
+printf '%s' "" | vercel env add NEXT_PUBLIC_GOOGLE_CLIENT_ID production
+vercel deploy --prod
+cd ../..
+```
+
+Skip the Google line if Google sign-in is not being set up (an empty value is fine, or skip it).
+
+The admin app uses `basePath: '/admin'`, so it is served at `https://<admin-project>.vercel.app/admin`. Record `ADMIN_URL` as `https://<admin-project>.vercel.app` (no `/admin`).
+
+**Gate:** `curl -sI "$ADMIN_URL/admin"` returns `200` or a redirect to the admin login page.
+
+### 6.4 Web environment variables, then deploy
+
+```bash
+cd apps/web
+vercel link --yes --project elevatesde-web
+printf '%s' "$API_URL" | vercel env add NEXT_PUBLIC_API_URL production
+printf '%s' "$ADMIN_URL" | vercel env add ADMIN_APP_URL production
+printf '%s' "" | vercel env add NEXT_PUBLIC_GOOGLE_CLIENT_ID production
+vercel deploy --prod
+cd ../..
+```
+
+`ADMIN_APP_URL` must have no trailing slash and no `/admin`. The web app rewrites `/admin/*` to it.
+
+Record `WEB_URL` (the production URL printed by the deploy).
+
+**Gate:** `curl -sI "$WEB_URL"` returns `200`, and `$WEB_URL/admin` reaches the admin app.
+
+If the build fails with an unresolved `@elevatesde/*` import, the "Include source files outside of the Root Directory" setting is off. Turn it on and redeploy.
+
+### 6.5 Google OAuth (only if Google sign-in is wanted)
+
+**HUMAN:** in Google Cloud Console, add `WEB_URL` and `ADMIN_URL` to the OAuth client's **Authorized JavaScript origins**. Put the client ID in `GOOGLE_CLIENT_ID` in `apps/api/.env` and `NEXT_PUBLIC_GOOGLE_CLIENT_ID` in both Vercel projects (`vercel env add`, then redeploy with `vercel deploy --prod`).
+
+---
+
+## 7. Wire the API to the deployed frontends
+
+Edit `apps/api/.env`:
+
+```
+WEB_APP_URL="<WEB_URL>"
+CORS_ALLOWED_ORIGINS="<WEB_URL>,<ADMIN_URL>"
+```
+
+```bash
+pm2 restart elevatesde-api --update-env
+```
+
+**Gate:** from a browser on `WEB_URL`, the sign-up and sign-in requests to `API_URL` succeed with no CORS error in the browser console.
+
+---
+
+## 8. Backups
+
+```bash
+crontab -l 2>/dev/null; echo "0 3 * * * $HOME/elevateSDE/scripts/backup-postgres.sh >> $HOME/elevatesde-backup.log 2>&1" | crontab -
+```
+
+Adjust the path if the repo was cloned elsewhere.
+
+**Gate:** run `~/elevateSDE/scripts/backup-postgres.sh` once and confirm a `.sql.gz` file appears in `~/elevatesde-backups`.
+
+---
+
+## 9. Smoke test
+
+Report pass or fail for each item.
+
+1. `WEB_URL` loads and the landing page renders.
+2. Register a new account, sign out, sign in.
+3. The dashboard loads with no failed API calls.
+4. The problem list shows the seeded problems, and a `rp-` problem opens in the editor.
+5. Submit a correct solution to a `rp-` problem. It should be judged through the Docker sandbox (check `docker ps -a` briefly shows `elevate-*` containers, and `pm2 logs` has no sandbox errors).
+6. Start a mock interview and finish it through to the report. Check `pm2 logs elevatesde-api` for `Falling back to deterministic` to see whether the model answered.
+7. `WEB_URL/admin` loads the admin login. Sign in with the admin account from step 3.5.
+8. `pm2 logs elevatesde-api` shows scheduler startup with no errors.
+
+---
+
+## 10. Updating after code changes
+
+```bash
+cd ~/elevateSDE
+git pull
+pnpm install
+pnpm --filter @elevatesde/api db:generate
+pnpm --filter @elevatesde/api db:migrate
+pnpm --filter @elevatesde/api build
+pm2 restart elevatesde-api --update-env
+```
+
+The Vercel projects redeploy automatically on every push to `main`. Pushes to other branches create preview URLs, but those previews call the same `API_URL`, and the API only allows origins listed in `CORS_ALLOWED_ORIGINS`, so previews will be blocked by CORS unless added there.
+
+---
+
+## 11. Troubleshooting
+
+| Symptom | Likely cause and fix |
+|---|---|
+| Browser console shows a CORS error | `CORS_ALLOWED_ORIGINS` is missing the exact origin (scheme and host, no trailing slash). Fix and `pm2 restart elevatesde-api --update-env`. |
+| `/api/docs` works locally but not through the tunnel | Funnel not enabled for the machine, or `tailscale funnel status` shows nothing. Re-run `sudo tailscale funnel --bg 4400`. |
+| Code submissions hang or fail | The API user is not in the `docker` group, or sandbox images are not pulled. `docker ps` as the pm2 user, and re-run the pulls from phase 1. |
+| Mock interview never uses the model | Wrong endpoint (it must end in `/v1/chat/completions`), model not pulled, or timeouts too short. Check `pm2 logs` and `ollama list`. |
+| API stops after reboot | `pm2 startup` was not run, or `pm2 save` was skipped. Repeat both. |
+| Vercel build cannot resolve `@elevatesde/ui` or `@elevatesde/api-client` | "Include source files outside of the Root Directory" is off. |
+| Prisma errors about a missing table | `db:migrate` was not run against the right `DATABASE_URL`. Check `apps/api/.env`. |
