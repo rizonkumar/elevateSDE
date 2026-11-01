@@ -35,8 +35,8 @@ export class ProblemSocialRepository implements IProblemSocialRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async problemExists(problemId: string): Promise<boolean> {
-    const problem = await this.prisma.problem.findUnique({
-      where: { id: problemId },
+    const problem = await this.prisma.problem.findFirst({
+      where: { id: problemId, isPublished: true },
       select: { id: true },
     });
     return problem !== null;

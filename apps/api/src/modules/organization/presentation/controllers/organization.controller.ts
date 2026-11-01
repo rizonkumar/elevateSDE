@@ -100,6 +100,7 @@ export class OrganizationController {
     const invitation = await this.organizationService.accept(token, {
       id: req.user.getId(),
       email: req.user.getEmail(),
+      tenantId: req.user.getTenantId(),
     });
     return OrganizationPresentationMapper.toInvitation(invitation);
   }

@@ -93,6 +93,7 @@ export class ForumService {
     if (!comment) {
       throw new NotFoundException('Comment not found');
     }
+    await this.findPublished(comment.getPostId());
     await this.forumRepository.toggleCommentVote(commentId, userId);
     return this.requireCommentView(commentId, userId);
   }

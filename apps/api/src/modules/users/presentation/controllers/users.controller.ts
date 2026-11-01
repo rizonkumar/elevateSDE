@@ -17,6 +17,8 @@ import { UserRole } from '@prisma/client';
 import { User } from '../../domain/entities/user';
 import { UserResponseDto } from '../dtos/user-response.dto';
 import { UserPresentationMapper } from '../mappers/user-presentation.mapper';
+import { UpdateUserRoleDto } from '../dtos/update-user-role.dto';
+import { isOwnerAdminEmail } from '../../../../infrastructure/config/security-config';
 
 interface RequestWithUser {
   user: User;
@@ -49,13 +51,17 @@ export class UsersController {
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   async updateRole(
     @Param('id') id: string,
-    @Body('role') role: UserRole,
+    @Body() dto: UpdateUserRoleDto,
     @Req() req: RequestWithUser,
   ): Promise<UserResponseDto> {
     if (req.user.getId() === id) {
       throw new ForbiddenException('You cannot change your own role');
     }
-    const updatedUser = await this.usersService.updateRole(id, role);
+    const target = await this.usersService.findById(id);
+    if (isOwnerAdminEmail(target.getEmail())) {
+      throw new ForbiddenException('The owner admin role cannot be changed');
+    }
+    const updatedUser = await this.usersService.updateRole(id, dto.role);
     return UserPresentationMapper.toResponse(updatedUser);
   }
 }

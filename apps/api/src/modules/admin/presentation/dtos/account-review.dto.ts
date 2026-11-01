@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
+import { IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
 import { UserRole } from '@prisma/client';
 import {
   PendingAccountCountDto,
@@ -31,12 +31,6 @@ export class RejectAccountDto {
   @MaxLength(500)
   @IsOptional()
   reason?: string;
-}
-
-export class UpdateUserRoleDto {
-  @ApiProperty({ enum: UserRole })
-  @IsEnum(UserRole)
-  role!: UserRole;
 }
 
 export class PendingAccountResponseDto implements PendingAccountDto {

@@ -165,6 +165,7 @@ describe('OrganizationService', () => {
       const accepted = await service.accept(invitation.getToken(), {
         id: 'user-9',
         email: 'join@acme.dev',
+        tenantId: null,
       });
 
       expect(accepted.getStatus()).toBe(InvitationStatus.ACCEPTED);
@@ -174,7 +175,7 @@ describe('OrganizationService', () => {
     it('rejects acceptance from a mismatched email', async () => {
       const invitation = await service.invite(TENANT_ID, ADMIN_ID, 'join@acme.dev');
       await expect(
-        service.accept(invitation.getToken(), { id: 'user-9', email: 'someone@else.dev' }),
+        service.accept(invitation.getToken(), { id: 'user-9', email: 'someone@else.dev', tenantId: null }),
       ).rejects.toBeInstanceOf(ForbiddenException);
     });
 
@@ -193,19 +194,32 @@ describe('OrganizationService', () => {
       repository.invitations.push(expired);
 
       await expect(
-        service.accept('expired-token', { id: 'user-9', email: 'late@acme.dev' }),
+        service.accept('expired-token', { id: 'user-9', email: 'late@acme.dev', tenantId: null }),
       ).rejects.toBeInstanceOf(ConflictException);
 
       const stored = await repository.findInvitationByToken('expired-token');
       expect(stored?.getStatus()).toBe(InvitationStatus.EXPIRED);
     });
 
-    it('rejects an already accepted invitation', async () => {
+    it('refuses to move a member of another organization', async () => {
       const invitation = await service.invite(TENANT_ID, ADMIN_ID, 'join@acme.dev');
-      await service.accept(invitation.getToken(), { id: 'user-9', email: 'join@acme.dev' });
 
       await expect(
-        service.accept(invitation.getToken(), { id: 'user-9', email: 'join@acme.dev' }),
+        service.accept(invitation.getToken(), {
+          id: 'user-9',
+          email: 'join@acme.dev',
+          tenantId: 'other-tenant',
+        }),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(repository.attached).toEqual([]);
+    });
+
+    it('rejects an already accepted invitation', async () => {
+      const invitation = await service.invite(TENANT_ID, ADMIN_ID, 'join@acme.dev');
+      await service.accept(invitation.getToken(), { id: 'user-9', email: 'join@acme.dev', tenantId: null });
+
+      await expect(
+        service.accept(invitation.getToken(), { id: 'user-9', email: 'join@acme.dev', tenantId: null }),
       ).rejects.toBeInstanceOf(ConflictException);
     });
   });

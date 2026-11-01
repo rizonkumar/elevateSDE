@@ -36,6 +36,7 @@ export interface OrgOverviewView {
 export interface AcceptingUser {
   id: string;
   email: string;
+  tenantId: string | null;
 }
 
 export interface InvitePreviewView {
@@ -154,6 +155,11 @@ export class OrganizationService {
     }
     if (!invitation.matchesEmail(user.email)) {
       throw new ForbiddenException('This invitation was issued to a different email address.');
+    }
+    if (user.tenantId !== null && user.tenantId !== invitation.getTenantId()) {
+      throw new ConflictException(
+        'You already belong to another organization. Leave it before accepting this invitation.',
+      );
     }
     await this.organizationRepository.attachUserToTenant(user.id, invitation.getTenantId());
     return this.organizationRepository.save(invitation.accept(new Date()));

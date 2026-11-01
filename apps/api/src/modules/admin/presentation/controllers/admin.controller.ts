@@ -29,7 +29,7 @@ import { ToggleFeatureFlagDto } from '../dtos/toggle-feature-flag.dto';
 import { UpdateRolloutDto } from '../dtos/update-rollout.dto';
 import { AdminDashboardStatsDto } from '../dtos/dashboard-stats.dto';
 import { AdminPresentationMapper } from '../mappers/admin-presentation.mapper';
-import { UpdateUserRoleDto } from '../dtos/account-review.dto';
+import { UpdateUserRoleDto } from '../../../users/presentation/dtos/update-user-role.dto';
 import { isOwnerAdminEmail } from '../../../../infrastructure/config/security-config';
 
 interface RequestWithUser {
