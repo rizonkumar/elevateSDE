@@ -140,7 +140,7 @@ function removeSavedCode(problemId: string, language: AssessmentLanguage): void 
 }
 
 function buildInitialCode(problem: CodingProblemDto): Record<AssessmentLanguage, string> {
-  const result = { ...problem.starterCode };
+  const result: Record<AssessmentLanguage, string> = { ...EMPTY_CODE, ...problem.starterCode };
   for (const language of LANGUAGES) {
     const saved = readSavedCode(problem.id, language);
     if (saved !== null) {
@@ -181,7 +181,17 @@ const EMPTY_CODE: Record<AssessmentLanguage, string> = {
   javascript: '',
   python: '',
   cpp: '',
+  java: '',
+  go: '',
 };
+
+function initialLanguage(problem: CodingProblemDto): AssessmentLanguage {
+  const preferred = useAssessmentSettingsStore.getState().preferredLanguage;
+  if (problem.availableLanguages.includes(preferred)) {
+    return preferred;
+  }
+  return problem.availableLanguages[0] ?? 'javascript';
+}
 
 export const useAssessmentStore = create<AssessmentState>((set, get) => {
   const tick = () => {
@@ -301,7 +311,7 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => {
       set({
         status: 'READY',
         problem,
-        language: 'javascript',
+        language: initialLanguage(problem),
         codeByLanguage: buildInitialCode(problem),
         isRunning: false,
         isSubmitting: false,
@@ -321,7 +331,12 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => {
       });
     },
 
-    setLanguage: (language) => set({ language }),
+    setLanguage: (language) => {
+      const { problem } = get();
+      if (problem && !problem.availableLanguages.includes(language)) return;
+      useAssessmentSettingsStore.getState().setPreferredLanguage(language);
+      set({ language });
+    },
 
     setCode: (code) => {
       const { language, problem } = get();
@@ -340,7 +355,10 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => {
       clearAutosave();
       removeSavedCode(problem.id, language);
       set((state) => ({
-        codeByLanguage: { ...state.codeByLanguage, [language]: problem.starterCode[language] },
+        codeByLanguage: {
+          ...state.codeByLanguage,
+          [language]: problem.starterCode[language] ?? '',
+        },
       }));
       useToastStore.getState().addToast('Code reset to the starter template.', 'info');
     },

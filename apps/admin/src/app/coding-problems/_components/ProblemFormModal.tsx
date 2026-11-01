@@ -35,12 +35,18 @@ const LANGUAGE_TABS: { id: AssessmentLanguage; label: string }[] = [
   { id: 'javascript', label: 'JavaScript' },
   { id: 'python', label: 'Python' },
   { id: 'cpp', label: 'C++' },
+  { id: 'java', label: 'Java' },
+  { id: 'go', label: 'Go' },
 ];
+
+const GENERATED_LANGUAGES = new Set<AssessmentLanguage>(['java', 'go']);
 
 const EMPTY_STARTER_CODE: Record<AssessmentLanguage, string> = {
   javascript: '',
   python: '',
   cpp: '',
+  java: '',
+  go: '',
 };
 
 function toFormValues(problem: AdminCodingProblemDto | null): ProblemFormValues {
@@ -69,7 +75,7 @@ function toFormValues(problem: AdminCodingProblemDto | null): ProblemFormValues 
     })),
     description: problem.description,
     constraints: [...problem.constraints],
-    starterCode: { ...problem.starterCode },
+    starterCode: { ...EMPTY_STARTER_CODE, ...problem.starterCode },
     testCases: problem.testCases.map((testCase) => ({ ...testCase })),
     isPublished: problem.isPublished,
   };
@@ -212,7 +218,11 @@ export function ProblemFormModal() {
               value={values.starterCode[activeLanguage] ?? ''}
               onChange={(event) => setStarterCode(activeLanguage, event.target.value)}
               className="min-h-[140px] font-mono text-xs"
-              placeholder="Starter code for the selected language."
+              placeholder={
+                GENERATED_LANGUAGES.has(activeLanguage)
+                  ? 'Leave empty to generate a stub from the function signature.'
+                  : 'Starter code for the selected language.'
+              }
             />
           </div>
 

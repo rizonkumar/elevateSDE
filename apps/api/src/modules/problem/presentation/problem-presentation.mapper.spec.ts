@@ -54,7 +54,9 @@ describe('ProblemPresentationMapper', () => {
     expect(serialized).not.toContain('secret-input');
     expect(serialized).not.toContain('secret-output');
     expect(serialized).not.toContain('return secret;');
-    expect(serialized).not.toContain('twoSum');
+    expect(dto).not.toHaveProperty('functionName');
+    expect(dto).not.toHaveProperty('harness');
+    expect(dto).not.toHaveProperty('referenceSolution');
   });
 
   it('maps summary fields', () => {

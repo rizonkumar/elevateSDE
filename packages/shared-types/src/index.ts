@@ -454,7 +454,9 @@ export interface SubmitMockInterviewAnswerDto {
   version: number;
 }
 
-export type AssessmentLanguage = 'javascript' | 'python' | 'cpp';
+export const ASSESSMENT_LANGUAGES = ['javascript', 'python', 'cpp', 'java', 'go'] as const;
+
+export type AssessmentLanguage = (typeof ASSESSMENT_LANGUAGES)[number];
 
 export type AssessmentDifficulty = 'EASY' | 'MEDIUM' | 'HARD';
 
@@ -482,7 +484,8 @@ export interface CodingProblemDto {
   description: string;
   constraints: string[];
   tags: string[];
-  starterCode: Record<AssessmentLanguage, string>;
+  starterCode: Partial<Record<AssessmentLanguage, string>>;
+  availableLanguages: AssessmentLanguage[];
   examples: CodingProblemExample[];
   testCases: AssessmentTestCase[];
   timeLimitMinutes: number;
@@ -557,7 +560,7 @@ export interface AdminCodingProblemInput {
   constraints: string[];
   topicIds: string[];
   companies: AdminProblemCompanyInput[];
-  starterCode: Record<AssessmentLanguage, string>;
+  starterCode: Partial<Record<AssessmentLanguage, string>>;
   timeLimitMinutes: number;
   isPublished: boolean;
   testCases: AdminTestCaseInput[];

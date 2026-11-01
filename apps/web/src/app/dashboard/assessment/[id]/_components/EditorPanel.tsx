@@ -39,6 +39,10 @@ export function EditorPanel() {
   const resetCodeToStarter = useAssessmentStore((state) => state.resetCodeToStarter);
   const editorMaximized = useAssessmentStore((state) => state.editorMaximized);
   const toggleEditorMaximized = useAssessmentStore((state) => state.toggleEditorMaximized);
+  const availableLanguages = useAssessmentStore((state) => state.problem?.availableLanguages);
+  const languageOptions = ASSESSMENT_LANGUAGE_OPTIONS.filter(
+    (option) => !availableLanguages || availableLanguages.includes(option.value),
+  );
 
   const fontSize = useAssessmentSettingsStore((state) => state.fontSize);
   const tabSize = useAssessmentSettingsStore((state) => state.tabSize);
@@ -80,7 +84,7 @@ export function EditorPanel() {
         <div className="w-40">
           <Select
             value={language}
-            options={ASSESSMENT_LANGUAGE_OPTIONS}
+            options={languageOptions}
             onChange={(value) => setLanguage(value as AssessmentLanguage)}
           />
         </div>

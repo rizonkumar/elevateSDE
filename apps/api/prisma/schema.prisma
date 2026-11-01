@@ -36,6 +36,8 @@ enum AssessmentLanguage {
   JAVASCRIPT
   PYTHON
   CPP
+  JAVA
+  GO
 }
 
 enum SubmissionStatus {

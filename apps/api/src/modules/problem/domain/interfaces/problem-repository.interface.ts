@@ -37,7 +37,7 @@ export interface ProblemWriteInput {
   constraints: string[];
   topicIds: string[];
   companies: ProblemCompanyInput[];
-  starterCode: LanguageCodeMap;
+  starterCode: Partial<LanguageCodeMap>;
   timeLimitMinutes: number;
   isPublished: boolean;
   testCases: ProblemTestCaseInput[];

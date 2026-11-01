@@ -23,7 +23,7 @@ export class SubmissionDetailResponseDto implements SubmissionDetailDto {
   @ApiProperty({ example: 'uuid-problem' })
   problemId!: string;
 
-  @ApiProperty({ enum: ['javascript', 'python', 'cpp'] })
+  @ApiProperty({ enum: ['javascript', 'python', 'cpp', 'java', 'go'] })
   language!: AssessmentLanguage;
 
   @ApiProperty({ enum: SUBMISSION_STATUSES, example: 'RUNNING' })

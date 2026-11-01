@@ -163,4 +163,18 @@ describe('ProblemService', () => {
     expect(repository.written?.topicIds).toEqual([TOPIC_ID]);
     expect(repository.written?.companies).toEqual([{ companyId: COMPANY_ID, frequency: 70 }]);
   });
+
+  it('drops blank starter code so Java and Go fall back to generated stubs', async () => {
+    await service.create(writeInput({ starterCode: { javascript: 'x', java: '   ', go: '' } }));
+
+    expect(repository.written?.starterCode).toEqual({ javascript: 'x' });
+  });
+
+  it('rejects starter code for unknown languages', async () => {
+    const starterCode = JSON.parse('{"ruby":"puts 1"}') as ProblemWriteInput['starterCode'];
+
+    await expect(service.create(writeInput({ starterCode }))).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
+  });
 });

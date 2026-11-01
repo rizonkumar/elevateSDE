@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ProblemProgressStatus } from '@elevatesde/shared-types';
-import { Problem } from '../domain/entities/problem';
+import { LanguageCodeMap, PROBLEM_LANGUAGES, Problem } from '../domain/entities/problem';
 import {
   IProblemRepository,
   ProblemListFilter,
@@ -17,6 +17,9 @@ export interface ProblemListPage {
   items: ProblemListEntry[];
   total: number;
 }
+
+const MAX_STARTER_CODE_LENGTH = 20000;
+const KNOWN_LANGUAGES = new Set<string>(PROBLEM_LANGUAGES);
 
 @Injectable()
 export class ProblemService {
@@ -115,6 +118,27 @@ export class ProblemService {
     if (companyCount !== companyIds.length) {
       throw new BadRequestException('One or more companies do not exist.');
     }
-    return { ...input, topicIds };
+    return { ...input, topicIds, starterCode: normalizeStarterCode(input.starterCode) };
   }
+}
+
+function normalizeStarterCode(starterCode: Partial<LanguageCodeMap>): Partial<LanguageCodeMap> {
+  const normalized: Partial<LanguageCodeMap> = {};
+  for (const [language, code] of Object.entries(starterCode)) {
+    if (!KNOWN_LANGUAGES.has(language)) {
+      throw new BadRequestException(`Unknown starter code language: ${language}.`);
+    }
+    if (typeof code !== 'string') {
+      throw new BadRequestException(`Starter code for ${language} must be text.`);
+    }
+    if (code.length > MAX_STARTER_CODE_LENGTH) {
+      throw new BadRequestException(
+        `Starter code for ${language} must be at most ${MAX_STARTER_CODE_LENGTH} characters.`,
+      );
+    }
+    if (code.trim().length > 0) {
+      normalized[language as keyof LanguageCodeMap] = code;
+    }
+  }
+  return normalized;
 }

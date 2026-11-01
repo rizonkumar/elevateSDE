@@ -1,6 +1,6 @@
 # Feature Plan: Coding Practice Upgrade
 
-> **Status: IN PROGRESS.** Approved with the default answers to the open questions. Phases A, B and C are done. Branch: `feature/coding-practice-upgrade`.
+> **Status: IN PROGRESS.** Approved with the default answers to the open questions. Phases A to D are done. Branch: `feature/coding-practice-upgrade`.
 
 Five improvements to the problem-solving loop:
 
@@ -174,13 +174,13 @@ Docker runtimes vary between runs. Percentiles are labelled as approximate, and 
 ### Schema and types
 - Add `JAVA` and `GO` to `AssessmentLanguage` (an additive enum migration).
 - `ProblemLanguage` becomes `'javascript' | 'python' | 'cpp' | 'java' | 'go'`, and `toPrismaLanguage`/`fromPrismaLanguage` are extended. `@elevatesde/shared-types` gets the same update.
-- `starterCode` becomes `Partial<LanguageCodeMap>`. A language is **available** for a problem only when it has both starter code and a reference solution. The API returns `availableLanguages`, and the editor's language picker only offers those.
+- `starterCode` becomes `Partial<LanguageCodeMap>`. JavaScript, Python and C++ stay available for every problem, as before. Java and Go are available when the problem has authored starter code for them or a typed harness that a stub can be generated from. A reference solution is not required. The API returns `availableLanguages`, the editor's language picker only offers those, and run/submit reject any other language with a 400.
 
 ### Sandbox
 | Language | Image | Compile | Run |
 |---|---|---|---|
 | Java | `eclipse-temurin:21-jdk-alpine` | `javac -d /sandbox /sandbox/Main.java` | `java -Xss64m -XX:+UseSerialGC -cp /sandbox Main` |
-| Go | `golang:1.23-alpine` | `go build -o /sandbox/main.bin /sandbox/main.go` with `GOCACHE=/tmp/gocache`, `GOFLAGS=-mod=mod`, `CGO_ENABLED=0` | `/sandbox/main.bin` |
+| Go | `elevatesde/sandbox-go:1.23` (built from `docker/sandbox/go`) | `go build -o /sandbox/main.bin /sandbox/main.go` | `/sandbox/main.bin` |
 
 - Languages get per-language limits, because the current shared limits are too tight for the JVM. Java gets 512 MB memory and +2 s wall time. Go gets +3 s to compile.
 - **Drivers** are typed from `harness.paramTypes` and `returnType`, like the C++ driver. The supported types match C++: `int`, `long`, `double`, `bool`, `string`, `int[]`, `string[]`, `int[][]` and `bool[]`.
@@ -188,12 +188,13 @@ Docker runtimes vary between runs. Percentiles are labelled as approximate, and 
   - The Java driver includes a small JSON reader, since the JDK has no JSON library. It is ported from the C++ `JParser`.
 - **Signature generation:** `harness.cpp.signature` becomes optional, and Java and Go signatures are derived from the harness types. Starter stubs for the two new languages can be generated from the harness, so existing problems only need a reference solution.
 - The existing user hardening carries over unchanged: unprivileged user, no network, read-only root, `/tmp` tmpfs.
-- `scripts/` and `docs/deployment-self-hosted.md` add `docker pull` for both images so the first submission doesn't wait on a pull.
+- The Go image is built locally from `golang:1.23-alpine` with `go build std` run at build time. Measured locally: a cold compile on the stock image took 12 s; with the warmed cache it takes about 0.35 s. `scripts/prepare-sandbox-images.sh` pulls every sandbox image and builds the Go one, and `SANDBOX_GO_IMAGE` overrides the tag.
+- Verified against real Docker: the gated integration suite (`RUN_SANDBOX_INTEGRATION=1`) now covers Java and Go solutions, every supported type, exceptions and panics, compile errors, nil Go slices and user imports. All 16 cases pass; Java cases take about 1.1 s and Go about 0.5 s.
 
 ### Admin and seed data
 - The problem form gets Java and Go tabs for starter code and reference solutions, with a "Generate stub from signature" button.
 - Saving runs every provided reference solution against all test cases, as the existing languages already do.
-- Seed data: add Java and Go reference solutions to the runnable seed problems.
+- Seed data: no change needed. The runnable seed problems have typed harnesses, so they get generated Java and Go stubs automatically.
 
 ### Frontend
 - Monaco already supports `java` and `go` modes, so this only needs the language picker and per-language starter caching in localStorage.

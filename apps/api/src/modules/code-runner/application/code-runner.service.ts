@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { SubmissionStatus, TestCaseResultStatus } from '@prisma/client';
 import { ProblemService } from '../../problem/application/problem.service';
 import { Problem, ProblemLanguage } from '../../problem/domain/entities/problem';
@@ -25,6 +25,7 @@ export class CodeRunnerService {
     includeHidden: boolean,
   ): Promise<AssessmentRunOutcome> {
     const problem = await this.problemService.getById(problemId);
+    CodeRunnerService.assertLanguageSupported(problem, language);
     const cases = includeHidden ? problem.getTestCases() : problem.getVisibleTestCases();
 
     const raw = await this.sandboxRunner.run({
@@ -38,6 +39,12 @@ export class CodeRunnerService {
     });
 
     return this.assemble(problem, cases, raw);
+  }
+
+  static assertLanguageSupported(problem: Problem, language: ProblemLanguage): void {
+    if (!problem.supportsLanguage(language)) {
+      throw new BadRequestException(`This problem cannot be solved in ${language} yet.`);
+    }
   }
 
   private assemble(

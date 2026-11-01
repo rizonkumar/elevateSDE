@@ -99,12 +99,13 @@ For each round, the service calculates a weighted average from the available app
 
 Candidate submissions are evaluated by the `code-runner` module in isolated Docker containers. It is **harness-based** (the candidate writes a function; a generated driver invokes it with JSON-decoded arguments) rather than stdin/stdout-based.
 
-- **Languages:** JavaScript (`node:20-alpine`), Python (`python:3.12-alpine`), C++ (`gcc:13`, compiled with `-O2 -std=c++17`).
+- **Languages:** JavaScript (`node:20-alpine`), Python (`python:3.12-alpine`), C++ (`gcc:13`, compiled with `-O2 -std=c++17`), Java (`eclipse-temurin:21-jdk-alpine`, 512MB because of the JVM), and Go (`elevatesde/sandbox-go:1.23`, built from `docker/sandbox/go`).
+- **Java and Go starters** are generated from a problem's typed harness (`paramTypes`/`returnType`, with parameter names taken from the C++ signature), so every runnable problem supports them without extra authoring. Admins can still override the generated stub.
 - **Isolation & limits:** `--network none`, read-only filesystem, `2s` per test case, `256MB` memory, `--cpus=1.0`, `--pids-limit=64`.
 - **Grading:** each problem has a `comparisonMode` — `EXACT`, `UNORDERED` (multiset, order-independent), or `FLOAT_TOLERANT` (1e-6 relative tolerance).
 - **Two entry points:** `POST /api/v1/assessments/run` runs **visible** cases synchronously; `POST /api/v1/assessments/submit` queues a job (BullMQ) that runs **all** cases (incl. hidden) via the `CodeExecutionProcessor`, transitioning the submission `QUEUED → RUNNING → ACCEPTED / WRONG_ANSWER / …`. Clients poll `GET /api/v1/assessments/submissions/:id`.
 
-> **Docker must be running** for code execution. The runtime images are pulled automatically on first use (or pre-pull with `docker pull node:20-alpine python:3.12-alpine`).
+> **Docker must be running** for code execution. Run `./scripts/prepare-sandbox-images.sh` once to pull the runtime images and build the Go image; Go submissions fail until that image exists.
 
 ## System Audit Logging & Compliance
 

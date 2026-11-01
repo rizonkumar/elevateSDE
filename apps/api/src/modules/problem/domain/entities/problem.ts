@@ -1,7 +1,10 @@
 import { AssessmentDifficulty, ComparisonMode } from '@prisma/client';
 import { ProblemTestCase } from './problem-test-case';
+import { goStub, javaStub, toTypedSignature } from '../languages/starter-stubs';
 
-export type ProblemLanguage = 'javascript' | 'python' | 'cpp';
+export const PROBLEM_LANGUAGES = ['javascript', 'python', 'cpp', 'java', 'go'] as const;
+
+export type ProblemLanguage = (typeof PROBLEM_LANGUAGES)[number];
 
 export type LanguageCodeMap = Record<ProblemLanguage, string>;
 
@@ -14,7 +17,7 @@ export interface ProblemExample {
 export interface ProblemHarness {
   paramTypes: string[];
   returnType: string;
-  cpp: { signature: string };
+  cpp?: { signature: string };
 }
 
 export interface ProblemTopicRef {
@@ -39,7 +42,7 @@ export interface ProblemProps {
   description: string;
   constraints: string[];
   tags: string[];
-  starterCode: LanguageCodeMap;
+  starterCode: Partial<LanguageCodeMap>;
   examples: ProblemExample[];
   functionName: string;
   harness: ProblemHarness;
@@ -93,8 +96,42 @@ export class Problem {
     return this.props.tags;
   }
 
-  getStarterCode(): LanguageCodeMap {
+  getStarterCode(): Partial<LanguageCodeMap> {
     return this.props.starterCode;
+  }
+
+  getStarterCodeFor(language: ProblemLanguage): string | null {
+    const stored = this.props.starterCode[language];
+    if (language !== 'java' && language !== 'go') {
+      return stored ?? '';
+    }
+    if (stored && stored.trim().length > 0) {
+      return stored;
+    }
+    const signature = toTypedSignature(this.props.functionName, this.props.harness);
+    if (!signature) {
+      return null;
+    }
+    return language === 'java' ? javaStub(signature) : goStub(signature);
+  }
+
+  getAvailableLanguages(): ProblemLanguage[] {
+    return PROBLEM_LANGUAGES.filter((language) => this.getStarterCodeFor(language) !== null);
+  }
+
+  supportsLanguage(language: ProblemLanguage): boolean {
+    return this.getStarterCodeFor(language) !== null;
+  }
+
+  getResolvedStarterCode(): Partial<LanguageCodeMap> {
+    const resolved: Partial<LanguageCodeMap> = {};
+    for (const language of this.getAvailableLanguages()) {
+      const code = this.getStarterCodeFor(language);
+      if (code !== null) {
+        resolved[language] = code;
+      }
+    }
+    return resolved;
   }
 
   getExamples(): ProblemExample[] {

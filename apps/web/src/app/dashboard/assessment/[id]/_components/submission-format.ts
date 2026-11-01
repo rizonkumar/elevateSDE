@@ -4,12 +4,16 @@ export const LANGUAGE_LABEL: Record<AssessmentLanguage, string> = {
   javascript: 'JavaScript',
   python: 'Python',
   cpp: 'C++',
+  java: 'Java',
+  go: 'Go',
 };
 
 export const MONACO_LANGUAGE: Record<AssessmentLanguage, string> = {
   javascript: 'javascript',
   python: 'python',
   cpp: 'cpp',
+  java: 'java',
+  go: 'go',
 };
 
 export const SUBMISSION_STATUS_LABEL: Record<SubmissionStatusValue, string> = {

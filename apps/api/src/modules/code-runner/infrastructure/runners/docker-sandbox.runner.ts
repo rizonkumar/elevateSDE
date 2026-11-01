@@ -11,7 +11,6 @@ import { buildDockerRunArgs, SANDBOX_RUN_USER } from '../docker-sandbox/run-flag
 import { JS_RESULT_SENTINEL } from '../docker-sandbox/drivers/javascript.driver';
 
 const MAX_OUTPUT_BYTES = 512 * 1024;
-const COMPILE_TIMEOUT_MS = 20000;
 const WALL_SLACK_MS = 4000;
 
 interface DockerExecResult {
@@ -38,12 +37,13 @@ export class DockerSandboxRunner extends ISandboxRunner {
         const compileArgs = buildDockerRunArgs({
           image: config.image,
           workDir: dir,
-          memoryMb: spec.memoryLimitMb,
+          memoryMb: config.compileMemoryMb,
           name: compileName,
           readOnly: false,
           command: config.compile,
+          pidsLimit: config.pidsLimit,
         });
-        const compiled = await this.exec(compileArgs, COMPILE_TIMEOUT_MS, compileName);
+        const compiled = await this.exec(compileArgs, config.compileTimeoutMs, compileName);
         if (compiled.timedOut || compiled.code !== 0) {
           return {
             caseResults: [],
@@ -51,21 +51,28 @@ export class DockerSandboxRunner extends ISandboxRunner {
             exitCode: compiled.code,
             timedOut: compiled.timedOut,
             wallMs: compiled.wallMs,
-            compileError: compiled.stderr.trim() || 'Compilation failed',
+            compileError:
+              compiled.stderr.trim() ||
+              compiled.stdout.trim() ||
+              (compiled.timedOut ? 'Compilation timed out' : 'Compilation failed'),
           };
         }
       }
 
       const runName = `elevate-${randomUUID()}`;
-      const wallTimeout = spec.timeoutMsPerCase * Math.max(1, spec.cases.length) + WALL_SLACK_MS;
+      const wallTimeout =
+        spec.timeoutMsPerCase * Math.max(1, spec.cases.length) +
+        WALL_SLACK_MS +
+        config.startupSlackMs;
       const runArgs = buildDockerRunArgs({
         image: config.image,
         workDir: dir,
-        memoryMb: spec.memoryLimitMb,
+        memoryMb: config.memoryMb ?? spec.memoryLimitMb,
         name: runName,
         readOnly: true,
         command: config.run,
         user: SANDBOX_RUN_USER,
+        pidsLimit: config.pidsLimit,
       });
       const executed = await this.exec(runArgs, wallTimeout, runName);
       const parsed = this.parseStdout(executed.stdout);

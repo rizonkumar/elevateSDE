@@ -33,7 +33,10 @@ export class CodingProblemResponseDto implements CodingProblemDto {
       cpp: 'vector<int> twoSum(vector<int>& nums, int target) {}',
     },
   })
-  starterCode!: Record<AssessmentLanguage, string>;
+  starterCode!: Partial<Record<AssessmentLanguage, string>>;
+
+  @ApiProperty({ enum: ['javascript', 'python', 'cpp', 'java', 'go'], isArray: true })
+  availableLanguages!: AssessmentLanguage[];
 
   @ApiProperty({
     example: [{ input: 'nums = [2,7,11,15], target = 9', output: '[0,1]', explanation: null }],

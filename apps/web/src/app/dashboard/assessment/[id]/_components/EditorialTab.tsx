@@ -7,14 +7,9 @@ import type { AssessmentLanguage, ProblemEditorialDto } from '@elevatesde/shared
 import { useProblemAssistanceStore } from '@/store/problem-assistance.store';
 import { SegmentedControl } from './SegmentedControl';
 import { ParagraphText } from './problem-text';
+import { LANGUAGE_LABEL } from './submission-format';
 
-const LANGUAGE_ORDER: readonly AssessmentLanguage[] = ['python', 'javascript', 'cpp'];
-
-const LANGUAGE_LABEL: Record<AssessmentLanguage, string> = {
-  javascript: 'JavaScript',
-  python: 'Python',
-  cpp: 'C++',
-};
+const LANGUAGE_ORDER: readonly AssessmentLanguage[] = ['python', 'javascript', 'java', 'cpp', 'go'];
 
 interface EditorialTabProps {
   problemId: string;

@@ -20,7 +20,7 @@ export class PerformanceDistributionResponseDto implements PerformanceDistributi
   @ApiProperty({ example: 'uuid-problem' })
   problemId!: string;
 
-  @ApiProperty({ enum: ['javascript', 'python', 'cpp'] })
+  @ApiProperty({ enum: ['javascript', 'python', 'cpp', 'java', 'go'] })
   language!: AssessmentLanguage;
 
   @ApiProperty({ example: 128 })

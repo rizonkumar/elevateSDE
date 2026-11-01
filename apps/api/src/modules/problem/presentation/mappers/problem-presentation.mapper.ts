@@ -59,6 +59,7 @@ export class ProblemPresentationMapper {
   static toAdminCodingProblem(problem: Problem): AdminCodingProblemResponseDto {
     const dto = new AdminCodingProblemResponseDto();
     ProblemPresentationMapper.assignContent(dto, problem);
+    dto.starterCode = problem.getStarterCode();
     dto.testCases = problem.getTestCases().map((testCase) => ({
       id: testCase.getId(),
       input: testCase.getInput(),
@@ -80,7 +81,8 @@ export class ProblemPresentationMapper {
     dto.description = problem.getDescription();
     dto.constraints = problem.getConstraints();
     dto.tags = problem.getTags();
-    dto.starterCode = problem.getStarterCode();
+    dto.starterCode = problem.getResolvedStarterCode();
+    dto.availableLanguages = problem.getAvailableLanguages();
     dto.examples = problem.getExamples();
     dto.timeLimitMinutes = problem.getTimeLimitMinutes();
   }

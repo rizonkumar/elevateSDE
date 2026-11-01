@@ -56,7 +56,7 @@ export class CreateCodingProblemDto implements AdminCodingProblemInput {
     example: { javascript: 'function twoSum() {}', python: 'def two_sum():', cpp: 'int main(){}' },
   })
   @IsObject()
-  starterCode!: Record<AssessmentLanguage, string>;
+  starterCode!: Partial<Record<AssessmentLanguage, string>>;
 
   @ApiProperty({ example: 30 })
   @IsInt()

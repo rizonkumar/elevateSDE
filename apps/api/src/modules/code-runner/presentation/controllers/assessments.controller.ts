@@ -72,7 +72,8 @@ export class AssessmentsController {
     @Body() dto: RunAssessmentDto,
     @Req() req: RequestWithUser,
   ): Promise<SubmissionAcceptedResponseDto> {
-    await this.problemService.getById(dto.problemId);
+    const problem = await this.problemService.getById(dto.problemId);
+    CodeRunnerService.assertLanguageSupported(problem, dto.language);
     const submission = await this.submissionService.createPending(
       req.user.getId(),
       dto.problemId,
