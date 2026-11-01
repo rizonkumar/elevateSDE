@@ -43,7 +43,7 @@ Read this whole file first, then run the phases in order. Do not skip a verifica
 sudo apt update && sudo apt install -y git curl ca-certificates openssl
 curl -fsSL https://get.docker.com | sh
 sudo usermod -aG docker "$USER"
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
 sudo apt install -y nodejs
 sudo npm install -g pnpm@10.33.0 pm2 vercel
 ```
@@ -58,7 +58,7 @@ docker pull gcc:13
 
 The three images are the code-execution sandbox languages (JavaScript, Python, C++). Pull them now so the first submission does not time out downloading.
 
-**Gate:** `docker run --rm hello-world`, `node -v` (v20 or newer), `pnpm -v`, `pm2 -v` all succeed.
+**Gate:** `docker run --rm hello-world`, `node -v` (v24 LTS; do not use odd-numbered or pre-release Node versions), `pnpm -v`, `pm2 -v` all succeed.
 
 ---
 
@@ -99,8 +99,11 @@ cp apps/api/.env.production.example apps/api/.env
 
 Edit `apps/api/.env` and set:
 - `DATABASE_URL="postgresql://postgres:<DB_PASSWORD>@127.0.0.1:5432/elevatesde"`
-- `JWT_SECRET="<JWT_SECRET>"`
-- Leave `WEB_APP_URL` and `CORS_ALLOWED_ORIGINS` for phase 7.
+- `JWT_SECRET="<JWT_SECRET>"` (the API refuses to start if it is shorter than 32 characters)
+- `SEED_ADMIN_EMAIL` and `SEED_ADMIN_PASSWORD` for the owner admin (see 3.5). Type them on the server only.
+- `CORS_ALLOWED_ORIGINS="https://placeholder.invalid"` for now. In production the API refuses to start without an explicit origin list; phase 7 replaces it with the real Vercel URLs.
+- Leave `WEB_APP_URL` for phase 7.
+- Keep `SWAGGER_ENABLED="false"` (API docs are off in production) and `TRUST_PROXY="1"` (see the rate-limit check in section 9).
 - Leave the `MOCK_INTERVIEW_AI_*` values as they are if Ollama will be installed in phase 4. Otherwise set `MOCK_INTERVIEW_AI_ENABLED="false"`.
 
 ### 3.3 Start Postgres and Redis
@@ -151,6 +154,8 @@ cd ../..
 
 Every new registration stays in `PENDING_APPROVAL` until the owner approves it from **Users → Pending approval** in the backoffice.
 
+On a server that was already deployed, set both variables and run `pnpm --filter @elevatesde/api db:migrate && pnpm --filter @elevatesde/api db:seed` once. The migration keeps every existing account active; the seed creates or updates the owner admin and deletes `admin@elevatesde.dev`.
+
 ### 3.6 Build and run the API
 
 ```bash
@@ -162,7 +167,7 @@ pm2 startup
 
 Run the command that `pm2 startup` prints (it needs sudo).
 
-**Gate:** `curl -sI http://127.0.0.1:4400/api/docs` returns `200`, and `pm2 status` shows `elevatesde-api` as `online`.
+**Gate:** `curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:4400/api/v1/problems` returns `401` (the API is up and requires sign-in), `curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:4400/api/docs` returns `404` (docs are off in production), and `pm2 status` shows `elevatesde-api` as `online`. If pm2 shows it errored, `pm2 logs elevatesde-api` names the missing or weak env var.
 
 ---
 
@@ -329,13 +334,15 @@ Adjust the path if the repo was cloned elsewhere.
 Report pass or fail for each item.
 
 1. `WEB_URL` loads and the landing page renders.
-2. Register a new account, sign out, sign in.
+2. Register a new account. The web app shows "Registration received" and signing in says the account is awaiting approval.
+   Sign in to `WEB_URL/admin` as the owner admin, open **Users → Pending approval**, approve the account, then sign in with it on `WEB_URL`.
 3. The dashboard loads with no failed API calls.
 4. The problem list shows the seeded problems, and a `rp-` problem opens in the editor.
 5. Submit a correct solution to a `rp-` problem. It should be judged through the Docker sandbox (check `docker ps -a` briefly shows `elevate-*` containers, and `pm2 logs` has no sandbox errors).
 6. Start a mock interview and finish it through to the report. Check `pm2 logs elevatesde-api` for `Falling back to deterministic` to see whether the model answered.
 7. `WEB_URL/admin` loads the admin login. Sign in with the admin account from step 3.5.
 8. `pm2 logs elevatesde-api` shows scheduler startup with no errors.
+9. Rate limiting sees real client IPs. From two different networks (for example laptop Wi-Fi and a phone on mobile data), try signing in with a wrong password 11 times on one of them. Only that network should get `429 Too Many Requests`; the other must still be able to sign in. If both are blocked, the API sees every visitor as the same proxy IP: change `TRUST_PROXY` in `apps/api/.env` (try `2`) and `pm2 restart elevatesde-api --update-env`.
 
 ---
 

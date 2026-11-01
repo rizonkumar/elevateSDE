@@ -159,3 +159,27 @@ model User {
 3. Approval workflow backend → admin UI → web UI
 4. High fixes 4–8
 5. Medium 9–12, Low 13–16
+
+---
+
+## Status (2026-11-01)
+
+| Item | Status |
+| --- | --- |
+| Part A owner admin seeding | Done |
+| Part B approval workflow (API, admin queue, web pending screen, admin notification) | Done |
+| 1–3 Critical | Done |
+| 4 Rate limiting (verified-user or IP keyed) | Done |
+| 5 CORS fail-closed | Done |
+| 6 Swagger off in production | Done |
+| 7 Helmet + Next security headers/CSP | Done |
+| 8 Dependencies: Next 16.4.3, axios, pdfjs, mammoth, pnpm overrides | Done — 0 critical / 0 high; 18 moderate + 1 low remain in build/dev tooling only |
+| 9 httpOnly refresh cookie | **Blocked on decision**: web/admin (`*.vercel.app`) and API (`*.ts.net`) are different sites, so an API cookie would be third-party and Safari blocks it |
+| 10 Role DTO + owner protection (both role endpoints) | Done |
+| 11 Password policy | Done |
+| 12 Generic auth errors / no enumeration | Done |
+| 13 Sandbox runs as uid 65534 | Done, integration-tested |
+| 14 Hidden inputs: stdout suppressed when hidden cases run | Done |
+| 15 1 MB body limit | Done |
+| 16 IDOR sweep | Done — invitation cross-tenant move, unpublished-problem social actions, hidden-post comment upvote fixed |
+| Extra: API build emitted `dist/src/main.js`, breaking `pm2` `dist/main.js` | Fixed (`tsconfig.build.json` includes `src` only) |
