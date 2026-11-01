@@ -3,16 +3,10 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-
-function resolveCorsOrigins(): string[] | true {
-  const configured = (process.env.CORS_ALLOWED_ORIGINS ?? '')
-    .split(',')
-    .map((origin) => origin.trim())
-    .filter((origin) => origin.length > 0);
-  return configured.length > 0 ? configured : true;
-}
+import { assertSecurityConfig, resolveCorsOrigins } from './infrastructure/config/security-config';
 
 async function bootstrap() {
+  assertSecurityConfig();
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
