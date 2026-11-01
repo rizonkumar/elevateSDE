@@ -183,3 +183,5 @@ model User {
 | 15 1 MB body limit | Done |
 | 16 IDOR sweep | Done — invitation cross-tenant move, unpublished-problem social actions, hidden-post comment upvote fixed |
 | Extra: API build emitted `dist/src/main.js`, breaking `pm2` `dist/main.js` | Fixed (`tsconfig.build.json` includes `src` only) |
+| Code review pass | Done — owner-email case impostor, register/login timing leaks, Google-only login hint, Google pending screen, approval queue pagination, role guards centralised, shared password policy and security headers |
+| Existing bug: unpublished problems still listed in learning paths | Fixed |
