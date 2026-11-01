@@ -24,13 +24,17 @@ export class UsersRepository implements IUsersRepository {
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    const user = await this.prisma.user.findUnique({
+    const exact = await this.prisma.user.findUnique({
       where: { email },
     });
-    if (!user) {
-      return null;
+    if (exact) {
+      return UserMapper.toDomain(exact);
     }
-    return UserMapper.toDomain(user);
+    const caseInsensitive = await this.prisma.user.findFirst({
+      where: { email: { equals: email, mode: 'insensitive' } },
+      orderBy: { createdAt: 'asc' },
+    });
+    return caseInsensitive ? UserMapper.toDomain(caseInsensitive) : null;
   }
 
   async findByGoogleId(googleId: string): Promise<User | null> {

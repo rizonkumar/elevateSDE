@@ -2,7 +2,7 @@ import { ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AccountStatus, UserRole } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-import { AuthService } from './auth.service';
+import { AuthService, INVALID_CREDENTIALS_MESSAGE } from './auth.service';
 import { TokenService } from './application/token.service';
 import { UsersService } from '../users/application/users.service';
 import { AccountReviewService } from '../users/application/account-review.service';
@@ -15,6 +15,7 @@ import { User } from '../users/domain/entities/user';
 interface UsersServiceDouble {
   findByEmail: jest.Mock<Promise<User | null>, [string]>;
   create: jest.Mock;
+  replacePasswordHash: jest.Mock;
 }
 
 describe('AuthService registration and login', () => {
@@ -30,6 +31,9 @@ describe('AuthService registration and login', () => {
       create: jest.fn().mockImplementation(async (data: { email: string; role: UserRole }) =>
         User.create('new-user', data.email, 'hash', data.role),
       ),
+      replacePasswordHash: jest
+        .fn()
+        .mockImplementation(async (user: User, hash: string) => user.withPasswordHash(hash)),
     };
     announcePending = jest.fn().mockResolvedValue(undefined);
     tenantCreate = jest.fn().mockResolvedValue({ id: 'tenant-1' });
@@ -95,6 +99,25 @@ describe('AuthService registration and login', () => {
       expect(result.accessToken).toBeTruthy();
     });
 
+    it('upgrades a weaker legacy hash to the current cost after a successful sign-in', async () => {
+      users.findByEmail.mockResolvedValue(userWithStatus(AccountStatus.ACTIVE, hash));
+
+      await service.login({ email: 'a@example.com', password: 'correct-password' });
+
+      expect(users.replacePasswordHash).toHaveBeenCalledTimes(1);
+      const upgraded = users.replacePasswordHash.mock.calls[0]?.[1] as string;
+      expect(bcrypt.getRounds(upgraded)).toBe(12);
+    });
+
+    it('does not rehash after a failed sign-in', async () => {
+      users.findByEmail.mockResolvedValue(userWithStatus(AccountStatus.ACTIVE, hash));
+
+      await expect(
+        service.login({ email: 'a@example.com', password: 'wrong-password' }),
+      ).rejects.toBeInstanceOf(UnauthorizedException);
+      expect(users.replacePasswordHash).not.toHaveBeenCalled();
+    });
+
     it.each([AccountStatus.PENDING_APPROVAL, AccountStatus.REJECTED])(
       'refuses a %s account with the right password',
       async (status) => {
@@ -118,7 +141,7 @@ describe('AuthService registration and login', () => {
     it('uses the same error for an unknown email', async () => {
       await expect(
         service.login({ email: 'nobody@example.com', password: 'whatever-pass' }),
-      ).rejects.toThrow('Invalid credentials');
+      ).rejects.toThrow(INVALID_CREDENTIALS_MESSAGE);
     });
   });
 

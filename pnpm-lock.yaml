@@ -40,6 +40,9 @@ importers:
       '@elevatesde/api-client':
         specifier: workspace:*
         version: link:../../packages/api-client
+      '@elevatesde/next-security':
+        specifier: workspace:*
+        version: link:../../packages/next-security
       '@elevatesde/shared-types':
         specifier: workspace:*
         version: link:../../packages/shared-types
@@ -267,6 +270,9 @@ importers:
       '@elevatesde/api-client':
         specifier: workspace:*
         version: link:../../packages/api-client
+      '@elevatesde/next-security':
+        specifier: workspace:*
+        version: link:../../packages/next-security
       '@elevatesde/shared-types':
         specifier: workspace:*
         version: link:../../packages/shared-types
@@ -395,6 +401,8 @@ importers:
       typescript-eslint:
         specifier: ^7.7.1
         version: 7.18.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
+
+  packages/next-security: {}
 
   packages/shared-types:
     devDependencies:

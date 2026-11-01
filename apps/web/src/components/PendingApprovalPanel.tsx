@@ -28,8 +28,16 @@ export function PendingApprovalPanel({
       <div className="flex flex-col gap-2">
         <h2 className="text-xl font-semibold text-(--color-text-primary)">{title}</h2>
         <p className="text-sm leading-6 text-(--color-text-muted)">
-          Your account for <span className="font-medium text-(--color-text-primary)">{email}</span>{' '}
-          is waiting for admin approval. You will be able to sign in as soon as it is approved.
+          {email ? (
+            <>
+              Your account for{' '}
+              <span className="font-medium text-(--color-text-primary)">{email}</span> is waiting
+              for admin approval.
+            </>
+          ) : (
+            'Your account is waiting for admin approval.'
+          )}{' '}
+          You will be able to sign in as soon as it is approved.
         </p>
       </div>
       <Link

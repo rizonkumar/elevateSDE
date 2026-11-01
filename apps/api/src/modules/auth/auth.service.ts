@@ -14,7 +14,7 @@ import {
 import { isWithinReuseGrace } from './domain/refresh-token-rotation';
 import { assertAccountCanSignIn } from './domain/account-access';
 import { AccountReviewService } from '../users/application/account-review.service';
-import { hashPassword } from './domain/password-hashing';
+import { hashPassword, needsRehash } from './domain/password-hashing';
 
 @Injectable()
 export class AuthService {
@@ -29,12 +29,11 @@ export class AuthService {
   async register(dto: RegisterDto): Promise<RegistrationResultDto> {
     const email = dto.email.trim();
     const pending: RegistrationResultDto = { status: 'PENDING_APPROVAL', email };
+    const passwordHash = await hashPassword(dto.password);
     const existing = await this.usersService.findByEmail(email);
     if (existing) {
       return pending;
     }
-
-    const passwordHash = await hashPassword(dto.password);
 
     let tenantId: string | undefined;
 
@@ -76,7 +75,10 @@ export class AuthService {
     }
 
     assertAccountCanSignIn(user);
-    return this.tokenService.issueFor(user);
+    const current = needsRehash(passwordHash)
+      ? await this.usersService.replacePasswordHash(user, await hashPassword(dto.password))
+      : user;
+    return this.tokenService.issueFor(current);
   }
 
   async refresh(token: string): Promise<AuthResponseDto> {
@@ -136,8 +138,11 @@ export class AuthService {
 
 const TIMING_SAFE_DUMMY_HASH = '$2b$12$lEHOHk0sbjUEEQ.hx52zdOGHVHpvjn031m3rXIne.zbUp.OtCX9uO';
 
+export const INVALID_CREDENTIALS_MESSAGE =
+  'Invalid email or password. If you signed up with Google, use Continue with Google.';
+
 function invalidCredentials(): UnauthorizedException {
-  return new UnauthorizedException('Invalid credentials');
+  return new UnauthorizedException(INVALID_CREDENTIALS_MESSAGE);
 }
 
 function invalidRefreshToken(): UnauthorizedException {

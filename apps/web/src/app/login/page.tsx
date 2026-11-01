@@ -101,11 +101,15 @@ export default function LoginPage() {
       }
     } catch (err) {
       const axiosError = err as AxiosErrorResponse;
+      if (axiosError.response?.data?.code === 'ACCOUNT_PENDING_APPROVAL') {
+        setPendingEmail('');
+        return;
+      }
       addToast(axiosError.response?.data?.message || 'Google sign-in failed.', 'error');
     }
   };
 
-  if (pendingEmail) {
+  if (pendingEmail !== null) {
     return (
       <AuthLayout>
         <PendingApprovalPanel email={pendingEmail} />

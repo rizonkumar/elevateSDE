@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@elevatesde/api-client": "workspace:*",
+    "@elevatesde/next-security": "workspace:*",
     "@elevatesde/shared-types": "workspace:*",
     "@elevatesde/ui": "workspace:*",
     "framer-motion": "^12.40.0",

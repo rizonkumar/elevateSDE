@@ -19,13 +19,9 @@ import {
   AuthResponseDto,
   GoogleOnboardingDto,
   RegistrationResultDto,
+  PASSWORD_POLICY,
+  isStrongPassword,
 } from '@elevatesde/shared-types';
-
-const MIN_PASSWORD_LENGTH = 10;
-
-function isStrongPassword(value: string): boolean {
-  return value.length >= MIN_PASSWORD_LENGTH && /[A-Za-z]/.test(value) && /\d/.test(value);
-}
 
 interface AxiosErrorResponse {
   response?: {
@@ -80,6 +76,10 @@ export default function RegisterPage() {
       }
     } catch (err) {
       const axiosError = err as AxiosErrorResponse;
+      if (axiosError.response?.data?.code === 'ACCOUNT_PENDING_APPROVAL') {
+        setPendingEmail('');
+        return;
+      }
       addToast(axiosError.response?.data?.message || 'Google sign-in failed.', 'error');
     }
   };
@@ -91,10 +91,7 @@ export default function RegisterPage() {
       return;
     }
     if (!isStrongPassword(password)) {
-      addToast(
-        `Password must be at least ${MIN_PASSWORD_LENGTH} characters and include a letter and a number.`,
-        'error',
-      );
+      addToast(`Password must be ${PASSWORD_POLICY.description}.`, 'error');
       return;
     }
     setLoading(true);
@@ -133,7 +130,7 @@ export default function RegisterPage() {
     }
   };
 
-  if (pendingEmail) {
+  if (pendingEmail !== null) {
     return (
       <AuthLayout>
         <PendingApprovalPanel email={pendingEmail} />
@@ -222,7 +219,7 @@ export default function RegisterPage() {
           <Input
             type="password"
             label="Password"
-            placeholder="Min. 8 characters"
+            placeholder={`Min. ${PASSWORD_POLICY.minLength} characters, a letter and a number`}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={loading}

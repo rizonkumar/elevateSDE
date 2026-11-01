@@ -1,0 +1,7 @@
+{
+  "name": "@elevatesde/next-security",
+  "version": "0.0.0",
+  "private": true,
+  "main": "security-headers.mjs",
+  "types": "security-headers.d.mts"
+}

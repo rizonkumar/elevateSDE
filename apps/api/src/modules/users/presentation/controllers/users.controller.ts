@@ -6,7 +6,6 @@ import {
   Body,
   UseGuards,
   Req,
-  ForbiddenException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { UsersService } from '../../application/users.service';
@@ -18,7 +17,6 @@ import { User } from '../../domain/entities/user';
 import { UserResponseDto } from '../dtos/user-response.dto';
 import { UserPresentationMapper } from '../mappers/user-presentation.mapper';
 import { UpdateUserRoleDto } from '../dtos/update-user-role.dto';
-import { isOwnerAdminEmail } from '../../../../infrastructure/config/security-config';
 
 interface RequestWithUser {
   user: User;
@@ -54,14 +52,7 @@ export class UsersController {
     @Body() dto: UpdateUserRoleDto,
     @Req() req: RequestWithUser,
   ): Promise<UserResponseDto> {
-    if (req.user.getId() === id) {
-      throw new ForbiddenException('You cannot change your own role');
-    }
-    const target = await this.usersService.findById(id);
-    if (isOwnerAdminEmail(target.getEmail())) {
-      throw new ForbiddenException('The owner admin role cannot be changed');
-    }
-    const updatedUser = await this.usersService.updateRole(id, dto.role);
-    return UserPresentationMapper.toResponse(updatedUser);
+    const change = await this.usersService.updateRole(req.user.getId(), id, dto.role);
+    return UserPresentationMapper.toResponse(change.user);
   }
 }

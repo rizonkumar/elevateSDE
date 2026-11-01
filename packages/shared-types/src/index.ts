@@ -141,6 +141,23 @@ export interface ResumeDto {
 
 export const MAX_RESUME_SIZE_BYTES = 5 * 1024 * 1024;
 
+export const PASSWORD_POLICY = {
+  minLength: 10,
+  maxLength: 72,
+  letterPattern: /[A-Za-z]/,
+  digitPattern: /\d/,
+  description: 'at least 10 characters, including a letter and a number',
+} as const;
+
+export function isStrongPassword(value: string): boolean {
+  return (
+    value.length >= PASSWORD_POLICY.minLength &&
+    value.length <= PASSWORD_POLICY.maxLength &&
+    PASSWORD_POLICY.letterPattern.test(value) &&
+    PASSWORD_POLICY.digitPattern.test(value)
+  );
+}
+
 export const ACCEPTED_RESUME_MIME_TYPES: readonly string[] = [
   'application/pdf',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',

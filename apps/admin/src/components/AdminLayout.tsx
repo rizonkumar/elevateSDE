@@ -32,7 +32,7 @@ export function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
   const pendingCount = usePendingAccountsStore((state) => state.count);
-  const refreshPendingCount = usePendingAccountsStore((state) => state.refreshCount);
+  const refreshPendingCount = usePendingAccountsStore((state) => state.refreshCountIfStale);
   const navGroups = React.useMemo(
     () => withPendingBadge(ADMIN_NAV_GROUPS, pendingCount),
     [pendingCount],

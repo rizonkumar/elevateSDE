@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { AdminLayout } from '../../components/AdminLayout';
 import { Badge, type BadgeVariant, Select } from '../../components/ui';
-import { Tabs } from '@elevatesde/ui';
+import { Button, Tabs } from '@elevatesde/ui';
 import { api } from '../../lib/api';
 import { fetchPendingAccounts } from '../../lib/account-review-api';
 import { useToastStore } from '../../store/toast.store';
@@ -62,19 +62,24 @@ export default function UsersPage() {
   const [loading, setLoading] = React.useState(true);
   const [updatingId, setUpdatingId] = React.useState<string | null>(null);
   const [pending, setPending] = React.useState<PendingAccountDto[]>([]);
+  const [pendingTotal, setPendingTotal] = React.useState(0);
+  const [pendingPage, setPendingPage] = React.useState(1);
+  const [loadingMore, setLoadingMore] = React.useState(false);
   const [tab, setTab] = React.useState<UsersTab | null>(null);
   const setPendingCount = usePendingAccountsStore((state) => state.setCount);
 
   const loadUsers = React.useCallback(async () => {
     try {
-      const [res, pendingPage] = await Promise.all([
+      const [res, firstPage] = await Promise.all([
         api.get<UserDto[]>('/api/v1/admin/users'),
-        fetchPendingAccounts(),
+        fetchPendingAccounts(1),
       ]);
       setUsers(res.data);
-      setPending(pendingPage.items);
-      setPendingCount(pendingPage.total);
-      setTab((current) => current ?? initialTab() ?? (pendingPage.total > 0 ? 'pending' : 'all'));
+      setPending(firstPage.items);
+      setPendingTotal(firstPage.total);
+      setPendingPage(1);
+      setPendingCount(firstPage.total);
+      setTab((current) => current ?? initialTab() ?? (firstPage.total > 0 ? 'pending' : 'all'));
     } catch (err) {
       const axiosError = err as AxiosErrorResponse;
       addToast(axiosError.response?.data?.message || 'Failed to retrieve user listing.', 'error');
@@ -115,6 +120,24 @@ export default function UsersPage() {
     void loadUsers();
   };
 
+  const loadMorePending = async () => {
+    setLoadingMore(true);
+    try {
+      const next = await fetchPendingAccounts(pendingPage + 1);
+      setPending((current) => {
+        const seen = new Set(current.map((account) => account.id));
+        return [...current, ...next.items.filter((account) => !seen.has(account.id))];
+      });
+      setPendingTotal(next.total);
+      setPendingPage((page) => page + 1);
+    } catch (err) {
+      const axiosError = err as AxiosErrorResponse;
+      addToast(axiosError.response?.data?.message || 'Failed to load more sign-ups.', 'error');
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
   const activeTab: UsersTab = tab ?? 'all';
 
   return (
@@ -130,7 +153,7 @@ export default function UsersPage() {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <Tabs
               items={[
-                { id: 'pending', label: 'Pending approval', count: pending.length },
+                { id: 'pending', label: 'Pending approval', count: pendingTotal },
                 { id: 'all', label: 'All users', count: users.length },
               ]}
               value={activeTab}
@@ -144,11 +167,27 @@ export default function UsersPage() {
           </div>
 
           {activeTab === 'pending' ? (
-            <PendingAccountsPanel
-              accounts={pending}
-              onReviewed={handleReviewed}
-              onError={(message) => addToast(message, 'error')}
-            />
+            <div className="flex flex-col gap-4">
+              <PendingAccountsPanel
+                accounts={pending}
+                onReviewed={handleReviewed}
+                onError={(message) => addToast(message, 'error')}
+              />
+              {pending.length < pendingTotal && (
+                <div className="flex flex-col items-center gap-2">
+                  <span className="text-xs text-(--color-text-muted)">
+                    Showing {pending.length} of {pendingTotal}
+                  </span>
+                  <Button
+                    variant="secondary"
+                    disabled={loadingMore}
+                    onClick={() => void loadMorePending()}
+                  >
+                    {loadingMore ? 'Loading…' : 'Load more'}
+                  </Button>
+                </div>
+              )}
+            </div>
           ) : (
             <>
               <div className="hidden md:block overflow-visible rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-sm">

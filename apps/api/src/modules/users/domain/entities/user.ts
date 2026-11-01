@@ -92,6 +92,22 @@ export class User {
     );
   }
 
+  withPasswordHash(passwordHash: string): User {
+    return new User(
+      this.id,
+      this.tenantId,
+      this.email,
+      passwordHash,
+      this.googleId,
+      this.role,
+      this.firstName,
+      this.lastName,
+      this.headline,
+      this.createdAt,
+      this.status,
+    );
+  }
+
   linkGoogleId(googleId: string): User {
     return new User(
       this.id,

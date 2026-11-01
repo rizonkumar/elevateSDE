@@ -1,8 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { isOwnerAdminEmail } from '../../../infrastructure/config/security-config';
 import { IUsersRepository } from '../domain/interfaces/users-repository.interface';
 import { User } from '../domain/entities/user';
 import { UserRole } from '@prisma/client';
 import { randomUUID } from 'node:crypto';
+
+export interface RoleChange {
+  previousRole: UserRole;
+  user: User;
+}
 
 @Injectable()
 export class UsersService {
@@ -48,10 +54,20 @@ export class UsersService {
     return this.usersRepository.save(user);
   }
 
-  async updateRole(id: string, role: UserRole): Promise<User> {
-    const user = await this.findById(id);
-    const updatedUser = user.changeRole(role);
-    return this.usersRepository.save(updatedUser);
+  async updateRole(actorId: string, targetId: string, role: UserRole): Promise<RoleChange> {
+    if (actorId === targetId) {
+      throw new ForbiddenException('You cannot change your own role');
+    }
+    const user = await this.findById(targetId);
+    if (isOwnerAdminEmail(user.getEmail())) {
+      throw new ForbiddenException('The owner admin role cannot be changed');
+    }
+    const updated = await this.usersRepository.save(user.changeRole(role));
+    return { previousRole: user.getRole(), user: updated };
+  }
+
+  async replacePasswordHash(user: User, passwordHash: string): Promise<User> {
+    return this.usersRepository.save(user.withPasswordHash(passwordHash));
   }
 
   async linkGoogleAccount(id: string, googleId: string): Promise<User> {

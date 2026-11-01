@@ -7,9 +7,11 @@ import { api } from './api';
 
 const BASE_PATH = '/api/v1/admin/users';
 
-export async function fetchPendingAccounts(): Promise<PendingAccountListDto> {
+export const PENDING_PAGE_SIZE = 50;
+
+export async function fetchPendingAccounts(page: number): Promise<PendingAccountListDto> {
   const response = await api.get<PendingAccountListDto>(`${BASE_PATH}/pending`, {
-    params: { page: 1, pageSize: 100 },
+    params: { page, pageSize: PENDING_PAGE_SIZE },
   });
   return response.data;
 }
