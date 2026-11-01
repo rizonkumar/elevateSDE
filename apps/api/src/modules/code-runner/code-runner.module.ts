@@ -9,6 +9,9 @@ import { ISandboxRunner } from './domain/interfaces/sandbox-runner.interface';
 import { ISubmissionRepository } from './domain/interfaces/submission-repository.interface';
 import { CodeRunnerService } from './application/code-runner.service';
 import { SubmissionService } from './application/submission.service';
+import { SubmissionInsightsService } from './application/submission-insights.service';
+import { IDistributionCache } from './domain/interfaces/distribution-cache.interface';
+import { InMemoryDistributionCache } from './infrastructure/cache/in-memory-distribution.cache';
 import { DockerSandboxRunner } from './infrastructure/runners/docker-sandbox.runner';
 import { WorkdirManager } from './infrastructure/runners/workdir.manager';
 import { SubmissionRepository } from './infrastructure/repositories/submission.repository';
@@ -29,9 +32,14 @@ import { PrismaService } from '../../infrastructure/prisma/prisma.service';
   providers: [
     CodeRunnerService,
     SubmissionService,
+    SubmissionInsightsService,
     WorkdirManager,
     PrismaService,
     CodeExecutionProcessor,
+    {
+      provide: IDistributionCache,
+      useClass: InMemoryDistributionCache,
+    },
     {
       provide: ISandboxRunner,
       useClass: DockerSandboxRunner,

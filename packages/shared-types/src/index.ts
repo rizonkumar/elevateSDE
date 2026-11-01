@@ -639,10 +639,46 @@ export interface SubmissionDetailDto {
   totalCount: number;
   totalRuntimeMs: number;
   peakMemoryKb: number;
+  runtimePercentile: number | null;
+  memoryPercentile: number | null;
+  sourceCode: string;
   stdout: string;
   results: TestCaseResultDto[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface SubmissionSummaryDto {
+  id: string;
+  problemId: string;
+  language: AssessmentLanguage;
+  status: SubmissionStatusValue;
+  passedCount: number;
+  totalCount: number;
+  totalRuntimeMs: number;
+  peakMemoryKb: number;
+  runtimePercentile: number | null;
+  memoryPercentile: number | null;
+  createdAt: string;
+}
+
+export interface SubmissionPageDto {
+  items: SubmissionSummaryDto[];
+  nextCursor: string | null;
+}
+
+export interface HistogramBucketDto {
+  from: number;
+  to: number;
+  count: number;
+}
+
+export interface PerformanceDistributionDto {
+  problemId: string;
+  language: AssessmentLanguage;
+  sampleSize: number;
+  runtime: HistogramBucketDto[];
+  memory: HistogramBucketDto[];
 }
 
 export type ForumSortOption = 'newest' | 'popular' | 'unanswered';

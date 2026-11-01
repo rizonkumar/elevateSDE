@@ -471,25 +471,29 @@ model ProblemAssistance {
 }
 
 model Submission {
-  id             String             @id @default(uuid())
-  userId         String
-  problemId      String
-  language       AssessmentLanguage
-  sourceCode     String
-  status         SubmissionStatus
-  passedCount    Int                @default(0)
-  totalCount     Int                @default(0)
-  totalRuntimeMs Float              @default(0)
-  peakMemoryKb   Int                @default(0)
-  stdout         String             @default("")
-  createdAt      DateTime           @default(now())
-  updatedAt      DateTime           @updatedAt
-  user           User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  problem        Problem            @relation(fields: [problemId], references: [id], onDelete: Cascade)
-  results        SubmissionResult[]
+  id                String             @id @default(uuid())
+  userId            String
+  problemId         String
+  language          AssessmentLanguage
+  sourceCode        String
+  status            SubmissionStatus
+  passedCount       Int                @default(0)
+  totalCount        Int                @default(0)
+  totalRuntimeMs    Float              @default(0)
+  peakMemoryKb      Int                @default(0)
+  runtimePercentile Float?
+  memoryPercentile  Float?
+  stdout            String             @default("")
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem           Problem            @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  results           SubmissionResult[]
 
   @@index([userId, problemId])
   @@index([problemId, status])
+  @@index([userId, problemId, createdAt(sort: Desc)])
+  @@index([problemId, language, status, userId])
 }
 
 model SubmissionResult {

@@ -1,6 +1,6 @@
 # Feature Plan: Coding Practice Upgrade
 
-> **Status: IN PROGRESS.** Approved with the default answers to the open questions. Phases A and B are done. Branch: `feature/coding-practice-upgrade`.
+> **Status: IN PROGRESS.** Approved with the default answers to the open questions. Phases A, B and C are done. Branch: `feature/coding-practice-upgrade`.
 
 Five improvements to the problem-solving loop:
 
@@ -153,14 +153,15 @@ model ProblemCompany {
 - Add `@@index([problemId, language, status, totalRuntimeMs])`.
 
 ### Backend
-- When an accepted submission finishes, `code-execution.processor` computes its percentiles. The comparison set is **each other user's best accepted run** for the same problem and language, so one user resubmitting can't skew the distribution. The result is stored on the submission and never recomputed.
+- When an accepted submission finishes, `code-execution.processor` computes its percentiles *before* saving the result, so the result and its percentiles are written together and the client's poll never sees an accepted submission without them. A failure to compute leaves them `null` rather than failing the job. The comparison set is **each other user's best accepted run** for the same problem and language, so one user resubmitting can't skew the distribution. The result is stored on the submission and never recomputed.
 - At least 5 comparable users are required. With fewer, the percentile is `null` and the UI shows "Not enough data yet".
-- `GET /v1/assessments/insights?problemId=&language=` returns a 20-bucket runtime histogram and a memory histogram. It is cached in Redis for 10 minutes per problem and language.
-- `GET /v1/assessments/submissions` gains cursor pagination (`cursor`, `limit` ≤ 50) and returns language, runtime, memory and percentiles.
+- `GET /v1/assessments/insights?problemId=&language=` returns a 20-bucket runtime histogram and a memory histogram. It is cached for 10 minutes per problem and language behind an `IDistributionCache` interface. The current implementation is in-process memory, which avoids adding `ioredis` as a direct dependency; a Redis-backed implementation can replace it without touching the service.
+- `GET /v1/assessments/submissions` now returns `{ items, nextCursor }` with cursor pagination (`cursor`, `limit` ≤ 50). A cursor that is not one of the caller's own submissions for that problem returns an empty page.
+- `GET /v1/assessments/submissions/:id` now also returns `sourceCode` and the two percentiles, which the diff view needs.
 
 ### Frontend
 - A new **Submissions** tab in `ProblemPanel` lists status, language, runtime, memory and time. Clicking a row opens the detail view with the code, per-case results and a recharts histogram that highlights the user's bucket.
-- **Diff view:** select two submissions and choose "Compare" to open a modal with Monaco's `DiffEditor` in read-only mode.
+- **Diff view:** select two submissions and choose "Compare" to open a modal with Monaco's `DiffEditor` in read-only mode. The shared `Modal` gained an optional `size="wide"` for this.
 - The result banner after an accepted submit shows "Faster than 72% · Less memory than 41%".
 
 ### Note on noise

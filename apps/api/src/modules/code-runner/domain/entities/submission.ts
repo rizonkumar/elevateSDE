@@ -12,6 +12,8 @@ export interface SubmissionProps {
   totalCount: number;
   totalRuntimeMs: number;
   peakMemoryKb: number;
+  runtimePercentile: number | null;
+  memoryPercentile: number | null;
   stdout: string;
   results: SubmissionResult[];
   createdAt: Date;
@@ -35,6 +37,8 @@ export interface SubmissionOutcome {
   peakMemoryKb: number;
   stdout: string;
   results: SubmissionResult[];
+  runtimePercentile: number | null;
+  memoryPercentile: number | null;
 }
 
 export class Submission {
@@ -48,6 +52,8 @@ export class Submission {
       totalCount: 0,
       totalRuntimeMs: 0,
       peakMemoryKb: 0,
+      runtimePercentile: null,
+      memoryPercentile: null,
       stdout: '',
       results: [],
       updatedAt: props.createdAt,
@@ -70,6 +76,8 @@ export class Submission {
     this.props.peakMemoryKb = outcome.peakMemoryKb;
     this.props.stdout = outcome.stdout;
     this.props.results = outcome.results;
+    this.props.runtimePercentile = outcome.runtimePercentile;
+    this.props.memoryPercentile = outcome.memoryPercentile;
   }
 
   markFailed(message: string): void {
@@ -115,6 +123,14 @@ export class Submission {
 
   getPeakMemoryKb(): number {
     return this.props.peakMemoryKb;
+  }
+
+  getRuntimePercentile(): number | null {
+    return this.props.runtimePercentile;
+  }
+
+  getMemoryPercentile(): number | null {
+    return this.props.memoryPercentile;
   }
 
   getStdout(): string {

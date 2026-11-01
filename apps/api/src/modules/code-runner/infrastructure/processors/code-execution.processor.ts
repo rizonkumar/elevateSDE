@@ -15,7 +15,13 @@ import {
 } from '../../../notification/domain/events/notification-events';
 import { CodeRunnerService } from '../../application/code-runner.service';
 import { SubmissionService } from '../../application/submission.service';
+import {
+  AcceptedRun,
+  SubmissionInsightsService,
+} from '../../application/submission-insights.service';
+import { PerformancePercentiles } from '../../domain/insights/performance-insights';
 
+const NO_PERCENTILES: PerformancePercentiles = { runtime: null, memory: null };
 const FAILURE_MESSAGE = 'Execution failed unexpectedly. Please try again.';
 
 @Processor(QUEUE_NAMES.CODE_EXECUTION)
@@ -25,6 +31,7 @@ export class CodeExecutionProcessor extends WorkerHost {
   constructor(
     private readonly codeRunnerService: CodeRunnerService,
     private readonly submissionService: SubmissionService,
+    private readonly insightsService: SubmissionInsightsService,
     private readonly dailyChallengeService: DailyChallengeService,
     private readonly achievementService: AchievementService,
     private readonly pointsService: PointsService,
@@ -38,8 +45,18 @@ export class CodeExecutionProcessor extends WorkerHost {
     const { submissionId, userId, problemId, language, code } = job.data;
     await this.submissionService.markRunning(submissionId);
     const outcome = await this.codeRunnerService.evaluate(problemId, language, code, true);
-    await this.submissionService.applyResult(submissionId, outcome);
-    if (outcome.status === SubmissionStatus.ACCEPTED) {
+    const accepted = outcome.status === SubmissionStatus.ACCEPTED;
+    const percentiles = accepted
+      ? await this.percentilesFor({
+          userId,
+          problemId,
+          language,
+          runtimeMs: outcome.totalRuntimeMs,
+          memoryKb: outcome.peakMemoryKb,
+        })
+      : NO_PERCENTILES;
+    await this.submissionService.applyResult(submissionId, outcome, percentiles);
+    if (accepted) {
       const assisted = await this.problemAssistanceService.isAssisted(userId, problemId);
       if (!assisted) {
         await this.dailyChallengeService.registerCompletion(userId, problemId, submissionId);
@@ -50,6 +67,18 @@ export class CodeExecutionProcessor extends WorkerHost {
         userId,
         problemId,
       } satisfies SubmissionAcceptedEvent);
+    }
+  }
+
+  private async percentilesFor(run: AcceptedRun): Promise<PerformancePercentiles> {
+    try {
+      return await this.insightsService.percentilesFor(run);
+    } catch (error) {
+      this.logger.error(
+        `Could not compute percentiles for problem ${run.problemId}`,
+        error instanceof Error ? error.stack : undefined,
+      );
+      return NO_PERCENTILES;
     }
   }
 

@@ -2,11 +2,14 @@ import type {
   AssessmentDifficulty,
   AssessmentRunRequestDto,
   AssessmentRunResultDto,
+  AssessmentLanguage,
   CodingProblemDto,
+  PerformanceDistributionDto,
   ProblemListDto,
   ProblemProgressStatus,
   SubmissionAcceptedDto,
   SubmissionDetailDto,
+  SubmissionPageDto,
 } from '@elevatesde/shared-types';
 import { api } from './api';
 
@@ -52,5 +55,26 @@ export async function getSubmission(submissionId: string): Promise<SubmissionDet
   const response = await api.get<SubmissionDetailDto>(
     `/api/v1/assessments/submissions/${submissionId}`,
   );
+  return response.data;
+}
+
+export async function listSubmissions(
+  problemId: string,
+  cursor: string | null,
+  limit = 20,
+): Promise<SubmissionPageDto> {
+  const response = await api.get<SubmissionPageDto>('/api/v1/assessments/submissions', {
+    params: { problemId, limit, cursor: cursor ?? undefined },
+  });
+  return response.data;
+}
+
+export async function getPerformanceDistribution(
+  problemId: string,
+  language: AssessmentLanguage,
+): Promise<PerformanceDistributionDto> {
+  const response = await api.get<PerformanceDistributionDto>('/api/v1/assessments/insights', {
+    params: { problemId, language },
+  });
   return response.data;
 }

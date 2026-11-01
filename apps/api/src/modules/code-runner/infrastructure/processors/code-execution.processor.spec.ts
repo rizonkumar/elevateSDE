@@ -4,6 +4,7 @@ import { SubmissionStatus } from '@prisma/client';
 import { CodeExecutionProcessor } from './code-execution.processor';
 import { CodeRunnerService } from '../../application/code-runner.service';
 import { SubmissionService } from '../../application/submission.service';
+import { SubmissionInsightsService } from '../../application/submission-insights.service';
 import { DailyChallengeService } from '../../../daily-challenge/application/daily-challenge.service';
 import { AchievementService } from '../../../achievement/application/achievement.service';
 import { PointsService } from '../../../leaderboard/application/points.service';
@@ -39,6 +40,7 @@ function buildProcessor(): {
   evaluateAchievements: jest.Mock;
   awardProblemSolved: jest.Mock;
   isAssisted: jest.Mock;
+  percentilesFor: jest.Mock;
 } {
   const evaluate = jest.fn().mockResolvedValue(OUTCOME);
   const markRunning = jest.fn().mockResolvedValue(undefined);
@@ -53,6 +55,8 @@ function buildProcessor(): {
     applyResult,
     markFailed,
   } as unknown as SubmissionService;
+  const percentilesFor = jest.fn().mockResolvedValue({ runtime: 75, memory: 40 });
+  const insightsService = { percentilesFor } as unknown as SubmissionInsightsService;
   const dailyChallengeService = { registerCompletion } as unknown as DailyChallengeService;
   const achievementService = {
     evaluate: evaluateAchievements,
@@ -64,6 +68,7 @@ function buildProcessor(): {
     processor: new CodeExecutionProcessor(
       codeRunnerService,
       submissionService,
+      insightsService,
       dailyChallengeService,
       achievementService,
       pointsService,
@@ -78,6 +83,7 @@ function buildProcessor(): {
     evaluateAchievements,
     awardProblemSolved,
     isAssisted,
+    percentilesFor,
   };
 }
 
@@ -90,7 +96,7 @@ describe('CodeExecutionProcessor', () => {
 
     expect(markRunning).toHaveBeenCalledWith('s1');
     expect(evaluate).toHaveBeenCalledWith('p1', 'javascript', 'solve()', true);
-    expect(applyResult).toHaveBeenCalledWith('s1', OUTCOME);
+    expect(applyResult).toHaveBeenCalledWith('s1', OUTCOME, { runtime: 75, memory: 40 });
   });
 
   it('registers a daily challenge completion and evaluates achievements when accepted', async () => {
@@ -140,6 +146,46 @@ describe('CodeExecutionProcessor', () => {
     expect(registerCompletion).not.toHaveBeenCalled();
     expect(awardProblemSolved).not.toHaveBeenCalled();
     expect(evaluateAchievements).toHaveBeenCalledWith('u1');
+  });
+
+  it('computes percentiles from the run before persisting an accepted result', async () => {
+    const { processor, percentilesFor, applyResult } = buildProcessor();
+    const job = { data: JOB_DATA } as Job<CodeExecutionJobData>;
+
+    await processor.process(job);
+
+    expect(percentilesFor).toHaveBeenCalledWith({
+      userId: 'u1',
+      problemId: 'p1',
+      language: 'javascript',
+      runtimeMs: 5,
+      memoryKb: 1024,
+    });
+    const [percentileOrder] = percentilesFor.mock.invocationCallOrder;
+    const [applyOrder] = applyResult.mock.invocationCallOrder;
+    expect(percentileOrder).toBeLessThan(applyOrder ?? 0);
+  });
+
+  it('still saves the result when percentiles cannot be computed', async () => {
+    const { processor, percentilesFor, applyResult } = buildProcessor();
+    percentilesFor.mockRejectedValue(new Error('db down'));
+    const job = { data: JOB_DATA } as Job<CodeExecutionJobData>;
+
+    await processor.process(job);
+
+    expect(applyResult).toHaveBeenCalledWith('s1', OUTCOME, { runtime: null, memory: null });
+  });
+
+  it('skips percentiles for rejected submissions', async () => {
+    const { processor, evaluate, percentilesFor, applyResult } = buildProcessor();
+    const rejected = { ...OUTCOME, status: SubmissionStatus.WRONG_ANSWER };
+    evaluate.mockResolvedValue(rejected);
+    const job = { data: JOB_DATA } as Job<CodeExecutionJobData>;
+
+    await processor.process(job);
+
+    expect(percentilesFor).not.toHaveBeenCalled();
+    expect(applyResult).toHaveBeenCalledWith('s1', rejected, { runtime: null, memory: null });
   });
 
   it('does not mark failed while retries remain', async () => {

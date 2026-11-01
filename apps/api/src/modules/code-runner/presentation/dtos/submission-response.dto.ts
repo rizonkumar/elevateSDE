@@ -1,7 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { AssessmentLanguage } from '@elevatesde/shared-types';
+import {
+  AssessmentLanguage,
+  SubmissionStatusValue,
+  SubmissionSummaryDto,
+} from '@elevatesde/shared-types';
 
-export class SubmissionResponseDto {
+export class SubmissionResponseDto implements SubmissionSummaryDto {
   @ApiProperty({ example: 'uuid-string' })
   id!: string;
 
@@ -12,9 +16,17 @@ export class SubmissionResponseDto {
   language!: AssessmentLanguage;
 
   @ApiProperty({
-    enum: ['ACCEPTED', 'WRONG_ANSWER', 'RUNTIME_ERROR', 'TIME_LIMIT_EXCEEDED', 'COMPILE_ERROR'],
+    enum: [
+      'QUEUED',
+      'RUNNING',
+      'ACCEPTED',
+      'WRONG_ANSWER',
+      'RUNTIME_ERROR',
+      'TIME_LIMIT_EXCEEDED',
+      'COMPILE_ERROR',
+    ],
   })
-  status!: string;
+  status!: SubmissionStatusValue;
 
   @ApiProperty({ example: 4 })
   passedCount!: number;
@@ -27,6 +39,12 @@ export class SubmissionResponseDto {
 
   @ApiProperty({ example: 5120 })
   peakMemoryKb!: number;
+
+  @ApiProperty({ example: 72.5, nullable: true })
+  runtimePercentile!: number | null;
+
+  @ApiProperty({ example: 41, nullable: true })
+  memoryPercentile!: number | null;
 
   @ApiProperty({ example: '2026-06-20T08:11:29.000Z' })
   createdAt!: string;

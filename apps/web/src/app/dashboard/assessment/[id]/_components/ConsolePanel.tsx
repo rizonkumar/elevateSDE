@@ -18,6 +18,7 @@ import type {
   TestCaseResultStatus,
 } from '@elevatesde/shared-types';
 import { useAssessmentStore } from '@/store/assessment.store';
+import { PercentileSummary } from './PercentileSummary';
 
 const STATUS_HEADLINE: Record<AssessmentRunStatus, string> = {
   ACCEPTED: 'Accepted',
@@ -132,6 +133,7 @@ export function ConsolePanel() {
   const isSubmitting = useAssessmentStore((state) => state.isSubmitting);
   const submissionPhase = useAssessmentStore((state) => state.submissionPhase);
   const result = useAssessmentStore((state) => state.lastResult);
+  const percentiles = useAssessmentStore((state) => state.lastPercentiles);
   const testcaseTab = useAssessmentStore((state) => state.testcaseTab);
   const setTestcaseTab = useAssessmentStore((state) => state.setTestcaseTab);
   const activeCaseIndex = useAssessmentStore((state) => state.activeCaseIndex);
@@ -206,6 +208,7 @@ export function ConsolePanel() {
             )}
             {STATUS_HEADLINE[result.status]}
           </div>
+          {percentiles && <PercentileSummary percentiles={percentiles} />}
           <CaseSubTabs
             count={visibleResults.length}
             activeIndex={safeIndex}

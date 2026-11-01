@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { BookOpenCheck, FileText, MessagesSquare, StickyNote } from 'lucide-react';
+import { BookOpenCheck, FileText, History, MessagesSquare, StickyNote } from 'lucide-react';
 import { Badge, Tabs, type BadgeVariant, type TabItem } from '@elevatesde/ui';
 import type { AssessmentDifficulty, CodingProblemDto } from '@elevatesde/shared-types';
 import { useProblemSocialStore } from '@/store/problem-social.store';
@@ -11,9 +11,10 @@ import { DiscussionTab } from './DiscussionTab';
 import { NotesTab } from './NotesTab';
 import { HintsSection } from './HintsSection';
 import { EditorialTab } from './EditorialTab';
+import { SubmissionsTab } from './SubmissionsTab';
 import { ParagraphText, renderInline, toKeyed } from './problem-text';
 
-type ProblemTab = 'description' | 'editorial' | 'discuss' | 'notes';
+type ProblemTab = 'description' | 'editorial' | 'submissions' | 'discuss' | 'notes';
 
 const DIFFICULTY_VARIANT: Record<AssessmentDifficulty, BadgeVariant> = {
   EASY: 'success',
@@ -106,6 +107,7 @@ export function ProblemPanel({ problem }: Readonly<ProblemPanelProps>) {
   const tabs: TabItem[] = [
     { id: 'description', label: 'Description', icon: FileText },
     { id: 'editorial', label: 'Editorial', icon: BookOpenCheck },
+    { id: 'submissions', label: 'Submissions', icon: History },
     { id: 'discuss', label: 'Discuss', icon: MessagesSquare, count: discussionCount },
     { id: 'notes', label: 'Notes', icon: StickyNote },
   ];
@@ -128,6 +130,7 @@ export function ProblemPanel({ problem }: Readonly<ProblemPanelProps>) {
       <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
         {tab === 'description' && <DescriptionView problem={problem} />}
         {tab === 'editorial' && <EditorialTab problemId={problem.id} />}
+        {tab === 'submissions' && <SubmissionsTab problemId={problem.id} />}
         {tab === 'discuss' && <DiscussionTab problemId={problem.id} />}
         {tab === 'notes' && <NotesTab problemId={problem.id} />}
       </div>

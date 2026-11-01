@@ -5,7 +5,7 @@ import {
 import { Submission } from '../../domain/entities/submission';
 import { SubmissionResult } from '../../domain/entities/submission-result';
 
-type PrismaSubmissionWithResults = PrismaSubmission & { results: PrismaSubmissionResult[] };
+type PrismaSubmissionWithResults = PrismaSubmission & { results?: PrismaSubmissionResult[] };
 
 export class SubmissionMapper {
   static toDomain(record: PrismaSubmissionWithResults): Submission {
@@ -20,10 +20,12 @@ export class SubmissionMapper {
       totalCount: record.totalCount,
       totalRuntimeMs: record.totalRuntimeMs,
       peakMemoryKb: record.peakMemoryKb,
+      runtimePercentile: record.runtimePercentile,
+      memoryPercentile: record.memoryPercentile,
       stdout: record.stdout,
       createdAt: record.createdAt,
       updatedAt: record.updatedAt,
-      results: record.results.map((result) =>
+      results: (record.results ?? []).map((result) =>
         SubmissionResult.reconstitute({
           id: result.id,
           testCaseId: result.testCaseId,

@@ -42,6 +42,11 @@ function toRunStatus(status: SubmissionStatusValue): AssessmentRunStatus {
   return 'RUNTIME_ERROR';
 }
 
+export interface SubmissionPercentiles {
+  runtime: number | null;
+  memory: number | null;
+}
+
 function toRunResult(detail: SubmissionDetailDto): AssessmentRunResultDto {
   return {
     status: toRunStatus(detail.status),
@@ -65,6 +70,8 @@ interface AssessmentState {
   submissionPhase: SubmissionPhase;
   hasSubmitted: boolean;
   lastResult: AssessmentRunResultDto | null;
+  lastPercentiles: SubmissionPercentiles | null;
+  submissionsVersion: number;
   celebration: { streak: number } | null;
   testcaseTab: TestcaseTab;
   activeCaseIndex: number;
@@ -204,6 +211,11 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => {
       submissionPhase: null,
       hasSubmitted: true,
       lastResult: toRunResult(detail),
+      lastPercentiles:
+        detail.status === 'ACCEPTED'
+          ? { runtime: detail.runtimePercentile, memory: detail.memoryPercentile }
+          : null,
+      submissionsVersion: get().submissionsVersion + 1,
     });
     if (detail.status === 'ACCEPTED') {
       useToastStore.getState().addToast('Accepted — all test cases passed!', 'success');
@@ -260,6 +272,8 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => {
     submissionPhase: null,
     hasSubmitted: false,
     lastResult: null,
+    lastPercentiles: null,
+    submissionsVersion: 0,
     celebration: null,
     testcaseTab: 'testcase',
     activeCaseIndex: 0,
@@ -294,6 +308,7 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => {
         submissionPhase: null,
         hasSubmitted: false,
         lastResult: null,
+        lastPercentiles: null,
         testcaseTab: 'testcase',
         activeCaseIndex: 0,
         caseInputs: visibleInputs(problem),
@@ -402,7 +417,7 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => {
           language,
           code: codeByLanguage[language],
         });
-        set({ isRunning: false, lastResult: result });
+        set({ isRunning: false, lastResult: result, lastPercentiles: null });
         if (result.status === 'RUNTIME_ERROR') {
           useToastStore.getState().addToast('Runtime error while running your code.', 'error');
         } else {
@@ -428,6 +443,7 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => {
         isSubmitting: true,
         submissionPhase: 'QUEUED',
         lastResult: null,
+        lastPercentiles: null,
         testcaseTab: 'result',
       });
       try {
@@ -459,6 +475,7 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => {
         submissionPhase: null,
         hasSubmitted: false,
         lastResult: null,
+        lastPercentiles: null,
         celebration: null,
         testcaseTab: 'testcase',
         activeCaseIndex: 0,

@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
-import { ISubmissionRepository } from '../../domain/interfaces/submission-repository.interface';
+import { AssessmentLanguage, Prisma, SubmissionStatus } from '@prisma/client';
+import {
+  ISubmissionRepository,
+  SubmissionPage,
+} from '../../domain/interfaces/submission-repository.interface';
+import { BestRun } from '../../domain/insights/performance-insights';
 import { Submission } from '../../domain/entities/submission';
 import { SubmissionMapper } from '../mappers/submission.mapper';
 import { PrismaService } from '../../../../infrastructure/prisma/prisma.service';
@@ -39,6 +43,8 @@ export class SubmissionRepository implements ISubmissionRepository {
         totalCount: submission.getTotalCount(),
         totalRuntimeMs: submission.getTotalRuntimeMs(),
         peakMemoryKb: submission.getPeakMemoryKb(),
+        runtimePercentile: submission.getRuntimePercentile(),
+        memoryPercentile: submission.getMemoryPercentile(),
         stdout: submission.getStdout(),
         results: { deleteMany: {}, create: this.toResultRows(submission) },
       },
@@ -55,13 +61,46 @@ export class SubmissionRepository implements ISubmissionRepository {
     return record ? SubmissionMapper.toDomain(record) : null;
   }
 
-  async findByUserAndProblem(userId: string, problemId: string): Promise<Submission[]> {
+  async findPageByUserAndProblem(
+    userId: string,
+    problemId: string,
+    limit: number,
+    cursor: string | null,
+  ): Promise<SubmissionPage> {
     const records = await this.prisma.submission.findMany({
       where: { userId, problemId },
-      orderBy: { createdAt: 'desc' },
-      include: { results: true },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      take: limit + 1,
+      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
     });
-    return records.map((record) => SubmissionMapper.toDomain(record));
+    const page = records.slice(0, limit);
+    const last = page.at(-1);
+    return {
+      items: page.map((record) => SubmissionMapper.toDomain(record)),
+      nextCursor: records.length > limit && last ? last.id : null,
+    };
+  }
+
+  async findBestAcceptedRuns(
+    problemId: string,
+    language: AssessmentLanguage,
+    excludeUserId: string | null,
+  ): Promise<BestRun[]> {
+    const grouped = await this.prisma.submission.groupBy({
+      by: ['userId'],
+      where: {
+        problemId,
+        language,
+        status: SubmissionStatus.ACCEPTED,
+        ...(excludeUserId ? { userId: { not: excludeUserId } } : {}),
+      },
+      _min: { totalRuntimeMs: true, peakMemoryKb: true },
+    });
+    return grouped.map((row) => ({
+      userId: row.userId,
+      runtimeMs: row._min.totalRuntimeMs ?? 0,
+      memoryKb: row._min.peakMemoryKb ?? 0,
+    }));
   }
 
   private toResultRows(

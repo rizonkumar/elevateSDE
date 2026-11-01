@@ -12,3 +12,5 @@ export const fromPrismaLanguage: Record<PrismaAssessmentLanguage, ProblemLanguag
   PYTHON: 'python',
   CPP: 'cpp',
 };
+
+export const PROBLEM_LANGUAGES: ProblemLanguage[] = ['javascript', 'python', 'cpp'];
