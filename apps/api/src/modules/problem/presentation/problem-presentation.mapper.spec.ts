@@ -37,6 +37,8 @@ function buildProblem(): Problem {
         isHidden: true,
       }),
     ],
+    topics: [{ id: 't1', slug: 'array', name: 'Array' }],
+    companies: [{ id: 'c1', slug: 'amazon', name: 'Amazon', frequency: 90 }],
     createdAt: new Date(),
     updatedAt: new Date(),
   });
@@ -52,7 +54,9 @@ describe('ProblemPresentationMapper', () => {
     expect(serialized).not.toContain('secret-input');
     expect(serialized).not.toContain('secret-output');
     expect(serialized).not.toContain('return secret;');
-    expect(serialized).not.toContain('twoSum');
+    expect(dto).not.toHaveProperty('functionName');
+    expect(dto).not.toHaveProperty('harness');
+    expect(dto).not.toHaveProperty('referenceSolution');
   });
 
   it('maps summary fields', () => {

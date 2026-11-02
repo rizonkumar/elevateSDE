@@ -7,6 +7,7 @@ import type {
   SubmissionDetailDto,
   SubmissionStatusValue,
 } from '@elevatesde/shared-types';
+import { useProblemAssistanceStore } from '@/store/problem-assistance.store';
 import { useToastStore } from '@/store/toast.store';
 import { useAssessmentSettingsStore, type TimerMode } from '@/store/assessment-settings.store';
 import { useDailyChallengeStore } from '@/store/daily-challenge.store';
@@ -41,6 +42,11 @@ function toRunStatus(status: SubmissionStatusValue): AssessmentRunStatus {
   return 'RUNTIME_ERROR';
 }
 
+export interface SubmissionPercentiles {
+  runtime: number | null;
+  memory: number | null;
+}
+
 function toRunResult(detail: SubmissionDetailDto): AssessmentRunResultDto {
   return {
     status: toRunStatus(detail.status),
@@ -64,6 +70,8 @@ interface AssessmentState {
   submissionPhase: SubmissionPhase;
   hasSubmitted: boolean;
   lastResult: AssessmentRunResultDto | null;
+  lastPercentiles: SubmissionPercentiles | null;
+  submissionsVersion: number;
   celebration: { streak: number } | null;
   testcaseTab: TestcaseTab;
   activeCaseIndex: number;
@@ -132,7 +140,7 @@ function removeSavedCode(problemId: string, language: AssessmentLanguage): void 
 }
 
 function buildInitialCode(problem: CodingProblemDto): Record<AssessmentLanguage, string> {
-  const result = { ...problem.starterCode };
+  const result: Record<AssessmentLanguage, string> = { ...EMPTY_CODE, ...problem.starterCode };
   for (const language of LANGUAGES) {
     const saved = readSavedCode(problem.id, language);
     if (saved !== null) {
@@ -173,7 +181,17 @@ const EMPTY_CODE: Record<AssessmentLanguage, string> = {
   javascript: '',
   python: '',
   cpp: '',
+  java: '',
+  go: '',
 };
+
+function initialLanguage(problem: CodingProblemDto): AssessmentLanguage {
+  const preferred = useAssessmentSettingsStore.getState().preferredLanguage;
+  if (problem.availableLanguages.includes(preferred)) {
+    return preferred;
+  }
+  return problem.availableLanguages[0] ?? 'javascript';
+}
 
 export const useAssessmentStore = create<AssessmentState>((set, get) => {
   const tick = () => {
@@ -203,9 +221,15 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => {
       submissionPhase: null,
       hasSubmitted: true,
       lastResult: toRunResult(detail),
+      lastPercentiles:
+        detail.status === 'ACCEPTED'
+          ? { runtime: detail.runtimePercentile, memory: detail.memoryPercentile }
+          : null,
+      submissionsVersion: get().submissionsVersion + 1,
     });
     if (detail.status === 'ACCEPTED') {
       useToastStore.getState().addToast('Accepted — all test cases passed!', 'success');
+      void useProblemAssistanceStore.getState().fetchAssistance(detail.problemId);
       if (useAssessmentSettingsStore.getState().autoReset) {
         get().resetTimer();
       }
@@ -258,6 +282,8 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => {
     submissionPhase: null,
     hasSubmitted: false,
     lastResult: null,
+    lastPercentiles: null,
+    submissionsVersion: 0,
     celebration: null,
     testcaseTab: 'testcase',
     activeCaseIndex: 0,
@@ -285,13 +311,14 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => {
       set({
         status: 'READY',
         problem,
-        language: 'javascript',
+        language: initialLanguage(problem),
         codeByLanguage: buildInitialCode(problem),
         isRunning: false,
         isSubmitting: false,
         submissionPhase: null,
         hasSubmitted: false,
         lastResult: null,
+        lastPercentiles: null,
         testcaseTab: 'testcase',
         activeCaseIndex: 0,
         caseInputs: visibleInputs(problem),
@@ -304,7 +331,12 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => {
       });
     },
 
-    setLanguage: (language) => set({ language }),
+    setLanguage: (language) => {
+      const { problem } = get();
+      if (problem && !problem.availableLanguages.includes(language)) return;
+      useAssessmentSettingsStore.getState().setPreferredLanguage(language);
+      set({ language });
+    },
 
     setCode: (code) => {
       const { language, problem } = get();
@@ -323,7 +355,10 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => {
       clearAutosave();
       removeSavedCode(problem.id, language);
       set((state) => ({
-        codeByLanguage: { ...state.codeByLanguage, [language]: problem.starterCode[language] },
+        codeByLanguage: {
+          ...state.codeByLanguage,
+          [language]: problem.starterCode[language] ?? '',
+        },
       }));
       useToastStore.getState().addToast('Code reset to the starter template.', 'info');
     },
@@ -400,7 +435,7 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => {
           language,
           code: codeByLanguage[language],
         });
-        set({ isRunning: false, lastResult: result });
+        set({ isRunning: false, lastResult: result, lastPercentiles: null });
         if (result.status === 'RUNTIME_ERROR') {
           useToastStore.getState().addToast('Runtime error while running your code.', 'error');
         } else {
@@ -426,6 +461,7 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => {
         isSubmitting: true,
         submissionPhase: 'QUEUED',
         lastResult: null,
+        lastPercentiles: null,
         testcaseTab: 'result',
       });
       try {
@@ -457,6 +493,7 @@ export const useAssessmentStore = create<AssessmentState>((set, get) => {
         submissionPhase: null,
         hasSubmitted: false,
         lastResult: null,
+        lastPercentiles: null,
         celebration: null,
         testcaseTab: 'testcase',
         activeCaseIndex: 0,

@@ -18,10 +18,14 @@ import { ProblemService } from '../../../problem/application/problem.service';
 import { ICodeExecutionQueue } from '../../../queues/domain/interfaces/code-execution-queue.interface';
 import { CodeRunnerService } from '../../application/code-runner.service';
 import { SubmissionService } from '../../application/submission.service';
+import { SubmissionInsightsService } from '../../application/submission-insights.service';
+import { ListSubmissionsQueryDto } from '../dtos/list-submissions-query.dto';
+import { SubmissionPageResponseDto } from '../dtos/submission-page-response.dto';
+import { PerformanceInsightsQueryDto } from '../dtos/performance-insights-query.dto';
+import { PerformanceDistributionResponseDto } from '../dtos/performance-distribution-response.dto';
 import { SubmissionStatusValue } from '@elevatesde/shared-types';
 import { RunAssessmentDto } from '../dtos/run-assessment.dto';
 import { AssessmentRunResponseDto } from '../dtos/assessment-run-response.dto';
-import { SubmissionResponseDto } from '../dtos/submission-response.dto';
 import { SubmissionAcceptedResponseDto } from '../dtos/submission-accepted-response.dto';
 import { SubmissionDetailResponseDto } from '../dtos/submission-detail-response.dto';
 import { AssessmentPresentationMapper } from '../mappers/assessment-presentation.mapper';
@@ -40,6 +44,7 @@ export class AssessmentsController {
   constructor(
     private readonly codeRunnerService: CodeRunnerService,
     private readonly submissionService: SubmissionService,
+    private readonly insightsService: SubmissionInsightsService,
     private readonly problemService: ProblemService,
     private readonly codeExecutionQueue: ICodeExecutionQueue,
   ) {}
@@ -67,7 +72,8 @@ export class AssessmentsController {
     @Body() dto: RunAssessmentDto,
     @Req() req: RequestWithUser,
   ): Promise<SubmissionAcceptedResponseDto> {
-    await this.problemService.getById(dto.problemId);
+    const problem = await this.problemService.getById(dto.problemId);
+    CodeRunnerService.assertLanguageSupported(problem, dto.language);
     const submission = await this.submissionService.createPending(
       req.user.getId(),
       dto.problemId,
@@ -88,17 +94,41 @@ export class AssessmentsController {
   }
 
   @Get('submissions')
-  @ApiOperation({ summary: 'List the current user submissions for a problem' })
-  @ApiResponse({ status: 200, type: [SubmissionResponseDto] })
+  @ApiOperation({ summary: 'List the current user submissions for a problem, newest first' })
+  @ApiResponse({ status: 200, type: SubmissionPageResponseDto })
   async submissions(
-    @Query('problemId') problemId: string,
+    @Query() query: ListSubmissionsQueryDto,
     @Req() req: RequestWithUser,
-  ): Promise<SubmissionResponseDto[]> {
-    const submissions = await this.submissionService.listForUserProblem(
+  ): Promise<SubmissionPageResponseDto> {
+    const page = await this.submissionService.listPageForUserProblem(
       req.user.getId(),
-      problemId,
+      query.problemId,
+      query.limit ?? 20,
+      query.cursor ?? null,
     );
-    return submissions.map((submission) => SubmissionPresentationMapper.toResponse(submission));
+    return SubmissionPresentationMapper.toPageResponse(page);
+  }
+
+  @Get('insights')
+  @ApiOperation({
+    summary: 'Runtime and memory distribution of accepted solutions, one best run per user',
+  })
+  @ApiResponse({ status: 200, type: PerformanceDistributionResponseDto })
+  async insights(
+    @Query() query: PerformanceInsightsQueryDto,
+  ): Promise<PerformanceDistributionResponseDto> {
+    await this.problemService.getById(query.problemId);
+    const distribution = await this.insightsService.getDistribution(
+      query.problemId,
+      query.language,
+    );
+    const dto = new PerformanceDistributionResponseDto();
+    dto.problemId = query.problemId;
+    dto.language = query.language;
+    dto.sampleSize = distribution.sampleSize;
+    dto.runtime = distribution.runtime.map((bucket) => ({ ...bucket }));
+    dto.memory = distribution.memory.map((bucket) => ({ ...bucket }));
+    return dto;
   }
 
   @Get('submissions/:id')

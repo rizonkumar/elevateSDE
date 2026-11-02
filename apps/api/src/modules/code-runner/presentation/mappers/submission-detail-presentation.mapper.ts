@@ -22,6 +22,9 @@ export class SubmissionDetailPresentationMapper {
     dto.totalCount = submission.getTotalCount();
     dto.totalRuntimeMs = submission.getTotalRuntimeMs();
     dto.peakMemoryKb = submission.getPeakMemoryKb();
+    dto.runtimePercentile = submission.getRuntimePercentile();
+    dto.memoryPercentile = submission.getMemoryPercentile();
+    dto.sourceCode = submission.getSourceCode();
     dto.stdout = submission.getStdout();
     dto.results = submission
       .getResults()

@@ -34,6 +34,7 @@ const TWO_SUM: AssessmentProblemSeed = {
     { id: 'two-sum-3', input: '[3,3], 6', expectedOutput: '[0,1]', isHidden: true },
     { id: 'two-sum-4', input: '[-1,-2,-3,-4,-5], -8', expectedOutput: '[2,4]', isHidden: true },
   ],
+  availableLanguages: ['javascript', 'python', 'cpp'],
   starterCode: {
     javascript: ['function twoSum(nums, target) {', '  // Write your solution here', '}'].join(
       '\n',
@@ -73,6 +74,7 @@ const VALID_PARENTHESES: AssessmentProblemSeed = {
     { id: 'valid-parentheses-3', input: '"(]"', expectedOutput: 'false', isHidden: true },
     { id: 'valid-parentheses-4', input: '"([)]"', expectedOutput: 'false', isHidden: true },
   ],
+  availableLanguages: ['javascript', 'python', 'cpp'],
   starterCode: {
     javascript: ['function isValid(s) {', '  // Write your solution here', '}'].join('\n'),
     python: ['def is_valid(s):', '    # Write your solution here', '    pass'].join('\n'),
@@ -120,6 +122,7 @@ const MERGE_INTERVALS: AssessmentProblemSeed = {
     { id: 'merge-intervals-3', input: '[[1,4],[0,4]]', expectedOutput: '[[0,4]]', isHidden: true },
     { id: 'merge-intervals-4', input: '[[1,4],[2,3]]', expectedOutput: '[[1,4]]', isHidden: true },
   ],
+  availableLanguages: ['javascript', 'python', 'cpp'],
   starterCode: {
     javascript: ['function merge(intervals) {', '  // Write your solution here', '}'].join('\n'),
     python: ['def merge(intervals):', '    # Write your solution here', '    pass'].join('\n'),
@@ -147,6 +150,8 @@ export const ASSESSMENT_LANGUAGE_OPTIONS: { value: AssessmentLanguage; label: st
   { value: 'javascript', label: 'JavaScript' },
   { value: 'python', label: 'Python' },
   { value: 'cpp', label: 'C++' },
+  { value: 'java', label: 'Java' },
+  { value: 'go', label: 'Go' },
 ];
 
 export function getProblemById(id: string): AssessmentProblemSeed | undefined {

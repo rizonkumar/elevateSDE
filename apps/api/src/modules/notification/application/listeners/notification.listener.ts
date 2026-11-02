@@ -13,6 +13,7 @@ import {
   ScorecardRequestEvent,
   StreakMilestoneEvent,
   SubmissionAcceptedEvent,
+  CodeReviewReadyEvent,
 } from '../../domain/events/notification-events';
 import { NotificationService } from '../notification.service';
 
@@ -136,6 +137,18 @@ export class NotificationListener {
       body: 'Your practice session is complete. Submit a scorecard while the conversation is fresh.',
       linkUrl: `/dashboard/interview-readiness/peer/${event.sessionId}`,
       dedupeKey: event.dedupeKey,
+    });
+  }
+
+  @OnEvent(NOTIFICATION_EVENTS.CODE_REVIEW_READY)
+  async onCodeReviewReady(event: CodeReviewReadyEvent): Promise<void> {
+    await this.safeNotify({
+      userId: event.userId,
+      type: 'CODE_REVIEW_READY',
+      title: 'Your code review is ready',
+      body: `See the feedback on your ${event.problemTitle} submission.`,
+      linkUrl: `/dashboard/assessment/${event.problemId}`,
+      dedupeKey: `code-review:${event.submissionId}`,
     });
   }
 

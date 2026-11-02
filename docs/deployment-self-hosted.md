@@ -51,12 +51,12 @@ sudo npm install -g pnpm@10.33.0 pm2 vercel
 The `docker` group applies after a new login. In the same shell use `newgrp docker`, or prefix with `sudo` until then.
 
 ```bash
-docker pull node:20-alpine
-docker pull python:3.12-alpine
-docker pull gcc:13
+./scripts/prepare-sandbox-images.sh
 ```
 
-The three images are the code-execution sandbox languages (JavaScript, Python, C++). Pull them now so the first submission does not time out downloading.
+This pulls the code-execution sandbox images (JavaScript, Python, C++, Java) and builds `elevatesde/sandbox-go:1.23` from `docker/sandbox/go`. Run it from the repository root once the repo is cloned, and again after pulling changes to `docker/sandbox`. Doing it now stops the first submission from timing out while an image downloads.
+
+The Go image is built locally rather than pulled, because it bakes a precompiled standard library into its build cache. A stock `golang` image recompiles the standard library on every submission, which takes about 12 seconds; the prepared image compiles a submission in under a second. Set `SANDBOX_GO_IMAGE` in `apps/api/.env` only if you tag the image differently.
 
 **Gate:** `docker run --rm hello-world`, `node -v` (v24 LTS; do not use odd-numbered or pre-release Node versions), `pnpm -v`, `pm2 -v` all succeed.
 

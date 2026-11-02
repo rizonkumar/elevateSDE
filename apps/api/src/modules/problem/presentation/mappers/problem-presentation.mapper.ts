@@ -1,5 +1,6 @@
-import { CodingProblemDto } from '@elevatesde/shared-types';
+import { CodingProblemDto, ProblemProgressStatus } from '@elevatesde/shared-types';
 import { Problem } from '../../domain/entities/problem';
+import { ProblemListItemResponseDto } from '../dtos/problem-list-item-response.dto';
 import { CodingProblemResponseDto } from '../dtos/coding-problem-response.dto';
 import { ProblemSummaryResponseDto } from '../dtos/problem-summary-response.dto';
 import { AdminCodingProblemResponseDto } from '../dtos/admin-coding-problem-response.dto';
@@ -13,6 +14,19 @@ export class ProblemPresentationMapper {
     dto.difficulty = problem.getDifficulty();
     dto.tags = problem.getTags();
     dto.timeLimitMinutes = problem.getTimeLimitMinutes();
+    return dto;
+  }
+
+  static toListItem(problem: Problem, status: ProblemProgressStatus): ProblemListItemResponseDto {
+    const dto = new ProblemListItemResponseDto();
+    dto.id = problem.getId();
+    dto.title = problem.getTitle();
+    dto.difficulty = problem.getDifficulty();
+    dto.tags = problem.getTags();
+    dto.timeLimitMinutes = problem.getTimeLimitMinutes();
+    dto.topics = problem.getTopics().map((topic) => ({ ...topic }));
+    dto.companies = problem.getCompanies().map((company) => ({ ...company }));
+    dto.status = status;
     return dto;
   }
 
@@ -45,12 +59,15 @@ export class ProblemPresentationMapper {
   static toAdminCodingProblem(problem: Problem): AdminCodingProblemResponseDto {
     const dto = new AdminCodingProblemResponseDto();
     ProblemPresentationMapper.assignContent(dto, problem);
+    dto.starterCode = problem.getStarterCode();
     dto.testCases = problem.getTestCases().map((testCase) => ({
       id: testCase.getId(),
       input: testCase.getInput(),
       expectedOutput: testCase.getExpectedOutput(),
       isHidden: testCase.isHidden(),
     }));
+    dto.topics = problem.getTopics().map((topic) => ({ ...topic }));
+    dto.companies = problem.getCompanies().map((company) => ({ ...company }));
     dto.isPublished = problem.isPublished();
     dto.createdAt = problem.getCreatedAt().toISOString();
     dto.updatedAt = problem.getUpdatedAt().toISOString();
@@ -64,7 +81,8 @@ export class ProblemPresentationMapper {
     dto.description = problem.getDescription();
     dto.constraints = problem.getConstraints();
     dto.tags = problem.getTags();
-    dto.starterCode = problem.getStarterCode();
+    dto.starterCode = problem.getResolvedStarterCode();
+    dto.availableLanguages = problem.getAvailableLanguages();
     dto.examples = problem.getExamples();
     dto.timeLimitMinutes = problem.getTimeLimitMinutes();
   }

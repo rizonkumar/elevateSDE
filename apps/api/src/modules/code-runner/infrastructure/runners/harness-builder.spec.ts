@@ -78,4 +78,46 @@ describe('buildHarness', () => {
       ),
     ).toThrow('Unsupported C++ parameter type: linkedlist');
   });
+
+  it('builds a Java harness that strips a public modifier and calls Solution', () => {
+    const { files } = buildHarness(
+      baseSpec({
+        language: 'java',
+        userCode:
+          'package app;\npublic class Solution { int[] twoSum(int[] nums, int target) { return nums; } }',
+      }),
+    );
+    const main = fileByName(files, 'Main.java');
+    expect(main).not.toContain('package app;');
+    expect(main).not.toContain('public class Solution');
+    expect(main).toContain('int[] __p0 = __toIntArr(__args.get(0));');
+    expect(main).toContain('int __p1 = __toInt(__args.get(1));');
+    expect(main).toContain('new Solution().twoSum(__p0, __p1)');
+    expect(main).toContain('###ELEVATE_RESULT###');
+  });
+
+  it('builds a Go harness that drops the user package clause and decodes typed args', () => {
+    const { files } = buildHarness(
+      baseSpec({
+        language: 'go',
+        userCode: 'package main\n\nfunc twoSum(nums []int, target int) []int { return nil }',
+      }),
+    );
+    const main = fileByName(files, 'main.go');
+    expect(main.match(/^package main$/gm)).toHaveLength(1);
+    expect(main).toContain('var __p0 []int');
+    expect(main).toContain('var __p1 int');
+    expect(main).toContain('return __elevateSerialize(twoSum(__p0, __p1))');
+  });
+
+  it('rejects parameter types the typed drivers cannot decode', () => {
+    expect(() =>
+      buildHarness(
+        baseSpec({
+          language: 'go',
+          harness: { paramTypes: ['map<int,int>'], returnType: 'int' },
+        }),
+      ),
+    ).toThrow('Unsupported Go parameter type');
+  });
 });

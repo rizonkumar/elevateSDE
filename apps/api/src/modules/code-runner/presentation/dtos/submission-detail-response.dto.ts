@@ -23,7 +23,7 @@ export class SubmissionDetailResponseDto implements SubmissionDetailDto {
   @ApiProperty({ example: 'uuid-problem' })
   problemId!: string;
 
-  @ApiProperty({ enum: ['javascript', 'python', 'cpp'] })
+  @ApiProperty({ enum: ['javascript', 'python', 'cpp', 'java', 'go'] })
   language!: AssessmentLanguage;
 
   @ApiProperty({ enum: SUBMISSION_STATUSES, example: 'RUNNING' })
@@ -40,6 +40,15 @@ export class SubmissionDetailResponseDto implements SubmissionDetailDto {
 
   @ApiProperty({ example: 5120 })
   peakMemoryKb!: number;
+
+  @ApiProperty({ example: 72.5, nullable: true })
+  runtimePercentile!: number | null;
+
+  @ApiProperty({ example: 41, nullable: true })
+  memoryPercentile!: number | null;
+
+  @ApiProperty({ example: 'def two_sum(nums, target): ...' })
+  sourceCode!: string;
 
   @ApiProperty({ example: 'Executed 4 test case(s).' })
   stdout!: string;

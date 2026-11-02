@@ -49,6 +49,8 @@ function buildProblem(): Problem {
     timeLimitMinutes: 30,
     isPublished: true,
     testCases,
+    topics: [],
+    companies: [],
     createdAt: new Date(),
     updatedAt: new Date(),
   });

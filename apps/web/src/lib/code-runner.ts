@@ -71,7 +71,7 @@ export function runCode(
   code: string,
   customVisibleInputs?: string[],
 ): Promise<AssessmentRunResultDto> {
-  const starter = problem.starterCode[language];
+  const starter = problem.starterCode[language] ?? '';
   const empty = isEmptyAttempt(code, starter);
   const totalCount = problem.testCases.length;
   const matched = empty ? 0 : countMatchedSignals(code, problem.solutionSignals);

@@ -1,8 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsIn, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
-import { AssessmentLanguage, AssessmentRunRequestDto } from '@elevatesde/shared-types';
+import {
+  ASSESSMENT_LANGUAGES,
+  AssessmentLanguage,
+  AssessmentRunRequestDto,
+} from '@elevatesde/shared-types';
 
-const LANGUAGES: AssessmentLanguage[] = ['javascript', 'python', 'cpp'];
+const LANGUAGES: readonly AssessmentLanguage[] = ASSESSMENT_LANGUAGES;
 
 export class RunAssessmentDto implements AssessmentRunRequestDto {
   @ApiProperty({ example: 'uuid-string' })

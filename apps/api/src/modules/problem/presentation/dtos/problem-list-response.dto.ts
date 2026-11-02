@@ -1,10 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ProblemListDto } from '@elevatesde/shared-types';
-import { ProblemSummaryResponseDto } from './problem-summary-response.dto';
+import { ProblemListItemResponseDto } from './problem-list-item-response.dto';
 
 export class ProblemListResponseDto implements ProblemListDto {
-  @ApiProperty({ type: [ProblemSummaryResponseDto] })
-  items!: ProblemSummaryResponseDto[];
+  @ApiProperty({ type: [ProblemListItemResponseDto] })
+  items!: ProblemListItemResponseDto[];
 
   @ApiProperty({ example: 512 })
   total!: number;

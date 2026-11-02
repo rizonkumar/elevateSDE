@@ -9,6 +9,8 @@ const MONACO_LANGUAGE: Record<AssessmentLanguage, string> = {
   javascript: 'javascript',
   python: 'python',
   cpp: 'cpp',
+  java: 'java',
+  go: 'go',
 };
 
 interface CodeEditorProps {

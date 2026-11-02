@@ -1,11 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { ISubmissionRepository } from '../domain/interfaces/submission-repository.interface';
+import {
+  ISubmissionRepository,
+  SubmissionPage,
+} from '../domain/interfaces/submission-repository.interface';
 import { Submission } from '../domain/entities/submission';
 import { SubmissionResult } from '../domain/entities/submission-result';
 import { ProblemLanguage } from '../../problem/domain/entities/problem';
 import { AssessmentRunOutcome } from './assessment-outcome';
 import { toPrismaLanguage } from './language';
+import { PerformancePercentiles } from '../domain/insights/performance-insights';
+
+const NO_PERCENTILES: PerformancePercentiles = { runtime: null, memory: null };
 
 @Injectable()
 export class SubmissionService {
@@ -35,7 +41,11 @@ export class SubmissionService {
     await this.submissionRepository.update(submission);
   }
 
-  async applyResult(submissionId: string, outcome: AssessmentRunOutcome): Promise<void> {
+  async applyResult(
+    submissionId: string,
+    outcome: AssessmentRunOutcome,
+    percentiles: PerformancePercentiles = NO_PERCENTILES,
+  ): Promise<void> {
     const submission = await this.submissionRepository.findById(submissionId);
     if (!submission) return;
     submission.applyOutcome({
@@ -45,6 +55,8 @@ export class SubmissionService {
       totalRuntimeMs: outcome.totalRuntimeMs,
       peakMemoryKb: outcome.peakMemoryKb,
       stdout: outcome.stdout,
+      runtimePercentile: percentiles.runtime,
+      memoryPercentile: percentiles.memory,
       results: outcome.results.map((result) =>
         SubmissionResult.create({
           id: randomUUID(),
@@ -74,7 +86,18 @@ export class SubmissionService {
     return submission;
   }
 
-  async listForUserProblem(userId: string, problemId: string): Promise<Submission[]> {
-    return this.submissionRepository.findByUserAndProblem(userId, problemId);
+  async listPageForUserProblem(
+    userId: string,
+    problemId: string,
+    limit: number,
+    cursor: string | null,
+  ): Promise<SubmissionPage> {
+    if (cursor) {
+      const anchor = await this.getForUser(cursor, userId);
+      if (!anchor || anchor.getProblemId() !== problemId) {
+        return { items: [], nextCursor: null };
+      }
+    }
+    return this.submissionRepository.findPageByUserAndProblem(userId, problemId, limit, cursor);
   }
 }

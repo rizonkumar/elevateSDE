@@ -454,7 +454,9 @@ export interface SubmitMockInterviewAnswerDto {
   version: number;
 }
 
-export type AssessmentLanguage = 'javascript' | 'python' | 'cpp';
+export const ASSESSMENT_LANGUAGES = ['javascript', 'python', 'cpp', 'java', 'go'] as const;
+
+export type AssessmentLanguage = (typeof ASSESSMENT_LANGUAGES)[number];
 
 export type AssessmentDifficulty = 'EASY' | 'MEDIUM' | 'HARD';
 
@@ -482,7 +484,8 @@ export interface CodingProblemDto {
   description: string;
   constraints: string[];
   tags: string[];
-  starterCode: Record<AssessmentLanguage, string>;
+  starterCode: Partial<Record<AssessmentLanguage, string>>;
+  availableLanguages: AssessmentLanguage[];
   examples: CodingProblemExample[];
   testCases: AssessmentTestCase[];
   timeLimitMinutes: number;
@@ -496,14 +499,37 @@ export interface ProblemSummaryDto {
   timeLimitMinutes: number;
 }
 
+export type ProblemProgressStatus = 'SOLVED' | 'ATTEMPTED' | 'TODO';
+
+export interface TopicRefDto {
+  id: string;
+  slug: string;
+  name: string;
+}
+
+export interface CompanyRefDto {
+  id: string;
+  slug: string;
+  name: string;
+  frequency: number;
+}
+
+export interface ProblemListItemDto extends ProblemSummaryDto {
+  topics: TopicRefDto[];
+  companies: CompanyRefDto[];
+  status: ProblemProgressStatus;
+}
+
 export interface ProblemListDto {
-  items: ProblemSummaryDto[];
+  items: ProblemListItemDto[];
   total: number;
   page: number;
   pageSize: number;
 }
 
 export interface AdminCodingProblemDto extends CodingProblemDto {
+  topics: TopicRefDto[];
+  companies: CompanyRefDto[];
   isPublished: boolean;
   createdAt: string;
   updatedAt: string;
@@ -532,11 +558,36 @@ export interface AdminCodingProblemInput {
   difficulty: AssessmentDifficulty;
   description: string;
   constraints: string[];
-  tags: string[];
-  starterCode: Record<AssessmentLanguage, string>;
+  topicIds: string[];
+  companies: AdminProblemCompanyInput[];
+  starterCode: Partial<Record<AssessmentLanguage, string>>;
   timeLimitMinutes: number;
   isPublished: boolean;
   testCases: AdminTestCaseInput[];
+}
+
+export interface AdminProblemCompanyInput {
+  companyId: string;
+  frequency: number;
+}
+
+export interface TopicDto {
+  id: string;
+  slug: string;
+  name: string;
+  problemCount: number;
+}
+
+export interface CompanyDto {
+  id: string;
+  slug: string;
+  name: string;
+  problemCount: number;
+  solvedCount: number;
+}
+
+export interface AdminTaxonomyInput {
+  name: string;
 }
 
 export interface AssessmentRunRequestDto {
@@ -591,10 +642,88 @@ export interface SubmissionDetailDto {
   totalCount: number;
   totalRuntimeMs: number;
   peakMemoryKb: number;
+  runtimePercentile: number | null;
+  memoryPercentile: number | null;
+  sourceCode: string;
   stdout: string;
   results: TestCaseResultDto[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface SubmissionSummaryDto {
+  id: string;
+  problemId: string;
+  language: AssessmentLanguage;
+  status: SubmissionStatusValue;
+  passedCount: number;
+  totalCount: number;
+  totalRuntimeMs: number;
+  peakMemoryKb: number;
+  runtimePercentile: number | null;
+  memoryPercentile: number | null;
+  createdAt: string;
+}
+
+export interface SubmissionPageDto {
+  items: SubmissionSummaryDto[];
+  nextCursor: string | null;
+}
+
+export interface HistogramBucketDto {
+  from: number;
+  to: number;
+  count: number;
+}
+
+export type CodeReviewStatusValue = 'PENDING' | 'COMPLETED' | 'FAILED';
+
+export type CodeReviewEngineValue = 'LLM' | 'DETERMINISTIC';
+
+export type CodeReviewFindingCategory =
+  | 'COMPLEXITY'
+  | 'READABILITY'
+  | 'EDGE_CASE'
+  | 'CORRECTNESS'
+  | 'PERFORMANCE';
+
+export type CodeReviewFindingSeverity = 'INFO' | 'SUGGESTION' | 'ISSUE';
+
+export interface CodeReviewFindingDto {
+  category: CodeReviewFindingCategory;
+  severity: CodeReviewFindingSeverity;
+  line: number | null;
+  message: string;
+  suggestion: string | null;
+}
+
+export interface SubmissionReviewDto {
+  id: string;
+  submissionId: string;
+  status: CodeReviewStatusValue;
+  engine: CodeReviewEngineValue | null;
+  timeComplexity: string | null;
+  spaceComplexity: string | null;
+  summary: string | null;
+  findings: CodeReviewFindingDto[];
+  failureReason: string | null;
+  createdAt: string;
+  completedAt: string | null;
+}
+
+export interface CodeReviewQuotaDto {
+  limit: number;
+  used: number;
+  remaining: number;
+  enabled: boolean;
+}
+
+export interface PerformanceDistributionDto {
+  problemId: string;
+  language: AssessmentLanguage;
+  sampleSize: number;
+  runtime: HistogramBucketDto[];
+  memory: HistogramBucketDto[];
 }
 
 export type ForumSortOption = 'newest' | 'popular' | 'unanswered';
@@ -976,6 +1105,7 @@ export type NotificationType =
   | 'PEER_INVITATION'
   | 'PEER_SESSION_CHANGED'
   | 'SCORECARD_REQUEST'
+  | 'CODE_REVIEW_READY'
   | 'SYSTEM';
 
 export interface NotificationDto {
@@ -1043,6 +1173,59 @@ export interface ProblemNoteDto {
   problemId: string;
   body: string;
   updatedAt: string;
+}
+
+export type EditorialUnlockReason = 'SOLVED' | 'GAVE_UP';
+
+export type EditorialAvailability = 'UNAVAILABLE' | 'LOCKED' | 'UNLOCKED';
+
+export interface ProblemHintDto {
+  ordinal: number;
+  content: string;
+}
+
+export interface ProblemAssistanceDto {
+  problemId: string;
+  totalHints: number;
+  hints: ProblemHintDto[];
+  editorial: EditorialAvailability;
+  unlockReason: EditorialUnlockReason | null;
+  lockedByContest: boolean;
+}
+
+export interface ProblemEditorialDto {
+  problemId: string;
+  approach: string;
+  timeComplexity: string;
+  spaceComplexity: string;
+  solutions: Partial<Record<AssessmentLanguage, string>>;
+  unlockReason: EditorialUnlockReason;
+  updatedAt: string;
+}
+
+export interface AdminProblemEditorialDto {
+  approach: string;
+  timeComplexity: string;
+  spaceComplexity: string;
+  isPublished: boolean;
+  updatedAt: string;
+}
+
+export interface AdminProblemGuidanceDto {
+  problemId: string;
+  editorial: AdminProblemEditorialDto | null;
+  hints: string[];
+}
+
+export interface AdminProblemEditorialInput {
+  approach: string;
+  timeComplexity: string;
+  spaceComplexity: string;
+  isPublished: boolean;
+}
+
+export interface AdminProblemHintsInput {
+  hints: string[];
 }
 
 export interface ProblemCollectionItemDto {

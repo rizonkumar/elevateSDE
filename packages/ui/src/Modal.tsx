@@ -6,9 +6,24 @@ interface ModalProps {
   title: string;
   description?: string;
   children: React.ReactNode;
+  size?: ModalSize;
 }
 
-export function Modal({ open, onClose, title, description, children }: ModalProps) {
+export type ModalSize = 'default' | 'wide';
+
+const SIZE_CLASS: Record<ModalSize, string> = {
+  default: 'sm:max-w-lg',
+  wide: 'sm:max-w-5xl',
+};
+
+export function Modal({
+  open,
+  onClose,
+  title,
+  description,
+  children,
+  size = 'default',
+}: ModalProps) {
   const panelRef = React.useRef<HTMLDivElement>(null);
   const onCloseRef = React.useRef(onClose);
 
@@ -51,7 +66,7 @@ export function Modal({ open, onClose, title, description, children }: ModalProp
       <div
         ref={panelRef}
         tabIndex={-1}
-        className="relative w-full sm:max-w-lg max-h-[92vh] overflow-y-auto bg-(--color-surface) border border-(--color-border-subtle) rounded-t-(--radius-md) sm:rounded-(--radius-md) shadow-(--shadow-modal) focus:outline-none"
+        className={`relative w-full ${SIZE_CLASS[size]} max-h-[92vh] overflow-y-auto bg-(--color-surface) border border-(--color-border-subtle) rounded-t-(--radius-md) sm:rounded-(--radius-md) shadow-(--shadow-modal) focus:outline-none`}
       >
         <div className="flex items-start justify-between gap-4 px-5 sm:px-6 pt-5 pb-4 border-b border-(--color-border-subtle)">
           <div className="flex flex-col gap-1">

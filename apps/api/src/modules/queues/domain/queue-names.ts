@@ -6,6 +6,7 @@ export const QUEUE_NAMES = {
   MOCK_INTERVIEW: 'mock-interview',
   SCHEDULED: 'scheduled',
   EMAIL: 'email',
+  CODE_REVIEW: 'code-review',
 } as const;
 
 export type QueueName = (typeof QUEUE_NAMES)[keyof typeof QUEUE_NAMES];

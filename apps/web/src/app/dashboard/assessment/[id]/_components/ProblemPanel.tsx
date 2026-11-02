@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { FileText, MessagesSquare, StickyNote } from 'lucide-react';
+import { BookOpenCheck, FileText, History, MessagesSquare, StickyNote } from 'lucide-react';
 import { Badge, Tabs, type BadgeVariant, type TabItem } from '@elevatesde/ui';
 import type { AssessmentDifficulty, CodingProblemDto } from '@elevatesde/shared-types';
 import { useProblemSocialStore } from '@/store/problem-social.store';
@@ -9,8 +9,12 @@ import { BookmarkToggle } from './BookmarkToggle';
 import { AddToListMenu } from './AddToListMenu';
 import { DiscussionTab } from './DiscussionTab';
 import { NotesTab } from './NotesTab';
+import { HintsSection } from './HintsSection';
+import { EditorialTab } from './EditorialTab';
+import { SubmissionsTab } from './SubmissionsTab';
+import { ParagraphText, renderInline, toKeyed } from './problem-text';
 
-type ProblemTab = 'description' | 'discuss' | 'notes';
+type ProblemTab = 'description' | 'editorial' | 'submissions' | 'discuss' | 'notes';
 
 const DIFFICULTY_VARIANT: Record<AssessmentDifficulty, BadgeVariant> = {
   EASY: 'success',
@@ -24,43 +28,7 @@ const DIFFICULTY_LABEL: Record<AssessmentDifficulty, string> = {
   HARD: 'Hard',
 };
 
-interface KeyedText {
-  key: string;
-  value: string;
-}
-
-function toKeyed(items: string[]): KeyedText[] {
-  const counts = new Map<string, number>();
-  return items.map((value) => {
-    const seen = counts.get(value) ?? 0;
-    counts.set(value, seen + 1);
-    return { key: `${value}#${seen}`, value };
-  });
-}
-
-function renderInline(text: string, keyPrefix: string): React.ReactNode[] {
-  const counts = new Map<string, number>();
-  return text.split('`').map((part, index) => {
-    const isCode = index % 2 === 1;
-    const tag = isCode ? 'code' : 'text';
-    const occurrence = counts.get(`${tag}:${part}`) ?? 0;
-    counts.set(`${tag}:${part}`, occurrence + 1);
-    const key = `${keyPrefix}-${tag}-${part}#${occurrence}`;
-    return isCode ? (
-      <code
-        key={key}
-        className="rounded bg-(--color-badge-bg) px-1.5 py-0.5 font-mono text-[0.85em] text-(--color-text-primary)"
-      >
-        {part}
-      </code>
-    ) : (
-      <React.Fragment key={key}>{part}</React.Fragment>
-    );
-  });
-}
-
 function DescriptionView({ problem }: Readonly<{ problem: CodingProblemDto }>) {
-  const lines = toKeyed(problem.description.split('\n'));
   const constraints = toKeyed(problem.constraints);
 
   return (
@@ -84,17 +52,7 @@ function DescriptionView({ problem }: Readonly<{ problem: CodingProblemDto }>) {
         </div>
       )}
 
-      <div className="space-y-2 text-sm leading-relaxed text-(--color-text-muted)">
-        {lines.map(({ key, value }) =>
-          value.trim().length === 0 ? (
-            <div key={key} className="h-1" />
-          ) : (
-            <p key={key} className="m-0 text-(--color-text-primary)/85">
-              {renderInline(value, key)}
-            </p>
-          ),
-        )}
-      </div>
+      <ParagraphText text={problem.description} />
 
       <section className="mt-6">
         <h3 className="m-0 mb-2.5 text-sm font-semibold text-(--color-text-primary)">Examples</h3>
@@ -130,6 +88,8 @@ function DescriptionView({ problem }: Readonly<{ problem: CodingProblemDto }>) {
           ))}
         </ul>
       </section>
+
+      <HintsSection problemId={problem.id} />
     </>
   );
 }
@@ -146,6 +106,8 @@ export function ProblemPanel({ problem }: Readonly<ProblemPanelProps>) {
 
   const tabs: TabItem[] = [
     { id: 'description', label: 'Description', icon: FileText },
+    { id: 'editorial', label: 'Editorial', icon: BookOpenCheck },
+    { id: 'submissions', label: 'Submissions', icon: History },
     { id: 'discuss', label: 'Discuss', icon: MessagesSquare, count: discussionCount },
     { id: 'notes', label: 'Notes', icon: StickyNote },
   ];
@@ -167,6 +129,8 @@ export function ProblemPanel({ problem }: Readonly<ProblemPanelProps>) {
 
       <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
         {tab === 'description' && <DescriptionView problem={problem} />}
+        {tab === 'editorial' && <EditorialTab problemId={problem.id} />}
+        {tab === 'submissions' && <SubmissionsTab problemId={problem.id} />}
         {tab === 'discuss' && <DiscussionTab problemId={problem.id} />}
         {tab === 'notes' && <NotesTab problemId={problem.id} />}
       </div>

@@ -1,0 +1,4 @@
+export const MIN_COMPANY_FREQUENCY = 1;
+export const MAX_COMPANY_FREQUENCY = 100;
+export const MAX_TOPICS_PER_PROBLEM = 10;
+export const MAX_COMPANIES_PER_PROBLEM = 20;

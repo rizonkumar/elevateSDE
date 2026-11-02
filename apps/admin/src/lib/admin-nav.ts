@@ -11,6 +11,7 @@ import {
   Swords,
   Medal,
   Map,
+  Tags,
 } from 'lucide-react';
 import { findActiveNavItem } from '@elevatesde/ui';
 import type { ActiveNavMatch, ShellNavGroupConfig, ShellNavItem } from '@elevatesde/ui';
@@ -46,6 +47,12 @@ export const ADMIN_NAV_GROUPS: ShellNavGroupConfig[] = [
         label: 'Coding Problems',
         icon: Code2,
         keywords: ['questions', 'assessments'],
+      },
+      {
+        href: '/taxonomy',
+        label: 'Topics & Companies',
+        icon: Tags,
+        keywords: ['tags', 'taxonomy', 'company questions', 'patterns'],
       },
       {
         href: '/daily-challenges',

@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { ASSESSMENT_LANGUAGES, type AssessmentLanguage } from '@elevatesde/shared-types';
 
 export type EditorFontSize = 12 | 13 | 14 | 16;
 
@@ -15,12 +16,14 @@ interface AssessmentSettingsState {
   editorTheme: EditorThemePref;
   defaultTimerMode: TimerMode;
   autoReset: boolean;
+  preferredLanguage: AssessmentLanguage;
   setFontSize: (value: EditorFontSize) => void;
   setTabSize: (value: EditorTabSize) => void;
   setWordWrap: (value: boolean) => void;
   setEditorTheme: (value: EditorThemePref) => void;
   setDefaultTimerMode: (value: TimerMode) => void;
   setAutoReset: (value: boolean) => void;
+  setPreferredLanguage: (value: AssessmentLanguage) => void;
   reset: () => void;
 }
 
@@ -33,6 +36,7 @@ interface PersistedSettings {
   editorTheme: EditorThemePref;
   defaultTimerMode: TimerMode;
   autoReset: boolean;
+  preferredLanguage: AssessmentLanguage;
 }
 
 const DEFAULTS: PersistedSettings = {
@@ -42,7 +46,12 @@ const DEFAULTS: PersistedSettings = {
   editorTheme: 'system',
   defaultTimerMode: 'stopwatch',
   autoReset: false,
+  preferredLanguage: 'javascript',
 };
+
+function isLanguage(value: unknown): value is AssessmentLanguage {
+  return typeof value === 'string' && (ASSESSMENT_LANGUAGES as readonly string[]).includes(value);
+}
 
 function readSettings(): PersistedSettings {
   if (globalThis.window === undefined) return DEFAULTS;
@@ -50,7 +59,10 @@ function readSettings(): PersistedSettings {
     const raw = globalThis.localStorage.getItem(STORAGE_KEY);
     if (!raw) return DEFAULTS;
     const parsed = JSON.parse(raw) as Partial<PersistedSettings>;
-    return { ...DEFAULTS, ...parsed };
+    const merged = { ...DEFAULTS, ...parsed };
+    return isLanguage(merged.preferredLanguage)
+      ? merged
+      : { ...merged, preferredLanguage: DEFAULTS.preferredLanguage };
   } catch {
     return DEFAULTS;
   }
@@ -67,8 +79,24 @@ function persist(state: PersistedSettings): void {
 
 export const useAssessmentSettingsStore = create<AssessmentSettingsState>((set, get) => {
   const commit = () => {
-    const { fontSize, tabSize, wordWrap, editorTheme, defaultTimerMode, autoReset } = get();
-    persist({ fontSize, tabSize, wordWrap, editorTheme, defaultTimerMode, autoReset });
+    const {
+      fontSize,
+      tabSize,
+      wordWrap,
+      editorTheme,
+      defaultTimerMode,
+      autoReset,
+      preferredLanguage,
+    } = get();
+    persist({
+      fontSize,
+      tabSize,
+      wordWrap,
+      editorTheme,
+      defaultTimerMode,
+      autoReset,
+      preferredLanguage,
+    });
   };
 
   return {
@@ -95,6 +123,10 @@ export const useAssessmentSettingsStore = create<AssessmentSettingsState>((set, 
     },
     setAutoReset: (autoReset) => {
       set({ autoReset });
+      commit();
+    },
+    setPreferredLanguage: (preferredLanguage) => {
+      set({ preferredLanguage });
       commit();
     },
     reset: () => {

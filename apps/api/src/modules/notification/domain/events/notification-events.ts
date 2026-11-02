@@ -8,6 +8,7 @@ export const NOTIFICATION_EVENTS = {
   PEER_INVITATION: 'notification.peer-invitation',
   PEER_SESSION_CHANGED: 'notification.peer-session-changed',
   SCORECARD_REQUEST: 'notification.scorecard-request',
+  CODE_REVIEW_READY: 'notification.code-review-ready',
   ACCOUNT_PENDING_APPROVAL: 'notification.account-pending-approval',
 } as const;
 
@@ -66,6 +67,13 @@ export interface PeerSessionChangedEvent {
   sessionId: string;
   status: string;
   dedupeKey: string;
+}
+
+export interface CodeReviewReadyEvent {
+  userId: string;
+  problemId: string;
+  problemTitle: string;
+  submissionId: string;
 }
 
 export interface ScorecardRequestEvent {

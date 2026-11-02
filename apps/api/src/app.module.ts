@@ -23,6 +23,9 @@ import { DailyChallengeModule } from './modules/daily-challenge/daily-challenge.
 import { AchievementModule } from './modules/achievement/achievement.module';
 import { NotificationModule } from './modules/notification/notification.module';
 import { ProblemSocialModule } from './modules/problem-social/problem-social.module';
+import { ProblemAssistanceModule } from './modules/problem-assistance/problem-assistance.module';
+import { TaxonomyModule } from './modules/taxonomy/taxonomy.module';
+import { CodeReviewModule } from './modules/code-review/code-review.module';
 import { ReviewModule } from './modules/review/review.module';
 import { ContestModule } from './modules/contest/contest.module';
 import { LearningPathModule } from './modules/learning-path/learning-path.module';
@@ -52,6 +55,9 @@ import { SchedulerModule } from './modules/scheduler/scheduler.module';
     AchievementModule,
     NotificationModule,
     ProblemSocialModule,
+    ProblemAssistanceModule,
+    TaxonomyModule,
+    CodeReviewModule,
     ReviewModule,
     ContestModule,
     LearningPathModule,
