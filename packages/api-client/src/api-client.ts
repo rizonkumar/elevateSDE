@@ -39,6 +39,8 @@ export interface ApiClientOptions {
 export interface ApiClient {
   api: AxiosInstance;
   signOut(): Promise<boolean>;
+  accessToken(): string | undefined;
+  renewSession(): Promise<string | null>;
 }
 
 const cookieTokens: SessionTokens = {
@@ -138,5 +140,18 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
     return revoked;
   };
 
-  return { api, signOut };
+  const renewSession = async (): Promise<string | null> => {
+    const refreshToken = tokens.refreshToken();
+    if (!refreshToken) {
+      endSession();
+      return null;
+    }
+    try {
+      return await renewAccessToken(refreshToken);
+    } catch {
+      return null;
+    }
+  };
+
+  return { api, signOut, accessToken: tokens.accessToken, renewSession };
 }

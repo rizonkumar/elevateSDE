@@ -10,6 +10,7 @@ import type {
 } from '@elevatesde/shared-types';
 import { useAuthStore } from '@/store/auth.store';
 import { useInterviewReadinessStore } from '@/store/interview-readiness.store';
+import { PeerSessionPresence } from './PeerSessionPresence';
 
 interface ScheduleModalProps {
   plan: InterviewPreparationPlanDto;
@@ -183,6 +184,7 @@ export function PeerSessionCard({
           {session.status.toLowerCase().replaceAll('_', ' ')}
         </Badge>
       </div>
+      <PeerSessionPresence session={session} currentUserId={currentUserId} />
       <div className="mt-4 flex flex-wrap gap-2">
         {session.status === 'PENDING' && !organizer && (
           <>

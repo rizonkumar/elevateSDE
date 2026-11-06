@@ -9,6 +9,7 @@ export class LeaderboardPresentationMapper {
     dto.userId = entry.view.userId;
     dto.name = buildDisplayName(entry.view.firstName, entry.view.lastName);
     dto.headline = entry.view.headline;
+    dto.publicHandle = entry.view.publicHandle;
     dto.points = entry.view.points;
     dto.assessmentsCompleted = entry.view.assessmentsCompleted;
     dto.badges = entry.view.badges;

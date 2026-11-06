@@ -4,7 +4,7 @@ import * as React from 'react';
 import { ArrowDown, ArrowUp, Plus, X } from 'lucide-react';
 import { Button, DatePicker, Input, Modal, Textarea } from '@elevatesde/ui';
 import type { AdminContestDetailDto } from '@elevatesde/shared-types';
-import { Select } from '../../../components/ui';
+import { Select, Toggle } from '../../../components/ui';
 import type {
   ContestFormProblem,
   ContestFormValues,
@@ -35,6 +35,7 @@ export function ContestFormModal({
   const [description, setDescription] = React.useState('');
   const [startsAt, setStartsAt] = React.useState<string | null>(null);
   const [endsAt, setEndsAt] = React.useState<string | null>(null);
+  const [isRated, setIsRated] = React.useState(true);
   const [problems, setProblems] = React.useState<ContestFormProblem[]>([]);
   const [selectedProblemId, setSelectedProblemId] = React.useState('');
 
@@ -47,6 +48,7 @@ export function ContestFormModal({
     setDescription(editingContest?.description ?? '');
     setStartsAt(editingContest?.startsAt ?? null);
     setEndsAt(editingContest?.endsAt ?? null);
+    setIsRated(editingContest?.isRated ?? true);
     setProblems(
       editingContest?.problems.map((problem) => ({
         problemId: problem.problemId,
@@ -117,6 +119,8 @@ export function ContestFormModal({
     );
   };
 
+  const ratingLocked = editingContest?.status === 'ENDED';
+
   const canSave =
     title.trim().length > 0 &&
     slug.trim().length > 0 &&
@@ -134,6 +138,7 @@ export function ContestFormModal({
       description: description.trim(),
       startsAt,
       endsAt,
+      isRated,
       problems,
     });
   };
@@ -168,6 +173,23 @@ export function ContestFormModal({
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <DatePicker value={startsAt} onChange={setStartsAt} label="Starts at" withTime />
           <DatePicker value={endsAt} onChange={setEndsAt} label="Ends at" withTime />
+        </div>
+
+        <div className="flex items-center justify-between gap-4 rounded-lg border border-(--color-border-subtle) bg-(--color-bg) px-3 py-3">
+          <div className="min-w-0">
+            <div className="text-sm font-medium text-(--color-text-primary)">Rated contest</div>
+            <p className="m-0 text-xs text-(--color-text-muted)">
+              {ratingLocked
+                ? 'Rating is locked because this contest has ended.'
+                : 'Participants who submit gain or lose contest rating when results are final.'}
+            </p>
+          </div>
+          <Toggle
+            checked={isRated}
+            disabled={ratingLocked}
+            onChange={setIsRated}
+            label="Rated contest"
+          />
         </div>
 
         <div className="flex flex-col gap-3">

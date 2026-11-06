@@ -5,6 +5,7 @@ import { Badge } from '@elevatesde/ui';
 import type { LeaderboardEntryDto } from '@elevatesde/shared-types';
 import { AuthorAvatar } from '@/components/dashboard/AuthorAvatar';
 import { RankBadge } from '@/components/dashboard/leaderboard/RankBadge';
+import { ProfileNameLink } from '@/components/public-profile/ProfileNameLink';
 
 interface LeaderboardRowProps {
   entry: LeaderboardEntryDto;
@@ -16,7 +17,11 @@ function MemberCell({ entry }: Readonly<LeaderboardRowProps>) {
       <AuthorAvatar name={entry.name} size="md" />
       <div className="min-w-0">
         <div className="flex items-center gap-2">
-          <span className="truncate font-semibold text-(--color-text-primary)">{entry.name}</span>
+          <ProfileNameLink
+            name={entry.name}
+            publicHandle={entry.publicHandle}
+            className="truncate font-semibold text-(--color-text-primary)"
+          />
           {entry.isCurrentUser && <Badge variant="accent">You</Badge>}
         </div>
         {entry.headline && (

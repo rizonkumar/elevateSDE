@@ -33,12 +33,16 @@ import { ResumeModule } from './modules/resume/resume.module';
 import { InterviewPreparationModule } from './modules/interview-preparation/interview-preparation.module';
 import { MockInterviewModule } from './modules/mock-interview/mock-interview.module';
 import { SchedulerModule } from './modules/scheduler/scheduler.module';
+import { RealtimeModule } from './modules/realtime/realtime.module';
+import { PublicProfileModule } from './modules/public-profile/public-profile.module';
+import { StudyGroupModule } from './modules/study-group/study-group.module';
 
 @Module({
   imports: [
     EventEmitterModule.forRoot(),
     ThrottlerModule.forRoot({ throttlers: [{ name: 'default', ...GLOBAL_RATE_LIMIT }] }),
     QueuesModule,
+    RealtimeModule,
     AuthModule,
     UsersModule,
     AuditLogModule,
@@ -64,6 +68,8 @@ import { SchedulerModule } from './modules/scheduler/scheduler.module';
     ResumeModule,
     InterviewPreparationModule,
     MockInterviewModule,
+    PublicProfileModule,
+    StudyGroupModule,
     SchedulerModule,
   ],
   controllers: [AppController],

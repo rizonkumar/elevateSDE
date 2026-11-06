@@ -3,6 +3,11 @@ import { ContestStatus } from '@prisma/client';
 import { ContestParticipationService } from './contest-participation.service';
 import { ContestStandingsService } from './contest-standings.service';
 import { buildContestDetail, FakeContestRepository } from '../testing/fake-contest.repository';
+import { ContestRatingService } from './contest-rating.service';
+
+const ratingService = {
+  getStandingRatings: jest.fn().mockResolvedValue(new Map()),
+} as unknown as ContestRatingService;
 
 describe('ContestParticipationService', () => {
   let repository: FakeContestRepository;
@@ -10,7 +15,11 @@ describe('ContestParticipationService', () => {
 
   beforeEach(() => {
     repository = new FakeContestRepository();
-    service = new ContestParticipationService(repository, new ContestStandingsService(repository));
+    service = new ContestParticipationService(
+      repository,
+      new ContestStandingsService(repository),
+      ratingService,
+    );
   });
 
   afterEach(() => {
@@ -66,9 +75,9 @@ describe('ContestParticipationService', () => {
   describe('standings', () => {
     beforeEach(() => {
       repository.participants = [
-        { userId: 'u1', firstName: 'Ada', lastName: 'Lovelace' },
-        { userId: 'u2', firstName: 'Alan', lastName: 'Turing' },
-        { userId: 'u3', firstName: null, lastName: null },
+        { userId: 'u1', firstName: 'Ada', lastName: 'Lovelace', publicHandle: null },
+        { userId: 'u2', firstName: 'Alan', lastName: 'Turing', publicHandle: null },
+        { userId: 'u3', firstName: null, lastName: null, publicHandle: null },
       ];
     });
 
@@ -117,6 +126,23 @@ describe('ContestParticipationService', () => {
       ];
       const rows = await service.standings('weekly-sprint', 'u1');
       expect(rows.map((row) => row.userId)).toEqual(['u2', 'u1', 'u3']);
+    });
+
+    it('leaves rating columns empty while the contest is live', async () => {
+      freezeAt('2026-07-19T19:00:00.000Z');
+      const rows = await service.standings('weekly-sprint', 'u1');
+      expect(rows.every((row) => row.ratingDelta === null && row.newRating === null)).toBe(true);
+    });
+
+    it('attaches rating changes once the contest has ended and been rated', async () => {
+      freezeAt('2026-07-20T10:00:00.000Z');
+      jest
+        .mocked(ratingService.getStandingRatings)
+        .mockResolvedValueOnce(new Map([['u1', { delta: 48, newRating: 1548 }]]));
+      const rows = await service.standings('weekly-sprint', 'u1');
+      const own = rows.find((row) => row.userId === 'u1');
+      expect(own).toMatchObject({ ratingDelta: 48, newRating: 1548 });
+      expect(rows.find((row) => row.userId === 'u2')?.ratingDelta).toBeNull();
     });
   });
 });

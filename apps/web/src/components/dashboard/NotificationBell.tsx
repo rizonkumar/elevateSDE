@@ -4,6 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import { Bell } from 'lucide-react';
 import { useNotificationsStore } from '@/store/notifications.store';
+import { useRealtimeConnected, useRealtimeEvent } from '@/hooks/use-realtime';
 import { NotificationItem } from './NotificationItem';
 
 const PREVIEW_COUNT = 6;
@@ -18,11 +19,22 @@ export function NotificationBell() {
   const markAllRead = useNotificationsStore((state) => state.markAllRead);
   const startPolling = useNotificationsStore((state) => state.startPolling);
   const stopPolling = useNotificationsStore((state) => state.stopPolling);
+  const fetchUnreadCount = useNotificationsStore((state) => state.fetchUnreadCount);
+  const receivePush = useNotificationsStore((state) => state.receivePush);
+  const setUnreadCount = useNotificationsStore((state) => state.setUnreadCount);
+  const isLive = useRealtimeConnected();
+
+  useRealtimeEvent('notification:new', receivePush);
+  useRealtimeEvent('notification:unread-count', (payload) => setUnreadCount(payload.unreadCount));
 
   React.useEffect(() => {
+    if (isLive) {
+      void fetchUnreadCount();
+      return;
+    }
     startPolling();
     return () => stopPolling();
-  }, [startPolling, stopPolling]);
+  }, [isLive, fetchUnreadCount, startPolling, stopPolling]);
 
   React.useEffect(() => {
     if (!open) return;

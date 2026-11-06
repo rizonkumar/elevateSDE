@@ -5,6 +5,7 @@ import {
   AcceptedSubmissionView,
   ContestDetailView,
   ContestFinalResult,
+  ContestLifecycleView,
   ContestParticipantView,
   ContestSummaryView,
   PublishedProblemRef,
@@ -24,6 +25,7 @@ export const buildContestDetail = (
   startsAt: CONTEST_STARTS_AT,
   endsAt: CONTEST_ENDS_AT,
   problemCount: 2,
+  isRated: true,
   createdAt: CONTEST_STARTS_AT,
   updatedAt: CONTEST_STARTS_AT,
   problems: [
@@ -43,7 +45,13 @@ export class FakeContestRepository implements IContestRepository {
   finalizableContestIds: string[] = [];
   finalizableEndedBefore: Date | null = null;
   pendingSubmissions = false;
+  liveEntries: Array<{ contestId: string; userId: string; problemId: string }> = [];
+  lifecycle: ContestLifecycleView[] = [];
+  lifecycleQueries: Array<{ after: Date; upTo: Date }> = [];
   finalizedContests = new Map<string, { results: ContestFinalResult[]; finalizedAt: Date }>();
+  contest: Contest | null = null;
+  updatedContests: Contest[] = [];
+  createdContests: Contest[] = [];
 
   async list(): Promise<ContestSummaryView[]> {
     return [];
@@ -54,8 +62,8 @@ export class FakeContestRepository implements IContestRepository {
   async findDetail(id: string): Promise<ContestDetailView | null> {
     return this.detail?.id === id ? this.detail : null;
   }
-  async findById(): Promise<Contest | null> {
-    return null;
+  async findById(id: string): Promise<Contest | null> {
+    return this.contest?.getId() === id ? this.contest : null;
   }
   async findIdBySlug(slug: string): Promise<string | null> {
     return this.detail?.slug === slug ? this.detail.id : null;
@@ -66,8 +74,14 @@ export class FakeContestRepository implements IContestRepository {
   async countProblems(): Promise<number> {
     return this.detail?.problemCount ?? 0;
   }
-  async create(): Promise<void> {}
-  async update(): Promise<void> {}
+  async create(contest: Contest): Promise<void> {
+    this.createdContests.push(contest);
+    this.detail = buildContestDetail({ id: contest.getId(), isRated: contest.isRated() });
+  }
+  async update(contest: Contest): Promise<void> {
+    this.updatedContests.push(contest);
+    this.contest = contest;
+  }
   async setProblems(): Promise<void> {}
   async remove(): Promise<void> {}
   async countParticipants(): Promise<Map<string, number>> {
@@ -91,6 +105,15 @@ export class FakeContestRepository implements IContestRepository {
   }
   async hasPendingSubmissionsInWindow(): Promise<boolean> {
     return this.pendingSubmissions;
+  }
+  async findLiveContestIdsForEntry(userId: string, problemId: string): Promise<string[]> {
+    return this.liveEntries
+      .filter((entry) => entry.userId === userId && entry.problemId === problemId)
+      .map((entry) => entry.contestId);
+  }
+  async findLifecycleChanges(after: Date, upTo: Date): Promise<ContestLifecycleView[]> {
+    this.lifecycleQueries.push({ after, upTo });
+    return this.lifecycle;
   }
   async saveFinalResults(
     contestId: string,

@@ -22,6 +22,7 @@ export interface SaveContestInput {
   description: string;
   startsAt: Date;
   endsAt: Date;
+  isRated?: boolean;
 }
 
 @Injectable()
@@ -55,14 +56,23 @@ export class ContestService {
       startsAt: input.startsAt,
       endsAt: input.endsAt,
       tenantId: GLOBAL_SCOPE,
+      isRated: input.isRated ?? true,
     });
     await this.repository.create(contest);
     return this.getDetail(contest.getId());
   }
 
-  async update(id: string, input: SaveContestInput): Promise<ContestDetailView> {
+  async update(
+    id: string,
+    input: SaveContestInput,
+    now: Date = new Date(),
+  ): Promise<ContestDetailView> {
     this.assertWindow(input.startsAt, input.endsAt);
     const contest = await this.requireContest(id);
+    const isRated = input.isRated ?? contest.isRated();
+    if (isRated !== contest.isRated() && contest.hasEnded(now)) {
+      throw new BadRequestException('Rating cannot be changed after the contest has ended');
+    }
     const slugOwner = await this.repository.findIdBySlug(input.slug);
     if (slugOwner && slugOwner !== id) {
       throw new ConflictException('A contest with that slug already exists');
@@ -74,6 +84,7 @@ export class ContestService {
         description: input.description,
         startsAt: input.startsAt,
         endsAt: input.endsAt,
+        isRated,
       }),
     );
     return this.getDetail(id);

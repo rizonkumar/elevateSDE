@@ -9,7 +9,10 @@ import { PageContainer } from '@/components/dashboard/PageContainer';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { ContributionHeatmap } from '@/components/dashboard/profile/ContributionHeatmap';
 import { ProfileAchievements } from '@/components/dashboard/profile/ProfileAchievements';
+import { PublicProfileSettingsCard } from '@/components/dashboard/profile/PublicProfileSettingsCard';
 import { useProfileStore } from '@/store/profile.store';
+import { useContestRatingStore } from '@/store/contest-rating.store';
+import { RatingCard } from '@/components/contest-rating/RatingCard';
 
 const DIFFICULTIES: { key: AssessmentDifficulty; label: string; tone: string }[] = [
   { key: 'EASY', label: 'Easy', tone: 'text-(--color-success)' },
@@ -49,13 +52,17 @@ export default function ProfilePage() {
   const heatmap = useProfileStore((state) => state.heatmap);
   const hasLoaded = useProfileStore((state) => state.hasLoaded);
   const loadProfile = useProfileStore((state) => state.loadProfile);
+  const ratingSummary = useContestRatingStore((state) => state.summary);
+  const hasLoadedRating = useContestRatingStore((state) => state.hasLoadedSummary);
+  const loadRatingSummary = useContestRatingStore((state) => state.loadSummary);
 
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
     setMounted(true);
     void loadProfile();
-  }, [loadProfile]);
+    void loadRatingSummary();
+  }, [loadProfile, loadRatingSummary]);
 
   if (!hasLoaded || !user || !stats) {
     return (
@@ -106,6 +113,8 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
+
+        <PublicProfileSettingsCard />
 
         <ProfileAchievements />
 
@@ -192,6 +201,8 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
+
+        {hasLoadedRating && <RatingCard summary={ratingSummary} />}
 
         <div className={cardClass}>
           <h3 className="m-0 mb-4 font-display text-sm font-semibold uppercase tracking-wider text-(--color-text-muted)">

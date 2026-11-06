@@ -343,6 +343,7 @@ Report pass or fail for each item.
 7. `WEB_URL/admin` loads the admin login. Sign in with the admin account from step 3.5.
 8. `pm2 logs elevatesde-api` shows scheduler startup with no errors.
 9. Rate limiting sees real client IPs. From two different networks (for example laptop Wi-Fi and a phone on mobile data), try signing in with a wrong password 11 times on one of them. Only that network should get `429 Too Many Requests`; the other must still be able to sign in. If both are blocked, the API sees every visitor as the same proxy IP: change `TRUST_PROXY` in `apps/api/.env` (try `2`) and `pm2 restart elevatesde-api --update-env`.
+10. Real-time updates work through the tunnel. Tailscale Funnel proxies WebSocket upgrades, so nothing extra needs configuring. Sign in on `WEB_URL`, open the browser devtools **Network → WS** tab and check that a `realtime` connection to the API host reaches status `101`. Then trigger a notification for that account (for example, have someone register so the admin gets an approval request) and confirm the bell count changes without a page refresh. If upgrades are blocked, Socket.io falls back to HTTP long polling: the **Network** tab shows repeated `socket.io/?EIO=4&transport=polling` requests instead, and everything still works, only with slightly higher latency. `pm2 logs elevatesde-api` must not show `Redis is unreachable, using the in-memory Socket.io adapter`.
 
 ---
 

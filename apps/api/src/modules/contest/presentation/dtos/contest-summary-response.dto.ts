@@ -23,6 +23,9 @@ export class ContestSummaryResponseDto implements AdminContestSummaryDto {
   @ApiProperty({ example: 3 })
   problemCount!: number;
 
+  @ApiProperty({ example: true })
+  isRated!: boolean;
+
   @ApiProperty({ example: '2026-07-05T12:00:00.000Z' })
   createdAt!: string;
 

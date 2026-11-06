@@ -1,4 +1,5 @@
 import { Invitation } from '../../domain/entities/invitation';
+import { OrgSettingsRecord } from '../../domain/interfaces/organization-repository.interface';
 import { InvitePreviewView, OrgOverviewView } from '../../application/organization.service';
 import { InvitationResponseDto, InviteCreatedResponseDto } from '../dtos/invitation-response.dto';
 import {
@@ -6,6 +7,7 @@ import {
   OrgMemberResponseDto,
   OrgOverviewResponseDto,
   OrgPerformancePointResponseDto,
+  OrgSettingsResponseDto,
   SeatUsageResponseDto,
 } from '../dtos/org-overview-response.dto';
 import { InvitePreviewResponseDto } from '../dtos/invite-preview-response.dto';
@@ -40,6 +42,13 @@ export class OrganizationPresentationMapper {
     dto.invitations = view.invitations.map((invitation) =>
       OrganizationPresentationMapper.toInvitation(invitation),
     );
+    dto.settings = OrganizationPresentationMapper.toSettings(view.settings);
+    return dto;
+  }
+
+  static toSettings(settings: OrgSettingsRecord): OrgSettingsResponseDto {
+    const dto = new OrgSettingsResponseDto();
+    dto.allowPublicProfiles = settings.allowPublicProfiles;
     return dto;
   }
 

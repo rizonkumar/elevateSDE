@@ -14,6 +14,9 @@ import {
   StreakMilestoneEvent,
   SubmissionAcceptedEvent,
   CodeReviewReadyEvent,
+  ContestRatingUpdatedEvent,
+  StudyGoalCompletedEvent,
+  StudyGroupAddedEvent,
 } from '../../domain/events/notification-events';
 import { NotificationService } from '../notification.service';
 
@@ -149,6 +152,45 @@ export class NotificationListener {
       body: `See the feedback on your ${event.problemTitle} submission.`,
       linkUrl: `/dashboard/assessment/${event.problemId}`,
       dedupeKey: `code-review:${event.submissionId}`,
+    });
+  }
+
+  @OnEvent(NOTIFICATION_EVENTS.CONTEST_RATING_UPDATED)
+  async onContestRatingUpdated(event: ContestRatingUpdatedEvent): Promise<void> {
+    const sign = event.delta >= 0 ? '+' : '−';
+    await this.safeNotify({
+      userId: event.userId,
+      type: 'CONTEST_RATING_UPDATED',
+      title: 'Your contest rating changed',
+      body: `${event.contestTitle}: ${event.oldRating} → ${event.newRating} (${sign}${Math.abs(event.delta)})`,
+      linkUrl: `/dashboard/contests/${event.contestSlug}/standings`,
+      dedupeKey: `rating:${event.contestId}:${event.userId}`,
+    });
+  }
+
+  @OnEvent(NOTIFICATION_EVENTS.STUDY_GROUP_ADDED)
+  async onStudyGroupAdded(event: StudyGroupAddedEvent): Promise<void> {
+    await this.safeNotify({
+      userId: event.recipientId,
+      type: 'STUDY_GROUP_ADDED',
+      title: `You joined ${event.groupName}`,
+      body: `${event.actorName} added you to the study group ${event.groupName}.`,
+      linkUrl: `/dashboard/groups/${event.groupId}`,
+      dedupeKey: event.dedupeKey,
+    });
+  }
+
+  @OnEvent(NOTIFICATION_EVENTS.STUDY_GOAL_COMPLETED)
+  async onStudyGoalCompleted(event: StudyGoalCompletedEvent): Promise<void> {
+    await this.safeNotify({
+      userId: event.recipientId,
+      type: 'STUDY_GOAL_COMPLETED',
+      title: event.personal ? 'You reached a group goal' : 'Your group reached its goal',
+      body: event.personal
+        ? `You hit the target for "${event.goalTitle}" in ${event.groupName}.`
+        : `${event.groupName} completed "${event.goalTitle}".`,
+      linkUrl: `/dashboard/groups/${event.groupId}`,
+      dedupeKey: event.dedupeKey,
     });
   }
 

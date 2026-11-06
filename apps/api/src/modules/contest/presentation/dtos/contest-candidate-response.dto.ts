@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   AssessmentDifficulty,
   ContestDetailDto,
@@ -35,6 +35,9 @@ export class ContestCandidateSummaryResponseDto implements ContestSummaryDto {
 
   @ApiProperty({ example: false })
   registered!: boolean;
+
+  @ApiProperty({ example: true })
+  isRated!: boolean;
 }
 
 export class ContestCandidateProblemResponseDto implements ContestProblemProgressDto {
@@ -81,6 +84,9 @@ export class ContestStandingRowResponseDto implements ContestStandingRowDto {
   @ApiProperty({ example: 'Ada Lovelace' })
   name!: string;
 
+  @ApiPropertyOptional({ example: 'ada', nullable: true })
+  publicHandle!: string | null;
+
   @ApiProperty({ example: 2 })
   solvedCount!: number;
 
@@ -92,4 +98,10 @@ export class ContestStandingRowResponseDto implements ContestStandingRowDto {
 
   @ApiProperty({ example: false })
   isCurrentUser!: boolean;
+
+  @ApiPropertyOptional({ example: 48, nullable: true })
+  ratingDelta!: number | null;
+
+  @ApiPropertyOptional({ example: 1548, nullable: true })
+  newRating!: number | null;
 }

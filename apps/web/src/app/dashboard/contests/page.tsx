@@ -8,6 +8,8 @@ import type { ContestStatus, ContestSummaryDto } from '@elevatesde/shared-types'
 import { PageContainer } from '@/components/dashboard/PageContainer';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { useContestsStore } from '@/store/contests.store';
+import { useContestRatingStore } from '@/store/contest-rating.store';
+import { RatingCard } from '@/components/contest-rating/RatingCard';
 import { formatContestDate, formatContestDuration } from '@/lib/contest-time';
 import { ContestStatusBadge } from './_components/ContestStatusBadge';
 import { ContestCountdown } from './_components/ContestCountdown';
@@ -55,6 +57,7 @@ function ContestCard({ contest }: Readonly<{ contest: ContestSummaryDto }>) {
           {contest.participantCount} registered
         </span>
         {contest.registered && <Badge variant="accent">Registered</Badge>}
+        {!contest.isRated && <Badge variant="neutral">Unrated</Badge>}
       </div>
     </Link>
   );
@@ -64,11 +67,15 @@ export default function ContestsPage() {
   const contests = useContestsStore((state) => state.contests);
   const isLoading = useContestsStore((state) => state.isLoading);
   const loadContests = useContestsStore((state) => state.loadContests);
+  const ratingSummary = useContestRatingStore((state) => state.summary);
+  const hasLoadedRating = useContestRatingStore((state) => state.hasLoadedSummary);
+  const loadRatingSummary = useContestRatingStore((state) => state.loadSummary);
   const [tab, setTab] = React.useState<ContestTab>('upcoming');
 
   React.useEffect(() => {
     void loadContests();
-  }, [loadContests]);
+    void loadRatingSummary();
+  }, [loadContests, loadRatingSummary]);
 
   const countByStatus = (status: ContestStatus) =>
     contests.filter((contest) => contest.status === status).length;
@@ -89,6 +96,8 @@ export default function ContestsPage() {
           title="Coding contests"
           description="Compete on timed problem sets and climb the live standings."
         />
+
+        {hasLoadedRating && <RatingCard summary={ratingSummary} />}
 
         <Tabs items={tabs} value={tab} onChange={(id) => setTab(id as ContestTab)} />
 

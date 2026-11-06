@@ -3,7 +3,7 @@ import { Notification } from '../entities/notification';
 import { NotificationPreferenceView } from '../read-models/notification-view';
 
 export abstract class INotificationRepository {
-  abstract create(notification: Notification): Promise<void>;
+  abstract create(notification: Notification): Promise<boolean>;
   abstract listForUser(userId: string, limit: number): Promise<Notification[]>;
   abstract countUnread(userId: string): Promise<number>;
   abstract markRead(userId: string, id: string): Promise<void>;

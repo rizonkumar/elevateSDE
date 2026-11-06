@@ -28,6 +28,7 @@ export class ContestPresentationMapper {
     dto.startsAt = view.startsAt.toISOString();
     dto.endsAt = view.endsAt.toISOString();
     dto.problemCount = view.problemCount;
+    dto.isRated = view.isRated;
     dto.createdAt = view.createdAt.toISOString();
     dto.updatedAt = view.updatedAt.toISOString();
     return dto;
@@ -42,6 +43,7 @@ export class ContestPresentationMapper {
     dto.startsAt = view.startsAt.toISOString();
     dto.endsAt = view.endsAt.toISOString();
     dto.problemCount = view.problemCount;
+    dto.isRated = view.isRated;
     dto.createdAt = view.createdAt.toISOString();
     dto.updatedAt = view.updatedAt.toISOString();
     dto.description = view.description;
@@ -69,6 +71,7 @@ export class ContestPresentationMapper {
     dto.problemCount = view.problemCount;
     dto.participantCount = view.participantCount;
     dto.registered = view.registered;
+    dto.isRated = view.isRated;
     return dto;
   }
 
@@ -95,10 +98,13 @@ export class ContestPresentationMapper {
     dto.rank = view.rank;
     dto.userId = view.userId;
     dto.name = buildDisplayName(view.firstName, view.lastName);
+    dto.publicHandle = view.publicHandle;
     dto.solvedCount = view.solvedCount;
     dto.score = view.score;
     dto.penaltySeconds = view.penaltySeconds;
     dto.isCurrentUser = view.isCurrentUser;
+    dto.ratingDelta = view.ratingDelta;
+    dto.newRating = view.newRating;
     return dto;
   }
 }

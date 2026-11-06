@@ -3,6 +3,7 @@ export interface LeaderboardEntryView {
   firstName: string | null;
   lastName: string | null;
   headline: string | null;
+  publicHandle: string | null;
   points: number;
   assessmentsCompleted: number;
   badges: string[];

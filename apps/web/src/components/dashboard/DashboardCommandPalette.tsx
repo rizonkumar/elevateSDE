@@ -5,17 +5,18 @@ import { useRouter } from 'next/navigation';
 import { LogOut, Monitor, Moon, Sun } from 'lucide-react';
 import { CommandPalette, useTheme } from '@elevatesde/ui';
 import type { CommandSection } from '@elevatesde/ui';
-import { useSessionRole } from '@/hooks/use-session-role';
+import { useSessionHasTenant, useSessionRole } from '@/hooks/use-session-role';
 import { signOut } from '@/lib/api';
 import { buildRouteGroups } from '@/lib/dashboard-nav';
 
 export function DashboardCommandPalette() {
   const router = useRouter();
   const role = useSessionRole();
+  const hasTenant = useSessionHasTenant();
   const { setPreference } = useTheme();
 
   const sections = React.useMemo<CommandSection[]>(() => {
-    const pages: CommandSection[] = buildRouteGroups(role).map((group) => ({
+    const pages: CommandSection[] = buildRouteGroups({ role, hasTenant }).map((group) => ({
       id: group.id,
       label: group.label ?? 'Go to',
       items: group.items.map((item) => ({
@@ -72,7 +73,7 @@ export function DashboardCommandPalette() {
     };
 
     return [...pages, actions];
-  }, [role, router, setPreference]);
+  }, [role, hasTenant, router, setPreference]);
 
   return <CommandPalette sections={sections} />;
 }

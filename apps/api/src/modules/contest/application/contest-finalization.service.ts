@@ -1,7 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PointsService } from '../../leaderboard/application/points.service';
 import { IContestRepository } from '../domain/interfaces/contest-repository.interface';
 import { ContestDetailView, ContestFinalResult } from '../domain/read-models/contest-view';
+import { CONTEST_EVENTS, ContestFinalizedEvent } from '../domain/events/contest-events';
 import { finalizationCutoff } from '../domain/contest-status';
 import { ContestStandingsService } from './contest-standings.service';
 
@@ -13,6 +15,7 @@ export class ContestFinalizationService {
     private readonly repository: IContestRepository,
     private readonly standingsService: ContestStandingsService,
     private readonly pointsService: PointsService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async finalizeEnded(now: Date = new Date()): Promise<number> {
@@ -44,6 +47,12 @@ export class ContestFinalizationService {
       this.logger.log(
         `Finalized contest ${contestId}: ${results.length} participants, ${awarded} awarded`,
       );
+      const event: ContestFinalizedEvent = {
+        contestId,
+        endsAt: detail.endsAt,
+        participantIds: results.map((result) => result.userId),
+      };
+      this.eventEmitter.emit(CONTEST_EVENTS.FINALIZED, event);
     }
     return finalized;
   }

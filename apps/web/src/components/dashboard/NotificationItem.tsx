@@ -12,7 +12,10 @@ import {
   Flame,
   MessageSquare,
   RefreshCw,
+  Target,
   ThumbsUp,
+  TrendingUp,
+  UserPlus,
   Users,
 } from 'lucide-react';
 import { Badge } from '@elevatesde/ui';
@@ -40,6 +43,9 @@ const TYPE_META: Record<NotificationType, NotificationTypeMeta> = {
   PEER_SESSION_CHANGED: { icon: RefreshCw, label: 'Peer session', variant: 'neutral' },
   SCORECARD_REQUEST: { icon: ClipboardCheck, label: 'Feedback', variant: 'accent' },
   CODE_REVIEW_READY: { icon: ScanSearch, label: 'Code review', variant: 'accent' },
+  CONTEST_RATING_UPDATED: { icon: TrendingUp, label: 'Rating', variant: 'accent' },
+  STUDY_GROUP_ADDED: { icon: UserPlus, label: 'Study group', variant: 'accent' },
+  STUDY_GOAL_COMPLETED: { icon: Target, label: 'Group goal', variant: 'success' },
   SYSTEM: { icon: Bell, label: 'System', variant: 'neutral' },
 };
 

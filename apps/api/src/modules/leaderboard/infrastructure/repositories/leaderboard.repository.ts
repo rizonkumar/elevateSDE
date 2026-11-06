@@ -1,3 +1,4 @@
+import { PUBLIC_HANDLE_SELECT, resolvePublicHandle } from '../../../../common/public-handle';
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { LeaderboardTimeframe } from '@elevatesde/shared-types';
@@ -27,7 +28,9 @@ export class LeaderboardRepository implements ILeaderboardRepository {
       where: toScopeFilter(scope),
       orderBy: [{ [column]: 'desc' }, { assessmentsCompleted: 'desc' }],
       include: {
-        user: { select: { firstName: true, lastName: true, headline: true } },
+        user: {
+          select: { firstName: true, lastName: true, headline: true, ...PUBLIC_HANDLE_SELECT },
+        },
       },
     });
     return records.map((record) => ({
@@ -35,6 +38,7 @@ export class LeaderboardRepository implements ILeaderboardRepository {
       firstName: record.user.firstName,
       lastName: record.user.lastName,
       headline: record.user.headline,
+      publicHandle: resolvePublicHandle(record.user),
       points: selectPoints(record, timeframe),
       assessmentsCompleted: record.assessmentsCompleted,
       badges: record.badges,

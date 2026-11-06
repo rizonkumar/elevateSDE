@@ -13,6 +13,10 @@ const STATUS_VARIANT: Record<ContestStatus, BadgeVariant> = {
   ENDED: 'warning',
 };
 
+function RatedChip({ isRated }: Readonly<{ isRated: boolean }>) {
+  return <Badge variant={isRated ? 'accent' : 'neutral'}>{isRated ? 'Rated' : 'Unrated'}</Badge>;
+}
+
 const STATUS_LABEL: Record<ContestStatus, string> = {
   DRAFT: 'Draft',
   SCHEDULED: 'Scheduled',
@@ -77,9 +81,12 @@ export function ContestDirectory({
                   {formatWindow(contest.startsAt, contest.endsAt)}
                 </td>
                 <td className="px-4 py-3">
-                  <Badge variant={STATUS_VARIANT[contest.status]}>
-                    {STATUS_LABEL[contest.status]}
-                  </Badge>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <Badge variant={STATUS_VARIANT[contest.status]}>
+                      {STATUS_LABEL[contest.status]}
+                    </Badge>
+                    <RatedChip isRated={contest.isRated} />
+                  </div>
                 </td>
                 <td className="px-4 py-3 text-right tabular-nums">{contest.problemCount}</td>
                 <td className="px-4 py-3">
@@ -130,7 +137,12 @@ export function ContestDirectory({
                 <div className="font-semibold text-(--color-text-primary)">{contest.title}</div>
                 <div className="text-xs text-(--color-text-muted)">{contest.slug}</div>
               </div>
-              <Badge variant={STATUS_VARIANT[contest.status]}>{STATUS_LABEL[contest.status]}</Badge>
+              <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
+                <Badge variant={STATUS_VARIANT[contest.status]}>
+                  {STATUS_LABEL[contest.status]}
+                </Badge>
+                <RatedChip isRated={contest.isRated} />
+              </div>
             </div>
             <div className="text-xs text-(--color-text-muted)">
               {formatWindow(contest.startsAt, contest.endsAt)}

@@ -11,6 +11,10 @@ import { PointsService } from '../../../leaderboard/application/points.service';
 import { ProblemAssistanceService } from '../../../problem-assistance/application/problem-assistance.service';
 import { AssessmentRunOutcome } from '../../application/assessment-outcome';
 import { CodeExecutionJobData } from '../../../queues/domain/interfaces/code-execution-queue.interface';
+import {
+  SUBMISSION_EVENTS,
+  SubmissionJudgedEvent,
+} from '../../domain/events/submission-events';
 
 const JOB_DATA: CodeExecutionJobData = {
   submissionId: 's1',
@@ -41,7 +45,9 @@ function buildProcessor(): {
   awardProblemSolved: jest.Mock;
   isAssisted: jest.Mock;
   percentilesFor: jest.Mock;
+  eventEmitter: EventEmitter2;
 } {
+  const eventEmitter = new EventEmitter2();
   const evaluate = jest.fn().mockResolvedValue(OUTCOME);
   const markRunning = jest.fn().mockResolvedValue(undefined);
   const applyResult = jest.fn().mockResolvedValue(undefined);
@@ -73,7 +79,7 @@ function buildProcessor(): {
       achievementService,
       pointsService,
       problemAssistanceService,
-      new EventEmitter2(),
+      eventEmitter,
     ),
     evaluate,
     markRunning,
@@ -84,10 +90,51 @@ function buildProcessor(): {
     awardProblemSolved,
     isAssisted,
     percentilesFor,
+    eventEmitter,
   };
 }
 
 describe('CodeExecutionProcessor', () => {
+  it.each([SubmissionStatus.ACCEPTED, SubmissionStatus.WRONG_ANSWER])(
+    'emits a judged event with the final %s status',
+    async (status) => {
+      const { processor, evaluate, eventEmitter } = buildProcessor();
+      evaluate.mockResolvedValue({ ...OUTCOME, status });
+      const judged: SubmissionJudgedEvent[] = [];
+      eventEmitter.on(SUBMISSION_EVENTS.JUDGED, (event: SubmissionJudgedEvent) => {
+        judged.push(event);
+      });
+
+      await processor.process({ data: JOB_DATA } as Job<CodeExecutionJobData>);
+
+      expect(judged).toEqual([
+        {
+          submissionId: 's1',
+          userId: 'u1',
+          problemId: 'p1',
+          status,
+          judgedAt: expect.any(Date),
+        },
+      ]);
+    },
+  );
+
+  it('emits a runtime error judged event once retries are exhausted', async () => {
+    const { processor, eventEmitter } = buildProcessor();
+    const judged: SubmissionJudgedEvent[] = [];
+    eventEmitter.on(SUBMISSION_EVENTS.JUDGED, (event: SubmissionJudgedEvent) => {
+      judged.push(event);
+    });
+
+    await processor.onFailed({
+      data: JOB_DATA,
+      attemptsMade: 3,
+      opts: { attempts: 3 },
+    } as Job<CodeExecutionJobData>);
+
+    expect(judged.map((event) => event.status)).toEqual([SubmissionStatus.RUNTIME_ERROR]);
+  });
+
   it('marks the submission running, evaluates all cases, then persists the outcome', async () => {
     const { processor, evaluate, markRunning, applyResult } = buildProcessor();
     const job = { data: JOB_DATA } as Job<CodeExecutionJobData>;

@@ -6,7 +6,10 @@ import {
 } from '@nestjs/common';
 import { InvitationStatus } from '@prisma/client';
 import { randomBytes, randomUUID } from 'node:crypto';
-import { IOrganizationRepository } from '../domain/interfaces/organization-repository.interface';
+import {
+  IOrganizationRepository,
+  OrgSettingsRecord,
+} from '../domain/interfaces/organization-repository.interface';
 import { Invitation } from '../domain/entities/invitation';
 
 const INVITE_TOKEN_BYTES = 24;
@@ -31,6 +34,7 @@ export interface OrgOverviewView {
   members: OrgMemberView[];
   teamPerformance: OrgPerformanceView[];
   invitations: Invitation[];
+  settings: OrgSettingsRecord;
 }
 
 export interface AcceptingUser {
@@ -49,6 +53,12 @@ export interface InvitePreviewView {
 @Injectable()
 export class OrganizationService {
   constructor(private readonly organizationRepository: IOrganizationRepository) {}
+
+  async updateSettings(tenantId: string, settings: OrgSettingsRecord): Promise<OrgSettingsRecord> {
+    await this.requireTenant(tenantId);
+    await this.organizationRepository.updateSettings(tenantId, settings);
+    return settings;
+  }
 
   async getOverview(tenantId: string): Promise<OrgOverviewView> {
     const tenant = await this.requireTenant(tenantId);
@@ -78,6 +88,7 @@ export class OrganizationService {
       members: [...activeMembers, ...invitedMembers],
       teamPerformance,
       invitations: pending,
+      settings: { allowPublicProfiles: tenant.allowPublicProfiles },
     };
   }
 

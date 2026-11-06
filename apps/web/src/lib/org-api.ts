@@ -3,11 +3,18 @@ import type {
   InvitePreviewDto,
   InvitationDto,
   OrgOverviewDto,
+  OrgSettingsDto,
+  UpdateOrgSettingsRequest,
 } from '@elevatesde/shared-types';
 import { api } from './api';
 
 export async function fetchOrgOverview(): Promise<OrgOverviewDto> {
   const response = await api.get<OrgOverviewDto>('/api/v1/org/overview');
+  return response.data;
+}
+
+export async function updateOrgSettings(request: UpdateOrgSettingsRequest): Promise<OrgSettingsDto> {
+  const response = await api.patch<OrgSettingsDto>('/api/v1/org/settings', request);
   return response.data;
 }
 

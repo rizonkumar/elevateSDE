@@ -1,20 +1,24 @@
 import { ScheduledJobRunner } from './scheduled-job-runner.service';
 import { PointsService } from '../../leaderboard/application/points.service';
 import { DailyChallengeService } from '../../daily-challenge/application/daily-challenge.service';
-import { ContestFinalizationService } from '../../contest/application/contest-finalization.service';
+import { ContestScheduledJobsService } from '../../contest/application/contest-scheduled-jobs.service';
 import { PeerPracticeService } from '../../interview-preparation/application/peer-practice.service';
 import { AuthService } from '../../auth/auth.service';
 import { MockInterviewService } from '../../mock-interview/application/mock-interview.service';
 import { SCHEDULED_JOBS, ScheduledJobName } from '../domain/scheduled-jobs';
 
-function buildRunner(): { runner: ScheduledJobRunner; handlers: Record<string, jest.Mock> } {
+function buildRunner(): {
+  runner: ScheduledJobRunner;
+  handlers: Record<string, jest.Mock>;
+} {
   const refreshPeriodTotals = jest.fn((period: string) =>
     Promise.resolve(period === 'weekly' ? 1 : 2),
   );
   const handlers = {
     refreshPeriodTotals,
     expireStreaks: jest.fn().mockResolvedValue(3),
-    finalizeEnded: jest.fn().mockResolvedValue(4),
+    finalizeAndRate: jest.fn().mockResolvedValue(4),
+    broadcastStatus: jest.fn().mockResolvedValue(8),
     sweepPreparationReminders: jest.fn().mockResolvedValue(5),
     pruneExpiredRefreshTokens: jest.fn().mockResolvedValue(6),
     sweep: jest.fn().mockResolvedValue(7),
@@ -22,7 +26,10 @@ function buildRunner(): { runner: ScheduledJobRunner; handlers: Record<string, j
   const runner = new ScheduledJobRunner(
     { refreshPeriodTotals } as unknown as PointsService,
     { expireStreaks: handlers.expireStreaks } as unknown as DailyChallengeService,
-    { finalizeEnded: handlers.finalizeEnded } as unknown as ContestFinalizationService,
+    {
+      finalizeAndRate: handlers.finalizeAndRate,
+      broadcastStatus: handlers.broadcastStatus,
+    } as unknown as ContestScheduledJobsService,
     {
       sweepPreparationReminders: handlers.sweepPreparationReminders,
     } as unknown as PeerPracticeService,
@@ -48,7 +55,8 @@ describe('ScheduledJobRunner', () => {
 
   it.each<[ScheduledJobName, string, number]>([
     [SCHEDULED_JOBS.EXPIRE_STREAKS, 'expireStreaks', 3],
-    [SCHEDULED_JOBS.FINALIZE_CONTESTS, 'finalizeEnded', 4],
+    [SCHEDULED_JOBS.FINALIZE_CONTESTS, 'finalizeAndRate', 4],
+    [SCHEDULED_JOBS.BROADCAST_CONTEST_STATUS, 'broadcastStatus', 8],
     [SCHEDULED_JOBS.SWEEP_PREPARATION_REMINDERS, 'sweepPreparationReminders', 5],
     [SCHEDULED_JOBS.PRUNE_REFRESH_TOKENS, 'pruneExpiredRefreshTokens', 6],
     [SCHEDULED_JOBS.SWEEP_MOCK_INTERVIEWS, 'sweep', 7],
@@ -66,7 +74,7 @@ describe('ScheduledJobRunner', () => {
 
   it('propagates handler failures so the queue can retry', async () => {
     const { runner, handlers } = buildRunner();
-    handlers.finalizeEnded?.mockRejectedValue(new Error('deadlock'));
+    handlers.finalizeAndRate?.mockRejectedValue(new Error('deadlock'));
 
     await expect(runner.run(SCHEDULED_JOBS.FINALIZE_CONTESTS)).rejects.toThrow('deadlock');
   });

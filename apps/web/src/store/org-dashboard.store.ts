@@ -4,9 +4,15 @@ import type {
   OrgCompanyDto,
   OrgMemberDto,
   OrgPerformancePointDto,
+  OrgSettingsDto,
   SeatUsageDto,
 } from '@elevatesde/shared-types';
-import { createInvitation, fetchOrgOverview, revokeInvitation } from '@/lib/org-api';
+import {
+  createInvitation,
+  fetchOrgOverview,
+  revokeInvitation,
+  updateOrgSettings,
+} from '@/lib/org-api';
 import { useToastStore } from '@/store/toast.store';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -14,6 +20,8 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const EMPTY_COMPANY: OrgCompanyDto = { name: '', plan: '' };
 
 const EMPTY_SEATS: SeatUsageDto = { used: 0, total: 0 };
+
+const DEFAULT_SETTINGS: OrgSettingsDto = { allowPublicProfiles: true };
 
 export interface InviteResult {
   ok: boolean;
@@ -27,12 +35,15 @@ interface OrgDashboardState {
   members: OrgMemberDto[];
   teamPerformance: OrgPerformancePointDto[];
   invitations: InvitationDto[];
+  settings: OrgSettingsDto;
+  isSavingSettings: boolean;
   isLoaded: boolean;
   isLoading: boolean;
   lastInviteUrl: string | null;
   loadOrgDashboard: () => Promise<void>;
   inviteMember: (email: string) => Promise<InviteResult>;
   revoke: (id: string) => Promise<void>;
+  setAllowPublicProfiles: (allow: boolean) => Promise<void>;
   clearInviteUrl: () => void;
 }
 
@@ -42,6 +53,8 @@ export const useOrgDashboardStore = create<OrgDashboardState>((set, get) => ({
   members: [],
   teamPerformance: [],
   invitations: [],
+  settings: DEFAULT_SETTINGS,
+  isSavingSettings: false,
   isLoaded: false,
   isLoading: false,
   lastInviteUrl: null,
@@ -56,6 +69,7 @@ export const useOrgDashboardStore = create<OrgDashboardState>((set, get) => ({
         members: overview.members,
         teamPerformance: overview.teamPerformance,
         invitations: overview.invitations,
+        settings: overview.settings,
         isLoaded: true,
         isLoading: false,
       });
@@ -91,6 +105,23 @@ export const useOrgDashboardStore = create<OrgDashboardState>((set, get) => ({
       useToastStore
         .getState()
         .addToast(extractMessage(error, 'Could not revoke the invitation.'), 'error');
+    }
+  },
+
+  setAllowPublicProfiles: async (allow) => {
+    const previous = get().settings;
+    set({ settings: { ...previous, allowPublicProfiles: allow }, isSavingSettings: true });
+    try {
+      const settings = await updateOrgSettings({ allowPublicProfiles: allow });
+      set({ settings, isSavingSettings: false });
+      useToastStore
+        .getState()
+        .addToast(allow ? 'Public profiles allowed.' : 'Public profiles turned off.', 'success');
+    } catch (error) {
+      set({ settings: previous, isSavingSettings: false });
+      useToastStore
+        .getState()
+        .addToast(extractMessage(error, 'Could not update organization settings.'), 'error');
     }
   },
 

@@ -14,6 +14,9 @@ export class LeaderboardEntryResponseDto implements LeaderboardEntryDto {
   @ApiPropertyOptional({ example: 'Distributed systems', nullable: true })
   headline!: string | null;
 
+  @ApiPropertyOptional({ example: 'kenji', nullable: true })
+  publicHandle!: string | null;
+
   @ApiProperty({ example: 4820 })
   points!: number;
 

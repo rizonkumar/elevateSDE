@@ -802,6 +802,7 @@ export interface LeaderboardEntryDto {
   userId: string;
   name: string;
   headline: string | null;
+  publicHandle: string | null;
   points: number;
   assessmentsCompleted: number;
   badges: string[];
@@ -920,6 +921,7 @@ export interface AdminContestSummaryDto {
   startsAt: string;
   endsAt: string;
   problemCount: number;
+  isRated: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -945,6 +947,7 @@ export interface AdminContestInput {
   description: string;
   startsAt: string;
   endsAt: string;
+  isRated?: boolean;
 }
 
 export interface SetContestProblemsInput {
@@ -961,6 +964,7 @@ export interface ContestSummaryDto {
   problemCount: number;
   participantCount: number;
   registered: boolean;
+  isRated: boolean;
 }
 
 export interface ContestProblemProgressDto extends ContestProblemDto {
@@ -976,10 +980,51 @@ export interface ContestStandingRowDto {
   rank: number;
   userId: string;
   name: string;
+  publicHandle: string | null;
   solvedCount: number;
   score: number;
   penaltySeconds: number;
   isCurrentUser: boolean;
+  ratingDelta: number | null;
+  newRating: number | null;
+}
+
+export interface ContestRatingHistoryEntryDto {
+  contestId: string;
+  slug: string;
+  title: string;
+  endsAt: string;
+  rank: number;
+  oldRating: number;
+  newRating: number;
+  delta: number;
+}
+
+export interface ContestRatingSummaryDto {
+  rating: number;
+  peakRating: number;
+  contestsRated: number;
+  history: ContestRatingHistoryEntryDto[];
+}
+
+export type ContestRatingScope = 'platform' | 'tenant';
+
+export interface ContestRatingLeaderboardEntryDto {
+  rank: number;
+  userId: string;
+  name: string;
+  publicHandle: string | null;
+  rating: number;
+  peakRating: number;
+  contestsRated: number;
+  isCurrentUser: boolean;
+}
+
+export interface ContestRatingLeaderboardDto {
+  items: ContestRatingLeaderboardEntryDto[];
+  total: number;
+  page: number;
+  pageSize: number;
 }
 
 export interface SubmissionHeatmapCellDto {
@@ -1031,6 +1076,7 @@ export interface OrgOverviewDto {
   members: OrgMemberDto[];
   teamPerformance: OrgPerformancePointDto[];
   invitations: InvitationDto[];
+  settings: OrgSettingsDto;
 }
 
 export interface InviteCreatedDto extends InvitationDto {
@@ -1106,6 +1152,9 @@ export type NotificationType =
   | 'PEER_SESSION_CHANGED'
   | 'SCORECARD_REQUEST'
   | 'CODE_REVIEW_READY'
+  | 'CONTEST_RATING_UPDATED'
+  | 'STUDY_GROUP_ADDED'
+  | 'STUDY_GOAL_COMPLETED'
   | 'SYSTEM';
 
 export interface NotificationDto {
@@ -1669,4 +1718,371 @@ export interface AiReadinessExplanationDto {
 export interface UpdatePeerPracticeStatusDto {
   status: Exclude<PeerPracticeStatus, 'PENDING'>;
   version: number;
+}
+
+export type ProfileVisibility = 'PRIVATE' | 'PUBLIC';
+
+export type HandleUnavailableReason = 'TAKEN' | 'RESERVED' | 'INVALID';
+
+export interface HandleAvailabilityDto {
+  handle: string;
+  available: boolean;
+  reason: HandleUnavailableReason | null;
+}
+
+export interface PublicProfileSettingsDto {
+  handle: string | null;
+  bio: string | null;
+  location: string | null;
+  githubUrl: string | null;
+  linkedinUrl: string | null;
+  websiteUrl: string | null;
+  profileVisibility: ProfileVisibility;
+  showOrganization: boolean;
+  organizationName: string | null;
+  organizationAllowsPublicProfiles: boolean;
+  isPublic: boolean;
+}
+
+export interface UpdatePublicProfileRequest {
+  handle?: string | null;
+  bio?: string | null;
+  location?: string | null;
+  githubUrl?: string | null;
+  linkedinUrl?: string | null;
+  websiteUrl?: string | null;
+  profileVisibility?: ProfileVisibility;
+  showOrganization?: boolean;
+}
+
+export interface PublicProfileLinksDto {
+  github: string | null;
+  linkedin: string | null;
+  website: string | null;
+}
+
+export interface PublicProfileDifficultyCountDto {
+  solved: number;
+  total: number;
+}
+
+export interface PublicProfileSolvedDto {
+  solved: number;
+  total: number;
+  byDifficulty: Record<AssessmentDifficulty, PublicProfileDifficultyCountDto>;
+}
+
+export interface PublicProfileTopicDto {
+  slug: string;
+  name: string;
+  solved: number;
+}
+
+export interface PublicProfileBadgeDto {
+  key: string;
+  name: string;
+  description: string;
+  icon: string;
+  awardedAt: string;
+}
+
+export interface PublicProfileRecentSolveDto {
+  slug: string;
+  title: string;
+  difficulty: AssessmentDifficulty;
+  solvedAt: string;
+}
+
+export interface PublicProfileStreakDto {
+  current: number;
+  longest: number;
+}
+
+export type PublicProfileRatingDto = ContestRatingSummaryDto;
+
+export interface PublicProfileDto {
+  handle: string;
+  displayName: string;
+  headline: string | null;
+  bio: string | null;
+  location: string | null;
+  links: PublicProfileLinksDto;
+  organizationName: string | null;
+  joinedAt: string;
+  points: number;
+  streak: PublicProfileStreakDto;
+  solved: PublicProfileSolvedDto;
+  topTopics: PublicProfileTopicDto[];
+  badges: PublicProfileBadgeDto[];
+  heatmap: SubmissionHeatmapCellDto[];
+  recentSolves: PublicProfileRecentSolveDto[];
+  rating: PublicProfileRatingDto | null;
+}
+
+export interface OrgSettingsDto {
+  allowPublicProfiles: boolean;
+}
+
+export interface UpdateOrgSettingsRequest {
+  allowPublicProfiles: boolean;
+}
+
+export type RealtimeRoomKind = 'contest' | 'peer' | 'group';
+
+export type RealtimeRoom = `${RealtimeRoomKind}:${string}`;
+
+export interface RealtimeAck {
+  ok: boolean;
+  error?: string;
+}
+
+export interface NotificationPushDto {
+  notification: NotificationDto;
+  unreadCount: number;
+}
+
+export interface UnreadCountPushDto {
+  unreadCount: number;
+}
+
+export interface ContestStandingsPushDto {
+  contestId: string;
+  rows: ContestStandingRowDto[];
+  generatedAt: string;
+}
+
+export interface ContestStatusPushDto {
+  contestId: string;
+  status: ContestStatus;
+  finalized: boolean;
+  rated: boolean;
+}
+
+export interface PeerPresencePushDto {
+  sessionId: string;
+  userId: string;
+  online: boolean;
+}
+
+export interface PeerPresenceSnapshotDto {
+  sessionId: string;
+  onlineUserIds: string[];
+}
+
+export type PeerSessionChangeStatus = PeerPracticeStatus | 'RESCHEDULED';
+
+export interface PeerSessionChangedPushDto {
+  sessionId: string;
+  status: PeerSessionChangeStatus;
+}
+
+export interface ServerToClientEvents {
+  'notification:new': (payload: NotificationPushDto) => void;
+  'notification:unread-count': (payload: UnreadCountPushDto) => void;
+  'contest:standings': (payload: ContestStandingsPushDto) => void;
+  'contest:status': (payload: ContestStatusPushDto) => void;
+  'peer:presence': (payload: PeerPresencePushDto) => void;
+  'peer:presence-snapshot': (payload: PeerPresenceSnapshotDto) => void;
+  'peer:session-changed': (payload: PeerSessionChangedPushDto) => void;
+  'group:activity': (payload: StudyGroupActivityPushDto) => void;
+}
+
+export type ServerToClientEventName = keyof ServerToClientEvents;
+
+export type ServerToClientPayload<E extends ServerToClientEventName> = Parameters<
+  ServerToClientEvents[E]
+>[0];
+
+export interface ClientToServerEvents {
+  'room:subscribe': (room: string, ack: (result: RealtimeAck) => void) => void;
+  'room:unsubscribe': (room: string, ack: (result: RealtimeAck) => void) => void;
+}
+
+export const REALTIME_NAMESPACE = '/realtime';
+
+export type StudyGroupRole = 'OWNER' | 'MEMBER';
+
+export type StudyGroupJoinPolicy = 'OPEN' | 'INVITE_ONLY';
+
+export type StudyGoalMetric = 'PROBLEMS_SOLVED' | 'POINTS' | 'DAILY_CHALLENGES' | 'CONTESTS_ENTERED';
+
+export type StudyGoalScope = 'GROUP_TOTAL' | 'EACH_MEMBER';
+
+export type StudyGoalStatus = 'UPCOMING' | 'ACTIVE' | 'COMPLETED' | 'ENDED';
+
+export type StudyGroupLeaderboardWindow = 'goal' | 'week' | 'all';
+
+export type StudyGroupActivityKind = 'PROBLEM_SOLVED' | 'DAILY_CHALLENGE' | 'CONTEST_RESULT';
+
+export const STUDY_GROUP_LIMITS = {
+  maxMembers: 200,
+  maxActiveGoals: 5,
+  nameMaxLength: 60,
+  descriptionMaxLength: 280,
+  goalTitleMaxLength: 80,
+  goalTargetMax: 100000,
+} as const;
+
+export interface StudyGroupSummaryDto {
+  id: string;
+  name: string;
+  description: string | null;
+  joinPolicy: StudyGroupJoinPolicy;
+  memberCount: number;
+  activeGoalCount: number;
+  myRole: StudyGroupRole | null;
+  myWeeklyRank: number | null;
+  createdAt: string;
+}
+
+export interface StudyGroupListDto {
+  canCreate: boolean;
+  groups: StudyGroupSummaryDto[];
+  discoverable: StudyGroupSummaryDto[];
+}
+
+export interface StudyGroupViewerDto {
+  role: StudyGroupRole | null;
+  isMember: boolean;
+  isTenantAdmin: boolean;
+  canEdit: boolean;
+  canArchive: boolean;
+  canManageMembers: boolean;
+  canAssignRoles: boolean;
+  canManageGoals: boolean;
+  canJoin: boolean;
+  canLeave: boolean;
+}
+
+export interface StudyGroupMemberDto {
+  userId: string;
+  displayName: string;
+  headline: string | null;
+  publicHandle: string | null;
+  role: StudyGroupRole;
+  joinedAt: string;
+  isViewer: boolean;
+}
+
+export interface StudyGoalGroupTotalProgressDto {
+  scope: 'GROUP_TOTAL';
+  current: number;
+  target: number;
+  percent: number;
+}
+
+export interface StudyGoalMemberProgressDto {
+  userId: string;
+  displayName: string;
+  value: number;
+  reached: boolean;
+}
+
+export interface StudyGoalEachMemberProgressDto {
+  scope: 'EACH_MEMBER';
+  target: number;
+  membersReached: number;
+  memberCount: number;
+  percent: number;
+  viewerValue: number | null;
+  perMember: StudyGoalMemberProgressDto[];
+}
+
+export type StudyGoalProgressDto = StudyGoalGroupTotalProgressDto | StudyGoalEachMemberProgressDto;
+
+export interface StudyGroupGoalDto {
+  id: string;
+  title: string;
+  metric: StudyGoalMetric;
+  scope: StudyGoalScope;
+  target: number;
+  startsAt: string;
+  endsAt: string;
+  completedAt: string | null;
+  status: StudyGoalStatus;
+  progress: StudyGoalProgressDto;
+}
+
+export interface StudyGroupDetailDto {
+  id: string;
+  name: string;
+  description: string | null;
+  joinPolicy: StudyGroupJoinPolicy;
+  memberCount: number;
+  createdAt: string;
+  viewer: StudyGroupViewerDto;
+  members: StudyGroupMemberDto[];
+  goals: StudyGroupGoalDto[];
+}
+
+export interface StudyGroupLeaderboardEntryDto {
+  rank: number;
+  userId: string;
+  displayName: string;
+  publicHandle: string | null;
+  points: number;
+  problemsSolved: number;
+  isViewer: boolean;
+}
+
+export interface StudyGroupLeaderboardDto {
+  window: StudyGroupLeaderboardWindow;
+  from: string | null;
+  to: string | null;
+  goalTitle: string | null;
+  entries: StudyGroupLeaderboardEntryDto[];
+}
+
+export interface StudyGroupActivityItemDto {
+  id: string;
+  userId: string;
+  displayName: string;
+  publicHandle: string | null;
+  kind: StudyGroupActivityKind;
+  title: string;
+  linkUrl: string | null;
+  points: number;
+  occurredAt: string;
+}
+
+export interface StudyGroupActivityPushDto {
+  groupId: string;
+  item: StudyGroupActivityItemDto;
+}
+
+export interface StudyGroupRosterCandidateDto {
+  userId: string;
+  displayName: string;
+  email: string;
+  headline: string | null;
+}
+
+export interface CreateStudyGroupRequest {
+  name: string;
+  description?: string | null;
+  joinPolicy: StudyGroupJoinPolicy;
+  ownerIds?: string[];
+}
+
+export interface UpdateStudyGroupRequest {
+  name?: string;
+  description?: string | null;
+  joinPolicy?: StudyGroupJoinPolicy;
+}
+
+export interface AddStudyGroupMembersRequest {
+  userIds: string[];
+}
+
+export interface UpdateStudyGroupMemberRequest {
+  role: StudyGroupRole;
+}
+
+export interface StudyGroupGoalInput {
+  title: string;
+  metric: StudyGoalMetric;
+  scope: StudyGoalScope;
+  target: number;
+  startsAt: string;
+  endsAt: string;
 }

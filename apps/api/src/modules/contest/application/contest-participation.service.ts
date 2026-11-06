@@ -9,13 +9,16 @@ import {
   ContestDetailView,
   ContestStandingRowView,
 } from '../domain/read-models/contest-view';
+import { StandingRatingView } from '../domain/read-models/contest-rating-view';
 import { ContestStandingsService } from './contest-standings.service';
+import { ContestRatingService } from './contest-rating.service';
 
 @Injectable()
 export class ContestParticipationService {
   constructor(
     private readonly repository: IContestRepository,
     private readonly standingsService: ContestStandingsService,
+    private readonly ratingService: ContestRatingService,
   ) {}
 
   async listForUser(userId: string): Promise<ContestCandidateSummaryView[]> {
@@ -62,17 +65,49 @@ export class ContestParticipationService {
 
   async standings(slug: string, userId: string): Promise<ContestStandingRowView[]> {
     const detail = await this.requireVisibleDetail(slug);
+    return this.rankRows(detail, userId);
+  }
+
+  async liveStandings(contestId: string): Promise<ContestStandingRowView[] | null> {
+    const detail = await this.repository.findDetail(contestId);
+    if (!detail || detail.status === ContestStatus.DRAFT) {
+      return null;
+    }
+    return this.rankRows(detail, null);
+  }
+
+  async isVisibleContest(contestId: string): Promise<boolean> {
+    const contest = await this.repository.findById(contestId);
+    return contest !== null && contest.getStatus() !== ContestStatus.DRAFT;
+  }
+
+  async findLiveContestIdsForEntry(userId: string, problemId: string, at: Date): Promise<string[]> {
+    return this.repository.findLiveContestIdsForEntry(userId, problemId, at);
+  }
+
+  private async rankRows(
+    detail: ContestDetailView,
+    viewerId: string | null,
+  ): Promise<ContestStandingRowView[]> {
     const status = deriveContestStatus(detail.status, detail.startsAt, detail.endsAt, new Date());
     if (status === ContestStatus.SCHEDULED) {
       return [];
     }
-    const ranked = await this.standingsService.rank(detail);
+    const [ranked, ratings] = await Promise.all([
+      this.standingsService.rank(detail),
+      status === ContestStatus.ENDED
+        ? this.ratingService.getStandingRatings(detail.id)
+        : Promise.resolve(new Map<string, StandingRatingView>()),
+    ]);
     return ranked.map(({ participant, rank, totals }) => ({
       rank,
       userId: participant.userId,
       firstName: participant.firstName,
       lastName: participant.lastName,
-      isCurrentUser: participant.userId === userId,
+      publicHandle: participant.publicHandle,
+      isCurrentUser: participant.userId === viewerId,
+      ratingDelta: ratings.get(participant.userId)?.delta ?? null,
+      newRating: ratings.get(participant.userId)?.newRating ?? null,
       ...totals,
     }));
   }

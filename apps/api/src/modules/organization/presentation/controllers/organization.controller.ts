@@ -6,6 +6,7 @@ import {
   Get,
   HttpCode,
   Param,
+  Patch,
   Post,
   Req,
   UseGuards,
@@ -19,7 +20,8 @@ import { Roles } from '../../../auth/decorators/roles.decorator';
 import { User } from '../../../users/domain/entities/user';
 import { OrganizationService } from '../../application/organization.service';
 import { InviteMemberDto } from '../dtos/invite-member.dto';
-import { OrgOverviewResponseDto } from '../dtos/org-overview-response.dto';
+import { OrgOverviewResponseDto, OrgSettingsResponseDto } from '../dtos/org-overview-response.dto';
+import { UpdateOrgSettingsDto } from '../dtos/update-org-settings.dto';
 import { InvitationResponseDto, InviteCreatedResponseDto } from '../dtos/invitation-response.dto';
 import { InvitePreviewResponseDto } from '../dtos/invite-preview-response.dto';
 import { OrganizationPresentationMapper } from '../mappers/organization-presentation.mapper';
@@ -43,6 +45,23 @@ export class OrganizationController {
     const tenantId = this.requireTenant(req.user);
     const view = await this.organizationService.getOverview(tenantId);
     return OrganizationPresentationMapper.toOverview(view);
+  }
+
+  @Patch('settings')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.TENANT_ADMIN)
+  @ApiOperation({ summary: 'Update organization settings such as public profile visibility' })
+  @ApiResponse({ status: 200, type: OrgSettingsResponseDto })
+  async updateSettings(
+    @Body() dto: UpdateOrgSettingsDto,
+    @Req() req: RequestWithUser,
+  ): Promise<OrgSettingsResponseDto> {
+    const tenantId = this.requireTenant(req.user);
+    const settings = await this.organizationService.updateSettings(tenantId, {
+      allowPublicProfiles: dto.allowPublicProfiles,
+    });
+    return OrganizationPresentationMapper.toSettings(settings);
   }
 
   @Post('invitations')

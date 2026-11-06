@@ -5,10 +5,12 @@ import { usePathname } from 'next/navigation';
 import { Sidebar } from '@/components/dashboard/Sidebar';
 import { DashboardTopbar } from '@/components/dashboard/DashboardTopbar';
 import { DashboardCommandPalette } from '@/components/dashboard/DashboardCommandPalette';
+import { useRealtimeConnection } from '@/hooks/use-realtime';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = React.useState(false);
   const pathname = usePathname();
+  useRealtimeConnection();
 
   React.useEffect(() => {
     setOpen(false);

@@ -17,6 +17,7 @@ export interface ContestSummaryView {
   startsAt: Date;
   endsAt: Date;
   problemCount: number;
+  isRated: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -44,6 +45,7 @@ export interface ContestParticipantView {
   userId: string;
   firstName: string | null;
   lastName: string | null;
+  publicHandle: string | null;
 }
 
 export interface AcceptedSubmissionView {
@@ -57,10 +59,13 @@ export interface ContestStandingRowView {
   userId: string;
   firstName: string | null;
   lastName: string | null;
+  publicHandle: string | null;
   solvedCount: number;
   score: number;
   penaltySeconds: number;
   isCurrentUser: boolean;
+  ratingDelta: number | null;
+  newRating: number | null;
 }
 
 export interface ContestFinalResult {
@@ -80,4 +85,13 @@ export interface PublishedProblemRef {
   id: string;
   title: string;
   difficulty: AssessmentDifficulty;
+}
+
+export interface ContestLifecycleView {
+  id: string;
+  status: ContestStatus;
+  startsAt: Date;
+  endsAt: Date;
+  finalizedAt: Date | null;
+  ratedAt: Date | null;
 }

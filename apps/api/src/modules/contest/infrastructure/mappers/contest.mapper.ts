@@ -12,6 +12,7 @@ export class ContestMapper {
       endsAt: record.endsAt,
       status: record.status,
       tenantId: record.tenantId,
+      isRated: record.isRated,
       createdAt: record.createdAt,
       updatedAt: record.updatedAt,
     });
@@ -21,7 +22,15 @@ export class ContestMapper {
     contest: Contest,
   ): Pick<
     PrismaContest,
-    'id' | 'slug' | 'title' | 'description' | 'startsAt' | 'endsAt' | 'status' | 'tenantId'
+    | 'id'
+    | 'slug'
+    | 'title'
+    | 'description'
+    | 'startsAt'
+    | 'endsAt'
+    | 'status'
+    | 'tenantId'
+    | 'isRated'
   > {
     return {
       id: contest.getId(),
@@ -32,6 +41,7 @@ export class ContestMapper {
       endsAt: contest.getEndsAt(),
       status: contest.getStatus(),
       tenantId: contest.getTenantId(),
+      isRated: contest.isRated(),
     };
   }
 }

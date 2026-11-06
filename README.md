@@ -6,6 +6,7 @@ ElevateSDE is an enterprise-grade AI-driven interview preparation platform built
 
 - **Architecture:** Detailed technical stack, monorepo structure, DDD pattern, database schemas, and advanced systems are documented in [architecture.md](./architecture.md).
 - **Deployment:** Self-hosted production runbook in [docs/deployment-self-hosted.md](./docs/deployment-self-hosted.md). When a custom domain is ready, follow its **section 10** checklist: the API only accepts browser requests from origins listed in `CORS_ALLOWED_ORIGINS` (never `*`) and refuses to start in production without it.
+- **Real-time:** Socket.io gateway, rooms and events are described in the "Real-time Updates" section of [architecture.md](./architecture.md); the deployment smoke test is step 10 of [docs/deployment-self-hosted.md](./docs/deployment-self-hosted.md).
 - **Developer Guidelines:** Guidelines for development, coding standards (no comments), git branching strategy, and UI rules for AI assistants are documented in [CLAUDE.md](./CLAUDE.md).
 
 ## System Architecture Diagram
@@ -22,9 +23,10 @@ graph TD
 
         subgraph Domains["DDD Modules"]
             CoreMods["auth · users · organization · admin"]
-            LearnMods["problem · code-runner · daily-challenge · dashboard · learning-path · contest · review"]
+            LearnMods["problem · code-runner · daily-challenge · dashboard · learning-path · contest · review · study-group · public-profile"]
             CommMods["forum · leaderboard · job-application · problem-social · achievement · notification · interview-preparation"]
-            PlatMods["audit-log · feature-flag · queues"]
+            PlatMods["audit-log · feature-flag · queues · scheduler"]
+            RealtimeMod["realtime (Socket.io gateway · RealtimePublisher port)"]
         end
 
         subgraph Layers["Clean Architecture Layers (per module)"]
@@ -38,7 +40,7 @@ graph TD
     subgraph Async["Async Code Execution"]
         Queue["CODE_EXECUTION Queue (BullMQ)"]
         Worker["CodeExecutionProcessor (Worker)"]
-        Sandbox["Docker Sandbox<br/>node:20 · python:3.12 · gcc:13<br/>--network none · read-only · 2s / 256MB"]
+        Sandbox["Docker Sandbox<br/>node:20 · python:3.12 · gcc:13 · temurin:21 · go:1.23<br/>--network none · read-only · 2s / 256MB"]
     end
 
     subgraph Storage["Data Store Layer"]
@@ -47,6 +49,7 @@ graph TD
     end
 
     Web --> Gateway
+    Web <-.->|"WebSocket /realtime · JWT handshake"| RealtimeMod
     Admin --> Gateway
     Gateway --> Pres
     Pres --> App
@@ -54,6 +57,8 @@ graph TD
     Dom --> Infra
     Infra --> DB
     App --> Cache
+    App -.->|"domain events → live pushes"| RealtimeMod
+    RealtimeMod --> Cache
 
     %% Code execution: synchronous run vs queued submit
     App -->|POST /assessments/run · visible cases| Sandbox
@@ -180,7 +185,9 @@ The API requires a PostgreSQL database (and Redis for caching/queues). Both are 
 | Daily challenge & streak | `http://localhost:3001/dashboard/daily`        | Any authenticated user |
 | Prep tracks              | `http://localhost:3001/dashboard/paths`        | Any authenticated user |
 | Coding contests          | `http://localhost:3001/dashboard/contests`     | Any authenticated user |
-| Profile & heatmap        | `http://localhost:3001/dashboard/profile`      | Any authenticated user |
+| Study groups             | `http://localhost:3001/dashboard/groups`       | Users in an organization |
+| Public profile           | `http://localhost:3001/u/[handle]`             | Public (opt-in by the user) |
+| Profile, heatmap & public profile settings | `http://localhost:3001/dashboard/profile` | Any authenticated user |
 | Organization dashboard   | `http://localhost:3001/dashboard/org`          | `TENANT_ADMIN` only    |
 | Super-Admin backoffice   | `http://localhost:3001/admin`                  | `ADMIN` only           |
 | Coding problem bank      | `http://localhost:3001/admin/coding-problems`  | `ADMIN` only           |
@@ -200,7 +207,7 @@ For local development only, `SEED_DEMO_ACCOUNTS="true"` also seeds these demo lo
 | `org@elevatesde.dev`       | `TENANT_ADMIN` |
 | `candidate@elevatesde.dev` | `USER`         |
 
-Most surfaces are backed by live, user-scoped API endpoints: the candidate dashboard, interview readiness and peer practice (`/api/v1/interview-preparation*`), resume analysis, coding assessments + execution, daily challenge & streaks, learning paths (`/api/v1/learning-paths*`), coding contests (`/api/v1/contests*` — list/detail, registration, and live standings polled every 15s), achievements (`/api/v1/achievements*`), notifications (`/api/v1/notifications*`), spaced repetition (`/api/v1/review/*`), profile & submission heatmap, job tracker, community forum, leaderboard, and the organization dashboard, plus the backoffice (`/api/v1/admin/*`, including the coding problem bank, daily-challenge scheduling, contest management, the learning path builder, and badge management). Per-problem community and curation endpoints are also live via the `problem-social` module: problem discussions with comments/upvotes (`/api/v1/problems/:id/discussions`, `/api/v1/discussions/*`), bookmarks (`/api/v1/problems/:id/bookmark`), private notes (`/api/v1/problems/:id/note`), and custom problem collections (`/api/v1/me/lists*`). The AI mock interview console still uses its browser engine and is intentionally excluded from durable readiness evidence until persistent interview sessions land.
+Most surfaces are backed by live, user-scoped API endpoints: the candidate dashboard, interview readiness and peer practice (`/api/v1/interview-preparation*`), resume analysis, coding assessments + execution, daily challenge & streaks, learning paths (`/api/v1/learning-paths*`), coding contests (`/api/v1/contests*` — list/detail, registration, live standings pushed over Socket.io with a 15s polling fallback, and Elo-style ratings under `/api/v1/contests/ratings/*`), public profiles (`/api/v1/public/profiles/:handle`, no auth, opt-in), study groups (`/api/v1/study-groups*`, organization-scoped with shared goals and a group leaderboard), achievements (`/api/v1/achievements*`), notifications (`/api/v1/notifications*`), spaced repetition (`/api/v1/review/*`), profile & submission heatmap, job tracker, community forum, leaderboard, and the organization dashboard, plus the backoffice (`/api/v1/admin/*`, including the coding problem bank, daily-challenge scheduling, contest management, the learning path builder, and badge management). Per-problem community and curation endpoints are also live via the `problem-social` module: problem discussions with comments/upvotes (`/api/v1/problems/:id/discussions`, `/api/v1/discussions/*`), bookmarks (`/api/v1/problems/:id/bookmark`), private notes (`/api/v1/problems/:id/note`), and custom problem collections (`/api/v1/me/lists*`). The AI mock interview console still uses its browser engine and is intentionally excluded from durable readiness evidence until persistent interview sessions land.
 
 ## Common Commands
 

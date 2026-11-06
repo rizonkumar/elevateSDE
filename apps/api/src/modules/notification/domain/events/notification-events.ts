@@ -9,6 +9,9 @@ export const NOTIFICATION_EVENTS = {
   PEER_SESSION_CHANGED: 'notification.peer-session-changed',
   SCORECARD_REQUEST: 'notification.scorecard-request',
   CODE_REVIEW_READY: 'notification.code-review-ready',
+  CONTEST_RATING_UPDATED: 'notification.contest-rating-updated',
+  STUDY_GROUP_ADDED: 'notification.study-group-added',
+  STUDY_GOAL_COMPLETED: 'notification.study-goal-completed',
   ACCOUNT_PENDING_APPROVAL: 'notification.account-pending-approval',
 } as const;
 
@@ -76,9 +79,36 @@ export interface CodeReviewReadyEvent {
   submissionId: string;
 }
 
+export interface ContestRatingUpdatedEvent {
+  userId: string;
+  contestId: string;
+  contestSlug: string;
+  contestTitle: string;
+  oldRating: number;
+  newRating: number;
+  delta: number;
+}
+
 export interface ScorecardRequestEvent {
   recipientId: string;
   planId: string;
   sessionId: string;
+  dedupeKey: string;
+}
+
+export interface StudyGroupAddedEvent {
+  recipientId: string;
+  groupId: string;
+  groupName: string;
+  actorName: string;
+  dedupeKey: string;
+}
+
+export interface StudyGoalCompletedEvent {
+  recipientId: string;
+  groupId: string;
+  groupName: string;
+  goalTitle: string;
+  personal: boolean;
   dedupeKey: string;
 }

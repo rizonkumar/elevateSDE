@@ -1,6 +1,16 @@
 import { User } from '../../domain/entities/user';
 import { User as PrismaUser } from '@prisma/client';
 
+type PublicProfileColumn =
+  | 'handle'
+  | 'bio'
+  | 'location'
+  | 'githubUrl'
+  | 'linkedinUrl'
+  | 'websiteUrl'
+  | 'profileVisibility'
+  | 'showOrganization';
+
 export class UserMapper {
   static toDomain(prismaUser: PrismaUser): User {
     return User.reconstitute(
@@ -22,7 +32,13 @@ export class UserMapper {
     user: User,
   ): Omit<
     PrismaUser,
-    'createdAt' | 'updatedAt' | 'headline' | 'reviewedAt' | 'reviewedById' | 'rejectionReason'
+    | 'createdAt'
+    | 'updatedAt'
+    | 'headline'
+    | 'reviewedAt'
+    | 'reviewedById'
+    | 'rejectionReason'
+    | PublicProfileColumn
   > {
     return {
       id: user.getId(),

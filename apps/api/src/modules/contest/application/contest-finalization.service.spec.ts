@@ -1,3 +1,5 @@
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { CONTEST_EVENTS } from '../domain/events/contest-events';
 import { ContestFinalizationService } from './contest-finalization.service';
 import { ContestStandingsService } from './contest-standings.service';
 import { PointsService } from '../../leaderboard/application/points.service';
@@ -12,6 +14,7 @@ const FINALIZED_AT = new Date('2026-07-19T19:35:00.000Z');
 describe('ContestFinalizationService', () => {
   let repository: FakeContestRepository;
   let awardContestResults: jest.Mock;
+  let emit: jest.Mock;
   let service: ContestFinalizationService;
 
   beforeEach(() => {
@@ -19,8 +22,8 @@ describe('ContestFinalizationService', () => {
     repository.detail = buildContestDetail({ endsAt: CONTEST_ENDS_AT });
     repository.finalizableContestIds = ['contest-1'];
     repository.participants = [
-      { userId: 'u1', firstName: 'Ada', lastName: 'Lovelace' },
-      { userId: 'u2', firstName: 'Alan', lastName: 'Turing' },
+      { userId: 'u1', firstName: 'Ada', lastName: 'Lovelace', publicHandle: null },
+      { userId: 'u2', firstName: 'Alan', lastName: 'Turing', publicHandle: null },
     ];
     repository.accepted = [
       { userId: 'u2', problemId: 'p1', firstAcceptedAt: new Date('2026-07-19T18:10:00.000Z') },
@@ -28,9 +31,13 @@ describe('ContestFinalizationService', () => {
       { userId: 'u1', problemId: 'p1', firstAcceptedAt: new Date('2026-07-19T18:30:00.000Z') },
     ];
     awardContestResults = jest.fn().mockResolvedValue(2);
-    service = new ContestFinalizationService(repository, new ContestStandingsService(repository), {
-      awardContestResults,
-    } as unknown as PointsService);
+    emit = jest.fn();
+    service = new ContestFinalizationService(
+      repository,
+      new ContestStandingsService(repository),
+      { awardContestResults } as unknown as PointsService,
+      { emit } as unknown as EventEmitter2,
+    );
   });
 
   it('persists final ranks and awards contest points', async () => {
@@ -45,6 +52,24 @@ describe('ContestFinalizationService', () => {
       results: expected,
       finalizedAt: FINALIZED_AT,
     });
+  });
+
+  it('announces the finalized contest with every ranked participant', async () => {
+    await service.finalizeEnded(FINALIZED_AT);
+
+    expect(emit).toHaveBeenCalledWith(CONTEST_EVENTS.FINALIZED, {
+      contestId: 'contest-1',
+      endsAt: CONTEST_ENDS_AT,
+      participantIds: ['u2', 'u1'],
+    });
+  });
+
+  it('does not announce a contest that failed to finalize', async () => {
+    awardContestResults.mockRejectedValue(new Error('database unavailable'));
+
+    await expect(service.finalizeEnded(FINALIZED_AT)).rejects.toThrow();
+
+    expect(emit).not.toHaveBeenCalled();
   });
 
   it('awards points before marking the contest finalized', async () => {

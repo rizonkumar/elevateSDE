@@ -1,3 +1,4 @@
+import { PUBLIC_HANDLE_SELECT, resolvePublicHandle } from '../../../../common/public-handle';
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { ContestStatus, Prisma, SubmissionStatus } from '@prisma/client';
@@ -8,6 +9,7 @@ import {
   AcceptedSubmissionView,
   ContestDetailView,
   ContestFinalResult,
+  ContestLifecycleView,
   ContestParticipantView,
   ContestProblemAssignment,
   ContestSummaryView,
@@ -68,6 +70,7 @@ export class ContestRepository implements IContestRepository {
       startsAt: row.startsAt,
       endsAt: row.endsAt,
       problemCount: row.problems.length,
+      isRated: row.isRated,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
       problems: row.problems.map((entry) => ({
@@ -163,12 +166,13 @@ export class ContestRepository implements IContestRepository {
   async listParticipants(contestId: string): Promise<ContestParticipantView[]> {
     const rows = await this.prisma.contestParticipant.findMany({
       where: { contestId },
-      include: { user: { select: { firstName: true, lastName: true } } },
+      include: { user: { select: { firstName: true, lastName: true, ...PUBLIC_HANDLE_SELECT } } },
     });
     return rows.map((row) => ({
       userId: row.userId,
       firstName: row.user.firstName,
       lastName: row.user.lastName,
+      publicHandle: resolvePublicHandle(row.user),
     }));
   }
 
@@ -209,6 +213,43 @@ export class ContestRepository implements IContestRepository {
       select: { id: true },
     });
     return rows.map((row) => row.id);
+  }
+
+  async findLiveContestIdsForEntry(userId: string, problemId: string, at: Date): Promise<string[]> {
+    const rows = await this.prisma.contest.findMany({
+      where: {
+        status: { not: ContestStatus.DRAFT },
+        startsAt: { lte: at },
+        endsAt: { gt: at },
+        problems: { some: { problemId } },
+        participants: { some: { userId } },
+      },
+      select: { id: true },
+    });
+    return rows.map((row) => row.id);
+  }
+
+  async findLifecycleChanges(after: Date, upTo: Date): Promise<ContestLifecycleView[]> {
+    const window = { gt: after, lte: upTo };
+    return this.prisma.contest.findMany({
+      where: {
+        status: { not: ContestStatus.DRAFT },
+        OR: [
+          { startsAt: window },
+          { endsAt: window },
+          { finalizedAt: window },
+          { ratedAt: window },
+        ],
+      },
+      select: {
+        id: true,
+        status: true,
+        startsAt: true,
+        endsAt: true,
+        finalizedAt: true,
+        ratedAt: true,
+      },
+    });
   }
 
   async saveFinalResults(
@@ -269,6 +310,7 @@ export class ContestRepository implements IContestRepository {
       startsAt: row.startsAt,
       endsAt: row.endsAt,
       problemCount: row._count.problems,
+      isRated: row.isRated,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     };
