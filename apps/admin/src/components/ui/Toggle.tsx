@@ -9,7 +9,7 @@ interface ToggleProps {
   label?: string;
 }
 
-export function Toggle({ checked, onChange, disabled, label }: ToggleProps) {
+export function Toggle({ checked, onChange, disabled, label }: Readonly<ToggleProps>) {
   return (
     <button
       type="button"

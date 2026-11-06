@@ -101,7 +101,7 @@ export class CodeReviewRepository implements ICodeReviewRepository {
     });
   }
 
-  async countCreatedSince(userId: string, since: Date): Promise<number> {
+  countCreatedSince(userId: string, since: Date): Promise<number> {
     return this.prisma.submissionReview.count({ where: { userId, createdAt: { gte: since } } });
   }
 }

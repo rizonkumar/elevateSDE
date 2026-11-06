@@ -32,7 +32,7 @@ export class ContestService {
   async list(): Promise<ContestSummaryView[]> {
     const now = new Date();
     const views = await this.repository.list();
-    return views.map((view) => this.withDerivedSummaryStatus(view, now));
+    return views.map((view) => this.withDerivedStatus(view, now));
   }
 
   async getDetail(id: string): Promise<ContestDetailView> {
@@ -40,7 +40,7 @@ export class ContestService {
     if (!view) {
       throw new NotFoundException('Contest not found');
     }
-    return this.withDerivedDetailStatus(view, new Date());
+    return this.withDerivedStatus(view, new Date());
   }
 
   async create(input: SaveContestInput): Promise<ContestDetailView> {
@@ -146,14 +146,7 @@ export class ContestService {
     }
   }
 
-  private withDerivedSummaryStatus(view: ContestSummaryView, now: Date): ContestSummaryView {
-    return {
-      ...view,
-      status: deriveContestStatus(view.status, view.startsAt, view.endsAt, now),
-    };
-  }
-
-  private withDerivedDetailStatus(view: ContestDetailView, now: Date): ContestDetailView {
+  private withDerivedStatus<T extends ContestSummaryView>(view: T, now: Date): T {
     return {
       ...view,
       status: deriveContestStatus(view.status, view.startsAt, view.endsAt, now),

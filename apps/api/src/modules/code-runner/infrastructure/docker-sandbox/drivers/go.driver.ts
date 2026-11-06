@@ -15,35 +15,35 @@ import (
 `;
 
 export const GO_MAIN =
-  String.raw`
+  `
 type __elevateCase struct {
 	ID    string ` +
   '`json:"id"`' +
-  String.raw`
+  `
 	Input string ` +
   '`json:"input"`' +
-  String.raw`
+  `
 }
 
 type __elevateLine struct {
 	CaseID       string  ` +
   '`json:"caseId"`' +
-  String.raw`
+  `
 	Status       string  ` +
   '`json:"status"`' +
-  String.raw`
+  `
 	Output       string  ` +
   '`json:"output,omitempty"`' +
-  String.raw`
+  `
 	Error        string  ` +
   '`json:"error,omitempty"`' +
-  String.raw`
+  `
 	RuntimeMs    float64 ` +
   '`json:"runtimeMs"`' +
-  String.raw`
+  `
 	PeakMemoryKb int64   ` +
   '`json:"peakMemoryKb"`' +
-  String.raw`
+  `
 }
 
 func __elevatePeakMemoryKb() int64 {

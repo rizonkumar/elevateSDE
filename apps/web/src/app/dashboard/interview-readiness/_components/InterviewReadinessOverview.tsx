@@ -31,7 +31,7 @@ function daysUntil(value: string): number {
 
 export function InterviewReadinessOverview({
   initialApplicationId,
-}: InterviewReadinessOverviewProps) {
+}: Readonly<InterviewReadinessOverviewProps>) {
   const { overview, isLoading, error, loadOverview, loadTemplates } = useInterviewReadinessStore();
   const [setupOpen, setSetupOpen] = React.useState(Boolean(initialApplicationId));
 

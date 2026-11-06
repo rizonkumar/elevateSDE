@@ -24,16 +24,16 @@ export type SubmissionPhase = 'QUEUED' | 'RUNNING' | null;
 
 const POLL_INTERVAL_MS = 1200;
 
-const TERMINAL_STATUSES: SubmissionStatusValue[] = [
+const TERMINAL_STATUSES = new Set<SubmissionStatusValue>([
   'ACCEPTED',
   'WRONG_ANSWER',
   'RUNTIME_ERROR',
   'TIME_LIMIT_EXCEEDED',
   'COMPILE_ERROR',
-];
+]);
 
 function isTerminalStatus(status: SubmissionStatusValue): boolean {
-  return TERMINAL_STATUSES.includes(status);
+  return TERMINAL_STATUSES.has(status);
 }
 
 function toRunStatus(status: SubmissionStatusValue): AssessmentRunStatus {

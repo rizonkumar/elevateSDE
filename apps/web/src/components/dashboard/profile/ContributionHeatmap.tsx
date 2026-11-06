@@ -20,7 +20,7 @@ function levelClass(count: number): string {
   return 'bg-(--color-accent)';
 }
 
-export function ContributionHeatmap({ cells }: ContributionHeatmapProps) {
+export function ContributionHeatmap({ cells }: Readonly<ContributionHeatmapProps>) {
   const counts = new Map(cells.map((cell) => [cell.date, cell.count]));
   const total = cells.reduce((sum, cell) => sum + cell.count, 0);
 

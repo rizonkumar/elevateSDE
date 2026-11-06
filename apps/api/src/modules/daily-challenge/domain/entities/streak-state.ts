@@ -26,7 +26,7 @@ export class StreakState {
     const active = startOfUtcDay(activityDate);
     const last = this.props.lastActiveDate ? startOfUtcDay(this.props.lastActiveDate) : null;
 
-    if (last && last.getTime() === active.getTime()) {
+    if (last?.getTime() === active.getTime()) {
       return this;
     }
 

@@ -9,7 +9,7 @@ interface RoleGuideProps {
   defaultOpen?: boolean;
 }
 
-export function RoleGuide({ defaultOpen = false }: RoleGuideProps) {
+export function RoleGuide({ defaultOpen = false }: Readonly<RoleGuideProps>) {
   const [open, setOpen] = React.useState(defaultOpen);
 
   return (

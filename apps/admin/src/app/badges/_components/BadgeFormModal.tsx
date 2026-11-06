@@ -58,6 +58,9 @@ export function BadgeFormModal() {
   const keyError = showErrors && !values.key.trim() ? 'Key is required.' : undefined;
   const nameError = showErrors && !values.name.trim() ? 'Name is required.' : undefined;
 
+  const idleSubmitLabel = isEditing ? 'Save changes' : 'Create badge';
+  const submitLabel = saving ? 'Saving…' : idleSubmitLabel;
+
   const handleSubmit = async () => {
     if (!values.key.trim() || !values.name.trim()) {
       setShowErrors(true);
@@ -145,7 +148,7 @@ export function BadgeFormModal() {
             Cancel
           </Button>
           <Button type="button" onClick={handleSubmit} disabled={saving}>
-            {saving ? 'Saving…' : isEditing ? 'Save changes' : 'Create badge'}
+            {submitLabel}
           </Button>
         </div>
       </div>

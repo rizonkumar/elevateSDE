@@ -4,9 +4,14 @@ import { IResumeTextExtractor } from '../../domain/interfaces/resume-text-extrac
 
 const PDF_MIME_TYPE = 'application/pdf';
 
+function collapseWhitespaceBeforeNewline(run: string): string {
+  const lastNewline = run.lastIndexOf('\n');
+  return lastNewline === -1 ? run : `\n${run.slice(lastNewline + 1)}`;
+}
+
 function normalizeExtractedText(text: string): string {
   return text
-    .replace(/\s+\n/g, '\n')
+    .replace(/\s+/g, collapseWhitespaceBeforeNewline)
     .replace(/[ \t]{2,}/g, ' ')
     .trim();
 }
@@ -25,13 +30,13 @@ export class ResumeTextExtractor implements IResumeTextExtractor {
     const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
     const loadingTask = pdfjs.getDocument({ data: new Uint8Array(buffer) });
     const document = await loadingTask.promise;
-    const pages: string[] = [];
-    for (let pageNumber = 1; pageNumber <= document.numPages; pageNumber += 1) {
-      const page = await document.getPage(pageNumber);
-      const content = await page.getTextContent();
-      const pageText = content.items.map((item) => ('str' in item ? item.str : '')).join(' ');
-      pages.push(pageText);
-    }
+    const pages = await Promise.all(
+      Array.from({ length: document.numPages }, async (_, index) => {
+        const page = await document.getPage(index + 1);
+        const content = await page.getTextContent();
+        return content.items.map((item) => ('str' in item ? item.str : '')).join(' ');
+      }),
+    );
     await loadingTask.destroy();
     return pages.join('\n');
   }

@@ -4,7 +4,7 @@ interface AdminBrandMarkProps {
   compact: boolean;
 }
 
-export function AdminBrandMark({ compact }: AdminBrandMarkProps) {
+export function AdminBrandMark({ compact }: Readonly<AdminBrandMarkProps>) {
   return (
     <Link
       href="/"

@@ -14,7 +14,7 @@ function parseResult(content: string): ReadinessNarrativeResult {
   if (!parsed || typeof parsed !== 'object') throw new Error('Invalid narrative response');
   const value = parsed as { explanation?: unknown; recommendations?: unknown };
   if (typeof value.explanation !== 'string' || !Array.isArray(value.recommendations)) {
-    throw new Error('Invalid narrative response');
+    throw new TypeError('Invalid narrative response');
   }
   const recommendations = value.recommendations.filter(
     (item): item is string => typeof item === 'string',

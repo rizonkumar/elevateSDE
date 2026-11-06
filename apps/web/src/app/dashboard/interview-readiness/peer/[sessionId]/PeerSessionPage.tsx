@@ -9,7 +9,7 @@ import { useAuthStore } from '@/store/auth.store';
 import { useInterviewReadinessStore } from '@/store/interview-readiness.store';
 import { PeerSessionCard, ScorecardModal } from '../../_components/PeerPracticePanel';
 
-export function PeerSessionPage({ sessionId }: { sessionId: string }) {
+export function PeerSessionPage({ sessionId }: Readonly<{ sessionId: string }>) {
   const userId = useAuthStore((state) => state.user?.id);
   const { peerSession, isLoading, error, loadPeerSession } = useInterviewReadinessStore();
   const [scorecardOpen, setScorecardOpen] = React.useState(false);

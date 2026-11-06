@@ -8,7 +8,7 @@ interface ShellTooltipProps {
   children: React.ReactNode;
 }
 
-export function ShellTooltip({ label, enabled, children }: ShellTooltipProps) {
+export function ShellTooltip({ label, enabled, children }: Readonly<ShellTooltipProps>) {
   const anchorRef = React.useRef<HTMLDivElement>(null);
   const [top, setTop] = React.useState<number | null>(null);
 

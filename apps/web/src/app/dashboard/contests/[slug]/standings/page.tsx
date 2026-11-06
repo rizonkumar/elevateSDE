@@ -159,6 +159,54 @@ export default function ContestStandingsPage() {
     return () => window.clearInterval(id);
   }, [isLive, isStreaming, slug, loadStandings]);
 
+  let content: React.ReactNode;
+  if (isStandingsLoading && standings.length === 0) {
+    content = (
+      <p className="text-sm text-(--color-text-muted)">Loading standings…</p>
+    );
+  } else if (standings.length === 0) {
+    content = (
+      <div className="flex flex-col items-center gap-2 py-16 text-center">
+        <span className="inline-flex h-11 w-11 items-center justify-center rounded-(--radius-full) bg-(--color-accent-soft) text-(--color-accent)">
+          <Trophy className="h-5 w-5" />
+        </span>
+        <h2 className="m-0 font-display text-lg font-semibold">No standings yet</h2>
+        <p className="m-0 max-w-sm text-sm text-(--color-text-muted)">
+          Rankings appear once the contest is live and participants are registered.
+        </p>
+      </div>
+    );
+  } else {
+    content = (
+      <>
+        <div className="hidden overflow-x-auto rounded-md border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-card) md:block">
+          <table className="w-full border-collapse text-left text-sm">
+            <thead>
+              <tr className="border-b border-(--color-border-subtle) bg-(--color-bg-soft) text-xs font-semibold uppercase tracking-wider text-(--color-text-muted)">
+                <th className="px-4 py-3 font-semibold">Rank</th>
+                <th className="px-4 py-3 font-semibold">Member</th>
+                <th className="px-4 py-3 text-right font-semibold">Solved</th>
+                <th className="px-4 py-3 text-right font-semibold">Score</th>
+                <th className="px-4 py-3 text-right font-semibold">Penalty</th>
+                {showRating && <th className="px-4 py-3 text-right font-semibold">Rating</th>}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-(--color-border-subtle)">
+              {standings.map((row) => (
+                <StandingRow key={row.userId} row={row} showRating={showRating} />
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="flex flex-col gap-3 md:hidden">
+          {standings.map((row) => (
+            <StandingCard key={row.userId} row={row} showRating={showRating} />
+          ))}
+        </div>
+      </>
+    );
+  }
+
   return (
     <PageContainer>
       <div className="flex flex-col gap-6 sm:gap-8">
@@ -184,46 +232,7 @@ export default function ContestStandingsPage() {
           )}
         </div>
 
-        {isStandingsLoading && standings.length === 0 ? (
-          <p className="text-sm text-(--color-text-muted)">Loading standings…</p>
-        ) : standings.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 py-16 text-center">
-            <span className="inline-flex h-11 w-11 items-center justify-center rounded-(--radius-full) bg-(--color-accent-soft) text-(--color-accent)">
-              <Trophy className="h-5 w-5" />
-            </span>
-            <h2 className="m-0 font-display text-lg font-semibold">No standings yet</h2>
-            <p className="m-0 max-w-sm text-sm text-(--color-text-muted)">
-              Rankings appear once the contest is live and participants are registered.
-            </p>
-          </div>
-        ) : (
-          <>
-            <div className="hidden overflow-x-auto rounded-md border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-card) md:block">
-              <table className="w-full border-collapse text-left text-sm">
-                <thead>
-                  <tr className="border-b border-(--color-border-subtle) bg-(--color-bg-soft) text-xs font-semibold uppercase tracking-wider text-(--color-text-muted)">
-                    <th className="px-4 py-3 font-semibold">Rank</th>
-                    <th className="px-4 py-3 font-semibold">Member</th>
-                    <th className="px-4 py-3 text-right font-semibold">Solved</th>
-                    <th className="px-4 py-3 text-right font-semibold">Score</th>
-                    <th className="px-4 py-3 text-right font-semibold">Penalty</th>
-                    {showRating && <th className="px-4 py-3 text-right font-semibold">Rating</th>}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-(--color-border-subtle)">
-                  {standings.map((row) => (
-                    <StandingRow key={row.userId} row={row} showRating={showRating} />
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div className="flex flex-col gap-3 md:hidden">
-              {standings.map((row) => (
-                <StandingCard key={row.userId} row={row} showRating={showRating} />
-              ))}
-            </div>
-          </>
-        )}
+        {content}
       </div>
     </PageContainer>
   );

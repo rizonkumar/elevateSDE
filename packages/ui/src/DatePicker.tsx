@@ -47,7 +47,7 @@ export function DatePicker({
   disabled,
   withTime = false,
   placeholder = 'Select date',
-}: DatePickerProps) {
+}: Readonly<DatePickerProps>) {
   const selected = parseValue(value);
   const [open, setOpen] = React.useState(false);
   const [mounted, setMounted] = React.useState(false);
@@ -111,9 +111,8 @@ export function DatePicker({
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const today = new Date();
 
-  const cells: Array<number | null> = [];
-  for (let i = 0; i < leading; i += 1) cells.push(null);
-  for (let day = 1; day <= daysInMonth; day += 1) cells.push(day);
+  const leadingBlanks = WEEKDAYS.slice(0, leading);
+  const days = Array.from({ length: daysInMonth }, (_, offset) => offset + 1);
 
   const emit = (next: Date) => onChange(next.toISOString());
 
@@ -127,7 +126,8 @@ export function DatePicker({
   };
 
   const selectDay = (day: number) => {
-    const hours = selected ? selected.getHours() : withTime ? 9 : 0;
+    const defaultHours = withTime ? 9 : 0;
+    const hours = selected ? selected.getHours() : defaultHours;
     const minutes = selected ? selected.getMinutes() : 0;
     emit(new Date(year, month, day, hours, minutes, 0, 0));
     if (!withTime) setOpen(false);
@@ -173,7 +173,7 @@ export function DatePicker({
           onClick={() => setView(new Date(year, month - 1, 1))}
           className="rounded-md p-1.5 text-(--color-text-muted) transition-colors hover:bg-(--color-badge-bg) hover:text-(--color-text-primary) cursor-pointer"
         >
-          <svg viewBox="0 0 20 20" fill="none" className="h-4 w-4">
+          <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="h-4 w-4">
             <path
               d="M12 5l-5 5 5 5"
               stroke="currentColor"
@@ -192,7 +192,7 @@ export function DatePicker({
           onClick={() => setView(new Date(year, month + 1, 1))}
           className="rounded-md p-1.5 text-(--color-text-muted) transition-colors hover:bg-(--color-badge-bg) hover:text-(--color-text-primary) cursor-pointer"
         >
-          <svg viewBox="0 0 20 20" fill="none" className="h-4 w-4">
+          <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="h-4 w-4">
             <path
               d="M8 5l5 5-5 5"
               stroke="currentColor"
@@ -216,8 +216,10 @@ export function DatePicker({
       </div>
 
       <div className="grid grid-cols-7 gap-1">
-        {cells.map((day, index) => {
-          if (day === null) return <span key={`blank-${index}`} className="h-8" />;
+        {leadingBlanks.map((weekday) => (
+          <span key={`blank-${weekday}`} className="h-8" />
+        ))}
+        {days.map((day) => {
           const dayDate = new Date(year, month, day);
           const isSelected = selected !== null && isSameDay(dayDate, selected);
           const isToday = isSameDay(dayDate, today);
@@ -241,7 +243,7 @@ export function DatePicker({
 
       {withTime && (
         <div className="mt-3 flex items-center gap-2 border-t border-(--color-border-subtle) pt-3">
-          <svg
+          <svg aria-hidden="true"
             viewBox="0 0 20 20"
             fill="none"
             className="h-4 w-4 shrink-0 text-(--color-text-muted)"
@@ -314,7 +316,7 @@ export function DatePicker({
         <span className={selected ? 'truncate' : 'truncate text-(--color-text-muted)'}>
           {display}
         </span>
-        <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 shrink-0 text-(--color-text-muted)">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-4 w-4 shrink-0 text-(--color-text-muted)">
           <path
             d="M7 3v3m10-3v3M4 8h16M5 6h14a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1Z"
             stroke="currentColor"

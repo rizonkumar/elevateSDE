@@ -14,7 +14,7 @@ const AUTH_PATH_PREFIX = '/api/v1/auth/';
 const REFRESH_PATH = `${AUTH_PATH_PREFIX}refresh`;
 const LOGOUT_PATH = `${AUTH_PATH_PREFIX}logout`;
 const UNAUTHORIZED = 401;
-const SESSION_REJECTED_STATUSES: readonly number[] = [400, UNAUTHORIZED, 403];
+const SESSION_REJECTED_STATUSES: ReadonlySet<number> = new Set([400, UNAUTHORIZED, 403]);
 
 type RetriableRequestConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
@@ -59,7 +59,7 @@ function isAuthEndpoint(request: InternalAxiosRequestConfig): boolean {
 }
 
 function isSessionRejected(error: unknown): boolean {
-  return isAxiosError(error) && SESSION_REJECTED_STATUSES.includes(error.response?.status ?? 0);
+  return isAxiosError(error) && SESSION_REJECTED_STATUSES.has(error.response?.status ?? 0);
 }
 
 export function createApiClient(options: ApiClientOptions): ApiClient {
@@ -123,10 +123,10 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
     },
   );
 
-  const revokeRemoteSession = async (): Promise<boolean> => {
+  const revokeRemoteSession = (): Promise<boolean> => {
     const refreshToken = tokens.refreshToken();
     if (!refreshToken) {
-      return false;
+      return Promise.resolve(false);
     }
     return authClient.post(LOGOUT_PATH, { refreshToken }).then(
       () => true,

@@ -118,7 +118,7 @@ export class UsersRepository implements IUsersRepository {
     };
   }
 
-  async countPendingAccounts(): Promise<number> {
+  countPendingAccounts(): Promise<number> {
     return this.prisma.user.count({ where: { status: AccountStatus.PENDING_APPROVAL } });
   }
 

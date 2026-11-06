@@ -59,6 +59,14 @@ function toJobApplication(record: {
 
 const MOCK_INTERVIEW_EVIDENCE_LIMIT = 30;
 
+type VersionedResult<T> = T | 'VERSION_CONFLICT' | null;
+
+function resolveDueAtUpdate(dueAt: string | null | undefined): Date | null | undefined {
+  if (dueAt === undefined) return undefined;
+  if (dueAt === null) return null;
+  return new Date(dueAt);
+}
+
 @Injectable()
 export class InterviewPreparationRepository implements IInterviewPreparationRepository {
   constructor(private readonly prisma: PrismaService) {}
@@ -144,71 +152,71 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
       peerScores,
       mockInterviews,
     ] = await Promise.all([
-        Promise.all([
-          this.prisma.submission.count({ where: { userId } }),
-          this.prisma.submission.count({ where: { userId, status: 'ACCEPTED' } }),
-        ]),
-        this.prisma.submission.aggregate({ where: { userId }, _max: { createdAt: true } }),
-        Promise.all([
-          this.prisma.reviewItem.count({ where: { userId } }),
-          this.prisma.reviewItem.count({ where: { userId, dueAt: { lte: now } } }),
-        ]),
-        this.prisma.reviewItem.aggregate({ where: { userId }, _max: { lastReviewedAt: true } }),
-        Promise.all([
-          this.prisma.learningPathItem.count({
-            where: { module: { path: { enrollments: { some: { userId } } } } },
-          }),
-          this.prisma.learningPathItem.count({
-            where: {
-              module: { path: { enrollments: { some: { userId } } } },
-              problem: { submissions: { some: { userId, status: 'ACCEPTED' } } },
-            },
-          }),
-        ]),
-        Promise.all([
-          this.prisma.submission.findFirst({
-            where: {
-              userId,
-              status: 'ACCEPTED',
-              problem: {
-                learningPathItems: {
-                  some: { module: { path: { enrollments: { some: { userId } } } } },
-                },
+      Promise.all([
+        this.prisma.submission.count({ where: { userId } }),
+        this.prisma.submission.count({ where: { userId, status: 'ACCEPTED' } }),
+      ]),
+      this.prisma.submission.aggregate({ where: { userId }, _max: { createdAt: true } }),
+      Promise.all([
+        this.prisma.reviewItem.count({ where: { userId } }),
+        this.prisma.reviewItem.count({ where: { userId, dueAt: { lte: now } } }),
+      ]),
+      this.prisma.reviewItem.aggregate({ where: { userId }, _max: { lastReviewedAt: true } }),
+      Promise.all([
+        this.prisma.learningPathItem.count({
+          where: { module: { path: { enrollments: { some: { userId } } } } },
+        }),
+        this.prisma.learningPathItem.count({
+          where: {
+            module: { path: { enrollments: { some: { userId } } } },
+            problem: { submissions: { some: { userId, status: 'ACCEPTED' } } },
+          },
+        }),
+      ]),
+      Promise.all([
+        this.prisma.submission.findFirst({
+          where: {
+            userId,
+            status: 'ACCEPTED',
+            problem: {
+              learningPathItems: {
+                some: { module: { path: { enrollments: { some: { userId } } } } },
               },
             },
-            orderBy: { createdAt: 'desc' },
-            select: { createdAt: true },
-          }),
-          this.prisma.pathEnrollment.findFirst({
-            where: { userId },
-            orderBy: { enrolledAt: 'desc' },
-            select: { enrolledAt: true },
-          }),
-        ]),
-        this.prisma.resume.findFirst({
-          where: { userId, status: 'COMPLETED', atsScore: { not: null } },
-          orderBy: { updatedAt: 'desc' },
-          select: { atsScore: true, updatedAt: true },
-        }),
-        this.prisma.peerScorecard.aggregate({
-          where: {
-            evaluatorId: { not: userId },
-            session: {
-              planId,
-              status: 'COMPLETED',
-              OR: [{ organizerId: userId }, { inviteeId: userId }],
-            },
           },
-          _avg: { communication: true, problemSolving: true, technicalDepth: true, structure: true },
-          _max: { submittedAt: true },
+          orderBy: { createdAt: 'desc' },
+          select: { createdAt: true },
         }),
-        this.prisma.mockInterviewSession.findMany({
-          where: { userId, status: 'COMPLETED', overallScore: { not: null }, endedAt: { not: null } },
-          orderBy: { endedAt: 'desc' },
-          take: MOCK_INTERVIEW_EVIDENCE_LIMIT,
-          select: { topic: true, overallScore: true, endedAt: true },
+        this.prisma.pathEnrollment.findFirst({
+          where: { userId },
+          orderBy: { enrolledAt: 'desc' },
+          select: { enrolledAt: true },
         }),
-      ]);
+      ]),
+      this.prisma.resume.findFirst({
+        where: { userId, status: 'COMPLETED', atsScore: { not: null } },
+        orderBy: { updatedAt: 'desc' },
+        select: { atsScore: true, updatedAt: true },
+      }),
+      this.prisma.peerScorecard.aggregate({
+        where: {
+          evaluatorId: { not: userId },
+          session: {
+            planId,
+            status: 'COMPLETED',
+            OR: [{ organizerId: userId }, { inviteeId: userId }],
+          },
+        },
+        _avg: { communication: true, problemSolving: true, technicalDepth: true, structure: true },
+        _max: { submittedAt: true },
+      }),
+      this.prisma.mockInterviewSession.findMany({
+        where: { userId, status: 'COMPLETED', overallScore: { not: null }, endedAt: { not: null } },
+        orderBy: { endedAt: 'desc' },
+        take: MOCK_INTERVIEW_EVIDENCE_LIMIT,
+        select: { topic: true, overallScore: true, endedAt: true },
+      }),
+    ]);
     const [totalSubmissions, acceptedSubmissions] = submissionCounts;
     const [trackedReviews, dueReviews] = reviewCounts;
     const [learningTotal, learningSolved] = learningCounts;
@@ -228,18 +236,27 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
     return {
       revision: plan.readinessRevision,
       coding: {
-        score: totalSubmissions === 0 ? null : Math.round((acceptedSubmissions / totalSubmissions) * 100),
+        score:
+          totalSubmissions === 0
+            ? null
+            : Math.round((acceptedSubmissions / totalSubmissions) * 100),
         observedAt: latestSubmission._max.createdAt,
       },
       review: {
-        score: trackedReviews === 0 ? null : Math.round(((trackedReviews - dueReviews) / trackedReviews) * 100),
+        score:
+          trackedReviews === 0
+            ? null
+            : Math.round(((trackedReviews - dueReviews) / trackedReviews) * 100),
         observedAt: latestReview._max.lastReviewedAt,
       },
       learning: {
         score: learningTotal === 0 ? null : Math.round((learningSolved / learningTotal) * 100),
         observedAt: learningObservedAt,
       },
-      resume: { score: latestResume?.atsScore ?? null, observedAt: latestResume?.updatedAt ?? null },
+      resume: {
+        score: latestResume?.atsScore ?? null,
+        observedAt: latestResume?.updatedAt ?? null,
+      },
       peer: {
         score:
           peerValues.length === 0
@@ -263,7 +280,7 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
     return result.count;
   }
 
-  async completeMockInterviewTask(userId: string, taskId: string): Promise<boolean> {
+  completeMockInterviewTask(userId: string, taskId: string): Promise<boolean> {
     return this.prisma.$transaction(async (transaction) => {
       const task = await transaction.preparationTask.findFirst({
         where: { id: taskId, type: 'RUN_MOCK_INTERVIEW', status: 'PENDING', plan: { userId } },
@@ -335,7 +352,7 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
     userId: string,
     planId: string,
     input: UpdateInterviewPreparationPlanDto,
-  ): Promise<InterviewPreparationPlanDto | 'VERSION_CONFLICT' | null> {
+  ): Promise<VersionedResult<InterviewPreparationPlanDto>> {
     const result = await this.prisma.interviewPreparationPlan.updateMany({
       where: { id: planId, userId, version: input.version },
       data: {
@@ -354,7 +371,7 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
     planId: string,
     status: InterviewPreparationPlanStatus,
     version: number,
-  ): Promise<InterviewPreparationPlanDto | 'VERSION_CONFLICT' | null> {
+  ): Promise<VersionedResult<InterviewPreparationPlanDto>> {
     const result = await this.prisma.interviewPreparationPlan.updateMany({
       where: { id: planId, userId, version },
       data: { status, version: { increment: 1 } },
@@ -401,7 +418,7 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
     userId: string,
     roundId: string,
     input: UpdatePreparationRoundDto,
-  ): Promise<PreparationRoundDto | 'VERSION_CONFLICT' | null> {
+  ): Promise<VersionedResult<PreparationRoundDto>> {
     const result = await this.prisma.$transaction(async (transaction) => {
       const updated = await transaction.interviewPreparationRound.updateMany({
         where: { id: roundId, plan: { userId }, version: input.version },
@@ -484,13 +501,13 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
     userId: string,
     taskId: string,
     input: UpdatePreparationTaskDto,
-  ): Promise<PreparationTaskDto | 'VERSION_CONFLICT' | null> {
+  ): Promise<VersionedResult<PreparationTaskDto>> {
     const result = await this.prisma.preparationTask.updateMany({
       where: { id: taskId, plan: { userId }, version: input.version },
       data: {
         title: input.title,
         description: input.description,
-        dueAt: input.dueAt === undefined ? undefined : input.dueAt === null ? null : new Date(input.dueAt),
+        dueAt: resolveDueAtUpdate(input.dueAt),
         version: { increment: 1 },
       },
     });
@@ -502,7 +519,7 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
     taskId: string,
     completed: boolean,
     version: number,
-  ): Promise<PreparationTaskDto | 'VERSION_CONFLICT' | null> {
+  ): Promise<VersionedResult<PreparationTaskDto>> {
     const task = await this.prisma.preparationTask.findFirst({
       where: { id: taskId, plan: { userId } },
     });
@@ -627,7 +644,7 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
     sessionId: string,
     status: PeerPracticeStatus,
     version: number,
-  ): Promise<PeerPracticeSessionDto | 'VERSION_CONFLICT' | null> {
+  ): Promise<VersionedResult<PeerPracticeSessionDto>> {
     const result = await this.prisma.peerPracticeSession.updateMany({
       where: {
         id: sessionId,
@@ -643,7 +660,7 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
     userId: string,
     sessionId: string,
     input: ReschedulePeerPracticeSessionDto,
-  ): Promise<PeerPracticeSessionDto | 'VERSION_CONFLICT' | null> {
+  ): Promise<VersionedResult<PeerPracticeSessionDto>> {
     const result = await this.prisma.peerPracticeSession.updateMany({
       where: { id: sessionId, organizerId: userId, version: input.version },
       data: {
@@ -697,7 +714,7 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
     userId: string,
     sessionId: string,
     count: number,
-  ): Promise<PeerPracticeSessionDto | 'VERSION_CONFLICT' | null> {
+  ): Promise<VersionedResult<PeerPracticeSessionDto>> {
     if (count > 0) return this.findPeerSessionForParticipant(userId, sessionId);
     const exists = await this.prisma.peerPracticeSession.findFirst({
       where: { id: sessionId, OR: [{ organizerId: userId }, { inviteeId: userId }] },
@@ -710,7 +727,7 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
     userId: string,
     planId: string,
     count: number,
-  ): Promise<InterviewPreparationPlanDto | 'VERSION_CONFLICT' | null> {
+  ): Promise<VersionedResult<InterviewPreparationPlanDto>> {
     if (count > 0) return this.findOwnedPlan(userId, planId);
     const exists = await this.prisma.interviewPreparationPlan.findFirst({
       where: { id: planId, userId },
@@ -723,7 +740,7 @@ export class InterviewPreparationRepository implements IInterviewPreparationRepo
     userId: string,
     taskId: string,
     count: number,
-  ): Promise<PreparationTaskDto | 'VERSION_CONFLICT' | null> {
+  ): Promise<VersionedResult<PreparationTaskDto>> {
     if (count > 0) {
       const task = await this.prisma.preparationTask.findFirst({
         where: { id: taskId, plan: { userId } },

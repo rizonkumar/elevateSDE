@@ -16,7 +16,7 @@ export class GoogleTokenVerifier implements IGoogleTokenVerifier {
     });
 
     const payload = ticket.getPayload();
-    if (!payload || !payload.email || !payload.email_verified) {
+    if (!payload?.email || !payload.email_verified) {
       throw new UnauthorizedException('Invalid or unverified Google account');
     }
 

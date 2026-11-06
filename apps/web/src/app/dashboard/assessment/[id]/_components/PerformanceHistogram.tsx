@@ -37,6 +37,17 @@ function ownBucketIndex(buckets: HistogramBucketDto[], value: number): number {
   return buckets.length - 1;
 }
 
+function tickLabel(
+  bucket: HistogramBucketDto,
+  index: number,
+  count: number,
+  format: (value: number) => string,
+): string {
+  if (index === 0) return format(bucket.from);
+  if (index === count - 1) return format(bucket.to);
+  return '';
+}
+
 function HistogramTooltip({ active, payload }: Readonly<TooltipContentProps>) {
   const row = payload?.[0]?.payload as ChartRow | undefined;
   if (!active || !row) return null;
@@ -64,10 +75,7 @@ export function PerformanceHistogram({
       bucket.from === bucket.to
         ? format(bucket.from)
         : `${format(bucket.from)} – ${format(bucket.to)}`,
-    tick:
-      index === 0 || index === buckets.length - 1
-        ? format(index === 0 ? bucket.from : bucket.to)
-        : '',
+    tick: tickLabel(bucket, index, buckets.length, format),
     count: bucket.count,
     isOwn: index === ownIndex,
   }));

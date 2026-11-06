@@ -1,6 +1,6 @@
 export const CPP_RESULT_SENTINEL = '###ELEVATE_RESULT###';
 
-export const CPP_PREFIX = `
+export const CPP_PREFIX = String.raw`
 #include <bits/stdc++.h>
 using namespace std;
 
@@ -17,7 +17,7 @@ struct JParser {
   const string& src;
   size_t i = 0;
   explicit JParser(const string& x) : src(x) {}
-  void ws() { while (i < src.size() && (src[i] == ' ' || src[i] == '\\t' || src[i] == '\\n' || src[i] == '\\r')) i++; }
+  void ws() { while (i < src.size() && (src[i] == ' ' || src[i] == '\t' || src[i] == '\n' || src[i] == '\r')) i++; }
   JV parse() { ws(); return val(); }
   JV val() {
     ws();
@@ -36,13 +36,13 @@ struct JParser {
     i++;
     while (i < src.size() && src[i] != '"') {
       char c = src[i++];
-      if (c == '\\\\' && i < src.size()) {
+      if (c == '\\' && i < src.size()) {
         char e = src[i++];
-        if (e == 'n') out.push_back('\\n');
-        else if (e == 't') out.push_back('\\t');
-        else if (e == 'r') out.push_back('\\r');
-        else if (e == 'b') out.push_back('\\b');
-        else if (e == 'f') out.push_back('\\f');
+        if (e == 'n') out.push_back('\n');
+        else if (e == 't') out.push_back('\t');
+        else if (e == 'r') out.push_back('\r');
+        else if (e == 'b') out.push_back('\b');
+        else if (e == 'f') out.push_back('\f');
         else if (e == 'u') { i += 4; out.push_back('?'); }
         else out.push_back(e);
       } else {
@@ -102,16 +102,16 @@ static vector<string> __toVecStr(const JV& v) { vector<string> r; for (auto& e :
 static vector<vector<int>> __toVecVecInt(const JV& v) { vector<vector<int>> r; for (auto& e : v.a) r.push_back(__toVecInt(e)); return r; }
 
 static string __jsonEscape(const string& s) {
-  string out = "\\"";
+  string out = "\"";
   for (char c : s) {
-    if (c == '"') out += "\\\\\\"";
-    else if (c == '\\\\') out += "\\\\\\\\";
-    else if (c == '\\n') out += "\\\\n";
-    else if (c == '\\t') out += "\\\\t";
-    else if (c == '\\r') out += "\\\\r";
+    if (c == '"') out += "\\\"";
+    else if (c == '\\') out += "\\\\";
+    else if (c == '\n') out += "\\n";
+    else if (c == '\t') out += "\\t";
+    else if (c == '\r') out += "\\r";
     else out.push_back(c);
   }
-  out += "\\"";
+  out += "\"";
   return out;
 }
 
@@ -147,7 +147,7 @@ static long long __peakMemoryKb() {
 }
 `;
 
-export const CPP_MAIN = `
+export const CPP_MAIN = String.raw`
 int main() {
   ifstream __f("/sandbox/cases.json");
   stringstream __ss;
@@ -168,13 +168,13 @@ int main() {
       string __out = __elevate_invoke(__args);
       auto __end = chrono::high_resolution_clock::now();
       double __ms = chrono::duration<double, milli>(__end - __start).count();
-      __line = string("{") + "\\"caseId\\":" + __jsonEscape(__id) + ",\\"status\\":\\"ok\\",\\"output\\":" + __jsonEscape(__out) + ",\\"runtimeMs\\":" + __ser(__ms) + ",\\"peakMemoryKb\\":" + __ser((long long)__peakMemoryKb()) + "}";
+      __line = string("{") + "\"caseId\":" + __jsonEscape(__id) + ",\"status\":\"ok\",\"output\":" + __jsonEscape(__out) + ",\"runtimeMs\":" + __ser(__ms) + ",\"peakMemoryKb\":" + __ser((long long)__peakMemoryKb()) + "}";
     } catch (exception& __e) {
       auto __end = chrono::high_resolution_clock::now();
       double __ms = chrono::duration<double, milli>(__end - __start).count();
-      __line = string("{") + "\\"caseId\\":" + __jsonEscape(__id) + ",\\"status\\":\\"error\\",\\"error\\":" + __jsonEscape(string(__e.what())) + ",\\"runtimeMs\\":" + __ser(__ms) + ",\\"peakMemoryKb\\":" + __ser((long long)__peakMemoryKb()) + "}";
+      __line = string("{") + "\"caseId\":" + __jsonEscape(__id) + ",\"status\":\"error\",\"error\":" + __jsonEscape(string(__e.what())) + ",\"runtimeMs\":" + __ser(__ms) + ",\"peakMemoryKb\":" + __ser((long long)__peakMemoryKb()) + "}";
     }
-    cout << __sentinel << __line << "\\n";
+    cout << __sentinel << __line << "\n";
   }
   return 0;
 }

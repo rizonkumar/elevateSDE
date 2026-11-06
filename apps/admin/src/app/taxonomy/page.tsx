@@ -99,15 +99,19 @@ export default function TaxonomyPage() {
           </Button>
         </form>
 
-        {!loaded ? (
+        {!loaded && (
           <div className="flex min-h-[200px] items-center justify-center">
             <span className="animate-pulse text-sm text-(--color-text-muted)">Loading…</span>
           </div>
-        ) : terms.length === 0 ? (
+        )}
+
+        {loaded && terms.length === 0 && (
           <p className="m-0 rounded-md border border-dashed border-(--color-border-subtle) p-8 text-center text-sm text-(--color-text-muted)">
             {copy.empty}
           </p>
-        ) : (
+        )}
+
+        {loaded && terms.length > 0 && (
           <ul className="m-0 list-none divide-y divide-(--color-border-subtle) overflow-hidden rounded-md border border-(--color-border-subtle) bg-(--color-surface) p-0 shadow-(--shadow-card)">
             {terms.map((term) => (
               <TermRow

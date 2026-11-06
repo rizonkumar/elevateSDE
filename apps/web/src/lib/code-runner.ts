@@ -28,8 +28,8 @@ function resolveActualOutput(empty: boolean, passed: boolean, expected: string):
 
 function stripNoise(code: string): string {
   return code
-    .replace(/\/\/.*$/gm, '')
-    .replace(/#.*$/gm, '')
+    .replace(/\/\/.*/g, '')
+    .replace(/#.*/g, '')
     .replace(/\/\*[\s\S]*?\*\//g, '')
     .replace(/\s+/g, ' ')
     .trim()

@@ -19,10 +19,9 @@ export function SegmentedControl<T extends string | number>({
   ariaLabel,
 }: Readonly<SegmentedControlProps<T>>) {
   return (
-    <div
-      role="group"
+    <fieldset
       aria-label={ariaLabel}
-      className="inline-flex items-center gap-0.5 rounded-(--radius-sm) border border-(--color-border-subtle) bg-(--color-badge-bg) p-0.5"
+      className="m-0 inline-flex min-w-0 items-center gap-0.5 rounded-(--radius-sm) border border-(--color-border-subtle) bg-(--color-badge-bg) p-0.5"
     >
       {options.map((option) => {
         const active = option.value === value;
@@ -42,6 +41,6 @@ export function SegmentedControl<T extends string | number>({
           </button>
         );
       })}
-    </div>
+    </fieldset>
   );
 }

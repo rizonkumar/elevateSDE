@@ -23,7 +23,7 @@ export function Modal({
   description,
   children,
   size = 'default',
-}: ModalProps) {
+}: Readonly<ModalProps>) {
   const panelRef = React.useRef<HTMLDivElement>(null);
   const onCloseRef = React.useRef(onClose);
 
@@ -81,7 +81,7 @@ export function Modal({
             onClick={onClose}
             className="shrink-0 -mr-1 -mt-1 p-2 rounded-full text-(--color-text-muted) hover:bg-(--color-badge-bg) hover:text-(--color-text-primary) transition cursor-pointer"
           >
-            <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4">
+            <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="w-4 h-4">
               <path
                 d="M5 5l10 10M15 5L5 15"
                 stroke="currentColor"

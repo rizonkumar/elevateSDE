@@ -159,6 +159,11 @@ function normalizeEmail(value: string): string {
   return value.trim().toLowerCase();
 }
 
+const EMAIL_PARTS = /^[^\s@]+@([^\s@]+)$/;
+
 function isEmail(value: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  const domain = EMAIL_PARTS.exec(value)?.[1];
+  if (domain === undefined) return false;
+  const firstDot = domain.indexOf('.', 1);
+  return firstDot !== -1 && firstDot <= domain.length - 2;
 }

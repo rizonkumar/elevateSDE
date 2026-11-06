@@ -10,16 +10,16 @@ const securityHeaders = buildSecurityHeaders({
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
-  async headers() {
-    return [{ source: '/:path*', headers: securityHeaders }];
+  headers() {
+    return Promise.resolve([{ source: '/:path*', headers: securityHeaders }]);
   },
-  async rewrites() {
-    return [
+  rewrites() {
+    return Promise.resolve([
       {
         source: '/admin/:path*',
         destination: `${adminAppUrl}/admin/:path*`,
       },
-    ];
+    ]);
   },
 };
 

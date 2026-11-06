@@ -13,19 +13,19 @@ type PublicProfileColumn =
 
 export class UserMapper {
   static toDomain(prismaUser: PrismaUser): User {
-    return User.reconstitute(
-      prismaUser.id,
-      prismaUser.email,
-      prismaUser.passwordHash,
-      prismaUser.role,
-      prismaUser.tenantId,
-      prismaUser.createdAt,
-      prismaUser.firstName,
-      prismaUser.lastName,
-      prismaUser.headline,
-      prismaUser.googleId,
-      prismaUser.status,
-    );
+    return User.reconstitute({
+      id: prismaUser.id,
+      email: prismaUser.email,
+      passwordHash: prismaUser.passwordHash,
+      role: prismaUser.role,
+      tenantId: prismaUser.tenantId,
+      createdAt: prismaUser.createdAt,
+      firstName: prismaUser.firstName,
+      lastName: prismaUser.lastName,
+      headline: prismaUser.headline,
+      googleId: prismaUser.googleId,
+      status: prismaUser.status,
+    });
   }
 
   static toPersistence(

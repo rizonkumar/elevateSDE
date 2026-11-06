@@ -49,7 +49,7 @@ export function loadGoogleIdentityScript(): Promise<void> {
   if (window.google?.accounts?.id) {
     return Promise.resolve();
   }
-  if (loadPromise) {
+  if (loadPromise !== null) {
     return loadPromise;
   }
 

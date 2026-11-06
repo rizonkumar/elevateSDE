@@ -4,7 +4,7 @@ interface MockInterviewSessionPageProps {
   params: Promise<{ sessionId: string }>;
 }
 
-export default async function MockInterviewSessionPage({ params }: MockInterviewSessionPageProps) {
+export default async function MockInterviewSessionPage({ params }: Readonly<MockInterviewSessionPageProps>) {
   const { sessionId } = await params;
   return <MockInterviewSessionDetail sessionId={sessionId} />;
 }

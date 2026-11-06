@@ -27,9 +27,9 @@ const MIN_SCORE = 0;
 const STRONG_SCORE_THRESHOLD = 80;
 const SOLID_SCORE_THRESHOLD = 60;
 
-const EMAIL_PATTERN = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i;
+const EMAIL_PATTERN = /[a-z0-9._%+-]@[a-z0-9.-]+\.[a-z]{2,}/i;
 const PHONE_PATTERN = /(\+?\d[\d\s().-]{7,}\d)/;
-const METRICS_PATTERN = /(\d+%|\$\s?\d+|\b\d+\s?[xkm+])/i;
+const METRICS_PATTERN = /(\d%|\$\s?\d|\b\d+\s?[xkm+])/i;
 const ALPHANUMERIC_KEYWORD_PATTERN = /^[a-z0-9]+$/;
 
 export function isReadableResumeText(text: string): boolean {

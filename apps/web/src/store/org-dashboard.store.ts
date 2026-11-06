@@ -15,7 +15,7 @@ import {
 } from '@/lib/org-api';
 import { useToastStore } from '@/store/toast.store';
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/;
 
 const EMPTY_COMPANY: OrgCompanyDto = { name: '', plan: '' };
 

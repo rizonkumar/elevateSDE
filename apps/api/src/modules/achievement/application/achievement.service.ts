@@ -41,20 +41,23 @@ export class AchievementService {
       this.repository.listActiveBadges(GLOBAL_SCOPE),
     ]);
     const earned = new Set(earnedKeys);
-    let awardedAny = false;
-    for (const badge of badges) {
+    const newlyQualified = badges.filter((badge) => {
       if (earned.has(badge.getKey()) || !badge.qualifies(metrics)) {
-        continue;
+        return false;
       }
-      await this.repository.award(userId, badge.getId());
       earned.add(badge.getKey());
-      awardedAny = true;
-      this.eventEmitter.emit(NOTIFICATION_EVENTS.BADGE_AWARDED, {
-        userId,
-        badgeName: badge.getName(),
-      } satisfies BadgeAwardedEvent);
-    }
-    if (awardedAny) {
+      return true;
+    });
+    await Promise.all(
+      newlyQualified.map(async (badge) => {
+        await this.repository.award(userId, badge.getId());
+        this.eventEmitter.emit(NOTIFICATION_EVENTS.BADGE_AWARDED, {
+          userId,
+          badgeName: badge.getName(),
+        } satisfies BadgeAwardedEvent);
+      }),
+    );
+    if (newlyQualified.length > 0) {
       await this.repository.syncUserStatsBadges(userId, [...earned]);
     }
   }

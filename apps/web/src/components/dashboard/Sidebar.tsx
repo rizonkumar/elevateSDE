@@ -17,7 +17,7 @@ interface SidebarProps {
   onClose: () => void;
 }
 
-export function Sidebar({ open, onClose }: SidebarProps) {
+export function Sidebar({ open, onClose }: Readonly<SidebarProps>) {
   const pathname = usePathname();
   const role = useSessionRole();
   const hasTenant = useSessionHasTenant();

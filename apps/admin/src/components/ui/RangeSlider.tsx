@@ -20,7 +20,7 @@ export function RangeSlider({
   min = 0,
   max = 100,
   className = '',
-}: RangeSliderProps) {
+}: Readonly<RangeSliderProps>) {
   const [local, setLocal] = React.useState(value);
 
   React.useEffect(() => {

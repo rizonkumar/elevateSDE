@@ -8,8 +8,10 @@ import { resolveRateLimitKey, RateLimitRequest } from './rate-limit-key';
 export class RateLimitGuard extends ThrottlerGuard {
   private readonly jwt = new JwtService({ secret: requireJwtSecret() });
 
-  protected override async getTracker(request: Record<string, unknown>): Promise<string> {
-    return resolveRateLimitKey(request as RateLimitRequest, (token) => this.verifiedSubject(token));
+  protected override getTracker(request: Record<string, unknown>): Promise<string> {
+    return Promise.resolve(
+      resolveRateLimitKey(request as RateLimitRequest, (token) => this.verifiedSubject(token)),
+    );
   }
 
   private verifiedSubject(token: string): string | null {

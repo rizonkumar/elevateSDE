@@ -116,7 +116,7 @@ export class CodeReviewService {
 
   async run(reviewId: string): Promise<void> {
     const review = await this.repository.findById(reviewId);
-    if (!review || review.status !== 'PENDING') {
+    if (review?.status !== 'PENDING') {
       return;
     }
     const submission = await this.submissionService.getForUser(review.submissionId, review.userId);

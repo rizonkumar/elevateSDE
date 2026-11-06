@@ -14,7 +14,7 @@ export function PageHeader({
   description,
   actions,
   className = '',
-}: PageHeaderProps) {
+}: Readonly<PageHeaderProps>) {
   return (
     <div
       className={`flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between ${className}`.trim()}

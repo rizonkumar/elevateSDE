@@ -408,8 +408,8 @@ export const useProblemSocialStore = create<ProblemSocialState>((set, get) => ({
 
   reorderList: async (listId, orderedProblemIds) => {
     const previous = get().lists;
-    const target = previous.find((list) => list.id === listId);
-    if (!target) {
+    const hasTarget = previous.some((list) => list.id === listId);
+    if (!hasTarget) {
       return;
     }
     set({

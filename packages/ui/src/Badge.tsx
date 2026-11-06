@@ -16,7 +16,7 @@ const variantClasses: Record<BadgeVariant, string> = {
   success: 'bg-(--color-success-soft) text-(--color-success) border-transparent',
 };
 
-export function Badge({ variant = 'neutral', children, className = '' }: BadgeProps) {
+export function Badge({ variant = 'neutral', children, className = '' }: Readonly<BadgeProps>) {
   return (
     <span
       className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-(--radius-full) border text-[11px] font-medium tracking-normal whitespace-nowrap ${variantClasses[variant]} ${className}`}

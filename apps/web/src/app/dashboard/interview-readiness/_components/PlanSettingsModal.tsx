@@ -21,7 +21,7 @@ const ARCHETYPE_OPTIONS = [
   { value: 'ENTERPRISE', label: 'Enterprise' },
 ];
 
-export function PlanSettingsModal({ plan, open, onClose }: PlanSettingsModalProps) {
+export function PlanSettingsModal({ plan, open, onClose }: Readonly<PlanSettingsModalProps>) {
   const updatePlan = useInterviewReadinessStore((state) => state.updatePlan);
   const updateRound = useInterviewReadinessStore((state) => state.updateRound);
   const isSaving = useInterviewReadinessStore((state) => state.isSaving);

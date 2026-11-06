@@ -218,34 +218,32 @@ const POSTS: SeedPost[] = [
 ];
 
 export async function seedCommunity(prisma: PrismaClient, passwordHash: string): Promise<number> {
-  for (let index = 0; index < ROSTER.length; index += 1) {
-    const member = ROSTER[index];
-    if (!member) {
-      continue;
-    }
-    const { firstName, lastName } = splitName(member.name);
-    const email = toEmail(member.name);
-    await prisma.user.upsert({
-      where: { id: member.id },
-      update: { headline: member.headline, firstName, lastName },
-      create: {
-        id: member.id,
-        email,
-        passwordHash,
-        role: 'USER',
-        firstName,
-        lastName,
-        headline: member.headline,
-      },
-    });
+  await Promise.all(
+    ROSTER.map(async (member, index) => {
+      const { firstName, lastName } = splitName(member.name);
+      const email = toEmail(member.name);
+      await prisma.user.upsert({
+        where: { id: member.id },
+        update: { headline: member.headline, firstName, lastName },
+        create: {
+          id: member.id,
+          email,
+          passwordHash,
+          role: 'USER',
+          firstName,
+          lastName,
+          headline: member.headline,
+        },
+      });
 
-    const stats = buildStats(index, member.badges);
-    await prisma.userStats.upsert({
-      where: { userId: member.id },
-      update: stats,
-      create: { userId: member.id, ...stats },
-    });
-  }
+      const stats = buildStats(index, member.badges);
+      await prisma.userStats.upsert({
+        where: { userId: member.id },
+        update: stats,
+        create: { userId: member.id, ...stats },
+      });
+    }),
+  );
 
   await seedCandidateStats(prisma);
 
@@ -255,29 +253,35 @@ export async function seedCommunity(prisma: PrismaClient, passwordHash: string):
   const commentIds = POSTS.flatMap((post) => post.comments.map((comment) => comment.id));
   await prisma.forumCommentVote.deleteMany({ where: { commentId: { in: commentIds } } });
 
-  for (const post of POSTS) {
-    await prisma.forumPost.upsert({
-      where: { id: post.id },
-      update: {
-        title: post.title,
-        body: post.body,
-        tags: post.tags,
-        status: post.status,
-        viewCount: post.viewCount,
-      },
-      create: {
-        id: post.id,
-        userId: post.authorId,
-        title: post.title,
-        body: post.body,
-        tags: post.tags,
-        status: post.status,
-        viewCount: post.viewCount,
-      },
-    });
+  await Promise.all(POSTS.map((post) => seedPost(prisma, post)));
 
-    for (const comment of post.comments) {
-      await prisma.forumComment.upsert({
+  return ROSTER.length;
+}
+
+async function seedPost(prisma: PrismaClient, post: SeedPost): Promise<void> {
+  await prisma.forumPost.upsert({
+    where: { id: post.id },
+    update: {
+      title: post.title,
+      body: post.body,
+      tags: post.tags,
+      status: post.status,
+      viewCount: post.viewCount,
+    },
+    create: {
+      id: post.id,
+      userId: post.authorId,
+      title: post.title,
+      body: post.body,
+      tags: post.tags,
+      status: post.status,
+      viewCount: post.viewCount,
+    },
+  });
+
+  await Promise.all(
+    post.comments.map((comment) =>
+      prisma.forumComment.upsert({
         where: { id: comment.id },
         update: { body: comment.body },
         create: {
@@ -286,18 +290,20 @@ export async function seedCommunity(prisma: PrismaClient, passwordHash: string):
           userId: comment.authorId,
           body: comment.body,
         },
-      });
-    }
+      }),
+    ),
+  );
 
-    const postVotes = pickVoters(post.upvoters, post.authorId).map((userId) => ({
-      postId: post.id,
-      userId,
-    }));
-    if (postVotes.length > 0) {
-      await prisma.forumPostVote.createMany({ data: postVotes, skipDuplicates: true });
-    }
+  const postVotes = pickVoters(post.upvoters, post.authorId).map((userId) => ({
+    postId: post.id,
+    userId,
+  }));
+  if (postVotes.length > 0) {
+    await prisma.forumPostVote.createMany({ data: postVotes, skipDuplicates: true });
+  }
 
-    for (const comment of post.comments) {
+  await Promise.all(
+    post.comments.map(async (comment) => {
       const commentVotes = pickVoters(comment.upvoters, comment.authorId).map((userId) => ({
         commentId: comment.id,
         userId,
@@ -305,19 +311,17 @@ export async function seedCommunity(prisma: PrismaClient, passwordHash: string):
       if (commentVotes.length > 0) {
         await prisma.forumCommentVote.createMany({ data: commentVotes, skipDuplicates: true });
       }
-    }
+    }),
+  );
 
-    const reportRows: Prisma.ForumReportCreateManyInput[] = post.reports.map((report) => ({
-      postId: post.id,
-      reporterId: report.reporterId,
-      reason: report.reason,
-    }));
-    if (reportRows.length > 0) {
-      await prisma.forumReport.createMany({ data: reportRows });
-    }
+  const reportRows: Prisma.ForumReportCreateManyInput[] = post.reports.map((report) => ({
+    postId: post.id,
+    reporterId: report.reporterId,
+    reason: report.reason,
+  }));
+  if (reportRows.length > 0) {
+    await prisma.forumReport.createMany({ data: reportRows });
   }
-
-  return ROSTER.length;
 }
 
 async function seedCandidateStats(prisma: PrismaClient): Promise<void> {
@@ -395,7 +399,6 @@ function toEmail(name: string): string {
     .toLowerCase()
     .replace(/[^a-z\s]/g, '')
     .trim()
-    .split(/\s+/)
-    .join('.');
+    .replaceAll(/\s+/g, '.');
   return `${handle}@community.dev`;
 }

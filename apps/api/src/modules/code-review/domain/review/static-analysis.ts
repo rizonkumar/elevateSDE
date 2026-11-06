@@ -2,8 +2,18 @@ import { ProblemLanguage } from '../../../problem/domain/entities/problem';
 
 const SORT_CALL =
   /\b(sort|sorted|Arrays\.sort|Collections\.sort|sort\.Ints|sort\.Slice|sort\.Strings)\s*\(|\.sort\s*\(/;
-const ALLOCATION =
-  /\bnew\s+[A-Z\w<]|\b(HashMap|HashSet|ArrayList|unordered_map|unordered_set|vector<|map<|set<|dict\(|set\(|list\(|defaultdict|Counter|make\(|Map\(|Set\()|=\s*(\{\}|\[\])|:=\s*(map\[|\[\])|\[\s*\w+\s+for\s+/;
+const ALLOCATION_PATTERNS = [
+  /\bnew\s+[\w<]/,
+  /\b(?:HashMap|HashSet|ArrayList|unordered_map|unordered_set|vector<|map<|set<)/,
+  /\b(?:dict\(|set\(|list\(|defaultdict|Counter|make\(|Map\(|Set\()/,
+  /=\s*(?:\{\}|\[\])/,
+  /:=\s*(?:map\[|\[\])/,
+  /\[\s*\w+\s+for\s+/,
+];
+const SHORT_NAME_PATTERNS = [
+  /\b(?:let|const|var|int|long|double|auto|String|boolean|bool)\s+([A-Za-z_])\b/g,
+  /\b([A-Za-z_])\s*(?::=|=(?!=))/g,
+];
 const DEBUG_OUTPUT =
   /\b(console\.log|print\s*\(|System\.out\.print|fmt\.Print|cout\s*<<|printf\s*\()/;
 const ALLOWED_SHORT_NAMES = new Set(['i', 'j', 'k', 'n', 'm', 'x', 'y', 'l', 'r', '_']);
@@ -25,9 +35,22 @@ function stripComments(code: string, language: ProblemLanguage): string {
       .map((line) => line.replace(/#.*$/, ''))
       .join('\n');
   }
-  return code
-    .replace(/\/\*[\s\S]*?\*\//g, (block) => block.replace(/[^\n]/g, ' '))
-    .replace(/\/\/.*$/gm, '');
+  return blankBlockComments(code).replace(/\/\/[^\n\r\u2028\u2029]*/g, '');
+}
+
+function blankBlockComments(code: string): string {
+  let result = '';
+  let position = 0;
+  while (position < code.length) {
+    const start = code.indexOf('/*', position);
+    const end = start === -1 ? -1 : code.indexOf('*/', start + 2);
+    if (end === -1) {
+      break;
+    }
+    result += code.slice(position, start) + code.slice(start, end + 2).replace(/[^\n]/g, ' ');
+    position = end + 2;
+  }
+  return result + code.slice(position);
 }
 
 function braceLoopDepth(code: string): number {
@@ -70,18 +93,18 @@ function indentLoopDepth(code: string): number {
 }
 
 function isRecursive(code: string, functionName: string): boolean {
-  const occurrences = code.match(new RegExp(`\\b${functionName}\\s*\\(`, 'g')) ?? [];
+  const occurrences = [...code.matchAll(new RegExp(String.raw`\b${functionName}\s*\(`, 'g'))];
   return occurrences.length >= 2;
 }
 
 function shortNames(code: string): string[] {
   const names = new Set<string>();
-  const pattern =
-    /\b(?:let|const|var|int|long|double|auto|String|boolean|bool)\s+([A-Za-z_])\b|\b([A-Za-z_])\s*(?::=|=(?!=))/g;
-  for (const match of code.matchAll(pattern)) {
-    const name = match[1] ?? match[2];
-    if (name && !ALLOWED_SHORT_NAMES.has(name)) {
-      names.add(name);
+  for (const pattern of SHORT_NAME_PATTERNS) {
+    for (const match of code.matchAll(pattern)) {
+      const name = match[1];
+      if (name && !ALLOWED_SHORT_NAMES.has(name)) {
+        names.add(name);
+      }
     }
   }
   return [...names].sort((left, right) => left.localeCompare(right));
@@ -97,7 +120,7 @@ export function analyzeCode(
   return {
     maxLoopDepth: language === 'python' ? indentLoopDepth(cleaned) : braceLoopDepth(cleaned),
     usesSort: SORT_CALL.test(cleaned),
-    allocatesCollections: ALLOCATION.test(cleaned),
+    allocatesCollections: ALLOCATION_PATTERNS.some((pattern) => pattern.test(cleaned)),
     isRecursive: isRecursive(cleaned, functionName),
     codeLineCount: lines.filter((line) => line.trim().length > 0).length,
     shortNames: shortNames(cleaned),

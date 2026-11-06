@@ -9,6 +9,18 @@ export interface JobApplicationDetails {
   interviewDate: Date | null;
 }
 
+export interface JobApplicationSnapshot extends JobApplicationDetails {
+  id: string;
+  userId: string;
+  boardPosition: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+function valueOrCurrent<T>(update: T | undefined, current: T): T {
+  return update === undefined ? current : update;
+}
+
 export class JobApplication {
   private constructor(
     private readonly id: string,
@@ -52,31 +64,19 @@ export class JobApplication {
     );
   }
 
-  static reconstitute(
-    id: string,
-    userId: string,
-    company: string,
-    role: string,
-    status: JobApplicationStatus,
-    salaryRange: string | null,
-    jobDescriptionUrl: string | null,
-    interviewDate: Date | null,
-    boardPosition: number,
-    createdAt: Date,
-    updatedAt: Date,
-  ): JobApplication {
+  static reconstitute(snapshot: JobApplicationSnapshot): JobApplication {
     return new JobApplication(
-      id,
-      userId,
-      company,
-      role,
-      status,
-      salaryRange,
-      jobDescriptionUrl,
-      interviewDate,
-      boardPosition,
-      createdAt,
-      updatedAt,
+      snapshot.id,
+      snapshot.userId,
+      snapshot.company,
+      snapshot.role,
+      snapshot.status,
+      snapshot.salaryRange,
+      snapshot.jobDescriptionUrl,
+      snapshot.interviewDate,
+      snapshot.boardPosition,
+      snapshot.createdAt,
+      snapshot.updatedAt,
     );
   }
 
@@ -87,9 +87,9 @@ export class JobApplication {
       details.company ?? this.company,
       details.role ?? this.role,
       details.status ?? this.status,
-      details.salaryRange !== undefined ? details.salaryRange : this.salaryRange,
-      details.jobDescriptionUrl !== undefined ? details.jobDescriptionUrl : this.jobDescriptionUrl,
-      details.interviewDate !== undefined ? details.interviewDate : this.interviewDate,
+      valueOrCurrent(details.salaryRange, this.salaryRange),
+      valueOrCurrent(details.jobDescriptionUrl, this.jobDescriptionUrl),
+      valueOrCurrent(details.interviewDate, this.interviewDate),
       this.boardPosition,
       this.createdAt,
       new Date(),

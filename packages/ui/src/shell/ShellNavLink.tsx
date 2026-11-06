@@ -14,7 +14,7 @@ interface ShellNavLinkProps {
 const FOCUS_RING =
   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--color-accent)';
 
-export function ShellNavLink({ item, active, rail, LinkComponent }: ShellNavLinkProps) {
+export function ShellNavLink({ item, active, rail, LinkComponent }: Readonly<ShellNavLinkProps>) {
   const Icon = item.icon;
   const badgeCount = item.badgeCount ?? 0;
   const showBadge = badgeCount > 0;

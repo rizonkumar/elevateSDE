@@ -7,19 +7,17 @@ import { User } from '../domain/entities/user';
 import { NOTIFICATION_EVENTS } from '../../notification/domain/events/notification-events';
 
 function userWith(status: AccountStatus, email = 'pending@example.com'): User {
-  return User.reconstitute(
-    'target',
+  return User.reconstitute({
+    id: 'target',
     email,
-    'hash',
-    UserRole.USER,
-    null,
-    new Date('2026-10-01T00:00:00.000Z'),
-    null,
-    null,
-    null,
-    null,
+    passwordHash: 'hash',
+    role: UserRole.USER,
+    tenantId: null,
+    createdAt: new Date('2026-10-01T00:00:00.000Z'),
+    firstName: null,
+    lastName: null,
     status,
-  );
+  });
 }
 
 describe('AccountReviewService', () => {

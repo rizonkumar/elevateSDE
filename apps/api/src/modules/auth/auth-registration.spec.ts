@@ -29,7 +29,7 @@ describe('AuthService registration and login', () => {
     users = {
       findByEmail: jest.fn().mockResolvedValue(null),
       create: jest.fn().mockImplementation(async (data: { email: string; role: UserRole }) =>
-        User.create('new-user', data.email, 'hash', data.role),
+        User.create({ id: 'new-user', email: data.email, passwordHash: 'hash', role: data.role }),
       ),
       replacePasswordHash: jest
         .fn()

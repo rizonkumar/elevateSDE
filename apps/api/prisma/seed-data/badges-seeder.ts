@@ -61,19 +61,21 @@ const BADGES: SeedBadge[] = [
 ];
 
 export async function seedBadges(prisma: PrismaClient): Promise<number> {
-  for (const badge of BADGES) {
-    await prisma.badge.upsert({
-      where: { key: badge.key },
-      update: {
-        name: badge.name,
-        description: badge.description,
-        icon: badge.icon,
-        criteriaType: badge.criteriaType,
-        threshold: badge.threshold,
-        isActive: true,
-      },
-      create: { ...badge, isActive: true },
-    });
-  }
+  await Promise.all(
+    BADGES.map((badge) =>
+      prisma.badge.upsert({
+        where: { key: badge.key },
+        update: {
+          name: badge.name,
+          description: badge.description,
+          icon: badge.icon,
+          criteriaType: badge.criteriaType,
+          threshold: badge.threshold,
+          isActive: true,
+        },
+        create: { ...badge, isActive: true },
+      }),
+    ),
+  );
   return prisma.badge.count();
 }

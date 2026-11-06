@@ -51,7 +51,7 @@ export default function DashboardPage() {
         setLoading(false);
       }
     }
-    loadDashboardData();
+    void loadDashboardData();
   }, [addToast]);
 
   const cards = [
@@ -112,11 +112,11 @@ export default function DashboardPage() {
       ) : (
         <div className="flex flex-col gap-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {cards.map((card, idx) => {
+            {cards.map((card) => {
               const Icon = card.icon;
               return (
                 <div
-                  key={idx}
+                  key={card.name}
                   className="p-6 rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-sm flex flex-col gap-4"
                 >
                   <div className="flex items-center justify-between">
@@ -143,11 +143,11 @@ export default function DashboardPage() {
               System Operations
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {opsCards.map((card, idx) => {
+              {opsCards.map((card) => {
                 const Icon = card.icon;
                 return (
                   <div
-                    key={idx}
+                    key={card.name}
                     className="p-6 rounded-xl border border-(--color-border-subtle) bg-(--color-surface) shadow-sm flex flex-col gap-4"
                   >
                     <div className="flex items-center justify-between">

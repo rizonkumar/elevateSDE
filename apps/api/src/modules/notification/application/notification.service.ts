@@ -27,7 +27,7 @@ const ALL_NOTIFICATION_TYPES: NotificationType[] = [
   'SYSTEM',
 ];
 
-const DEFAULT_DISABLED_TYPES: NotificationType[] = ['SUBMISSION_ACCEPTED'];
+const DEFAULT_DISABLED_TYPES: ReadonlySet<NotificationType> = new Set(['SUBMISSION_ACCEPTED']);
 
 @Injectable()
 export class NotificationService {
@@ -101,6 +101,6 @@ export class NotificationService {
   }
 
   private defaultEnabled(type: NotificationType): boolean {
-    return !DEFAULT_DISABLED_TYPES.includes(type);
+    return !DEFAULT_DISABLED_TYPES.has(type);
   }
 }
