@@ -1,6 +1,6 @@
 # Feature Plan: Engagement and Social
 
-> **Status: IN PROGRESS.** Approved with the default answers to the open questions. Branch: `feature/engagement-and-social` (cut from `main`).
+> **Status: DONE.** Approved with the default answers to the open questions. All four phases are implemented. Branch: `feature/engagement-and-social` (cut from `main`).
 
 Four improvements that make progress visible and shared:
 
@@ -362,7 +362,7 @@ These values are computed at read time, the same way contest standings are:
 
 ---
 
-## Open questions (proposed defaults)
+## Decisions (approved defaults)
 
 1. **Default profile visibility.** **Default: private and opt-in.** A profile becomes public only after the user claims a handle and switches it on.
 2. **Can organizations turn public profiles off?** **Default: yes**, with `Tenant.allowPublicProfiles`. B2B customers may not want their candidates to be public.
@@ -372,3 +372,29 @@ These values are computed at read time, the same way contest standings are:
 6. **Real-time peer practice scope.** **Default: presence, status updates and a shared countdown only.** A collaborative editor gets its own plan.
 7. **Study groups for users without an organization.** **Default: no.** Groups are an organization feature. Friend groups for individual users can follow later.
 8. **Who creates groups.** **Default: tenant admins only.** Owners they assign then manage the group.
+
+---
+
+## Deviations from the plan
+
+- **Public profile settings** have their own `GET` and `PATCH /v1/users/me/public-profile` endpoints instead of extending `UserDto`. This keeps the `User` entity and the auth user loading unchanged.
+- **The ratings backfill sends no notifications.** It boots a small Nest context without the notification module, so replaying past contests does not notify anyone.
+- **Contest lifecycle broadcasts** come from a new every-minute `contests.broadcast-status` scheduled job. It publishes `contest:status` for contests that went live, ended, were finalized or were rated in the last 75 s, because contest status is derived from time rather than written by a transition.
+- **Goal notification dedupe keys** are `goal:{goalId}:{recipientId}` for both scopes. `Notification.dedupeKey` is unique across all users, so a single `goal:{goalId}` key would let only the first member be notified. A group-total goal still completes exactly once, through the atomic `completedAt` claim.
+- **Role changes** in study groups are limited to organization admins, who assign owners. Owners manage members and goals but cannot remove another owner. The last owner cannot leave; an admin can still demote or remove them.
+- **Admin adjustments** do not count towards group goals, leaderboards or the activity feed, matching how they are excluded from period point totals.
+
+---
+
+## Verification
+
+- `pnpm turbo run type-check lint test` passes: 12/12 tasks, 672 API tests passing (30 integration-gated skipped) and 18 api-client tests. `next build` succeeds for web.
+- **Phase A:** `/u/[handle]` was rendered against a fixture API at 1280px and 375px, in light and dark mode, for a full profile, an empty profile and a 404. The profile SQL ran against the throwaway Postgres on empty data.
+- **Phase B:** the backfill rated two contests in order against the throwaway Postgres, left out a participant who never submitted, and carried ratings from the first contest into the second. The rating history, both leaderboard scopes and standings ratings returned correct results.
+- **Phase C:** the built API ran against the throwaway Postgres and a temporary Redis. A real JWT connected over WebSocket, `notification:new` and `notification:unread-count` arrived end to end, and the API fell back to the in-memory adapter when Redis was unreachable.
+- **Phase D:** the repository integration suite (`RUN_DATABASE_INTEGRATION=1`, 6 tests) passed against the throwaway Postgres. It covers tenant-scoped member counts, every goal metric, point totals without admin adjustments, activity titles and links, roster search, duplicate names and the one-time goal completion. The groups list, group detail (all four tabs), the goal and add-member modals, the no-organization state and the organization summary card were checked against a mock API at 1280px and 375px, in light and dark mode, with no horizontal scroll.
+- **Not verified:**
+  - The dashboard settings card, standings, peer presence and study group pages against the live API in a logged-in browser.
+  - Live standings and the group activity feed driven by a real sandboxed submission (both covered by unit tests).
+  - Tailscale Funnel WebSocket behaviour.
+  - A live LLM provider (not used by this plan).
