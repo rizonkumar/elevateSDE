@@ -93,6 +93,7 @@ The platform exposes a **single public origin** to users; the admin backoffice i
                  ┌──────────────────────────────────────────────┐
                  │  API (apps/api, NestJS)     :4400             │
                  │  • Global prefix /api, URI versioning /v1     │
+                 │  • Socket.io /realtime (same origin, JWT auth)│
                  │  • PostgreSQL :5432 · Redis :6379             │
                  └──────────────────────────────────────────────┘
 ```
@@ -282,7 +283,7 @@ The `mock-interview` module persists every session (`MockInterviewSession`) and 
 ## Phased Execution Plan
 
 - **Phase 1 (Core Foundations):** Monorepo setup, Auth, Users, RBAC, Basic Questions, Next.js Dashboard.
-- **Phase 2 (Asynchronous & Real-time):** Redis, BullMQ, WebSockets, Notifications, Job Tracker.
+- **Phase 2 (Asynchronous & Real-time):** Redis, BullMQ, WebSockets _(done)_, Notifications, Job Tracker.
 - **Phase 3 (Enterprise & AI):** Multi-tenancy, Stripe Subscriptions, AI Resume Analyzer, LangChain integration.
-- **Phase 4 (Advanced Systems):** pgvector RAG _(pending)_, Dockerized Code Execution Engine _(done)_, Discussion Forums _(done)_, Leaderboards _(done)_, Gamification & Streaks — daily challenges, profile, submission heatmap _(done)_, Achievements & Badges _(done)_, In-App Notifications _(done)_, Problem Discussions + Bookmarks/Notes/Lists _(done)_, Spaced Repetition — backend _(done)_, web UI _(pending)_, Learning Paths / Prep Tracks _(done)_, AI Mock Interviews — persisted sessions, rubric scoring, readiness evidence _(done; RAG pending)_, Coding Contests — admin builder + candidate register/solve/standings _(done, statuses and standings derived at read time; no scheduler needed)_.
+- **Phase 4 (Advanced Systems):** pgvector RAG _(pending)_, Dockerized Code Execution Engine _(done)_, Discussion Forums _(done)_, Leaderboards _(done)_, Gamification & Streaks — daily challenges, profile, submission heatmap _(done)_, Achievements & Badges _(done)_, In-App Notifications _(done)_, Problem Discussions + Bookmarks/Notes/Lists _(done)_, Spaced Repetition — backend _(done)_, web UI _(pending)_, Learning Paths / Prep Tracks _(done)_, AI Mock Interviews — persisted sessions, rubric scoring, readiness evidence _(done; RAG pending)_, Coding Contests — admin builder + candidate register/solve/standings _(done; standings derived at read time and pushed live over Socket.io)_, Contest Ratings — Elo-style rating history _(done)_, Public Profiles — `/u/[handle]` _(done)_, Study Groups — shared goals and group leaderboard _(done)_.
 - **Phase 5 (Production Readiness):** OpenTelemetry, Sentry, Swagger Docs, Feature Flags, Audit Logging, CI/CD pipelines.
