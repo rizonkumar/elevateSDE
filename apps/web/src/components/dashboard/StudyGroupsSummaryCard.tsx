@@ -16,6 +16,15 @@ function Stat({ label, value }: Readonly<{ label: string; value: number }>) {
   );
 }
 
+type SummaryView = 'loading' | 'empty' | 'content';
+
+function resolveSummaryView(isLoading: boolean, groupCount: number): SummaryView {
+  if (isLoading) {
+    return 'loading';
+  }
+  return groupCount === 0 ? 'empty' : 'content';
+}
+
 export function StudyGroupsSummaryCard() {
   const list = useStudyGroupsStore((state) => state.list);
   const listState = useStudyGroupsStore((state) => state.listState);
@@ -29,6 +38,7 @@ export function StudyGroupsSummaryCard() {
   const ranked = [...groups].sort((left, right) => right.memberCount - left.memberCount);
   const memberSeats = groups.reduce((sum, group) => sum + group.memberCount, 0);
   const activeGoals = groups.reduce((sum, group) => sum + group.activeGoalCount, 0);
+  const view = resolveSummaryView(listState === 'loading' && !list, groups.length);
 
   return (
     <div className="card">
@@ -45,13 +55,15 @@ export function StudyGroupsSummaryCard() {
           <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </div>
-      {listState === 'loading' && !list ? (
+      {view === 'loading' && (
         <div className="grid animate-pulse grid-cols-3 gap-3">
           {[0, 1, 2].map((index) => (
             <div key={index} className="h-16 rounded-(--radius-sm) bg-(--color-badge-bg)" />
           ))}
         </div>
-      ) : groups.length === 0 ? (
+      )}
+
+      {view === 'empty' && (
         <p className="m-0 text-sm text-(--color-text-muted)">
           No groups yet. Create cohorts or teams with shared goals from the{' '}
           <Link href="/dashboard/groups" className="text-(--color-accent) hover:underline">
@@ -59,7 +71,9 @@ export function StudyGroupsSummaryCard() {
           </Link>
           .
         </p>
-      ) : (
+      )}
+
+      {view === 'content' && (
         <div className="flex flex-col gap-4">
           <div className="grid grid-cols-3 gap-3">
             <Stat label={groups.length === 1 ? 'Group' : 'Groups'} value={groups.length} />

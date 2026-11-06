@@ -16,7 +16,7 @@ interface ImageProps {
   params: Promise<{ handle: string }>;
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({ label, value }: Readonly<{ label: string; value: string }>) {
   return (
     <div
       style={{

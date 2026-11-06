@@ -13,10 +13,10 @@ function awardedLabel(iso: string): string {
 export function ProfileBadgesCard({
   badges,
   className,
-}: {
+}: Readonly<{
   badges: PublicProfileBadgeDto[];
   className?: string;
-}) {
+}>) {
   return (
     <SectionCard
       className={className}

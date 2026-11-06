@@ -95,7 +95,7 @@ export class FakePublicProfileRepository implements IPublicProfileRepository {
 
   async findOwnerByHandle(handle: string): Promise<PublicProfileOwner | null> {
     const user = this.users.find((candidate) => candidate.settings.handle === handle);
-    if (!user || user.settings.handle === null) {
+    if (!user?.settings.handle) {
       return null;
     }
     return {

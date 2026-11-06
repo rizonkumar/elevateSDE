@@ -141,7 +141,7 @@ export class FakeStudyGroupRepository implements IStudyGroupRepository {
       .filter((member) => member.groupId === groupId)
       .flatMap((member) => {
         const user = this.users.get(member.userId);
-        if (!user || user.tenantId !== tenantId) {
+        if (user?.tenantId !== tenantId) {
           return [];
         }
         return [
@@ -208,7 +208,7 @@ export class FakeStudyGroupRepository implements IStudyGroupRepository {
 
   async archiveGroup(groupId: string, archivedAt: Date): Promise<void> {
     const group = this.groups.get(groupId);
-    if (group && group.archivedAt === null) {
+    if (group?.archivedAt === null) {
       this.groups.set(groupId, { ...group, archivedAt });
     }
   }
@@ -315,7 +315,7 @@ export class FakeStudyGroupRepository implements IStudyGroupRepository {
 
   async markGoalCompleted(goalId: string, completedAt: Date): Promise<boolean> {
     const goal = this.goals.get(goalId);
-    if (!goal || goal.completedAt !== null) {
+    if (goal?.completedAt !== null) {
       return false;
     }
     this.goals.set(goalId, { ...goal, completedAt });
@@ -414,7 +414,7 @@ export class FakeStudyGroupRepository implements IStudyGroupRepository {
       .filter((member) => member.userId === userId)
       .flatMap((member) => {
         const group = this.groups.get(member.groupId);
-        return group && group.tenantId === tenantId && group.archivedAt === null
+        return group?.tenantId === tenantId && group.archivedAt === null
           ? [{ groupId: group.id, tenantId }]
           : [];
       });

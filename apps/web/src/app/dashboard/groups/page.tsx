@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Building2, Plus, UsersRound } from 'lucide-react';
 import { Button } from '@elevatesde/ui';
-import type { StudyGroupSummaryDto } from '@elevatesde/shared-types';
+import type { StudyGroupListDto, StudyGroupSummaryDto } from '@elevatesde/shared-types';
 import { PageContainer } from '@/components/dashboard/PageContainer';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { useSessionTenantStatus } from '@/hooks/use-session-role';
@@ -72,24 +72,136 @@ function NoOrganization() {
   );
 }
 
-export default function StudyGroupsPage() {
+type GroupsView = 'no-organization' | 'loading' | 'error' | 'ready';
+
+type TenantStatus = ReturnType<typeof useSessionTenantStatus>;
+type ListState = ReturnType<typeof useStudyGroupsStore.getState>['listState'];
+
+function resolveGroupsView(
+  tenantStatus: TenantStatus,
+  listState: ListState,
+  list: StudyGroupListDto | null,
+): GroupsView {
+  if (tenantStatus === 'none') {
+    return 'no-organization';
+  }
+  if (tenantStatus === 'pending') {
+    return 'loading';
+  }
+  if (list) {
+    return 'ready';
+  }
+  if (listState === 'error') {
+    return 'error';
+  }
+  return 'loading';
+}
+
+function emptyGroupsDescription(canCreate: boolean, hasDiscoverable: boolean): string {
+  if (canCreate) {
+    return 'Create a group for a team or cohort, then add members and set a shared goal.';
+  }
+  if (hasDiscoverable) {
+    return 'Join an open group below, or ask an owner to add you.';
+  }
+  return 'When an owner adds you to a group, it will show up here.';
+}
+
+function CreateGroupButton({ onClick }: Readonly<{ onClick: () => void }>) {
+  return (
+    <Button type="button" onClick={onClick}>
+      <Plus className="h-4 w-4" />
+      Create group
+    </Button>
+  );
+}
+
+function GroupsLoadError({ onRetry }: Readonly<{ onRetry: () => void }>) {
+  return (
+    <EmptyState
+      icon={UsersRound}
+      title="Groups could not be loaded"
+      description="Something went wrong while loading your groups. Try again in a moment."
+      action={
+        <Button type="button" variant="secondary" onClick={onRetry}>
+          Try again
+        </Button>
+      }
+    />
+  );
+}
+
+interface GroupsListProps {
+  list: StudyGroupListDto;
+  joiningId: string | null;
+  onCreate: () => void;
+  onJoin: (group: StudyGroupSummaryDto) => void;
+}
+
+function YourGroupsSection({ list, onCreate }: Readonly<Pick<GroupsListProps, 'list' | 'onCreate'>>) {
+  const canCreate = list.canCreate;
+  return (
+    <Section title="Your groups" count={list.groups.length}>
+      {list.groups.length === 0 ? (
+        <EmptyState
+          compact
+          icon={UsersRound}
+          title="You are not in a group yet"
+          description={emptyGroupsDescription(canCreate, list.discoverable.length > 0)}
+          action={canCreate ? <CreateGroupButton onClick={onCreate} /> : undefined}
+        />
+      ) : (
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {list.groups.map((group) => (
+            <GroupCard key={group.id} group={group} />
+          ))}
+        </div>
+      )}
+    </Section>
+  );
+}
+
+function DiscoverableSection({
+  list,
+  joiningId,
+  onJoin,
+}: Readonly<Pick<GroupsListProps, 'list' | 'joiningId' | 'onJoin'>>) {
+  if (list.discoverable.length === 0) {
+    return null;
+  }
+  return (
+    <Section
+      title={list.canCreate ? 'Other groups in your organization' : 'Open groups'}
+      count={list.discoverable.length}
+    >
+      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        {list.discoverable.map((group) => (
+          <GroupCard
+            key={group.id}
+            group={group}
+            onJoin={onJoin}
+            joining={joiningId === group.id}
+          />
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+function GroupsList(props: Readonly<GroupsListProps>) {
+  return (
+    <>
+      <YourGroupsSection list={props.list} onCreate={props.onCreate} />
+      <DiscoverableSection list={props.list} joiningId={props.joiningId} onJoin={props.onJoin} />
+    </>
+  );
+}
+
+function useGroupActions() {
   const router = useRouter();
-  const tenantStatus = useSessionTenantStatus();
-  const hasTenant = tenantStatus === 'tenant';
-  const list = useStudyGroupsStore((state) => state.list);
-  const listState = useStudyGroupsStore((state) => state.listState);
-  const loadList = useStudyGroupsStore((state) => state.loadList);
   const create = useStudyGroupsStore((state) => state.create);
   const join = useStudyGroupsStore((state) => state.join);
-  const isMutating = useStudyGroupsStore((state) => state.isMutating);
-  const [creating, setCreating] = React.useState(false);
   const [joiningId, setJoiningId] = React.useState<string | null>(null);
-
-  React.useEffect(() => {
-    if (hasTenant) {
-      void loadList();
-    }
-  }, [hasTenant, loadList]);
 
   const handleCreate = async (values: GroupFormValues): Promise<boolean> => {
     const detail = await create({
@@ -97,11 +209,11 @@ export default function StudyGroupsPage() {
       description: values.description.length > 0 ? values.description : null,
       joinPolicy: values.joinPolicy,
     });
-    if (detail) {
-      router.push(`/dashboard/groups/${detail.id}`);
-      return true;
+    if (!detail) {
+      return false;
     }
-    return false;
+    router.push(`/dashboard/groups/${detail.id}`);
+    return true;
   };
 
   const handleJoin = async (group: StudyGroupSummaryDto) => {
@@ -113,9 +225,27 @@ export default function StudyGroupsPage() {
     }
   };
 
-  const canCreate = list?.canCreate ?? false;
-  const showSkeleton =
-    tenantStatus === 'pending' || (hasTenant && (listState === 'idle' || listState === 'loading') && !list);
+  return { joiningId, handleCreate, handleJoin };
+}
+
+export default function StudyGroupsPage() {
+  const tenantStatus = useSessionTenantStatus();
+  const hasTenant = tenantStatus === 'tenant';
+  const list = useStudyGroupsStore((state) => state.list);
+  const listState = useStudyGroupsStore((state) => state.listState);
+  const loadList = useStudyGroupsStore((state) => state.loadList);
+  const isMutating = useStudyGroupsStore((state) => state.isMutating);
+  const [creating, setCreating] = React.useState(false);
+  const { joiningId, handleCreate, handleJoin } = useGroupActions();
+
+  React.useEffect(() => {
+    if (hasTenant) {
+      void loadList();
+    }
+  }, [hasTenant, loadList]);
+
+  const view = resolveGroupsView(tenantStatus, listState, list);
+  const openCreate = () => setCreating(true);
 
   return (
     <PageContainer>
@@ -124,83 +254,20 @@ export default function StudyGroupsPage() {
           kicker="Community"
           title="Study groups"
           description="Practice alongside your team with shared goals, a group leaderboard and a live activity feed."
-          actions={
-            canCreate ? (
-              <Button type="button" onClick={() => setCreating(true)}>
-                <Plus className="h-4 w-4" />
-                Create group
-              </Button>
-            ) : undefined
-          }
+          actions={list?.canCreate ? <CreateGroupButton onClick={openCreate} /> : undefined}
         />
 
-        {tenantStatus === 'none' ? (
-          <NoOrganization />
-        ) : showSkeleton ? (
-          <GroupGridSkeleton />
-        ) : listState === 'error' && !list ? (
-          <EmptyState
-            icon={UsersRound}
-            title="Groups could not be loaded"
-            description="Something went wrong while loading your groups. Try again in a moment."
-            action={
-              <Button type="button" variant="secondary" onClick={() => void loadList()}>
-                Try again
-              </Button>
-            }
+        {view === 'no-organization' && <NoOrganization />}
+        {view === 'loading' && <GroupGridSkeleton />}
+        {view === 'error' && <GroupsLoadError onRetry={() => void loadList()} />}
+        {view === 'ready' && list && (
+          <GroupsList
+            list={list}
+            joiningId={joiningId}
+            onCreate={openCreate}
+            onJoin={(group) => void handleJoin(group)}
           />
-        ) : list ? (
-          <>
-            <Section title="Your groups" count={list.groups.length}>
-              {list.groups.length === 0 ? (
-                <EmptyState
-                  compact
-                  icon={UsersRound}
-                  title="You are not in a group yet"
-                  description={
-                    canCreate
-                      ? 'Create a group for a team or cohort, then add members and set a shared goal.'
-                      : list.discoverable.length > 0
-                        ? 'Join an open group below, or ask an owner to add you.'
-                        : 'When an owner adds you to a group, it will show up here.'
-                  }
-                  action={
-                    canCreate ? (
-                      <Button type="button" onClick={() => setCreating(true)}>
-                        <Plus className="h-4 w-4" />
-                        Create group
-                      </Button>
-                    ) : undefined
-                  }
-                />
-              ) : (
-                <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                  {list.groups.map((group) => (
-                    <GroupCard key={group.id} group={group} />
-                  ))}
-                </div>
-              )}
-            </Section>
-
-            {list.discoverable.length > 0 && (
-              <Section
-                title={canCreate ? 'Other groups in your organization' : 'Open groups'}
-                count={list.discoverable.length}
-              >
-                <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                  {list.discoverable.map((group) => (
-                    <GroupCard
-                      key={group.id}
-                      group={group}
-                      onJoin={(target) => void handleJoin(target)}
-                      joining={joiningId === group.id}
-                    />
-                  ))}
-                </div>
-              </Section>
-            )}
-          </>
-        ) : null}
+        )}
       </div>
 
       <GroupFormModal

@@ -8,7 +8,7 @@ const DIFFICULTIES: { key: AssessmentDifficulty; label: string; text: string; fi
   { key: 'HARD', label: 'Hard', text: 'text-(--color-danger)', fill: 'bg-(--color-danger)' },
 ];
 
-function SolvedComposition({ profile }: { profile: PublicProfileDto }) {
+function SolvedComposition({ profile }: Readonly<{ profile: PublicProfileDto }>) {
   const { solved } = profile;
   if (solved.solved === 0) {
     return (
@@ -54,10 +54,10 @@ function SolvedComposition({ profile }: { profile: PublicProfileDto }) {
 export function SolvedBreakdownCard({
   profile,
   className,
-}: {
+}: Readonly<{
   profile: PublicProfileDto;
   className?: string;
-}) {
+}>) {
   const { solved } = profile;
   const percent = solved.total > 0 ? Math.round((solved.solved / solved.total) * 100) : 0;
   return (

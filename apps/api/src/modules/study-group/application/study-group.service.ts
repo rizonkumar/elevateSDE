@@ -194,10 +194,11 @@ export class StudyGroupService {
     if (!access.canEdit) {
       throw new ForbiddenException('Only group owners and organization admins can edit a group.');
     }
+    const { description = group.description } = input;
     const draft = unwrap(
       normalizeGroupDraft({
         name: input.name ?? group.name,
-        description: input.description === undefined ? group.description : input.description,
+        description,
         joinPolicy: input.joinPolicy ?? group.joinPolicy,
       }),
     );
@@ -414,7 +415,7 @@ export class StudyGroupService {
       return false;
     }
     const group = await this.repository.findGroup(groupId);
-    if (!group || group.tenantId !== tenantId) {
+    if (group?.tenantId !== tenantId) {
       return false;
     }
     const [membership, isTenantAdmin] = await Promise.all([

@@ -93,6 +93,13 @@ function validate(state: GoalFormState): string | null {
   return null;
 }
 
+function goalSubmitLabel(saving: boolean, editing: boolean): string {
+  if (saving) {
+    return 'Saving…';
+  }
+  return editing ? 'Save goal' : 'Add goal';
+}
+
 export function GoalFormModal({
   open,
   goal,
@@ -190,7 +197,7 @@ export function GoalFormModal({
             Cancel
           </Button>
           <Button type="submit" disabled={saving}>
-            {saving ? 'Saving…' : goal ? 'Save goal' : 'Add goal'}
+            {goalSubmitLabel(saving, goal !== null)}
           </Button>
         </div>
       </form>

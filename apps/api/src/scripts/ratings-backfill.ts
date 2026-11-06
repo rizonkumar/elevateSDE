@@ -25,6 +25,6 @@ async function backfill(): Promise<void> {
 }
 
 backfill().catch((error: unknown) => {
-  new Logger('RatingsBackfill').error(error instanceof Error ? error.stack : String(error));
+  new Logger('RatingsBackfill').error(error instanceof Error ? error.stack : JSON.stringify(error));
   process.exitCode = 1;
 });

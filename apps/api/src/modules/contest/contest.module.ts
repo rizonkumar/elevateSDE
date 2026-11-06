@@ -7,6 +7,7 @@ import { ContestStandingsService } from './application/contest-standings.service
 import { ContestFinalizationService } from './application/contest-finalization.service';
 import { ContestRatingService } from './application/contest-rating.service';
 import { ContestLifecycleBroadcaster } from './application/contest-lifecycle-broadcaster.service';
+import { ContestScheduledJobsService } from './application/contest-scheduled-jobs.service';
 import { ContestLiveStandingsListener } from './presentation/listeners/contest-live-standings.listener';
 import { ContestRoomAuthorizer } from './presentation/realtime/contest-room.authorizer';
 import { IContestRatingRepository } from './domain/interfaces/contest-rating-repository.interface';
@@ -27,6 +28,7 @@ import { LeaderboardModule } from '../leaderboard/leaderboard.module';
     ContestFinalizationService,
     ContestRatingService,
     ContestLifecycleBroadcaster,
+    ContestScheduledJobsService,
     ContestLiveStandingsListener,
     ContestRoomAuthorizer,
     PrismaService,
@@ -44,6 +46,7 @@ import { LeaderboardModule } from '../leaderboard/leaderboard.module';
     ContestFinalizationService,
     ContestRatingService,
     ContestLifecycleBroadcaster,
+    ContestScheduledJobsService,
   ],
 })
 export class ContestModule {}

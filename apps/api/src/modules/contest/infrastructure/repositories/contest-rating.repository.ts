@@ -132,9 +132,9 @@ export class ContestRatingRepository implements IContestRatingRepository {
             createdAt: command.ratedAt,
           })),
         });
-        for (const change of changes) {
+        const upserts = changes.map((change) => {
           const previousPeak = ratingByUser.get(change.userId)?.peakRating ?? INITIAL_RATING;
-          await transaction.userRating.upsert({
+          return transaction.userRating.upsert({
             where: { userId: change.userId },
             create: {
               userId: change.userId,
@@ -150,7 +150,8 @@ export class ContestRatingRepository implements IContestRatingRepository {
               lastRatedAt: command.ratedAt,
             },
           });
-        }
+        });
+        await Promise.all(upserts);
         return changes;
       },
       { timeout: RATING_TRANSACTION_TIMEOUT_MS },

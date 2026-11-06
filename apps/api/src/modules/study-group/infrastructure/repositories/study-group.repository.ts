@@ -130,18 +130,19 @@ export class StudyGroupRepository implements IStudyGroupRepository {
     groupIds: readonly string[],
     tenantId: string,
   ): Promise<Map<string, string[]>> {
-    const byGroup = new Map<string, string[]>(groupIds.map((groupId) => [groupId, []]));
-    if (groupIds.length === 0) {
-      return byGroup;
-    }
-    const rows = await this.prisma.studyGroupMember.findMany({
-      where: { groupId: { in: [...groupIds] }, user: { tenantId } },
-      select: { groupId: true, userId: true },
-    });
-    for (const row of rows) {
-      byGroup.get(row.groupId)?.push(row.userId);
-    }
-    return byGroup;
+    const rows =
+      groupIds.length === 0
+        ? []
+        : await this.prisma.studyGroupMember.findMany({
+            where: { groupId: { in: [...groupIds] }, user: { tenantId } },
+            select: { groupId: true, userId: true },
+          });
+    return new Map(
+      groupIds.map((groupId) => [
+        groupId,
+        rows.filter((row) => row.groupId === groupId).map((row) => row.userId),
+      ]),
+    );
   }
 
   async countMembers(groupId: string, tenantId: string): Promise<number> {
@@ -339,10 +340,17 @@ export class StudyGroupRepository implements IStudyGroupRepository {
     metric: StudyGoalMetric,
     window: GoalWindow,
   ): Promise<Map<string, number>> {
-    const totals = new Map<string, number>();
     if (userIds.length === 0) {
-      return totals;
+      return new Map();
     }
+    return new Map(await this.metricEntries(userIds, metric, window));
+  }
+
+  private async metricEntries(
+    userIds: readonly string[],
+    metric: StudyGoalMetric,
+    window: GoalWindow,
+  ): Promise<Array<[string, number]>> {
     const inWindow = { gte: window.from, lt: window.to };
     if (metric === StudyGoalMetric.CONTESTS_ENTERED) {
       const rows = await this.prisma.$queryRaw<Array<{ userId: string; entered: number }>>(Prisma.sql`
@@ -363,8 +371,7 @@ export class StudyGroupRepository implements IStudyGroupRepository {
           )
         GROUP BY cp."userId"
       `);
-      rows.forEach((row) => totals.set(row.userId, row.entered));
-      return totals;
+      return rows.map((row) => [row.userId, row.entered]);
     }
     if (metric === StudyGoalMetric.POINTS) {
       const rows = await this.prisma.pointLedger.groupBy({
@@ -376,20 +383,18 @@ export class StudyGroupRepository implements IStudyGroupRepository {
         },
         _sum: { delta: true },
       });
-      rows.forEach((row) => totals.set(row.userId, row._sum.delta ?? 0));
-      return totals;
+      return rows.map((row) => [row.userId, row._sum.delta ?? 0]);
     }
     const source = LEDGER_SOURCE_FOR_COUNT_METRIC[metric];
     if (!source) {
-      return totals;
+      return [];
     }
     const rows = await this.prisma.pointLedger.groupBy({
       by: ['userId'],
       where: { userId: { in: [...userIds] }, source, createdAt: inWindow },
       _count: { _all: true },
     });
-    rows.forEach((row) => totals.set(row.userId, row._count._all));
-    return totals;
+    return rows.map((row) => [row.userId, row._count._all]);
   }
 
   async pointTotals(

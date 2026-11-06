@@ -35,6 +35,13 @@ const POLICY_OPTIONS: { value: StudyGroupJoinPolicy; label: string; description:
   },
 ];
 
+function groupSubmitLabel(saving: boolean, mode: 'create' | 'edit'): string {
+  if (saving) {
+    return 'Saving…';
+  }
+  return mode === 'create' ? 'Create group' : 'Save changes';
+}
+
 export function GroupFormModal({
   open,
   mode,
@@ -118,7 +125,7 @@ export function GroupFormModal({
             Cancel
           </Button>
           <Button type="submit" disabled={saving || trimmedName.length === 0}>
-            {saving ? 'Saving…' : mode === 'create' ? 'Create group' : 'Save changes'}
+            {groupSubmitLabel(saving, mode)}
           </Button>
         </div>
       </form>

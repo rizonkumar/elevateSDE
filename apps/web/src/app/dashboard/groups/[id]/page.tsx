@@ -10,6 +10,7 @@ import {
   type StudyGroupDetailDto,
   type StudyGroupGoalDto,
   type StudyGroupGoalInput,
+  type StudyGroupJoinPolicy,
 } from '@elevatesde/shared-types';
 import { PageContainer } from '@/components/dashboard/PageContainer';
 import { useRealtimeEvent, useRealtimeRoom } from '@/hooks/use-realtime';
@@ -28,6 +29,15 @@ import { GroupMonogram } from '../_components/GroupMonogram';
 type DetailTab = 'overview' | 'leaderboard' | 'members' | 'activity';
 
 type PendingConfirm = 'leave' | 'archive' | null;
+
+function confirmDescription(confirm: PendingConfirm, joinPolicy: StudyGroupJoinPolicy): string {
+  if (confirm === 'archive') {
+    return 'The group, its goals and leaderboard will be hidden for everyone. Member activity is kept.';
+  }
+  return joinPolicy === 'OPEN'
+    ? 'You can join again at any time.'
+    : 'An owner will need to add you back.';
+}
 
 function DetailSkeleton() {
   return (
@@ -435,13 +445,7 @@ export default function StudyGroupDetailPage() {
       <ConfirmDialog
         open={confirm !== null}
         title={confirm === 'archive' ? 'Archive this group?' : 'Leave this group?'}
-        description={
-          confirm === 'archive'
-            ? 'The group, its goals and leaderboard will be hidden for everyone. Member activity is kept.'
-            : group.joinPolicy === 'OPEN'
-              ? 'You can join again at any time.'
-              : 'An owner will need to add you back.'
-        }
+        description={confirmDescription(confirm, group.joinPolicy)}
         confirmLabel={confirm === 'archive' ? 'Archive group' : 'Leave group'}
         tone="danger"
         loading={isMutating}

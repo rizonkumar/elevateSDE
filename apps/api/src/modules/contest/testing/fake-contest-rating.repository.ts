@@ -113,7 +113,7 @@ export class FakeContestRatingRepository implements IContestRatingRepository {
 
   private claim(contestId: string, ratedAt: Date): boolean {
     const contest = this.contests.find((entry) => entry.id === contestId);
-    if (!contest || contest.ratedAt !== null) {
+    if (contest?.ratedAt !== null) {
       return false;
     }
     contest.ratedAt = ratedAt;

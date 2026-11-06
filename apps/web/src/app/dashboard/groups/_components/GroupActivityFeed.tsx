@@ -34,7 +34,17 @@ function Subject({ item }: Readonly<{ item: StudyGroupActivityItemDto }>) {
   );
 }
 
+type ActivityView = 'loading' | 'empty' | 'list';
+
+function resolveActivityView(loading: boolean, itemCount: number): ActivityView {
+  if (itemCount > 0) {
+    return 'list';
+  }
+  return loading ? 'loading' : 'empty';
+}
+
 export function GroupActivityFeed({ items, loading, live }: Readonly<GroupActivityFeedProps>) {
+  const view = resolveActivityView(loading, items.length);
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-3">
@@ -43,20 +53,24 @@ export function GroupActivityFeed({ items, loading, live }: Readonly<GroupActivi
         </h2>
         <LiveIndicator live={live} fallbackLabel="Live updates paused" />
       </div>
-      {loading && items.length === 0 ? (
+      {view === 'loading' && (
         <div className="flex flex-col gap-2" aria-label="Loading activity">
           {[0, 1, 2].map((index) => (
             <div key={index} className="h-14 animate-pulse rounded-md bg-(--color-badge-bg)" />
           ))}
         </div>
-      ) : items.length === 0 ? (
+      )}
+
+      {view === 'empty' && (
         <EmptyState
           compact
           icon={Activity}
           title="It is quiet in here"
           description="Solved problems, daily challenges and contest results from members will show up here as they happen."
         />
-      ) : (
+      )}
+
+      {view === 'list' && (
         <ol className="m-0 flex list-none flex-col divide-y divide-(--color-border-subtle) overflow-hidden rounded-md border border-(--color-border-subtle) bg-(--color-surface) p-0 shadow-(--shadow-card)">
           {items.map((item) => (
             <li key={item.id} className="flex items-start gap-3 px-4 py-3 sm:items-center">

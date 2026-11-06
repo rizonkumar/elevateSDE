@@ -15,7 +15,7 @@ export function CopyProfileLinkButton({
   path,
   label = 'Copy link',
   className = '',
-}: CopyProfileLinkButtonProps) {
+}: Readonly<CopyProfileLinkButtonProps>) {
   const [copied, setCopied] = React.useState(false);
 
   React.useEffect(() => {

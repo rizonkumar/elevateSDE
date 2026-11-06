@@ -12,7 +12,7 @@ function dayLabel(days: number): string {
   return `${days} ${days === 1 ? 'day' : 'days'}`;
 }
 
-export function ProfileStatGrid({ profile }: { profile: PublicProfileDto }) {
+export function ProfileStatGrid({ profile }: Readonly<{ profile: PublicProfileDto }>) {
   const tiles: StatTile[] = [
     {
       label: 'Problems solved',

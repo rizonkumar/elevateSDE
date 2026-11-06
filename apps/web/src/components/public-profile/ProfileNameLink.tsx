@@ -10,7 +10,7 @@ export function publicProfilePath(handle: string): string {
   return `/u/${encodeURIComponent(handle)}`;
 }
 
-export function ProfileNameLink({ name, publicHandle, className = '' }: ProfileNameLinkProps) {
+export function ProfileNameLink({ name, publicHandle, className = '' }: Readonly<ProfileNameLinkProps>) {
   if (!publicHandle) {
     return <span className={className}>{name}</span>;
   }

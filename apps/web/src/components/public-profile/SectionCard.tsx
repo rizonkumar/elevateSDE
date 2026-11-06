@@ -7,7 +7,7 @@ interface SectionCardProps {
   className?: string;
 }
 
-export function SectionCard({ title, aside, children, className = '' }: SectionCardProps) {
+export function SectionCard({ title, aside, children, className = '' }: Readonly<SectionCardProps>) {
   return (
     <section
       className={`rounded-md border border-(--color-border-subtle) bg-(--color-surface) p-5 shadow-(--shadow-card) sm:p-6 ${className}`.trim()}
@@ -23,7 +23,7 @@ export function SectionCard({ title, aside, children, className = '' }: SectionC
   );
 }
 
-export function EmptyNote({ children }: { children: React.ReactNode }) {
+export function EmptyNote({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <p className="m-0 rounded-md border border-dashed border-(--color-border) px-4 py-6 text-center text-sm text-(--color-text-muted)">
       {children}

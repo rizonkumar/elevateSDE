@@ -79,9 +79,9 @@ export class RealtimeGateway
     this.rateLimiters.delete(socket.id);
     const peerRooms = this.departingPeerRooms.get(socket.id) ?? [];
     this.departingPeerRooms.delete(socket.id);
-    for (const room of peerRooms) {
-      await this.announceDepartureIfLast(room, socket.data.userId);
-    }
+    await Promise.all(
+      peerRooms.map((room) => this.announceDepartureIfLast(room, socket.data.userId)),
+    );
   }
 
   @SubscribeMessage('room:subscribe')

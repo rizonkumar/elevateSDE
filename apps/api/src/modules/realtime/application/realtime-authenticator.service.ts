@@ -27,7 +27,7 @@ export class RealtimeAuthenticator {
       throw new RealtimeAuthError(REALTIME_AUTH_ERRORS.UNAUTHORIZED);
     }
     const user = await this.usersService.findById(payload.sub).catch(() => null);
-    if (!user || !user.isActive()) {
+    if (!user?.isActive()) {
       throw new RealtimeAuthError(REALTIME_AUTH_ERRORS.FORBIDDEN);
     }
     return {

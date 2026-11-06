@@ -66,6 +66,18 @@ function NameCell({ entry }: Readonly<{ entry: StudyGroupLeaderboardEntryDto }>)
   );
 }
 
+type LeaderboardView = 'loading' | 'empty' | 'table';
+
+function resolveLeaderboardView(
+  loading: boolean,
+  leaderboard: StudyGroupLeaderboardDto | null,
+): LeaderboardView {
+  if (!leaderboard) {
+    return loading ? 'loading' : 'empty';
+  }
+  return leaderboard.entries.length === 0 ? 'empty' : 'table';
+}
+
 export function GroupLeaderboard({
   leaderboard,
   window,
@@ -73,6 +85,7 @@ export function GroupLeaderboard({
   onWindowChange,
 }: Readonly<GroupLeaderboardProps>) {
   const fellBack = leaderboard?.window === 'week' && window === 'goal';
+  const view = resolveLeaderboardView(loading, leaderboard);
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -91,20 +104,24 @@ export function GroupLeaderboard({
         )}
       </div>
 
-      {loading && !leaderboard ? (
+      {view === 'loading' && (
         <div className="flex flex-col gap-2" aria-label="Loading leaderboard">
           {[0, 1, 2, 3].map((index) => (
             <div key={index} className="h-12 animate-pulse rounded-md bg-(--color-badge-bg)" />
           ))}
         </div>
-      ) : !leaderboard || leaderboard.entries.length === 0 ? (
+      )}
+
+      {view === 'empty' && (
         <EmptyState
           compact
           icon={Trophy}
           title="No one to rank yet"
           description="Add members to the group and their points will appear here."
         />
-      ) : (
+      )}
+
+      {view === 'table' && leaderboard && (
         <div className={loading ? 'opacity-60 transition-opacity' : 'transition-opacity'}>
           <div className="hidden overflow-hidden rounded-md border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-card) md:block">
             <table className="w-full border-collapse text-left text-sm">

@@ -58,9 +58,11 @@ export class StudyGroupActivityService {
         [...new Set(goals.map((goal) => goal.groupId))],
         tenantId,
       );
-      for (const goal of goals) {
-        await this.evaluateGoal(goal, membersByGroup.get(goal.groupId) ?? [], [event.userId], now);
-      }
+      await Promise.all(
+        goals.map((goal) =>
+          this.evaluateGoal(goal, membersByGroup.get(goal.groupId) ?? [], [event.userId], now),
+        ),
+      );
     }
     return { groupIds, activity: record ? toActivityView(record) : null };
   }
@@ -71,8 +73,13 @@ export class StudyGroupActivityService {
   ): Promise<void> {
     const tenantByGroup = new Map<string, string>();
     const participantsByGroup = new Map<string, string[]>();
-    for (const userId of event.participantIds) {
-      const memberships = await this.repository.listActiveMembershipsForUser(userId);
+    const membershipsByUser = await Promise.all(
+      event.participantIds.map(async (userId) => ({
+        userId,
+        memberships: await this.repository.listActiveMembershipsForUser(userId),
+      })),
+    );
+    for (const { userId, memberships } of membershipsByUser) {
       for (const membership of memberships) {
         tenantByGroup.set(membership.groupId, membership.tenantId);
         participantsByGroup.set(membership.groupId, [
@@ -87,19 +94,21 @@ export class StudyGroupActivityService {
     const goals = (await this.repository.listInProgressGoals([...tenantByGroup.keys()], now)).filter(
       (goal) => goal.metric === StudyGoalMetric.CONTESTS_ENTERED,
     );
-    for (const goal of goals) {
-      const tenantId = tenantByGroup.get(goal.groupId);
-      if (!tenantId) {
-        continue;
-      }
-      const membersByGroup = await this.repository.listMemberIdsByGroup([goal.groupId], tenantId);
-      await this.evaluateGoal(
-        goal,
-        membersByGroup.get(goal.groupId) ?? [],
-        participantsByGroup.get(goal.groupId) ?? [],
-        now,
-      );
-    }
+    await Promise.all(
+      goals.map(async (goal) => {
+        const tenantId = tenantByGroup.get(goal.groupId);
+        if (!tenantId) {
+          return;
+        }
+        const membersByGroup = await this.repository.listMemberIdsByGroup([goal.groupId], tenantId);
+        await this.evaluateGoal(
+          goal,
+          membersByGroup.get(goal.groupId) ?? [],
+          participantsByGroup.get(goal.groupId) ?? [],
+          now,
+        );
+      }),
+    );
   }
 
   private async evaluateGoal(

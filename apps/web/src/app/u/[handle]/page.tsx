@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: PublicProfilePageProps): Prom
   };
 }
 
-export default async function PublicProfilePage({ params }: PublicProfilePageProps) {
+export default async function PublicProfilePage({ params }: Readonly<PublicProfilePageProps>) {
   const { handle } = await params;
   const profile = await fetchPublicProfile(handle);
   if (!profile) {

@@ -30,13 +30,8 @@ export class PointsService {
       const award = PointAward.contestResult(contestId, placement);
       return award ? [award] : [];
     });
-    let awardedCount = 0;
-    for (const award of awards) {
-      if (await this.awardAndAnnounce(award)) {
-        awardedCount += 1;
-      }
-    }
-    return awardedCount;
+    const results = await Promise.all(awards.map((award) => this.awardAndAnnounce(award)));
+    return results.filter(Boolean).length;
   }
 
   async adjustTo(userId: string, targetPoints: number): Promise<boolean> {

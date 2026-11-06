@@ -45,7 +45,7 @@ function profileLinks(profile: PublicProfileDto): ProfileLink[] {
   return links;
 }
 
-export function ProfileHeaderCard({ profile }: ProfileHeaderCardProps) {
+export function ProfileHeaderCard({ profile }: Readonly<ProfileHeaderCardProps>) {
   const links = profileLinks(profile);
   return (
     <section className="rounded-md border border-(--color-border-subtle) bg-(--color-surface) p-5 shadow-(--shadow-card) sm:p-8">

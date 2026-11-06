@@ -20,10 +20,10 @@ function solvedLabel(iso: string): string {
 export function RecentSolvesCard({
   solves,
   className,
-}: {
+}: Readonly<{
   solves: PublicProfileRecentSolveDto[];
   className?: string;
-}) {
+}>) {
   return (
     <SectionCard className={className} title="Recent solves">
       {solves.length === 0 ? (

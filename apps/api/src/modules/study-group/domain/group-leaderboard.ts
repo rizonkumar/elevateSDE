@@ -70,8 +70,7 @@ export function rankMembers(
   scored.forEach((member, index) => {
     const previous = ranked[index - 1];
     const tied =
-      previous !== undefined &&
-      previous.points === member.points &&
+      previous?.points === member.points &&
       previous.problemsSolved === member.problemsSolved;
     ranked.push({ ...member, rank: tied ? previous.rank : index + 1 });
   });

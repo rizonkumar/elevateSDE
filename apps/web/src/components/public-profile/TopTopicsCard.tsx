@@ -5,10 +5,10 @@ import { EmptyNote, SectionCard } from './SectionCard';
 export function TopTopicsCard({
   topics,
   className,
-}: {
+}: Readonly<{
   topics: PublicProfileTopicDto[];
   className?: string;
-}) {
+}>) {
   const max = topics.reduce((highest, topic) => Math.max(highest, topic.solved), 0);
   return (
     <SectionCard className={className} title="Top topics">

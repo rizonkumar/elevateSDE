@@ -13,9 +13,9 @@ describe('resolvePublicHandle', () => {
   });
 
   it('hides private profiles', () => {
-    expect(resolvePublicHandle({ ...base, profileVisibility: ProfileVisibility.PRIVATE })).toBe(
-      null,
-    );
+    expect(
+      resolvePublicHandle({ ...base, profileVisibility: ProfileVisibility.PRIVATE }),
+    ).toBeNull();
   });
 
   it('hides profiles without a handle', () => {
@@ -23,7 +23,7 @@ describe('resolvePublicHandle', () => {
   });
 
   it('hides profiles when the tenant disallows public profiles', () => {
-    expect(resolvePublicHandle({ ...base, tenant: { allowPublicProfiles: false } })).toBe(null);
+    expect(resolvePublicHandle({ ...base, tenant: { allowPublicProfiles: false } })).toBeNull();
     expect(resolvePublicHandle({ ...base, tenant: { allowPublicProfiles: true } })).toBe('ada');
   });
 });

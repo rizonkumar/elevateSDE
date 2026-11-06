@@ -5,8 +5,7 @@ interface LiveIndicatorProps {
 
 export function LiveIndicator({ live, fallbackLabel }: Readonly<LiveIndicatorProps>) {
   return (
-    <span
-      role="status"
+    <output
       className="inline-flex items-center gap-1.5 rounded-(--radius-full) border border-(--color-border-subtle) bg-(--color-surface) px-2.5 py-0.5 text-xs font-medium text-(--color-text-muted)"
     >
       <span
@@ -18,6 +17,6 @@ export function LiveIndicator({ live, fallbackLabel }: Readonly<LiveIndicatorPro
         }`}
       />
       {live ? 'Live' : fallbackLabel}
-    </span>
+    </output>
   );
 }

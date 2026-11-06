@@ -102,11 +102,11 @@ function HandleHint({
   problem,
   status,
   unchanged,
-}: {
+}: Readonly<{
   problem: string | null;
   status: HandleStatus;
   unchanged: boolean;
-}) {
+}>) {
   if (problem) {
     return (
       <p className="m-0 flex items-start gap-1.5 text-xs text-(--color-danger)">
@@ -198,7 +198,7 @@ function SettingsSkeleton() {
   );
 }
 
-function SettingsForm({ settings }: { settings: PublicProfileSettingsDto }) {
+function SettingsForm({ settings }: Readonly<{ settings: PublicProfileSettingsDto }>) {
   const save = usePublicProfileSettingsStore((state) => state.save);
   const isSaving = usePublicProfileSettingsStore((state) => state.isSaving);
   const saved = React.useMemo(() => toForm(settings), [settings]);

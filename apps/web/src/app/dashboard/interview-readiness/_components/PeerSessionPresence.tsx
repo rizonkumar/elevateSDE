@@ -79,8 +79,7 @@ export function PeerSessionPresence({ session, currentUserId }: Readonly<PeerSes
   return (
     <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
       {joined && (
-        <span
-          role="status"
+        <output
           className={`inline-flex items-center gap-1.5 rounded-(--radius-full) border px-2.5 py-0.5 font-medium ${
             partnerOnline
               ? 'border-(--color-success)/30 bg-(--color-success-soft) text-(--color-success)'
@@ -96,7 +95,7 @@ export function PeerSessionPresence({ session, currentUserId }: Readonly<PeerSes
             }`}
           />
           {partnerOnline ? 'Partner is here' : 'Partner is away'}
-        </span>
+        </output>
       )}
       {timing && (
         <span className="inline-flex items-center gap-1.5 rounded-(--radius-full) border border-(--color-border-subtle) bg-(--color-surface) px-2.5 py-0.5 font-medium tabular-nums text-(--color-text-muted)">

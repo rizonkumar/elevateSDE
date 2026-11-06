@@ -2,7 +2,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import { PublicProfileTopbar } from '@/components/public-profile/PublicProfileTopbar';
 
-export default function PublicProfileLayout({ children }: { children: React.ReactNode }) {
+export default function PublicProfileLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <div className="flex min-h-full flex-1 flex-col bg-(--color-bg-soft)">
       <PublicProfileTopbar />

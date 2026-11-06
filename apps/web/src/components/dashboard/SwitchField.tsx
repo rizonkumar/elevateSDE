@@ -10,7 +10,7 @@ interface SwitchFieldProps {
   onChange: (value: boolean) => void;
 }
 
-export function SwitchField({ label, description, checked, disabled, onChange }: SwitchFieldProps) {
+export function SwitchField({ label, description, checked, disabled, onChange }: Readonly<SwitchFieldProps>) {
   const labelId = React.useId();
   const descriptionId = React.useId();
   return (
