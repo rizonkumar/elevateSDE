@@ -3,6 +3,7 @@ import { PointsService } from '../../leaderboard/application/points.service';
 import { DailyChallengeService } from '../../daily-challenge/application/daily-challenge.service';
 import { ContestFinalizationService } from '../../contest/application/contest-finalization.service';
 import { ContestRatingService } from '../../contest/application/contest-rating.service';
+import { ContestLifecycleBroadcaster } from '../../contest/application/contest-lifecycle-broadcaster.service';
 import { PeerPracticeService } from '../../interview-preparation/application/peer-practice.service';
 import { AuthService } from '../../auth/auth.service';
 import { MockInterviewService } from '../../mock-interview/application/mock-interview.service';
@@ -20,6 +21,7 @@ function buildRunner(): {
     refreshPeriodTotals,
     expireStreaks: jest.fn().mockResolvedValue(3),
     finalizeEnded: jest.fn().mockResolvedValue(4),
+    broadcastRecent: jest.fn().mockResolvedValue(8),
     sweepPreparationReminders: jest.fn().mockResolvedValue(5),
     pruneExpiredRefreshTokens: jest.fn().mockResolvedValue(6),
     sweep: jest.fn().mockResolvedValue(7),
@@ -30,6 +32,7 @@ function buildRunner(): {
     { expireStreaks: handlers.expireStreaks } as unknown as DailyChallengeService,
     { finalizeEnded: handlers.finalizeEnded } as unknown as ContestFinalizationService,
     { ratePending } as unknown as ContestRatingService,
+    { broadcastRecent: handlers.broadcastRecent } as unknown as ContestLifecycleBroadcaster,
     {
       sweepPreparationReminders: handlers.sweepPreparationReminders,
     } as unknown as PeerPracticeService,
@@ -56,6 +59,7 @@ describe('ScheduledJobRunner', () => {
   it.each<[ScheduledJobName, string, number]>([
     [SCHEDULED_JOBS.EXPIRE_STREAKS, 'expireStreaks', 3],
     [SCHEDULED_JOBS.FINALIZE_CONTESTS, 'finalizeEnded', 4],
+    [SCHEDULED_JOBS.BROADCAST_CONTEST_STATUS, 'broadcastRecent', 8],
     [SCHEDULED_JOBS.SWEEP_PREPARATION_REMINDERS, 'sweepPreparationReminders', 5],
     [SCHEDULED_JOBS.PRUNE_REFRESH_TOKENS, 'pruneExpiredRefreshTokens', 6],
     [SCHEDULED_JOBS.SWEEP_MOCK_INTERVIEWS, 'sweep', 7],

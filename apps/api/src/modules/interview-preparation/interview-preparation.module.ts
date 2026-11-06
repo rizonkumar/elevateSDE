@@ -5,6 +5,8 @@ import { InterviewPreparationService } from './application/interview-preparation
 import { PeerPracticeService } from './application/peer-practice.service';
 import { ReadinessNarrativeService } from './application/readiness-narrative.service';
 import { MockInterviewCompletedListener } from './application/listeners/mock-interview-completed.listener';
+import { PeerSessionRealtimeListener } from './application/listeners/peer-session-realtime.listener';
+import { PeerSessionRoomAuthorizer } from './presentation/realtime/peer-session-room.authorizer';
 import { IReadinessNarrativeProvider } from './domain/interfaces/readiness-narrative-provider.interface';
 import { IInterviewPreparationRepository } from './domain/interfaces/interview-preparation-repository.interface';
 import { InterviewPreparationRepository } from './infrastructure/repositories/interview-preparation.repository';
@@ -19,6 +21,8 @@ import { InterviewPreparationController } from './presentation/controllers/inter
     PeerPracticeService,
     ReadinessNarrativeService,
     MockInterviewCompletedListener,
+    PeerSessionRealtimeListener,
+    PeerSessionRoomAuthorizer,
     PrismaService,
     { provide: IReadinessNarrativeProvider, useClass: OpenAiCompatibleReadinessProvider },
     { provide: IInterviewPreparationRepository, useClass: InterviewPreparationRepository },

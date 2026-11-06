@@ -12,6 +12,8 @@ import {
   resolveCorsOrigins,
   resolveTrustProxy,
 } from './infrastructure/config/security-config';
+import { RedisIoAdapter } from './modules/realtime/infrastructure/redis-io.adapter';
+import { resolveRedisUrl } from './modules/queues/infrastructure/redis-connection';
 
 const JSON_BODY_LIMIT = '1mb';
 
@@ -38,6 +40,10 @@ async function bootstrap() {
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
+
+  const ioAdapter = new RedisIoAdapter(app, resolveCorsOrigins());
+  await ioAdapter.connectToRedis(resolveRedisUrl());
+  app.useWebSocketAdapter(ioAdapter);
 
   app.setGlobalPrefix('api');
 

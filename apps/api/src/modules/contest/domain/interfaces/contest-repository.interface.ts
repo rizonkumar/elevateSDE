@@ -3,6 +3,7 @@ import {
   AcceptedSubmissionView,
   ContestDetailView,
   ContestFinalResult,
+  ContestLifecycleView,
   ContestParticipantView,
   ContestProblemAssignment,
   ContestSummaryView,
@@ -37,6 +38,8 @@ export abstract class IContestRepository {
     from: Date,
     to: Date,
   ): Promise<boolean>;
+  abstract findLiveContestIdsForEntry(userId: string, problemId: string, at: Date): Promise<string[]>;
+  abstract findLifecycleChanges(after: Date, upTo: Date): Promise<ContestLifecycleView[]>;
   abstract saveFinalResults(
     contestId: string,
     results: ContestFinalResult[],

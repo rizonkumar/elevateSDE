@@ -65,6 +65,30 @@ export class ContestParticipationService {
 
   async standings(slug: string, userId: string): Promise<ContestStandingRowView[]> {
     const detail = await this.requireVisibleDetail(slug);
+    return this.rankRows(detail, userId);
+  }
+
+  async liveStandings(contestId: string): Promise<ContestStandingRowView[] | null> {
+    const detail = await this.repository.findDetail(contestId);
+    if (!detail || detail.status === ContestStatus.DRAFT) {
+      return null;
+    }
+    return this.rankRows(detail, null);
+  }
+
+  async isVisibleContest(contestId: string): Promise<boolean> {
+    const contest = await this.repository.findById(contestId);
+    return contest !== null && contest.getStatus() !== ContestStatus.DRAFT;
+  }
+
+  async findLiveContestIdsForEntry(userId: string, problemId: string, at: Date): Promise<string[]> {
+    return this.repository.findLiveContestIdsForEntry(userId, problemId, at);
+  }
+
+  private async rankRows(
+    detail: ContestDetailView,
+    viewerId: string | null,
+  ): Promise<ContestStandingRowView[]> {
     const status = deriveContestStatus(detail.status, detail.startsAt, detail.endsAt, new Date());
     if (status === ContestStatus.SCHEDULED) {
       return [];
@@ -81,7 +105,7 @@ export class ContestParticipationService {
       firstName: participant.firstName,
       lastName: participant.lastName,
       publicHandle: participant.publicHandle,
-      isCurrentUser: participant.userId === userId,
+      isCurrentUser: participant.userId === viewerId,
       ratingDelta: ratings.get(participant.userId)?.delta ?? null,
       newRating: ratings.get(participant.userId)?.newRating ?? null,
       ...totals,

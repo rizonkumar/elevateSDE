@@ -11,7 +11,7 @@ import { NotificationMapper } from '../mappers/notification.mapper';
 export class NotificationRepository implements INotificationRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(notification: Notification): Promise<void> {
+  async create(notification: Notification): Promise<boolean> {
     try {
       await this.prisma.notification.create({
         data: {
@@ -25,9 +25,10 @@ export class NotificationRepository implements INotificationRepository {
           dedupeKey: notification.getDedupeKey(),
         },
       });
+      return true;
     } catch (error) {
       if (notification.getDedupeKey() !== null && isUniqueConstraintViolation(error)) {
-        return;
+        return false;
       }
       throw error;
     }

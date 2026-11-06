@@ -1826,3 +1826,75 @@ export interface OrgSettingsDto {
 export interface UpdateOrgSettingsRequest {
   allowPublicProfiles: boolean;
 }
+
+export type RealtimeRoomKind = 'contest' | 'peer' | 'group';
+
+export type RealtimeRoom = `${RealtimeRoomKind}:${string}`;
+
+export interface RealtimeAck {
+  ok: boolean;
+  error?: string;
+}
+
+export interface NotificationPushDto {
+  notification: NotificationDto;
+  unreadCount: number;
+}
+
+export interface UnreadCountPushDto {
+  unreadCount: number;
+}
+
+export interface ContestStandingsPushDto {
+  contestId: string;
+  rows: ContestStandingRowDto[];
+  generatedAt: string;
+}
+
+export interface ContestStatusPushDto {
+  contestId: string;
+  status: ContestStatus;
+  finalized: boolean;
+  rated: boolean;
+}
+
+export interface PeerPresencePushDto {
+  sessionId: string;
+  userId: string;
+  online: boolean;
+}
+
+export interface PeerPresenceSnapshotDto {
+  sessionId: string;
+  onlineUserIds: string[];
+}
+
+export type PeerSessionChangeStatus = PeerPracticeStatus | 'RESCHEDULED';
+
+export interface PeerSessionChangedPushDto {
+  sessionId: string;
+  status: PeerSessionChangeStatus;
+}
+
+export interface ServerToClientEvents {
+  'notification:new': (payload: NotificationPushDto) => void;
+  'notification:unread-count': (payload: UnreadCountPushDto) => void;
+  'contest:standings': (payload: ContestStandingsPushDto) => void;
+  'contest:status': (payload: ContestStatusPushDto) => void;
+  'peer:presence': (payload: PeerPresencePushDto) => void;
+  'peer:presence-snapshot': (payload: PeerPresenceSnapshotDto) => void;
+  'peer:session-changed': (payload: PeerSessionChangedPushDto) => void;
+}
+
+export type ServerToClientEventName = keyof ServerToClientEvents;
+
+export type ServerToClientPayload<E extends ServerToClientEventName> = Parameters<
+  ServerToClientEvents[E]
+>[0];
+
+export interface ClientToServerEvents {
+  'room:subscribe': (room: string, ack: (result: RealtimeAck) => void) => void;
+  'room:unsubscribe': (room: string, ack: (result: RealtimeAck) => void) => void;
+}
+
+export const REALTIME_NAMESPACE = '/realtime';

@@ -11,15 +11,20 @@ function originOf(url) {
   }
 }
 
+function socketOriginOf(origin) {
+  return origin.replace(/^http/, 'ws');
+}
+
 export function buildSecurityHeaders({ apiUrl, isDev }) {
   const apiOrigin = originOf(apiUrl) || LOCAL_API;
+  const apiSocketOrigin = socketOriginOf(apiOrigin);
   const contentSecurityPolicy = [
     "default-src 'self'",
     `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} ${GOOGLE_IDENTITY} ${MONACO_CDN}`,
     `style-src 'self' 'unsafe-inline' ${GOOGLE_IDENTITY} ${MONACO_CDN}`,
     "img-src 'self' blob: data: https:",
     `font-src 'self' data: ${MONACO_CDN}`,
-    `connect-src 'self' ${apiOrigin} ${GOOGLE_IDENTITY}${isDev ? ' ws: http://localhost:*' : ''}`,
+    `connect-src 'self' ${apiOrigin} ${apiSocketOrigin} ${GOOGLE_IDENTITY}${isDev ? ' ws: http://localhost:*' : ''}`,
     `frame-src ${GOOGLE_IDENTITY}`,
     "worker-src 'self' blob:",
     "object-src 'none'",

@@ -122,6 +122,33 @@ function buildClient(overrides: Partial<FakeServer> = {}) {
 }
 
 describe('createApiClient', () => {
+  it('exposes the stored access token and renews the session on demand', async () => {
+    const { accessToken, renewSession, server, cookies } = buildClient();
+
+    expect(accessToken()).toBe('access-1');
+    await expect(renewSession()).resolves.toBe('access-2');
+    expect(server.refreshCalls).toBe(1);
+    expect(cookies.accessToken).toBe('access-2');
+  });
+
+  it('ends the session when renewing without a refresh token', async () => {
+    const { renewSession, cookies, state, navigate, server } = buildClient();
+    cookies.refreshToken = '';
+
+    await expect(renewSession()).resolves.toBeNull();
+
+    expect(server.refreshCalls).toBe(0);
+    expect(state.clearAuth).toHaveBeenCalledTimes(1);
+    expect(navigate).toHaveBeenCalledWith('/admin/login');
+  });
+
+  it('returns null when the renewal is rejected', async () => {
+    const { renewSession, state } = buildClient({ refreshFailure: 401 });
+
+    await expect(renewSession()).resolves.toBeNull();
+    expect(state.clearAuth).toHaveBeenCalledTimes(1);
+  });
+
   it('sends the current access token', async () => {
     const { api, seenAuthorization } = buildClient({ validAccessToken: 'access-1' });
 

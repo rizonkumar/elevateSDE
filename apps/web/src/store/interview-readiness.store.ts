@@ -34,6 +34,7 @@ interface InterviewReadinessState {
   loadTemplates: () => Promise<void>;
   loadPlan: (planId: string) => Promise<void>;
   loadPeerSession: (sessionId: string) => Promise<void>;
+  refreshPeerSession: (sessionId: string) => Promise<void>;
   createPlan: (input: CreateInterviewPreparationPlanDto) => Promise<string | null>;
   updatePlan: (planId: string, input: UpdateInterviewPreparationPlanDto) => Promise<boolean>;
   updateRound: (roundId: string, input: UpdatePreparationRoundDto) => Promise<boolean>;
@@ -140,6 +141,24 @@ export const useInterviewReadinessStore = create<InterviewReadinessState>((set, 
       set({ peerSession: response.data, isLoading: false });
     } catch (error) {
       set({ isLoading: false, error: messageFor(error, 'Could not load this peer session.') });
+    }
+  },
+
+  refreshPeerSession: async (sessionId) => {
+    try {
+      const { plan, peerSession } = get();
+      if (peerSession?.id === sessionId) {
+        const response = await api.get<PeerPracticeSessionDto>(
+          `${ENDPOINT}/peer-sessions/${sessionId}`,
+        );
+        set({ peerSession: response.data });
+      }
+      if (plan?.peerSessions.some((session) => session.id === sessionId)) {
+        const response = await api.get<InterviewPreparationPlanDto>(`${ENDPOINT}/plans/${plan.id}`);
+        set({ plan: response.data });
+      }
+    } catch {
+      set((state) => state);
     }
   },
 

@@ -11,6 +11,7 @@ import { useContestsStore } from '@/store/contests.store';
 import { formatContestDate, formatContestDuration } from '@/lib/contest-time';
 import { ContestStatusBadge } from '../_components/ContestStatusBadge';
 import { ContestCountdown } from '../_components/ContestCountdown';
+import { useRealtimeEvent, useRealtimeRoom } from '@/hooks/use-realtime';
 
 const DIFFICULTY_VARIANT: Record<AssessmentDifficulty, BadgeVariant> = {
   EASY: 'success',
@@ -77,6 +78,14 @@ export default function ContestDetailPage() {
   React.useEffect(() => {
     void loadContest(slug);
   }, [slug, loadContest]);
+
+  const contestRoom = active?.slug === slug ? (`contest:${active.id}` as const) : null;
+  useRealtimeRoom(contestRoom);
+  useRealtimeEvent('contest:status', (payload) => {
+    if (active?.id === payload.contestId) {
+      void loadContest(slug, true);
+    }
+  });
 
   if (isDetailLoading && !active) {
     return (

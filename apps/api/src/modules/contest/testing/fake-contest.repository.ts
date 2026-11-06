@@ -5,6 +5,7 @@ import {
   AcceptedSubmissionView,
   ContestDetailView,
   ContestFinalResult,
+  ContestLifecycleView,
   ContestParticipantView,
   ContestSummaryView,
   PublishedProblemRef,
@@ -44,6 +45,9 @@ export class FakeContestRepository implements IContestRepository {
   finalizableContestIds: string[] = [];
   finalizableEndedBefore: Date | null = null;
   pendingSubmissions = false;
+  liveEntries: Array<{ contestId: string; userId: string; problemId: string }> = [];
+  lifecycle: ContestLifecycleView[] = [];
+  lifecycleQueries: Array<{ after: Date; upTo: Date }> = [];
   finalizedContests = new Map<string, { results: ContestFinalResult[]; finalizedAt: Date }>();
   contest: Contest | null = null;
   updatedContests: Contest[] = [];
@@ -101,6 +105,15 @@ export class FakeContestRepository implements IContestRepository {
   }
   async hasPendingSubmissionsInWindow(): Promise<boolean> {
     return this.pendingSubmissions;
+  }
+  async findLiveContestIdsForEntry(userId: string, problemId: string): Promise<string[]> {
+    return this.liveEntries
+      .filter((entry) => entry.userId === userId && entry.problemId === problemId)
+      .map((entry) => entry.contestId);
+  }
+  async findLifecycleChanges(after: Date, upTo: Date): Promise<ContestLifecycleView[]> {
+    this.lifecycleQueries.push({ after, upTo });
+    return this.lifecycle;
   }
   async saveFinalResults(
     contestId: string,

@@ -3,6 +3,7 @@ import { PointsService } from '../../leaderboard/application/points.service';
 import { DailyChallengeService } from '../../daily-challenge/application/daily-challenge.service';
 import { ContestFinalizationService } from '../../contest/application/contest-finalization.service';
 import { ContestRatingService } from '../../contest/application/contest-rating.service';
+import { ContestLifecycleBroadcaster } from '../../contest/application/contest-lifecycle-broadcaster.service';
 import { PeerPracticeService } from '../../interview-preparation/application/peer-practice.service';
 import { AuthService } from '../../auth/auth.service';
 import { MockInterviewService } from '../../mock-interview/application/mock-interview.service';
@@ -20,6 +21,7 @@ export class ScheduledJobRunner {
     dailyChallengeService: DailyChallengeService,
     contestFinalizationService: ContestFinalizationService,
     contestRatingService: ContestRatingService,
+    contestLifecycleBroadcaster: ContestLifecycleBroadcaster,
     peerPracticeService: PeerPracticeService,
     authService: AuthService,
     mockInterviewService: MockInterviewService,
@@ -33,6 +35,8 @@ export class ScheduledJobRunner {
         const rated = await contestRatingService.ratePending();
         return finalized + rated;
       },
+      [SCHEDULED_JOBS.BROADCAST_CONTEST_STATUS]: () =>
+        contestLifecycleBroadcaster.broadcastRecent(),
       [SCHEDULED_JOBS.SWEEP_PREPARATION_REMINDERS]: () =>
         peerPracticeService.sweepPreparationReminders(),
       [SCHEDULED_JOBS.PRUNE_REFRESH_TOKENS]: () => authService.pruneExpiredRefreshTokens(),

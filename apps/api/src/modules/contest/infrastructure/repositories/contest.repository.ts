@@ -9,6 +9,7 @@ import {
   AcceptedSubmissionView,
   ContestDetailView,
   ContestFinalResult,
+  ContestLifecycleView,
   ContestParticipantView,
   ContestProblemAssignment,
   ContestSummaryView,
@@ -212,6 +213,43 @@ export class ContestRepository implements IContestRepository {
       select: { id: true },
     });
     return rows.map((row) => row.id);
+  }
+
+  async findLiveContestIdsForEntry(userId: string, problemId: string, at: Date): Promise<string[]> {
+    const rows = await this.prisma.contest.findMany({
+      where: {
+        status: { not: ContestStatus.DRAFT },
+        startsAt: { lte: at },
+        endsAt: { gt: at },
+        problems: { some: { problemId } },
+        participants: { some: { userId } },
+      },
+      select: { id: true },
+    });
+    return rows.map((row) => row.id);
+  }
+
+  async findLifecycleChanges(after: Date, upTo: Date): Promise<ContestLifecycleView[]> {
+    const window = { gt: after, lte: upTo };
+    return this.prisma.contest.findMany({
+      where: {
+        status: { not: ContestStatus.DRAFT },
+        OR: [
+          { startsAt: window },
+          { endsAt: window },
+          { finalizedAt: window },
+          { ratedAt: window },
+        ],
+      },
+      select: {
+        id: true,
+        status: true,
+        startsAt: true,
+        endsAt: true,
+        finalizedAt: true,
+        ratedAt: true,
+      },
+    });
   }
 
   async saveFinalResults(

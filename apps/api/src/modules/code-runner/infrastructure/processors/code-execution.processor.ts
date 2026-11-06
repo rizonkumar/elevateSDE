@@ -13,6 +13,7 @@ import {
   NOTIFICATION_EVENTS,
   SubmissionAcceptedEvent,
 } from '../../../notification/domain/events/notification-events';
+import { SUBMISSION_EVENTS, SubmissionJudgedEvent } from '../../domain/events/submission-events';
 import { CodeRunnerService } from '../../application/code-runner.service';
 import { SubmissionService } from '../../application/submission.service';
 import {
@@ -56,6 +57,7 @@ export class CodeExecutionProcessor extends WorkerHost {
         })
       : NO_PERCENTILES;
     await this.submissionService.applyResult(submissionId, outcome, percentiles);
+    this.emitJudged(job.data, outcome.status);
     if (accepted) {
       const assisted = await this.problemAssistanceService.isAssisted(userId, problemId);
       if (!assisted) {
@@ -88,5 +90,16 @@ export class CodeExecutionProcessor extends WorkerHost {
     if (job.attemptsMade < maxAttempts) return;
     this.logger.error(`Code execution job ${job.id} failed after ${job.attemptsMade} attempts`);
     await this.submissionService.markFailed(job.data.submissionId, FAILURE_MESSAGE);
+    this.emitJudged(job.data, SubmissionStatus.RUNTIME_ERROR);
+  }
+
+  private emitJudged(data: CodeExecutionJobData, status: SubmissionStatus): void {
+    this.eventEmitter.emit(SUBMISSION_EVENTS.JUDGED, {
+      submissionId: data.submissionId,
+      userId: data.userId,
+      problemId: data.problemId,
+      status,
+      judgedAt: new Date(),
+    } satisfies SubmissionJudgedEvent);
   }
 }

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type {
   ContestDetailDto,
+  ContestStandingsPushDto,
   ContestStandingRowDto,
   ContestSummaryDto,
 } from '@elevatesde/shared-types';
@@ -16,9 +17,10 @@ interface ContestsState {
   isStandingsLoading: boolean;
   isRegistering: boolean;
   loadContests: () => Promise<void>;
-  loadContest: (slug: string) => Promise<void>;
+  loadContest: (slug: string, silent?: boolean) => Promise<void>;
   register: (slug: string) => Promise<void>;
   loadStandings: (slug: string, silent?: boolean) => Promise<void>;
+  applyLiveStandings: (payload: ContestStandingsPushDto, viewerId: string | null) => void;
 }
 
 const ENDPOINT = '/api/v1/contests';
@@ -43,15 +45,29 @@ export const useContestsStore = create<ContestsState>((set, get) => ({
     }
   },
 
-  loadContest: async (slug) => {
-    set({ isDetailLoading: true, active: null });
+  loadContest: async (slug, silent = false) => {
+    if (!silent) {
+      set({ isDetailLoading: true, active: null });
+    }
     try {
       const response = await api.get<ContestDetailDto>(`${ENDPOINT}/${slug}`);
       set({ active: response.data, isDetailLoading: false });
     } catch {
       set({ isDetailLoading: false });
-      useToastStore.getState().addToast('Could not load this contest.', 'error');
+      if (!silent) {
+        useToastStore.getState().addToast('Could not load this contest.', 'error');
+      }
     }
+  },
+
+  applyLiveStandings: (payload, viewerId) => {
+    if (get().active?.id !== payload.contestId) {
+      return;
+    }
+    set({
+      standings: payload.rows.map((row) => ({ ...row, isCurrentUser: row.userId === viewerId })),
+      isStandingsLoading: false,
+    });
   },
 
   register: async (slug) => {

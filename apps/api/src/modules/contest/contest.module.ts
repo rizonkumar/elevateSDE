@@ -6,6 +6,9 @@ import { ContestParticipationService } from './application/contest-participation
 import { ContestStandingsService } from './application/contest-standings.service';
 import { ContestFinalizationService } from './application/contest-finalization.service';
 import { ContestRatingService } from './application/contest-rating.service';
+import { ContestLifecycleBroadcaster } from './application/contest-lifecycle-broadcaster.service';
+import { ContestLiveStandingsListener } from './presentation/listeners/contest-live-standings.listener';
+import { ContestRoomAuthorizer } from './presentation/realtime/contest-room.authorizer';
 import { IContestRatingRepository } from './domain/interfaces/contest-rating-repository.interface';
 import { ContestRatingRepository } from './infrastructure/repositories/contest-rating.repository';
 import { ContestRatingsController } from './presentation/controllers/contest-ratings.controller';
@@ -23,6 +26,9 @@ import { LeaderboardModule } from '../leaderboard/leaderboard.module';
     ContestStandingsService,
     ContestFinalizationService,
     ContestRatingService,
+    ContestLifecycleBroadcaster,
+    ContestLiveStandingsListener,
+    ContestRoomAuthorizer,
     PrismaService,
     {
       provide: IContestRepository,
@@ -33,6 +39,11 @@ import { LeaderboardModule } from '../leaderboard/leaderboard.module';
       useClass: ContestRatingRepository,
     },
   ],
-  exports: [ContestService, ContestFinalizationService, ContestRatingService],
+  exports: [
+    ContestService,
+    ContestFinalizationService,
+    ContestRatingService,
+    ContestLifecycleBroadcaster,
+  ],
 })
 export class ContestModule {}

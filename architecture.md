@@ -128,7 +128,7 @@ The backoffice consumes live `/api/v1/admin/*` endpoints (including the coding p
 
 ## Domain-Driven Design (DDD) Backend Architecture
 
-Instead of grouping by framework features (controllers/services), the API is structured by business domains. Current domain modules include `users`, `auth`, `audit-log`, `feature-flag`, `admin`, `organization` (tenant/seat/invitation management), `job-application` (the candidate job tracker), `problem` and `code-runner` (the coding assessment bank and Dockerized execution sandbox), `daily-challenge` (daily problems + streaks), `dashboard` (aggregated candidate stats), `forum` and `leaderboard` (the community discussion board and rankings), `problem-social` (per-problem discussions with comments/upvotes plus personal bookmarks, private notes, and custom problem collections), `contest` (admin-assembled timed competitions over the problem bank, with candidate registration and read-time derived standings), `learning-path` (curated prep tracks with enrollment and derived progress), `achievement` (badges and awarding rules), `notification` (in-app notifications and preferences), `review` (spaced-repetition review queue over solved problems), `resume` (ATS resume analysis), `interview-preparation` (readiness plans, evidence snapshots, and peer practice), `mock-interview` (persisted AI mock interviews with rubric scoring), `scheduler` (recurring BullMQ jobs), and `queues` (the shared BullMQ root that owns async job processing), each following the layered template below.
+Instead of grouping by framework features (controllers/services), the API is structured by business domains. Current domain modules include `users`, `auth`, `audit-log`, `feature-flag`, `admin`, `organization` (tenant/seat/invitation management), `job-application` (the candidate job tracker), `problem` and `code-runner` (the coding assessment bank and Dockerized execution sandbox), `daily-challenge` (daily problems + streaks), `dashboard` (aggregated candidate stats), `forum` and `leaderboard` (the community discussion board and rankings), `problem-social` (per-problem discussions with comments/upvotes plus personal bookmarks, private notes, and custom problem collections), `contest` (admin-assembled timed competitions over the problem bank, with candidate registration and read-time derived standings), `learning-path` (curated prep tracks with enrollment and derived progress), `achievement` (badges and awarding rules), `notification` (in-app notifications and preferences), `review` (spaced-repetition review queue over solved problems), `resume` (ATS resume analysis), `interview-preparation` (readiness plans, evidence snapshots, and peer practice), `mock-interview` (persisted AI mock interviews with rubric scoring), `scheduler` (recurring BullMQ jobs), `realtime` (the Socket.io gateway, handshake auth, room authorization and the `RealtimePublisher` port other modules push through), and `queues` (the shared BullMQ root that owns async job processing), each following the layered template below.
 
 ### Example: Users Domain
 
@@ -222,6 +222,20 @@ Business logic is decoupled using events.
 - **Listeners:** \* `NotificationListener`: Sends email via AWS SES.
 - `AnalyticsListener`: Updates the user's learning dashboard.
 - `LeaderboardListener`: Recalculates Redis sorted sets.
+
+### 1a. Real-time Updates (Socket.io) _(implemented)_
+
+The `realtime` module serves a Socket.io gateway on the `/realtime` namespace of the API origin.
+
+- **Adapter:** `main.ts` installs `RedisIoAdapter`, which uses the Socket.io Redis adapter on `REDIS_URL` so events reach clients connected to any API instance. If Redis is unreachable at boot, the API logs a warning and falls back to the in-memory adapter. CORS uses the same `CORS_ALLOWED_ORIGINS` list as HTTP.
+- **Handshake:** the client sends its access token as `auth.token`. The gateway verifies it with `JWT_SECRET`, requires an access (not refresh) token, and loads the user; inactive users are rejected with `forbidden`, bad tokens with `unauthorized`. The server disconnects the socket when the token expires, and the web client renews the session through the api-client and reconnects.
+- **Rooms:** every socket joins `user:{id}`. Clients join `contest:{id}`, `peer:{sessionId}` and `group:{id}` with `room:subscribe` (acknowledged with `{ ok, error? }`, limited to 20 subscribe or unsubscribe calls per 10 s per socket). Each room kind has a `RoomAuthorizer` that its owning module registers with `RoomAuthorizerRegistry` on module init: contests must not be drafts, and peer sessions admit only the organizer and the invitee.
+- **Publishing:** feature modules inject the `RealtimePublisher` port (`toUser`, `toContest`, `toPeerSession`, `toGroup`) and never depend on Socket.io. Event payloads are typed in `@elevatesde/shared-types` as `ServerToClientEvents` and `ClientToServerEvents`.
+- **Events:**
+  - `notification:new` and `notification:unread-count`, published by `NotificationService` after a row is written or marked read. The web bell polls every 45 s only while the socket is disconnected.
+  - `contest:standings`, published by `ContestLiveStandingsListener`. The code-execution worker emits `submission.judged` for every final status; for each live contest containing the problem that the user is registered in, standings are recomputed once per 2 s window and pushed with the same row DTO as the REST endpoint. Clients mark their own row by `userId`. The standings page falls back to 15 s polling while disconnected.
+  - `contest:status`, published every minute by the `contests.broadcast-status` scheduled job for contests that went live, ended, were finalized or were rated in the last 75 s.
+  - `peer:presence`, `peer:presence-snapshot` and `peer:session-changed` for peer practice sessions. Collaborative editing is out of scope.
 
 ### 2. Distributed Queues (BullMQ + Redis)
 

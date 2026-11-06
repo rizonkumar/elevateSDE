@@ -14,6 +14,9 @@ import { useContestsStore } from '@/store/contests.store';
 import { formatPenalty } from '@/lib/contest-time';
 import { ContestStatusBadge } from '../../_components/ContestStatusBadge';
 import { RatingDelta } from '@/components/contest-rating/RatingDelta';
+import { LiveIndicator } from '@/components/realtime/LiveIndicator';
+import { useRealtimeEvent, useRealtimeRoom } from '@/hooks/use-realtime';
+import { useAuthStore } from '@/store/auth.store';
 
 const POLL_INTERVAL_MS = 15_000;
 
@@ -123,24 +126,38 @@ export default function ContestStandingsPage() {
   const isStandingsLoading = useContestsStore((state) => state.isStandingsLoading);
   const loadContest = useContestsStore((state) => state.loadContest);
   const loadStandings = useContestsStore((state) => state.loadStandings);
+  const applyLiveStandings = useContestsStore((state) => state.applyLiveStandings);
+  const viewerId = useAuthStore((state) => state.user?.id ?? null);
 
   React.useEffect(() => {
     void loadContest(slug);
     void loadStandings(slug);
   }, [slug, loadContest, loadStandings]);
 
-  const isLive = active?.slug === slug && active.status === 'LIVE';
+  const isCurrent = active?.slug === slug;
+  const isLive = isCurrent && active.status === 'LIVE';
+  const room = isCurrent && active.status !== 'SCHEDULED' ? (`contest:${active.id}` as const) : null;
+  const isStreaming = useRealtimeRoom(room);
+
+  useRealtimeEvent('contest:standings', (payload) => applyLiveStandings(payload, viewerId));
+  useRealtimeEvent('contest:status', (payload) => {
+    if (active?.id !== payload.contestId) {
+      return;
+    }
+    void loadContest(slug, true);
+    void loadStandings(slug, true);
+  });
   const showRating = standings.some((row) => row.ratingDelta !== null);
   const awaitingRating =
     active?.slug === slug && active.status === 'ENDED' && active.isRated && !showRating;
 
   React.useEffect(() => {
-    if (!isLive) {
+    if (!isLive || isStreaming) {
       return;
     }
     const id = window.setInterval(() => void loadStandings(slug, true), POLL_INTERVAL_MS);
     return () => window.clearInterval(id);
-  }, [isLive, slug, loadStandings]);
+  }, [isLive, isStreaming, slug, loadStandings]);
 
   return (
     <PageContainer>
@@ -158,9 +175,7 @@ export default function ContestStandingsPage() {
             {active?.slug === slug ? `${active.title} standings` : 'Standings'}
           </h1>
           {active?.slug === slug && <ContestStatusBadge status={active.status} />}
-          {isLive && (
-            <span className="text-xs text-(--color-text-muted)">Updates every 15 seconds</span>
-          )}
+          {isLive && <LiveIndicator live={isStreaming} fallbackLabel="Updating every 15s" />}
           {active?.slug === slug && !active.isRated && <Badge variant="neutral">Unrated</Badge>}
           {awaitingRating && standings.length > 0 && (
             <span className="text-xs text-(--color-text-muted)">

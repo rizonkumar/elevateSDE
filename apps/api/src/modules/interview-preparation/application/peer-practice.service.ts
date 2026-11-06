@@ -31,6 +31,11 @@ export class PeerPracticeService {
     return this.findSession(userId, sessionId);
   }
 
+  async isParticipant(userId: string, sessionId: string): Promise<boolean> {
+    const session = await this.repository.findPeerSessionForParticipant(userId, sessionId);
+    return session !== null;
+  }
+
   async syncPreparationReminders(userId: string): Promise<void> {
     await this.emitUpcomingReminders(userId);
   }

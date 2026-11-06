@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { NotificationType } from '@prisma/client';
+import { RealtimePublisher } from '../../realtime/domain/realtime-publisher';
+import { NotificationPresentationMapper } from '../presentation/mappers/notification-presentation.mapper';
 import { INotificationRepository } from '../domain/interfaces/notification-repository.interface';
 import { Notification, NotificationDraft } from '../domain/entities/notification';
 import {
@@ -30,13 +32,24 @@ const DEFAULT_DISABLED_TYPES: NotificationType[] = ['SUBMISSION_ACCEPTED'];
 
 @Injectable()
 export class NotificationService {
-  constructor(private readonly repository: INotificationRepository) {}
+  constructor(
+    private readonly repository: INotificationRepository,
+    private readonly realtime: RealtimePublisher,
+  ) {}
 
   async notify(draft: NotificationDraft): Promise<void> {
     if (!(await this.isEnabled(draft.userId, draft.type))) {
       return;
     }
-    await this.repository.create(Notification.create(draft));
+    const notification = Notification.create(draft);
+    if (!(await this.repository.create(notification))) {
+      return;
+    }
+    const unreadCount = await this.repository.countUnread(draft.userId);
+    this.realtime.toUser(draft.userId, 'notification:new', {
+      notification: NotificationPresentationMapper.toNotification(notification),
+      unreadCount,
+    });
   }
 
   async listForUser(userId: string): Promise<NotificationsView> {
@@ -53,10 +66,12 @@ export class NotificationService {
 
   async markRead(userId: string, id: string): Promise<void> {
     await this.repository.markRead(userId, id);
+    await this.publishUnreadCount(userId);
   }
 
   async markAllRead(userId: string): Promise<void> {
     await this.repository.markAllRead(userId);
+    await this.publishUnreadCount(userId);
   }
 
   async getPreferences(userId: string): Promise<NotificationPreferenceView[]> {
@@ -77,6 +92,11 @@ export class NotificationService {
   ): Promise<NotificationPreferenceView[]> {
     await this.repository.upsertPreference(userId, type, inAppEnabled);
     return this.getPreferences(userId);
+  }
+
+  private async publishUnreadCount(userId: string): Promise<void> {
+    const unreadCount = await this.repository.countUnread(userId);
+    this.realtime.toUser(userId, 'notification:unread-count', { unreadCount });
   }
 
   private async isEnabled(userId: string, type: NotificationType): Promise<boolean> {

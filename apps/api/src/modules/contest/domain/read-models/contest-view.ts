@@ -86,3 +86,12 @@ export interface PublishedProblemRef {
   title: string;
   difficulty: AssessmentDifficulty;
 }
+
+export interface ContestLifecycleView {
+  id: string;
+  status: ContestStatus;
+  startsAt: Date;
+  endsAt: Date;
+  finalizedAt: Date | null;
+  ratedAt: Date | null;
+}

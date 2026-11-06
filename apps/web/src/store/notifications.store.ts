@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type {
   NotificationDto,
+  NotificationPushDto,
   NotificationsViewDto,
   UnreadCountDto,
 } from '@elevatesde/shared-types';
@@ -17,6 +18,8 @@ interface NotificationsState {
   fetchUnreadCount: () => Promise<void>;
   markRead: (id: string) => Promise<void>;
   markAllRead: () => Promise<void>;
+  receivePush: (payload: NotificationPushDto) => void;
+  setUnreadCount: (unreadCount: number) => void;
   startPolling: () => void;
   stopPolling: () => void;
 }
@@ -84,6 +87,22 @@ export const useNotificationsStore = create<NotificationsState>((set, get) => ({
     } catch {
       void get().fetchNotifications();
     }
+  },
+
+  receivePush: ({ notification, unreadCount }) => {
+    set((state) => ({
+      unreadCount,
+      notifications: state.hasLoaded
+        ? [
+            notification,
+            ...state.notifications.filter((existing) => existing.id !== notification.id),
+          ]
+        : state.notifications,
+    }));
+  },
+
+  setUnreadCount: (unreadCount) => {
+    set({ unreadCount });
   },
 
   startPolling: () => {
