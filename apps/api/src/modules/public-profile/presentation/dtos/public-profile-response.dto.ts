@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   AssessmentDifficulty,
+  ContestRatingHistoryEntryDto,
   PublicProfileBadgeDto,
   PublicProfileDifficultyCountDto,
   PublicProfileDto,
@@ -107,6 +108,32 @@ export class PublicProfileHeatmapCellResponseDto implements SubmissionHeatmapCel
   count!: number;
 }
 
+export class PublicProfileRatingHistoryEntryResponseDto implements ContestRatingHistoryEntryDto {
+  @ApiProperty({ example: 'uuid-string' })
+  contestId!: string;
+
+  @ApiProperty({ example: 'weekly-sprint-12' })
+  slug!: string;
+
+  @ApiProperty({ example: 'Weekly Sprint #12' })
+  title!: string;
+
+  @ApiProperty({ example: '2026-07-19T19:30:00.000Z' })
+  endsAt!: string;
+
+  @ApiProperty({ example: 4 })
+  rank!: number;
+
+  @ApiProperty({ example: 1540 })
+  oldRating!: number;
+
+  @ApiProperty({ example: 1588 })
+  newRating!: number;
+
+  @ApiProperty({ example: 48 })
+  delta!: number;
+}
+
 export class PublicProfileRatingResponseDto implements PublicProfileRatingDto {
   @ApiProperty({ example: 1540 })
   rating!: number;
@@ -116,6 +143,9 @@ export class PublicProfileRatingResponseDto implements PublicProfileRatingDto {
 
   @ApiProperty({ example: 4 })
   contestsRated!: number;
+
+  @ApiProperty({ type: [PublicProfileRatingHistoryEntryResponseDto] })
+  history!: PublicProfileRatingHistoryEntryResponseDto[];
 }
 
 export class PublicProfileResponseDto implements PublicProfileDto {

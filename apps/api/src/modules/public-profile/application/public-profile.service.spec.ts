@@ -3,6 +3,7 @@ import { ProfileVisibility } from '@prisma/client';
 import {
   FakeHeatmapSource,
   FakePublicProfileRepository,
+  FakeRatingSource,
   profileUser,
 } from '../testing/fake-public-profile.repository';
 import { PublicProfilePresentationMapper } from '../presentation/mappers/public-profile-presentation.mapper';
@@ -13,12 +14,14 @@ const NOW = new Date('2026-11-06T12:00:00.000Z');
 describe('PublicProfileService', () => {
   let repository: FakePublicProfileRepository;
   let heatmap: FakeHeatmapSource;
+  let ratings: FakeRatingSource;
   let service: PublicProfileService;
 
   beforeEach(() => {
     repository = new FakePublicProfileRepository();
     heatmap = new FakeHeatmapSource();
-    service = new PublicProfileService(repository, heatmap);
+    ratings = new FakeRatingSource();
+    service = new PublicProfileService(repository, heatmap, ratings);
   });
 
   function addPublicUser(overrides: Parameters<typeof profileUser>[1] = {}) {
@@ -61,6 +64,32 @@ describe('PublicProfileService', () => {
     expect(call?.userId).toBe('user-1');
     expect(call?.to).toEqual(NOW);
     expect(NOW.getTime() - (call?.from.getTime() ?? 0)).toBe(365 * 86_400_000);
+  });
+
+  it('includes the contest rating and its history once the owner is rated', async () => {
+    addPublicUser();
+    ratings.ratings.set('user-1', {
+      rating: 1588,
+      peakRating: 1612,
+      contestsRated: 2,
+      history: [
+        {
+          contestId: 'contest-1',
+          slug: 'weekly-1',
+          title: 'Weekly 1',
+          endsAt: new Date('2026-10-01T19:30:00.000Z'),
+          rank: 3,
+          oldRating: 1500,
+          newRating: 1612,
+          delta: 112,
+        },
+      ],
+    });
+
+    const dto = PublicProfilePresentationMapper.toProfile(await service.getByHandle('ada', NOW));
+
+    expect(dto.rating).toMatchObject({ rating: 1588, peakRating: 1612, contestsRated: 2 });
+    expect(dto.rating?.history[0]?.endsAt).toBe('2026-10-01T19:30:00.000Z');
   });
 
   it('hides the organization unless the owner opts in', async () => {

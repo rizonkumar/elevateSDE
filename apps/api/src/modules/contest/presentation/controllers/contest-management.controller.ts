@@ -59,6 +59,7 @@ export class ContestManagementController {
       description: dto.description,
       startsAt: new Date(dto.startsAt),
       endsAt: new Date(dto.endsAt),
+      isRated: dto.isRated,
     });
     return ContestPresentationMapper.toDetail(view);
   }
@@ -66,6 +67,7 @@ export class ContestManagementController {
   @Patch(':id')
   @ApiOperation({ summary: 'Update contest details and schedule window' })
   @ApiResponse({ status: 200, type: ContestDetailResponseDto })
+  @ApiResponse({ status: 400, description: 'Rating changed after the contest ended.' })
   @ApiResponse({ status: 404, description: 'Not found.' })
   @ApiResponse({ status: 409, description: 'Slug already in use.' })
   async update(
@@ -78,6 +80,7 @@ export class ContestManagementController {
       description: dto.description,
       startsAt: new Date(dto.startsAt),
       endsAt: new Date(dto.endsAt),
+      isRated: dto.isRated,
     });
     return ContestPresentationMapper.toDetail(view);
   }

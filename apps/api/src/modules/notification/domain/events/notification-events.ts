@@ -9,6 +9,7 @@ export const NOTIFICATION_EVENTS = {
   PEER_SESSION_CHANGED: 'notification.peer-session-changed',
   SCORECARD_REQUEST: 'notification.scorecard-request',
   CODE_REVIEW_READY: 'notification.code-review-ready',
+  CONTEST_RATING_UPDATED: 'notification.contest-rating-updated',
   ACCOUNT_PENDING_APPROVAL: 'notification.account-pending-approval',
 } as const;
 
@@ -74,6 +75,16 @@ export interface CodeReviewReadyEvent {
   problemId: string;
   problemTitle: string;
   submissionId: string;
+}
+
+export interface ContestRatingUpdatedEvent {
+  userId: string;
+  contestId: string;
+  contestSlug: string;
+  contestTitle: string;
+  oldRating: number;
+  newRating: number;
+  delta: number;
 }
 
 export interface ScorecardRequestEvent {

@@ -23,7 +23,8 @@
     "db:seed": "prisma db seed",
     "db:seed:problems": "ts-node --compiler-options {\"module\":\"commonjs\"} prisma/seed-problems.ts",
     "db:seed:runnable": "ts-node --compiler-options {\"module\":\"commonjs\"} prisma/seed-runnable-problems.ts",
-    "db:setup": "prisma migrate deploy && prisma db seed"
+    "db:setup": "prisma migrate deploy && prisma db seed",
+    "ratings:backfill": "ts-node --compiler-options '{\"module\":\"commonjs\"}' src/scripts/ratings-backfill.ts"
   },
   "dependencies": {
     "@elevatesde/shared-types": "workspace:*",

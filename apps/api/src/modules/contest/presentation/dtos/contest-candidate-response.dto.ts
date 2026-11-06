@@ -35,6 +35,9 @@ export class ContestCandidateSummaryResponseDto implements ContestSummaryDto {
 
   @ApiProperty({ example: false })
   registered!: boolean;
+
+  @ApiProperty({ example: true })
+  isRated!: boolean;
 }
 
 export class ContestCandidateProblemResponseDto implements ContestProblemProgressDto {
@@ -95,4 +98,10 @@ export class ContestStandingRowResponseDto implements ContestStandingRowDto {
 
   @ApiProperty({ example: false })
   isCurrentUser!: boolean;
+
+  @ApiPropertyOptional({ example: 48, nullable: true })
+  ratingDelta!: number | null;
+
+  @ApiPropertyOptional({ example: 1548, nullable: true })
+  newRating!: number | null;
 }

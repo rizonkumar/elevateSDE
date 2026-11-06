@@ -2,12 +2,17 @@ import { ScheduledJobRunner } from './scheduled-job-runner.service';
 import { PointsService } from '../../leaderboard/application/points.service';
 import { DailyChallengeService } from '../../daily-challenge/application/daily-challenge.service';
 import { ContestFinalizationService } from '../../contest/application/contest-finalization.service';
+import { ContestRatingService } from '../../contest/application/contest-rating.service';
 import { PeerPracticeService } from '../../interview-preparation/application/peer-practice.service';
 import { AuthService } from '../../auth/auth.service';
 import { MockInterviewService } from '../../mock-interview/application/mock-interview.service';
 import { SCHEDULED_JOBS, ScheduledJobName } from '../domain/scheduled-jobs';
 
-function buildRunner(): { runner: ScheduledJobRunner; handlers: Record<string, jest.Mock> } {
+function buildRunner(): {
+  runner: ScheduledJobRunner;
+  handlers: Record<string, jest.Mock>;
+  ratePending: jest.Mock;
+} {
   const refreshPeriodTotals = jest.fn((period: string) =>
     Promise.resolve(period === 'weekly' ? 1 : 2),
   );
@@ -19,10 +24,12 @@ function buildRunner(): { runner: ScheduledJobRunner; handlers: Record<string, j
     pruneExpiredRefreshTokens: jest.fn().mockResolvedValue(6),
     sweep: jest.fn().mockResolvedValue(7),
   };
+  const ratePending = jest.fn().mockResolvedValue(0);
   const runner = new ScheduledJobRunner(
     { refreshPeriodTotals } as unknown as PointsService,
     { expireStreaks: handlers.expireStreaks } as unknown as DailyChallengeService,
     { finalizeEnded: handlers.finalizeEnded } as unknown as ContestFinalizationService,
+    { ratePending } as unknown as ContestRatingService,
     {
       sweepPreparationReminders: handlers.sweepPreparationReminders,
     } as unknown as PeerPracticeService,
@@ -31,7 +38,7 @@ function buildRunner(): { runner: ScheduledJobRunner; handlers: Record<string, j
     } as unknown as AuthService,
     { sweep: handlers.sweep } as unknown as MockInterviewService,
   );
-  return { runner, handlers };
+  return { runner, handlers, ratePending };
 }
 
 describe('ScheduledJobRunner', () => {
@@ -62,6 +69,17 @@ describe('ScheduledJobRunner', () => {
       .filter(([name]) => name !== handlerName)
       .map(([, handler]) => handler.mock.calls.length);
     expect(otherCalls.every((count) => count === 0)).toBe(true);
+  });
+
+  it('rates finalized contests right after finalizing them', async () => {
+    const { runner, handlers, ratePending } = buildRunner();
+    ratePending.mockResolvedValue(2);
+
+    await expect(runner.run(SCHEDULED_JOBS.FINALIZE_CONTESTS)).resolves.toBe(6);
+
+    expect(ratePending).toHaveBeenCalledTimes(1);
+    const finalizeOrder = handlers.finalizeEnded?.mock.invocationCallOrder[0] ?? 0;
+    expect(ratePending.mock.invocationCallOrder[0]).toBeGreaterThan(finalizeOrder);
   });
 
   it('propagates handler failures so the queue can retry', async () => {

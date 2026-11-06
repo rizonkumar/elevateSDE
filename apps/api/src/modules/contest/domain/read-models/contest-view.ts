@@ -17,6 +17,7 @@ export interface ContestSummaryView {
   startsAt: Date;
   endsAt: Date;
   problemCount: number;
+  isRated: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -63,6 +64,8 @@ export interface ContestStandingRowView {
   score: number;
   penaltySeconds: number;
   isCurrentUser: boolean;
+  ratingDelta: number | null;
+  newRating: number | null;
 }
 
 export interface ContestFinalResult {

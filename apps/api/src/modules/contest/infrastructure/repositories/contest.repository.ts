@@ -69,6 +69,7 @@ export class ContestRepository implements IContestRepository {
       startsAt: row.startsAt,
       endsAt: row.endsAt,
       problemCount: row.problems.length,
+      isRated: row.isRated,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
       problems: row.problems.map((entry) => ({
@@ -271,6 +272,7 @@ export class ContestRepository implements IContestRepository {
       startsAt: row.startsAt,
       endsAt: row.endsAt,
       problemCount: row._count.problems,
+      isRated: row.isRated,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     };

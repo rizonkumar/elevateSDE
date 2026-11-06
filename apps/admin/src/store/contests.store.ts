@@ -30,6 +30,7 @@ export interface ContestFormValues {
   description: string;
   startsAt: string;
   endsAt: string;
+  isRated: boolean;
   problems: ContestFormProblem[];
 }
 
@@ -123,6 +124,7 @@ export const useContestsStore = create<ContestsState>((set, get) => ({
         description: values.description,
         startsAt: values.startsAt,
         endsAt: values.endsAt,
+        isRated: values.isRated,
       };
       const existing = get().editingContest;
       const contest = existing

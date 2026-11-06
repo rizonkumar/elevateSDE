@@ -921,6 +921,7 @@ export interface AdminContestSummaryDto {
   startsAt: string;
   endsAt: string;
   problemCount: number;
+  isRated: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -946,6 +947,7 @@ export interface AdminContestInput {
   description: string;
   startsAt: string;
   endsAt: string;
+  isRated?: boolean;
 }
 
 export interface SetContestProblemsInput {
@@ -962,6 +964,7 @@ export interface ContestSummaryDto {
   problemCount: number;
   participantCount: number;
   registered: boolean;
+  isRated: boolean;
 }
 
 export interface ContestProblemProgressDto extends ContestProblemDto {
@@ -982,6 +985,46 @@ export interface ContestStandingRowDto {
   score: number;
   penaltySeconds: number;
   isCurrentUser: boolean;
+  ratingDelta: number | null;
+  newRating: number | null;
+}
+
+export interface ContestRatingHistoryEntryDto {
+  contestId: string;
+  slug: string;
+  title: string;
+  endsAt: string;
+  rank: number;
+  oldRating: number;
+  newRating: number;
+  delta: number;
+}
+
+export interface ContestRatingSummaryDto {
+  rating: number;
+  peakRating: number;
+  contestsRated: number;
+  history: ContestRatingHistoryEntryDto[];
+}
+
+export type ContestRatingScope = 'platform' | 'tenant';
+
+export interface ContestRatingLeaderboardEntryDto {
+  rank: number;
+  userId: string;
+  name: string;
+  publicHandle: string | null;
+  rating: number;
+  peakRating: number;
+  contestsRated: number;
+  isCurrentUser: boolean;
+}
+
+export interface ContestRatingLeaderboardDto {
+  items: ContestRatingLeaderboardEntryDto[];
+  total: number;
+  page: number;
+  pageSize: number;
 }
 
 export interface SubmissionHeatmapCellDto {
@@ -1755,11 +1798,7 @@ export interface PublicProfileStreakDto {
   longest: number;
 }
 
-export interface PublicProfileRatingDto {
-  rating: number;
-  peakRating: number;
-  contestsRated: number;
-}
+export type PublicProfileRatingDto = ContestRatingSummaryDto;
 
 export interface PublicProfileDto {
   handle: string;

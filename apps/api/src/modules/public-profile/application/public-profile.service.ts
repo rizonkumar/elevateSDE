@@ -3,6 +3,7 @@ import { buildDisplayName } from '../../../common/display-name';
 import { isProfilePublic } from '../../../common/public-handle';
 import { IPublicProfileRepository } from '../domain/interfaces/public-profile-repository.interface';
 import { IProfileHeatmapSource } from '../domain/interfaces/profile-heatmap-source.interface';
+import { IProfileRatingSource } from '../domain/interfaces/profile-rating-source.interface';
 import { handleFormatProblem, normalizeHandle } from '../domain/policies/handle-policy';
 import {
   HEATMAP_WINDOW_DAYS,
@@ -19,18 +20,20 @@ export class PublicProfileService {
   constructor(
     private readonly repository: IPublicProfileRepository,
     private readonly heatmapSource: IProfileHeatmapSource,
+    private readonly ratingSource: IProfileRatingSource,
   ) {}
 
   async getByHandle(rawHandle: string, now: Date = new Date()): Promise<PublicProfileView> {
     const owner = await this.findVisibleOwner(rawHandle);
     const from = new Date(now.getTime() - HEATMAP_WINDOW_DAYS * DAY_MS);
-    const [activity, solved, topTopics, badges, recentSolves, heatmap] = await Promise.all([
+    const [activity, solved, topTopics, badges, recentSolves, heatmap, rating] = await Promise.all([
       this.repository.getActivity(owner.userId),
       this.repository.getSolvedBreakdown(owner.userId),
       this.repository.listTopTopics(owner.userId, TOP_TOPICS_LIMIT),
       this.repository.listBadges(owner.userId),
       this.repository.listRecentSolves(owner.userId, RECENT_SOLVES_LIMIT),
       this.heatmapSource.getHeatmap(owner.userId, from, now),
+      this.ratingSource.getRating(owner.userId),
     ]);
     return {
       handle: owner.handle,
@@ -52,7 +55,7 @@ export class PublicProfileService {
       badges,
       heatmap,
       recentSolves,
-      rating: null,
+      rating,
     };
   }
 

@@ -14,6 +14,7 @@ import {
   StreakMilestoneEvent,
   SubmissionAcceptedEvent,
   CodeReviewReadyEvent,
+  ContestRatingUpdatedEvent,
 } from '../../domain/events/notification-events';
 import { NotificationService } from '../notification.service';
 
@@ -149,6 +150,19 @@ export class NotificationListener {
       body: `See the feedback on your ${event.problemTitle} submission.`,
       linkUrl: `/dashboard/assessment/${event.problemId}`,
       dedupeKey: `code-review:${event.submissionId}`,
+    });
+  }
+
+  @OnEvent(NOTIFICATION_EVENTS.CONTEST_RATING_UPDATED)
+  async onContestRatingUpdated(event: ContestRatingUpdatedEvent): Promise<void> {
+    const sign = event.delta >= 0 ? '+' : '−';
+    await this.safeNotify({
+      userId: event.userId,
+      type: 'CONTEST_RATING_UPDATED',
+      title: 'Your contest rating changed',
+      body: `${event.contestTitle}: ${event.oldRating} → ${event.newRating} (${sign}${Math.abs(event.delta)})`,
+      linkUrl: `/dashboard/contests/${event.contestSlug}/standings`,
+      dedupeKey: `rating:${event.contestId}:${event.userId}`,
     });
   }
 

@@ -76,10 +76,22 @@ export interface HeatmapCell {
   count: number;
 }
 
+export interface PublicProfileRatingHistoryEntry {
+  contestId: string;
+  slug: string;
+  title: string;
+  endsAt: Date;
+  rank: number;
+  oldRating: number;
+  newRating: number;
+  delta: number;
+}
+
 export interface PublicProfileRating {
   rating: number;
   peakRating: number;
   contestsRated: number;
+  history: PublicProfileRatingHistoryEntry[];
 }
 
 export interface PublicProfileView {

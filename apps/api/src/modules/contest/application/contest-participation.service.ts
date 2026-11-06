@@ -9,13 +9,16 @@ import {
   ContestDetailView,
   ContestStandingRowView,
 } from '../domain/read-models/contest-view';
+import { StandingRatingView } from '../domain/read-models/contest-rating-view';
 import { ContestStandingsService } from './contest-standings.service';
+import { ContestRatingService } from './contest-rating.service';
 
 @Injectable()
 export class ContestParticipationService {
   constructor(
     private readonly repository: IContestRepository,
     private readonly standingsService: ContestStandingsService,
+    private readonly ratingService: ContestRatingService,
   ) {}
 
   async listForUser(userId: string): Promise<ContestCandidateSummaryView[]> {
@@ -66,7 +69,12 @@ export class ContestParticipationService {
     if (status === ContestStatus.SCHEDULED) {
       return [];
     }
-    const ranked = await this.standingsService.rank(detail);
+    const [ranked, ratings] = await Promise.all([
+      this.standingsService.rank(detail),
+      status === ContestStatus.ENDED
+        ? this.ratingService.getStandingRatings(detail.id)
+        : Promise.resolve(new Map<string, StandingRatingView>()),
+    ]);
     return ranked.map(({ participant, rank, totals }) => ({
       rank,
       userId: participant.userId,
@@ -74,6 +82,8 @@ export class ContestParticipationService {
       lastName: participant.lastName,
       publicHandle: participant.publicHandle,
       isCurrentUser: participant.userId === userId,
+      ratingDelta: ratings.get(participant.userId)?.delta ?? null,
+      newRating: ratings.get(participant.userId)?.newRating ?? null,
       ...totals,
     }));
   }

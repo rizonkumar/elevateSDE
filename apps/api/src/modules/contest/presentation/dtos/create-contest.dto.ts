@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsDateString, IsString, MinLength } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsBoolean, IsDateString, IsOptional, IsString, MinLength } from 'class-validator';
 import { AdminContestInput } from '@elevatesde/shared-types';
 
 export class CreateContestDto implements AdminContestInput {
@@ -24,4 +24,9 @@ export class CreateContestDto implements AdminContestInput {
   @ApiProperty({ example: '2026-07-10T19:30:00.000Z' })
   @IsDateString()
   endsAt!: string;
+
+  @ApiPropertyOptional({ example: true, description: 'Whether the contest changes ratings' })
+  @IsOptional()
+  @IsBoolean()
+  isRated?: boolean;
 }

@@ -10,6 +10,7 @@ export interface ContestProps {
   endsAt: Date;
   status: ContestStatus;
   tenantId: string | null;
+  isRated: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -21,6 +22,7 @@ export interface CreateContestInput {
   startsAt: Date;
   endsAt: Date;
   tenantId: string | null;
+  isRated: boolean;
 }
 
 export interface UpdateContestDetailsInput {
@@ -29,6 +31,7 @@ export interface UpdateContestDetailsInput {
   description: string;
   startsAt: Date;
   endsAt: Date;
+  isRated: boolean;
 }
 
 export class Contest {
@@ -45,6 +48,7 @@ export class Contest {
       endsAt: input.endsAt,
       status: ContestStatus.DRAFT,
       tenantId: input.tenantId,
+      isRated: input.isRated,
       createdAt: now,
       updatedAt: now,
     });
@@ -62,6 +66,7 @@ export class Contest {
       description: input.description,
       startsAt: input.startsAt,
       endsAt: input.endsAt,
+      isRated: input.isRated,
       updatedAt: new Date(),
     });
   }
@@ -100,6 +105,14 @@ export class Contest {
 
   getTenantId(): string | null {
     return this.props.tenantId;
+  }
+
+  isRated(): boolean {
+    return this.props.isRated;
+  }
+
+  hasEnded(now: Date): boolean {
+    return now >= this.props.endsAt;
   }
 
   getCreatedAt(): Date {

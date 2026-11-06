@@ -5,6 +5,7 @@ import { ContributionHeatmap } from '@/components/dashboard/profile/Contribution
 import { ProfileBadgesCard } from '@/components/public-profile/ProfileBadgesCard';
 import { ProfileHeaderCard } from '@/components/public-profile/ProfileHeaderCard';
 import { ProfileStatGrid } from '@/components/public-profile/ProfileStatGrid';
+import { RatingCard } from '@/components/contest-rating/RatingCard';
 import { RecentSolvesCard } from '@/components/public-profile/RecentSolvesCard';
 import { SectionCard } from '@/components/public-profile/SectionCard';
 import { SolvedBreakdownCard } from '@/components/public-profile/SolvedBreakdownCard';
@@ -49,6 +50,7 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
     <main className="mx-auto flex w-full max-w-[1080px] flex-col gap-4 px-4 py-6 sm:gap-6 sm:px-6 sm:py-10 lg:px-8">
       <ProfileHeaderCard profile={profile} />
       <ProfileStatGrid profile={profile} />
+      {profile.rating && <RatingCard summary={profile.rating} linkContests={false} />}
       <div className="grid gap-4 sm:gap-6 lg:grid-cols-5">
         <SolvedBreakdownCard profile={profile} className="lg:col-span-3" />
         <TopTopicsCard topics={profile.topTopics} className="lg:col-span-2" />

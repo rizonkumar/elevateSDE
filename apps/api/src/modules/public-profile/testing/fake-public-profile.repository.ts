@@ -2,11 +2,13 @@ import { ProfileVisibility } from '@prisma/client';
 import { HandleTakenError } from '../domain/errors/handle-taken.error';
 import { IPublicProfileRepository } from '../domain/interfaces/public-profile-repository.interface';
 import { IProfileHeatmapSource } from '../domain/interfaces/profile-heatmap-source.interface';
+import { IProfileRatingSource } from '../domain/interfaces/profile-rating-source.interface';
 import {
   EarnedBadge,
   HeatmapCell,
   PublicProfileActivity,
   PublicProfileOwner,
+  PublicProfileRating,
   PublicProfileSettingsRecord,
   PublicProfileSettingsWrite,
   RecentSolve,
@@ -157,5 +159,13 @@ export class FakeHeatmapSource implements IProfileHeatmapSource {
   async getHeatmap(userId: string, from: Date, to: Date): Promise<HeatmapCell[]> {
     this.calls.push({ userId, from, to });
     return this.cells;
+  }
+}
+
+export class FakeRatingSource implements IProfileRatingSource {
+  ratings = new Map<string, PublicProfileRating>();
+
+  async getRating(userId: string): Promise<PublicProfileRating | null> {
+    return this.ratings.get(userId) ?? null;
   }
 }

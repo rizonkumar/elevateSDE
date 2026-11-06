@@ -43,7 +43,17 @@ export class PublicProfilePresentationMapper {
         difficulty: solve.difficulty,
         solvedAt: solve.solvedAt.toISOString(),
       })),
-      rating: view.rating ? { ...view.rating } : null,
+      rating: view.rating
+        ? {
+            rating: view.rating.rating,
+            peakRating: view.rating.peakRating,
+            contestsRated: view.rating.contestsRated,
+            history: view.rating.history.map((entry) => ({
+              ...entry,
+              endsAt: entry.endsAt.toISOString(),
+            })),
+          }
+        : null,
     };
   }
 

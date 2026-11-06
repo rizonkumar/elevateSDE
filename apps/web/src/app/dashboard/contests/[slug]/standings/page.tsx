@@ -13,6 +13,7 @@ import { ProfileNameLink } from '@/components/public-profile/ProfileNameLink';
 import { useContestsStore } from '@/store/contests.store';
 import { formatPenalty } from '@/lib/contest-time';
 import { ContestStatusBadge } from '../../_components/ContestStatusBadge';
+import { RatingDelta } from '@/components/contest-rating/RatingDelta';
 
 const POLL_INTERVAL_MS = 15_000;
 
@@ -32,7 +33,24 @@ function MemberCell({ row }: Readonly<{ row: ContestStandingRowDto }>) {
   );
 }
 
-function StandingRow({ row }: Readonly<{ row: ContestStandingRowDto }>) {
+interface StandingProps {
+  row: ContestStandingRowDto;
+  showRating: boolean;
+}
+
+function RatingChange({ row }: Readonly<{ row: ContestStandingRowDto }>) {
+  if (row.ratingDelta === null || row.newRating === null) {
+    return <span className="text-xs text-(--color-text-disabled)">Unrated</span>;
+  }
+  return (
+    <span className="inline-flex items-baseline justify-end gap-2">
+      <span className="tabular-nums text-(--color-text-muted)">{row.newRating}</span>
+      <RatingDelta delta={row.ratingDelta} className="min-w-10 text-right" />
+    </span>
+  );
+}
+
+function StandingRow({ row, showRating }: Readonly<StandingProps>) {
   return (
     <tr
       className={`transition-colors ${
@@ -52,11 +70,16 @@ function StandingRow({ row }: Readonly<{ row: ContestStandingRowDto }>) {
       <td className="px-4 py-3 text-right text-(--color-text-muted)">
         {formatPenalty(row.penaltySeconds)}
       </td>
+      {showRating && (
+        <td className="px-4 py-3 text-right">
+          <RatingChange row={row} />
+        </td>
+      )}
     </tr>
   );
 }
 
-function StandingCard({ row }: Readonly<{ row: ContestStandingRowDto }>) {
+function StandingCard({ row, showRating }: Readonly<StandingProps>) {
   return (
     <div
       className={`rounded-md border p-4 ${
@@ -81,6 +104,12 @@ function StandingCard({ row }: Readonly<{ row: ContestStandingRowDto }>) {
         <span>{row.solvedCount} solved</span>
         <span>{formatPenalty(row.penaltySeconds)} penalty</span>
       </div>
+      {showRating && (
+        <div className="mt-2 flex items-center justify-between border-t border-(--color-border-subtle) pt-2 text-xs">
+          <span className="text-(--color-text-muted)">Rating</span>
+          <RatingChange row={row} />
+        </div>
+      )}
     </div>
   );
 }
@@ -101,6 +130,9 @@ export default function ContestStandingsPage() {
   }, [slug, loadContest, loadStandings]);
 
   const isLive = active?.slug === slug && active.status === 'LIVE';
+  const showRating = standings.some((row) => row.ratingDelta !== null);
+  const awaitingRating =
+    active?.slug === slug && active.status === 'ENDED' && active.isRated && !showRating;
 
   React.useEffect(() => {
     if (!isLive) {
@@ -129,6 +161,12 @@ export default function ContestStandingsPage() {
           {isLive && (
             <span className="text-xs text-(--color-text-muted)">Updates every 15 seconds</span>
           )}
+          {active?.slug === slug && !active.isRated && <Badge variant="neutral">Unrated</Badge>}
+          {awaitingRating && standings.length > 0 && (
+            <span className="text-xs text-(--color-text-muted)">
+              Rating changes appear once results are final
+            </span>
+          )}
         </div>
 
         {isStandingsLoading && standings.length === 0 ? (
@@ -154,18 +192,19 @@ export default function ContestStandingsPage() {
                     <th className="px-4 py-3 text-right font-semibold">Solved</th>
                     <th className="px-4 py-3 text-right font-semibold">Score</th>
                     <th className="px-4 py-3 text-right font-semibold">Penalty</th>
+                    {showRating && <th className="px-4 py-3 text-right font-semibold">Rating</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-(--color-border-subtle)">
                   {standings.map((row) => (
-                    <StandingRow key={row.userId} row={row} />
+                    <StandingRow key={row.userId} row={row} showRating={showRating} />
                   ))}
                 </tbody>
               </table>
             </div>
             <div className="flex flex-col gap-3 md:hidden">
               {standings.map((row) => (
-                <StandingCard key={row.userId} row={row} />
+                <StandingCard key={row.userId} row={row} showRating={showRating} />
               ))}
             </div>
           </>

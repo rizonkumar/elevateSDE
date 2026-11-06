@@ -1,15 +1,29 @@
 'use client';
 
 import * as React from 'react';
-import { TrendingUp, ClipboardCheck, Flame } from 'lucide-react';
+import { TrendingUp, ClipboardCheck, Flame, Trophy } from 'lucide-react';
 import { Button, Tabs, type TabItem } from '@elevatesde/ui';
-import type { LeaderboardTimeframe } from '@elevatesde/shared-types';
+import type { ContestRatingScope, LeaderboardTimeframe } from '@elevatesde/shared-types';
 import { PageContainer } from '@/components/dashboard/PageContainer';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { LeaderboardPodium } from '@/components/dashboard/leaderboard/LeaderboardPodium';
 import { LeaderboardRow, LeaderboardCard } from '@/components/dashboard/leaderboard/LeaderboardRow';
 import { PointRulesPanel } from '@/components/dashboard/leaderboard/PointRulesPanel';
+import { ContestRatingLeaderboard } from '@/components/dashboard/leaderboard/ContestRatingLeaderboard';
 import { useLeaderboardStore } from '@/store/leaderboard.store';
+import { useContestRatingStore } from '@/store/contest-rating.store';
+
+type LeaderboardMode = 'points' | 'rating';
+
+const MODE_TABS: TabItem[] = [
+  { id: 'points', label: 'Points', icon: Trophy },
+  { id: 'rating', label: 'Contest rating', icon: TrendingUp },
+];
+
+const SCOPE_TABS: TabItem[] = [
+  { id: 'platform', label: 'Everyone' },
+  { id: 'tenant', label: 'My organization' },
+];
 
 const TIMEFRAME_TABS: TabItem[] = [
   { id: 'all-time', label: 'All time' },
@@ -24,6 +38,9 @@ export default function LeaderboardPage() {
   const loadMore = useLeaderboardStore((state) => state.loadMore);
   const entries = useLeaderboardStore((state) => state.entries);
   const fetchEntries = useLeaderboardStore((state) => state.fetchEntries);
+  const ratingScope = useContestRatingStore((state) => state.scope);
+  const setRatingScope = useContestRatingStore((state) => state.setScope);
+  const [mode, setMode] = React.useState<LeaderboardMode>('points');
 
   React.useEffect(() => {
     void fetchEntries();
@@ -42,96 +59,119 @@ export default function LeaderboardPage() {
           title="Top performers"
           description="See how your preparation stacks up against the community across assessments, streaks, and contributions."
           actions={
-            <Tabs
-              items={TIMEFRAME_TABS}
-              value={timeframe}
-              onChange={(id) => setTimeframe(id as LeaderboardTimeframe)}
-            />
+            mode === 'points' ? (
+              <Tabs
+                items={TIMEFRAME_TABS}
+                value={timeframe}
+                onChange={(id) => setTimeframe(id as LeaderboardTimeframe)}
+              />
+            ) : (
+              <Tabs
+                items={SCOPE_TABS}
+                value={ratingScope}
+                onChange={(id) => setRatingScope(id as ContestRatingScope)}
+              />
+            )
           }
         />
 
-        {currentUser && (
-          <div className="rounded-md border border-(--color-accent) bg-(--color-accent-soft) p-5 sm:p-6">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <div className="text-xs font-semibold uppercase tracking-wider text-(--color-accent)">
-                  Your standing
-                </div>
-                <div className="mt-1 font-display text-2xl font-semibold tracking-tight text-(--color-text-primary)">
-                  Rank #{currentUser.rank}
-                </div>
-              </div>
-              <div className="grid grid-cols-3 gap-4 sm:gap-8">
-                <div>
-                  <div className="flex items-center gap-1.5 text-xs text-(--color-text-muted)">
-                    <TrendingUp className="h-3.5 w-3.5" />
-                    Points
-                  </div>
-                  <div className="mt-1 font-semibold text-(--color-text-primary)">
-                    {currentUser.points.toLocaleString()}
-                  </div>
-                </div>
-                <div>
-                  <div className="flex items-center gap-1.5 text-xs text-(--color-text-muted)">
-                    <ClipboardCheck className="h-3.5 w-3.5" />
-                    Assessments
-                  </div>
-                  <div className="mt-1 font-semibold text-(--color-text-primary)">
-                    {currentUser.assessmentsCompleted}
-                  </div>
-                </div>
-                <div>
-                  <div className="flex items-center gap-1.5 text-xs text-(--color-text-muted)">
-                    <Flame className="h-3.5 w-3.5" />
-                    Streak
-                  </div>
-                  <div className="mt-1 font-semibold text-(--color-text-primary)">
-                    {currentUser.streakDays}d
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <PointRulesPanel />
-
-        <LeaderboardPodium entries={podium} />
-
-        <div className="rounded-md border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-card)">
-          <div className="hidden overflow-x-auto md:block">
-            <table className="w-full border-collapse text-left text-sm">
-              <thead>
-                <tr className="border-b border-(--color-border-subtle) bg-(--color-bg-soft) text-xs font-semibold uppercase tracking-wider text-(--color-text-muted)">
-                  <th className="px-4 py-3 font-semibold">Rank</th>
-                  <th className="px-4 py-3 font-semibold">Member</th>
-                  <th className="px-4 py-3 text-right font-semibold">Points</th>
-                  <th className="px-4 py-3 text-right font-semibold">Assessments</th>
-                  <th className="px-4 py-3 text-right font-semibold">Streak</th>
-                  <th className="px-4 py-3 text-right font-semibold">Badges</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-(--color-border-subtle)">
-                {rows.map((entry) => (
-                  <LeaderboardRow key={entry.userId} entry={entry} />
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="flex flex-col gap-3 p-3 md:hidden">
-            {rows.map((entry) => (
-              <LeaderboardCard key={entry.userId} entry={entry} />
-            ))}
-          </div>
+        <div className="border-b border-(--color-border-subtle)">
+          <Tabs
+            variant="plain"
+            items={MODE_TABS}
+            value={mode}
+            onChange={(id) => setMode(id as LeaderboardMode)}
+          />
         </div>
 
-        {hasMore && (
-          <div className="flex justify-center">
-            <Button variant="secondary" onClick={loadMore}>
-              Load more
-            </Button>
-          </div>
+        {mode === 'rating' ? (
+          <ContestRatingLeaderboard />
+        ) : (
+          <>
+            {currentUser && (
+              <div className="rounded-md border border-(--color-accent) bg-(--color-accent-soft) p-5 sm:p-6">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <div className="text-xs font-semibold uppercase tracking-wider text-(--color-accent)">
+                      Your standing
+                    </div>
+                    <div className="mt-1 font-display text-2xl font-semibold tracking-tight text-(--color-text-primary)">
+                      Rank #{currentUser.rank}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-4 sm:gap-8">
+                    <div>
+                      <div className="flex items-center gap-1.5 text-xs text-(--color-text-muted)">
+                        <TrendingUp className="h-3.5 w-3.5" />
+                        Points
+                      </div>
+                      <div className="mt-1 font-semibold text-(--color-text-primary)">
+                        {currentUser.points.toLocaleString()}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-1.5 text-xs text-(--color-text-muted)">
+                        <ClipboardCheck className="h-3.5 w-3.5" />
+                        Assessments
+                      </div>
+                      <div className="mt-1 font-semibold text-(--color-text-primary)">
+                        {currentUser.assessmentsCompleted}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-1.5 text-xs text-(--color-text-muted)">
+                        <Flame className="h-3.5 w-3.5" />
+                        Streak
+                      </div>
+                      <div className="mt-1 font-semibold text-(--color-text-primary)">
+                        {currentUser.streakDays}d
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <PointRulesPanel />
+
+            <LeaderboardPodium entries={podium} />
+
+            <div className="rounded-md border border-(--color-border-subtle) bg-(--color-surface) shadow-(--shadow-card)">
+              <div className="hidden overflow-x-auto md:block">
+                <table className="w-full border-collapse text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-(--color-border-subtle) bg-(--color-bg-soft) text-xs font-semibold uppercase tracking-wider text-(--color-text-muted)">
+                      <th className="px-4 py-3 font-semibold">Rank</th>
+                      <th className="px-4 py-3 font-semibold">Member</th>
+                      <th className="px-4 py-3 text-right font-semibold">Points</th>
+                      <th className="px-4 py-3 text-right font-semibold">Assessments</th>
+                      <th className="px-4 py-3 text-right font-semibold">Streak</th>
+                      <th className="px-4 py-3 text-right font-semibold">Badges</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-(--color-border-subtle)">
+                    {rows.map((entry) => (
+                      <LeaderboardRow key={entry.userId} entry={entry} />
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="flex flex-col gap-3 p-3 md:hidden">
+                {rows.map((entry) => (
+                  <LeaderboardCard key={entry.userId} entry={entry} />
+                ))}
+              </div>
+            </div>
+
+            {hasMore && (
+              <div className="flex justify-center">
+                <Button variant="secondary" onClick={loadMore}>
+                  Load more
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </PageContainer>
