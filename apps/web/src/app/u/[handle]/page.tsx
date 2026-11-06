@@ -24,7 +24,7 @@ function describeProfile(profile: PublicProfileDto): string {
 
 export async function generateMetadata({ params }: PublicProfilePageProps): Promise<Metadata> {
   const { handle } = await params;
-  const profile = await fetchPublicProfile(handle);
+  const profile = await fetchPublicProfile(handle).catch(() => null);
   if (!profile) {
     return { title: 'Profile not found · ElevateSDE', robots: { index: false } };
   }

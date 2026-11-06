@@ -15,6 +15,7 @@ const UNAUTHORIZED = 'unauthorized';
 const FORBIDDEN = 'forbidden';
 const SERVER_DISCONNECT = 'io server disconnect';
 const MAX_RENEW_ATTEMPTS = 3;
+const RENEW_RETRY_DELAY_MS = 2_000;
 
 type EventHandler<E extends ServerToClientEventName> = (payload: ServerToClientPayload<E>) => void;
 
@@ -75,8 +76,12 @@ async function renewAndReconnect(target: RealtimeSocket): Promise<void> {
   setStatus('connecting');
   const token = await renewSession();
   renewing = false;
-  if (!token || !wanted) {
+  if (!wanted) {
     setStatus('unavailable');
+    return;
+  }
+  if (!token) {
+    setTimeout(() => void renewAndReconnect(target), RENEW_RETRY_DELAY_MS * renewAttempts);
     return;
   }
   target.connect();

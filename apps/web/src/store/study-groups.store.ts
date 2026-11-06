@@ -31,6 +31,10 @@ import { apiErrorMessage } from '@/lib/public-profile-api';
 import { useToastStore } from '@/store/toast.store';
 
 const ACTIVITY_LIMIT = 50;
+const ACTIVITY_REFRESH_DELAY_MS = 1500;
+
+let activityRefreshTimer: ReturnType<typeof setTimeout> | null = null;
+let latestDetailRequestId: string | null = null;
 
 export type LoadState = 'idle' | 'loading' | 'ready' | 'error';
 
@@ -123,11 +127,14 @@ export const useStudyGroupsStore = create<StudyGroupsState>((set, get) => {
           detailError: null,
         }));
       }
+      latestDetailRequestId = id;
       try {
         const detail = await fetchStudyGroup(id);
-        set({ detail, detailState: 'ready', detailError: null });
+        if (latestDetailRequestId === id) {
+          set({ detail, detailState: 'ready', detailError: null });
+        }
       } catch (error) {
-        if (!quiet) {
+        if (!quiet && latestDetailRequestId === id) {
           set({
             detail: null,
             detailState: 'error',
@@ -173,8 +180,19 @@ export const useStudyGroupsStore = create<StudyGroupsState>((set, get) => {
           ACTIVITY_LIMIT,
         ),
       }));
-      void get().loadDetail(groupId, true);
-      void get().loadLeaderboard(groupId, get().leaderboardWindow, true);
+      if (activityRefreshTimer !== null) {
+        clearTimeout(activityRefreshTimer);
+      }
+      activityRefreshTimer = setTimeout(() => {
+        activityRefreshTimer = null;
+        if (get().detail?.id !== groupId) {
+          return;
+        }
+        void get().loadDetail(groupId, true);
+        if (get().leaderboard !== null) {
+          void get().loadLeaderboard(groupId, get().leaderboardWindow, true);
+        }
+      }, ACTIVITY_REFRESH_DELAY_MS);
     },
 
     create: async (request) => {

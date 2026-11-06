@@ -8,13 +8,12 @@ function apiBaseUrl(): string {
 
 export async function fetchPublicProfile(handle: string): Promise<PublicProfileDto | null> {
   const url = `${apiBaseUrl()}/api/v1/public/profiles/${encodeURIComponent(handle)}`;
-  try {
-    const response = await fetch(url, { next: { revalidate: PROFILE_REVALIDATE_SECONDS } });
-    if (!response.ok) {
-      return null;
-    }
-    return (await response.json()) as PublicProfileDto;
-  } catch {
+  const response = await fetch(url, { next: { revalidate: PROFILE_REVALIDATE_SECONDS } });
+  if (response.status === 404) {
     return null;
   }
+  if (!response.ok) {
+    throw new Error(`Public profile request failed with status ${response.status}`);
+  }
+  return (await response.json()) as PublicProfileDto;
 }

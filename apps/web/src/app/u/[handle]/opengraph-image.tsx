@@ -36,7 +36,7 @@ function Stat({ label, value }: { label: string; value: string }) {
 
 export default async function Image({ params }: ImageProps) {
   const { handle } = await params;
-  const profile = await fetchPublicProfile(handle);
+  const profile = await fetchPublicProfile(handle).catch(() => null);
   const displayName = profile?.displayName ?? 'ElevateSDE';
   const subtitle = profile ? `@${profile.handle}` : 'Interview prep for engineers';
 

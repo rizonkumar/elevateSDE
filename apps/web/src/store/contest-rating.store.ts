@@ -46,11 +46,15 @@ export const useContestRatingStore = create<ContestRatingState>((set, get) => ({
   setScope: (scope) => set({ scope, entries: [], total: 0, page: 1 }),
 
   loadLeaderboard: async (page = 1) => {
+    const requestedScope = get().scope;
     set({ isLeaderboardLoading: true });
     try {
       const { data } = await api.get<ContestRatingLeaderboardDto>(`${ENDPOINT}/leaderboard`, {
-        params: { scope: get().scope, page },
+        params: { scope: requestedScope, page },
       });
+      if (get().scope !== requestedScope) {
+        return;
+      }
       set((state) => ({
         entries: page === 1 ? data.items : [...state.entries, ...data.items],
         total: data.total,
@@ -59,6 +63,9 @@ export const useContestRatingStore = create<ContestRatingState>((set, get) => ({
         isLeaderboardLoading: false,
       }));
     } catch {
+      if (get().scope !== requestedScope) {
+        return;
+      }
       set({ isLeaderboardLoading: false });
       useToastStore.getState().addToast('Could not load the rating leaderboard.', 'error');
     }
