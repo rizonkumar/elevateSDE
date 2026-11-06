@@ -1,8 +1,10 @@
 import { AssessmentDifficulty, PointSource } from '@prisma/client';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PointsService } from './points.service';
 import { IPointLedgerRepository } from '../domain/interfaces/point-ledger-repository.interface';
 import { PointAward } from '../domain/entities/point-award';
 import { PointPeriod } from '../domain/point-periods';
+import { POINTS_EVENTS, PointsAwardedEvent } from '../domain/events/points-events';
 
 const USER_ID = 'user-1';
 
@@ -58,10 +60,42 @@ class FakePointLedgerRepository implements IPointLedgerRepository {
 describe('PointsService', () => {
   let repository: FakePointLedgerRepository;
   let service: PointsService;
+  let announced: PointsAwardedEvent[];
 
   beforeEach(() => {
     repository = new FakePointLedgerRepository();
-    service = new PointsService(repository);
+    const emitter = new EventEmitter2();
+    announced = [];
+    emitter.on(POINTS_EVENTS.AWARDED, (event: PointsAwardedEvent) => announced.push(event));
+    service = new PointsService(repository, emitter);
+  });
+
+  describe('points awarded event', () => {
+    it('announces each new award once and stays quiet for duplicates', async () => {
+      repository.difficulties.set('p1', AssessmentDifficulty.MEDIUM);
+
+      await service.awardProblemSolved(USER_ID, 'p1');
+      await service.awardProblemSolved(USER_ID, 'p1');
+      await service.awardDailyChallenge(USER_ID, 'challenge-1');
+      await service.awardContestResults('contest-1', [
+        { userId: 'u1', rank: 1, score: 300 },
+        { userId: 'u2', rank: 2, score: 0 },
+      ]);
+
+      expect(announced.map((event) => [event.userId, event.source, event.refId, event.delta])).toEqual([
+        [USER_ID, PointSource.PROBLEM_SOLVED, 'p1', 20],
+        [USER_ID, PointSource.DAILY_CHALLENGE, 'challenge-1', 15],
+        ['u1', PointSource.CONTEST_RESULT, 'contest-1', 80],
+      ]);
+    });
+
+    it('does not announce admin adjustments', async () => {
+      repository.storedPoints.set(USER_ID, 10);
+
+      await service.adjustTo(USER_ID, 50);
+
+      expect(announced).toHaveLength(0);
+    });
   });
 
   describe('awardProblemSolved', () => {

@@ -1884,6 +1884,7 @@ export interface ServerToClientEvents {
   'peer:presence': (payload: PeerPresencePushDto) => void;
   'peer:presence-snapshot': (payload: PeerPresenceSnapshotDto) => void;
   'peer:session-changed': (payload: PeerSessionChangedPushDto) => void;
+  'group:activity': (payload: StudyGroupActivityPushDto) => void;
 }
 
 export type ServerToClientEventName = keyof ServerToClientEvents;
@@ -1898,3 +1899,190 @@ export interface ClientToServerEvents {
 }
 
 export const REALTIME_NAMESPACE = '/realtime';
+
+export type StudyGroupRole = 'OWNER' | 'MEMBER';
+
+export type StudyGroupJoinPolicy = 'OPEN' | 'INVITE_ONLY';
+
+export type StudyGoalMetric = 'PROBLEMS_SOLVED' | 'POINTS' | 'DAILY_CHALLENGES' | 'CONTESTS_ENTERED';
+
+export type StudyGoalScope = 'GROUP_TOTAL' | 'EACH_MEMBER';
+
+export type StudyGoalStatus = 'UPCOMING' | 'ACTIVE' | 'COMPLETED' | 'ENDED';
+
+export type StudyGroupLeaderboardWindow = 'goal' | 'week' | 'all';
+
+export type StudyGroupActivityKind = 'PROBLEM_SOLVED' | 'DAILY_CHALLENGE' | 'CONTEST_RESULT';
+
+export const STUDY_GROUP_LIMITS = {
+  maxMembers: 200,
+  maxActiveGoals: 5,
+  nameMaxLength: 60,
+  descriptionMaxLength: 280,
+  goalTitleMaxLength: 80,
+  goalTargetMax: 100000,
+} as const;
+
+export interface StudyGroupSummaryDto {
+  id: string;
+  name: string;
+  description: string | null;
+  joinPolicy: StudyGroupJoinPolicy;
+  memberCount: number;
+  activeGoalCount: number;
+  myRole: StudyGroupRole | null;
+  myWeeklyRank: number | null;
+  createdAt: string;
+}
+
+export interface StudyGroupListDto {
+  canCreate: boolean;
+  groups: StudyGroupSummaryDto[];
+  discoverable: StudyGroupSummaryDto[];
+}
+
+export interface StudyGroupViewerDto {
+  role: StudyGroupRole | null;
+  isMember: boolean;
+  isTenantAdmin: boolean;
+  canEdit: boolean;
+  canArchive: boolean;
+  canManageMembers: boolean;
+  canAssignRoles: boolean;
+  canManageGoals: boolean;
+  canJoin: boolean;
+  canLeave: boolean;
+}
+
+export interface StudyGroupMemberDto {
+  userId: string;
+  displayName: string;
+  headline: string | null;
+  publicHandle: string | null;
+  role: StudyGroupRole;
+  joinedAt: string;
+  isViewer: boolean;
+}
+
+export interface StudyGoalGroupTotalProgressDto {
+  scope: 'GROUP_TOTAL';
+  current: number;
+  target: number;
+  percent: number;
+}
+
+export interface StudyGoalMemberProgressDto {
+  userId: string;
+  displayName: string;
+  value: number;
+  reached: boolean;
+}
+
+export interface StudyGoalEachMemberProgressDto {
+  scope: 'EACH_MEMBER';
+  target: number;
+  membersReached: number;
+  memberCount: number;
+  percent: number;
+  viewerValue: number | null;
+  perMember: StudyGoalMemberProgressDto[];
+}
+
+export type StudyGoalProgressDto = StudyGoalGroupTotalProgressDto | StudyGoalEachMemberProgressDto;
+
+export interface StudyGroupGoalDto {
+  id: string;
+  title: string;
+  metric: StudyGoalMetric;
+  scope: StudyGoalScope;
+  target: number;
+  startsAt: string;
+  endsAt: string;
+  completedAt: string | null;
+  status: StudyGoalStatus;
+  progress: StudyGoalProgressDto;
+}
+
+export interface StudyGroupDetailDto {
+  id: string;
+  name: string;
+  description: string | null;
+  joinPolicy: StudyGroupJoinPolicy;
+  memberCount: number;
+  createdAt: string;
+  viewer: StudyGroupViewerDto;
+  members: StudyGroupMemberDto[];
+  goals: StudyGroupGoalDto[];
+}
+
+export interface StudyGroupLeaderboardEntryDto {
+  rank: number;
+  userId: string;
+  displayName: string;
+  publicHandle: string | null;
+  points: number;
+  problemsSolved: number;
+  isViewer: boolean;
+}
+
+export interface StudyGroupLeaderboardDto {
+  window: StudyGroupLeaderboardWindow;
+  from: string | null;
+  to: string | null;
+  goalTitle: string | null;
+  entries: StudyGroupLeaderboardEntryDto[];
+}
+
+export interface StudyGroupActivityItemDto {
+  id: string;
+  userId: string;
+  displayName: string;
+  publicHandle: string | null;
+  kind: StudyGroupActivityKind;
+  title: string;
+  linkUrl: string | null;
+  points: number;
+  occurredAt: string;
+}
+
+export interface StudyGroupActivityPushDto {
+  groupId: string;
+  item: StudyGroupActivityItemDto;
+}
+
+export interface StudyGroupRosterCandidateDto {
+  userId: string;
+  displayName: string;
+  email: string;
+  headline: string | null;
+}
+
+export interface CreateStudyGroupRequest {
+  name: string;
+  description?: string | null;
+  joinPolicy: StudyGroupJoinPolicy;
+  ownerIds?: string[];
+}
+
+export interface UpdateStudyGroupRequest {
+  name?: string;
+  description?: string | null;
+  joinPolicy?: StudyGroupJoinPolicy;
+}
+
+export interface AddStudyGroupMembersRequest {
+  userIds: string[];
+}
+
+export interface UpdateStudyGroupMemberRequest {
+  role: StudyGroupRole;
+}
+
+export interface StudyGroupGoalInput {
+  title: string;
+  metric: StudyGoalMetric;
+  scope: StudyGoalScope;
+  target: number;
+  startsAt: string;
+  endsAt: string;
+}

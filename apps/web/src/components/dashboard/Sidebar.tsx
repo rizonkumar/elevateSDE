@@ -4,7 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ShellSidebar } from '@elevatesde/ui';
-import { useSessionRole } from '@/hooks/use-session-role';
+import { useSessionHasTenant, useSessionRole } from '@/hooks/use-session-role';
 import { useReviewStore } from '@/store/review.store';
 import { buildNavGroups, findActiveDashboardItem } from '@/lib/dashboard-nav';
 import type { NavGroup } from '@/lib/dashboard-nav';
@@ -20,6 +20,7 @@ interface SidebarProps {
 export function Sidebar({ open, onClose }: SidebarProps) {
   const pathname = usePathname();
   const role = useSessionRole();
+  const hasTenant = useSessionHasTenant();
   const dueReviewCount = useReviewStore((state) => state.summary?.dueCount ?? 0);
   const loadReviewSummary = useReviewStore((state) => state.loadSummary);
 
@@ -29,13 +30,13 @@ export function Sidebar({ open, onClose }: SidebarProps) {
 
   const groups = React.useMemo<NavGroup[]>(
     () =>
-      buildNavGroups(role).map((group) => ({
+      buildNavGroups({ role, hasTenant }).map((group) => ({
         ...group,
         items: group.items.map((item) =>
           item.badge === 'review' ? { ...item, badgeCount: dueReviewCount } : item,
         ),
       })),
-    [role, dueReviewCount],
+    [role, hasTenant, dueReviewCount],
   );
 
   const activeHref = findActiveDashboardItem(pathname, groups)?.item.href ?? null;

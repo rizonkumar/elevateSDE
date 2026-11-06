@@ -23,6 +23,7 @@ import { useToastStore } from '@/store/toast.store';
 import { useOrgDashboardStore } from '@/store/org-dashboard.store';
 import { PageContainer } from '@/components/dashboard/PageContainer';
 import { SwitchField } from '@/components/dashboard/SwitchField';
+import { StudyGroupsSummaryCard } from '@/components/dashboard/StudyGroupsSummaryCard';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -336,6 +337,10 @@ export default function OrgDashboardPage() {
               </div>
             </div>
           </div>
+        </motion.section>
+
+        <motion.section variants={itemVariants}>
+          <StudyGroupsSummaryCard />
         </motion.section>
 
         <motion.section variants={itemVariants}>

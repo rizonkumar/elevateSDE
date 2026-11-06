@@ -28,6 +28,7 @@ const handlers: HandlerRegistry = {
   'peer:presence': new Set(),
   'peer:presence-snapshot': new Set(),
   'peer:session-changed': new Set(),
+  'group:activity': new Set(),
 };
 
 function isServerEvent(name: string): name is ServerToClientEventName {

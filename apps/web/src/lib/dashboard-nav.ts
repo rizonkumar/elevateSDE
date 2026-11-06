@@ -18,6 +18,7 @@ import {
   UserRound,
   Target,
   Shield,
+  UsersRound,
 } from 'lucide-react';
 import { findActiveNavItem } from '@elevatesde/ui';
 import type { ActiveNavMatch, ShellNavGroupConfig, ShellNavItem } from '@elevatesde/ui';
@@ -150,6 +151,13 @@ const COMMUNITY_GROUP: NavGroup = {
   ],
 };
 
+const GROUPS_ITEM: DashboardNavItem = {
+  href: '/dashboard/groups',
+  label: 'Study Groups',
+  icon: UsersRound,
+  keywords: ['cohort', 'team', 'goals', 'group leaderboard'],
+};
+
 const ORGANIZATION_ITEM: DashboardNavItem = {
   href: '/dashboard/org',
   label: 'Organization',
@@ -191,8 +199,24 @@ function buildManageItems(role?: string): DashboardNavItem[] {
   return items;
 }
 
-export function buildNavGroups(role?: string): NavGroup[] {
-  const groups = [HOME_GROUP, PRACTICE_GROUP, CAREER_GROUP, COMMUNITY_GROUP];
+export interface NavContext {
+  role?: string;
+  hasTenant?: boolean;
+}
+
+function buildCommunityGroup(hasTenant: boolean): NavGroup {
+  if (!hasTenant) {
+    return COMMUNITY_GROUP;
+  }
+  const [contests, leaderboard, ...rest] = COMMUNITY_GROUP.items;
+  const items = [contests, leaderboard, GROUPS_ITEM, ...rest].filter(
+    (item): item is DashboardNavItem => item !== undefined,
+  );
+  return { ...COMMUNITY_GROUP, items };
+}
+
+export function buildNavGroups({ role, hasTenant = false }: NavContext = {}): NavGroup[] {
+  const groups = [HOME_GROUP, PRACTICE_GROUP, CAREER_GROUP, buildCommunityGroup(hasTenant)];
   const manageItems = buildManageItems(role);
   if (manageItems.length > 0) {
     groups.push({ id: 'manage', label: 'Manage', items: manageItems });
@@ -200,8 +224,8 @@ export function buildNavGroups(role?: string): NavGroup[] {
   return groups;
 }
 
-export function buildRouteGroups(role?: string): NavGroup[] {
-  return [...buildNavGroups(role), ACCOUNT_GROUP];
+export function buildRouteGroups(context: NavContext = {}): NavGroup[] {
+  return [...buildNavGroups(context), ACCOUNT_GROUP];
 }
 
 export function findActiveDashboardItem(

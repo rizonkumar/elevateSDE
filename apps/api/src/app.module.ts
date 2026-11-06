@@ -35,6 +35,7 @@ import { MockInterviewModule } from './modules/mock-interview/mock-interview.mod
 import { SchedulerModule } from './modules/scheduler/scheduler.module';
 import { RealtimeModule } from './modules/realtime/realtime.module';
 import { PublicProfileModule } from './modules/public-profile/public-profile.module';
+import { StudyGroupModule } from './modules/study-group/study-group.module';
 
 @Module({
   imports: [
@@ -68,6 +69,7 @@ import { PublicProfileModule } from './modules/public-profile/public-profile.mod
     InterviewPreparationModule,
     MockInterviewModule,
     PublicProfileModule,
+    StudyGroupModule,
     SchedulerModule,
   ],
   controllers: [AppController],

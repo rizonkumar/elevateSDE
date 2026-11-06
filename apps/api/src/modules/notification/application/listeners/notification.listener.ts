@@ -15,6 +15,8 @@ import {
   SubmissionAcceptedEvent,
   CodeReviewReadyEvent,
   ContestRatingUpdatedEvent,
+  StudyGoalCompletedEvent,
+  StudyGroupAddedEvent,
 } from '../../domain/events/notification-events';
 import { NotificationService } from '../notification.service';
 
@@ -163,6 +165,31 @@ export class NotificationListener {
       body: `${event.contestTitle}: ${event.oldRating} → ${event.newRating} (${sign}${Math.abs(event.delta)})`,
       linkUrl: `/dashboard/contests/${event.contestSlug}/standings`,
       dedupeKey: `rating:${event.contestId}:${event.userId}`,
+    });
+  }
+
+  @OnEvent(NOTIFICATION_EVENTS.STUDY_GROUP_ADDED)
+  async onStudyGroupAdded(event: StudyGroupAddedEvent): Promise<void> {
+    await this.safeNotify({
+      userId: event.recipientId,
+      type: 'STUDY_GROUP_ADDED',
+      title: `You joined ${event.groupName}`,
+      body: `${event.actorName} added you to the study group ${event.groupName}.`,
+      linkUrl: `/dashboard/groups/${event.groupId}`,
+    });
+  }
+
+  @OnEvent(NOTIFICATION_EVENTS.STUDY_GOAL_COMPLETED)
+  async onStudyGoalCompleted(event: StudyGoalCompletedEvent): Promise<void> {
+    await this.safeNotify({
+      userId: event.recipientId,
+      type: 'STUDY_GOAL_COMPLETED',
+      title: event.personal ? 'You reached a group goal' : 'Your group reached its goal',
+      body: event.personal
+        ? `You hit the target for "${event.goalTitle}" in ${event.groupName}.`
+        : `${event.groupName} completed "${event.goalTitle}".`,
+      linkUrl: `/dashboard/groups/${event.groupId}`,
+      dedupeKey: event.dedupeKey,
     });
   }
 
