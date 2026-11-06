@@ -109,6 +109,62 @@ describe('StudyGroupActivityService', () => {
     expect(repository.completions).toEqual([goal.id]);
   });
 
+  it('completes a contests-entered goal on finalization even when nobody earned points', async () => {
+    const goal = repository.seedGoal({
+      groupId,
+      metric: StudyGoalMetric.CONTESTS_ENTERED,
+      scope: StudyGoalScope.GROUP_TOTAL,
+      target: 2,
+    });
+    repository.participations.push(
+      { userId: 'a', contestEndsAt: NOW, hasJudgedSubmission: true },
+      { userId: 'b', contestEndsAt: NOW, hasJudgedSubmission: true },
+    );
+
+    await service.recordContestFinalized(
+      { contestId: 'contest-1', endsAt: NOW, participantIds: ['a', 'b'] },
+      NOW,
+    );
+    await service.recordContestFinalized(
+      { contestId: 'contest-1', endsAt: NOW, participantIds: ['a', 'b'] },
+      NOW,
+    );
+
+    expect(repository.completions).toEqual([goal.id]);
+    expect(completed.map((event) => event.recipientId)).toEqual(['a', 'b']);
+  });
+
+  it('does not count sign-ups without a judged submission as contests entered', async () => {
+    repository.seedGoal({
+      groupId,
+      metric: StudyGoalMetric.CONTESTS_ENTERED,
+      scope: StudyGoalScope.GROUP_TOTAL,
+      target: 2,
+    });
+    repository.participations.push(
+      { userId: 'a', contestEndsAt: NOW, hasJudgedSubmission: true },
+      { userId: 'b', contestEndsAt: NOW, hasJudgedSubmission: false },
+    );
+
+    await service.recordContestFinalized(
+      { contestId: 'contest-1', endsAt: NOW, participantIds: ['a', 'b'] },
+      NOW,
+    );
+
+    expect(repository.completions).toEqual([]);
+    expect(completed).toHaveLength(0);
+  });
+
+  it('ignores contest finalization for users outside any group', async () => {
+    await expect(
+      service.recordContestFinalized(
+        { contestId: 'contest-1', endsAt: NOW, participantIds: ['stranger'] },
+        NOW,
+      ),
+    ).resolves.toBeUndefined();
+    expect(completed).toHaveLength(0);
+  });
+
   it('ignores goals whose metric the award does not move', async () => {
     repository.seedGoal({ groupId, metric: StudyGoalMetric.DAILY_CHALLENGES, target: 1 });
     await award('a', 'p1');

@@ -101,6 +101,7 @@ export interface StudyGroupAddedEvent {
   groupId: string;
   groupName: string;
   actorName: string;
+  dedupeKey: string;
 }
 
 export interface StudyGoalCompletedEvent {

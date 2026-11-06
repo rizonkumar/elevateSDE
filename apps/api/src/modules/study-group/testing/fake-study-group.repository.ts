@@ -41,6 +41,7 @@ interface StoredMember extends MembershipRecord {
 interface StoredParticipation {
   userId: string;
   contestEndsAt: Date;
+  hasJudgedSubmission: boolean;
 }
 
 export class FakeStudyGroupRepository implements IStudyGroupRepository {
@@ -331,7 +332,12 @@ export class FakeStudyGroupRepository implements IStudyGroupRepository {
     const within = (date: Date) => date >= window.from && date < window.to;
     if (metric === StudyGoalMetric.CONTESTS_ENTERED) {
       this.participations
-        .filter((entry) => userIds.includes(entry.userId) && within(entry.contestEndsAt))
+        .filter(
+          (entry) =>
+            userIds.includes(entry.userId) &&
+            entry.hasJudgedSubmission &&
+            within(entry.contestEndsAt),
+        )
         .forEach((entry) => totals.set(entry.userId, (totals.get(entry.userId) ?? 0) + 1));
       return totals;
     }

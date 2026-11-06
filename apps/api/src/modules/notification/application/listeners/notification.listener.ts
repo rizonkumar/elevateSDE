@@ -176,6 +176,7 @@ export class NotificationListener {
       title: `You joined ${event.groupName}`,
       body: `${event.actorName} added you to the study group ${event.groupName}.`,
       linkUrl: `/dashboard/groups/${event.groupId}`,
+      dedupeKey: event.dedupeKey,
     });
   }
 

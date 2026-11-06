@@ -3,6 +3,7 @@ import { NotificationService } from './notification.service';
 import { INotificationRepository } from '../domain/interfaces/notification-repository.interface';
 import { Notification } from '../domain/entities/notification';
 import { NotificationPreferenceView } from '../domain/read-models/notification-view';
+import { RealtimeNotificationPush } from '../infrastructure/realtime-notification-push';
 import { RecordingRealtimePublisher } from '../../realtime/testing/recording-realtime.publisher';
 
 class FakeNotificationRepository implements INotificationRepository {
@@ -76,7 +77,7 @@ describe('NotificationService', () => {
   beforeEach(() => {
     repository = new FakeNotificationRepository();
     realtime = new RecordingRealtimePublisher();
-    service = new NotificationService(repository, realtime);
+    service = new NotificationService(repository, new RealtimeNotificationPush(realtime));
   });
 
   describe('realtime push', () => {

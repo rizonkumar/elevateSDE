@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { INotificationRepository } from './domain/interfaces/notification-repository.interface';
+import { INotificationPush } from './domain/interfaces/notification-push.interface';
+import { RealtimeNotificationPush } from './infrastructure/realtime-notification-push';
 import { NotificationRepository } from './infrastructure/repositories/notification.repository';
 import { NotificationService } from './application/notification.service';
 import { NotificationListener } from './application/listeners/notification.listener';
@@ -15,6 +17,10 @@ import { PrismaService } from '../../infrastructure/prisma/prisma.service';
     {
       provide: INotificationRepository,
       useClass: NotificationRepository,
+    },
+    {
+      provide: INotificationPush,
+      useClass: RealtimeNotificationPush,
     },
   ],
   exports: [NotificationService],

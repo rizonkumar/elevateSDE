@@ -48,6 +48,15 @@ export class SocketIoRealtimePublisher extends RealtimePublisher {
     this.emit(roomName('group', groupId), event, payload);
   }
 
+  evictUserFromGroup(groupId: string, userId: string): void {
+    this.namespace?.in(userRoom(userId)).socketsLeave(roomName('group', groupId));
+  }
+
+  evictAllFromGroup(groupId: string): void {
+    const room = roomName('group', groupId);
+    this.namespace?.in(room).socketsLeave(room);
+  }
+
   private emit<E extends ServerToClientEventName>(
     room: string,
     event: E,

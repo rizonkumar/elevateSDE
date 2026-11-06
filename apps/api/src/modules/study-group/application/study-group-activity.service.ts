@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { StudyGoalScope } from '@prisma/client';
+import { StudyGoalMetric, StudyGoalScope } from '@prisma/client';
+import { ContestFinalizedEvent } from '../../contest/domain/events/contest-events';
 import { PointsAwardedEvent } from '../../leaderboard/domain/events/points-events';
 import {
   NOTIFICATION_EVENTS,
@@ -58,16 +59,53 @@ export class StudyGroupActivityService {
         tenantId,
       );
       for (const goal of goals) {
-        await this.evaluateGoal(goal, membersByGroup.get(goal.groupId) ?? [], event.userId, now);
+        await this.evaluateGoal(goal, membersByGroup.get(goal.groupId) ?? [], [event.userId], now);
       }
     }
     return { groupIds, activity: record ? toActivityView(record) : null };
   }
 
+  async recordContestFinalized(
+    event: ContestFinalizedEvent,
+    now: Date = new Date(),
+  ): Promise<void> {
+    const tenantByGroup = new Map<string, string>();
+    const participantsByGroup = new Map<string, string[]>();
+    for (const userId of event.participantIds) {
+      const memberships = await this.repository.listActiveMembershipsForUser(userId);
+      for (const membership of memberships) {
+        tenantByGroup.set(membership.groupId, membership.tenantId);
+        participantsByGroup.set(membership.groupId, [
+          ...(participantsByGroup.get(membership.groupId) ?? []),
+          userId,
+        ]);
+      }
+    }
+    if (tenantByGroup.size === 0) {
+      return;
+    }
+    const goals = (await this.repository.listInProgressGoals([...tenantByGroup.keys()], now)).filter(
+      (goal) => goal.metric === StudyGoalMetric.CONTESTS_ENTERED,
+    );
+    for (const goal of goals) {
+      const tenantId = tenantByGroup.get(goal.groupId);
+      if (!tenantId) {
+        continue;
+      }
+      const membersByGroup = await this.repository.listMemberIdsByGroup([goal.groupId], tenantId);
+      await this.evaluateGoal(
+        goal,
+        membersByGroup.get(goal.groupId) ?? [],
+        participantsByGroup.get(goal.groupId) ?? [],
+        now,
+      );
+    }
+  }
+
   private async evaluateGoal(
     goal: OpenGoalRecord,
     memberIds: string[],
-    earnerId: string,
+    earnerIds: string[],
     now: Date,
   ): Promise<void> {
     if (memberIds.length === 0) {
@@ -83,8 +121,10 @@ export class StudyGroupActivityService {
       memberIds.forEach((recipientId) => this.announce(goal, recipientId, false));
       return;
     }
-    if (valueOf(earnerId) >= goal.target) {
-      this.announce(goal, earnerId, true);
+    for (const earnerId of earnerIds) {
+      if (memberIds.includes(earnerId) && valueOf(earnerId) >= goal.target) {
+        this.announce(goal, earnerId, true);
+      }
     }
     if (memberIds.every((userId) => valueOf(userId) >= goal.target)) {
       await this.repository.markGoalCompleted(goal.id, now);

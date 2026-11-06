@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { Prisma, SubmissionStatus } from '@prisma/client';
+import { ContestStatus, Prisma, SubmissionStatus } from '@prisma/client';
 import { PrismaService } from '../../../../infrastructure/prisma/prisma.service';
 import { PUBLIC_HANDLE_SELECT, resolvePublicHandle } from '../../../../common/public-handle';
 import { IContestRatingRepository } from '../../domain/interfaces/contest-rating-repository.interface';
@@ -46,6 +46,20 @@ export class ContestRatingRepository implements IContestRatingRepository {
       endsAt: row.endsAt,
       problemIds: row.problems.map((problem) => problem.problemId),
     }));
+  }
+
+  async findEarliestUnfinalizedRatedEndsAt(now: Date): Promise<Date | null> {
+    const row = await this.prisma.contest.findFirst({
+      where: {
+        finalizedAt: null,
+        isRated: true,
+        status: { not: ContestStatus.DRAFT },
+        endsAt: { lte: now },
+      },
+      orderBy: { endsAt: 'asc' },
+      select: { endsAt: true },
+    });
+    return row?.endsAt ?? null;
   }
 
   async findRatingCandidates(contest: PendingRatingContest): Promise<RatingCandidate[]> {

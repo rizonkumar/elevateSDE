@@ -38,6 +38,7 @@ import {
   rankMembers,
   resolveLeaderboardWindow,
 } from '../domain/group-leaderboard';
+import { RealtimePublisher } from '../../realtime/domain/realtime-publisher';
 import { periodStart } from '../../leaderboard/domain/point-periods';
 import {
   ActivityRecord,
@@ -92,6 +93,7 @@ export class StudyGroupService {
   constructor(
     private readonly repository: IStudyGroupRepository,
     private readonly eventEmitter: EventEmitter2,
+    private readonly realtime: RealtimePublisher,
   ) {}
 
   async list(actor: StudyGroupActor, now: Date = new Date()): Promise<StudyGroupListView> {
@@ -150,7 +152,7 @@ export class StudyGroupService {
     const group = await this.mapNameConflict(() =>
       this.repository.createGroup(tenantActor.tenantId, tenantActor.userId, draft, ownerIds),
     );
-    this.announceAdded(group, ownerIds, tenantActor);
+    this.announceAdded(group, ownerIds, tenantActor, now);
     return this.getDetail(tenantActor, group.id, now);
   }
 
@@ -209,6 +211,7 @@ export class StudyGroupService {
       throw new ForbiddenException('Only organization admins can archive a study group.');
     }
     await this.repository.archiveGroup(group.id, now);
+    this.realtime.evictAllFromGroup(group.id);
   }
 
   async join(actor: StudyGroupActor, groupId: string): Promise<StudyGroupDetailView> {
@@ -236,6 +239,7 @@ export class StudyGroupService {
     }
     await this.assertOwnerRemains(group, access.role, null, tenantActor);
     await this.repository.removeMember(group.id, tenantActor.userId);
+    this.realtime.evictUserFromGroup(group.id, tenantActor.userId);
   }
 
   async addMembers(
@@ -262,7 +266,7 @@ export class StudyGroupService {
       requested,
       StudyGroupRole.MEMBER,
     );
-    this.announceAdded(group, added, tenantActor);
+    this.announceAdded(group, added, tenantActor, new Date());
     return this.getDetail(tenantActor, group.id);
   }
 
@@ -298,6 +302,7 @@ export class StudyGroupService {
     }
     await this.assertOwnerRemains(group, membership.role, null, tenantActor);
     await this.repository.removeMember(group.id, userId);
+    this.realtime.evictUserFromGroup(group.id, userId);
     return this.getDetail(tenantActor, group.id);
   }
 
@@ -558,7 +563,9 @@ export class StudyGroupService {
     group: StudyGroupRecord,
     userIds: readonly string[],
     actor: TenantActor,
+    now: Date,
   ): void {
+    const day = now.toISOString().slice(0, 10);
     for (const recipientId of userIds) {
       if (recipientId === actor.userId) {
         continue;
@@ -568,6 +575,7 @@ export class StudyGroupService {
         groupId: group.id,
         groupName: group.name,
         actorName: actor.displayName,
+        dedupeKey: `group-added:${group.id}:${recipientId}:${day}`,
       };
       this.eventEmitter.emit(NOTIFICATION_EVENTS.STUDY_GROUP_ADDED, event);
     }

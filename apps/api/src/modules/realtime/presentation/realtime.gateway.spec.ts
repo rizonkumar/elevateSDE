@@ -11,6 +11,7 @@ import type {
   PeerPresenceSnapshotDto,
   RealtimeAck,
   ServerToClientEvents,
+  StudyGroupActivityItemDto,
 } from '@elevatesde/shared-types';
 import { RealtimeGateway } from './realtime.gateway';
 import { RealtimeAuthenticator } from '../application/realtime-authenticator.service';
@@ -25,6 +26,7 @@ type TestClient = ClientSocket<ServerToClientEvents, ClientToServerEvents>;
 
 const SESSION_ID = '33333333-3333-4333-8333-333333333333';
 const CONTEST_ID = '44444444-4444-4444-8444-444444444444';
+const GROUP_ID = '55555555-5555-4555-8555-555555555555';
 const PARTICIPANTS = new Set(['user-1', 'user-2']);
 
 class FakeAuthenticator {
@@ -47,6 +49,20 @@ function waitFor<T>(register: (resolve: (value: T) => void) => void, timeoutMs =
       resolve(value);
     });
   });
+}
+
+function groupItem(): StudyGroupActivityItemDto {
+  return {
+    id: 'a:PROBLEM_SOLVED:p1',
+    userId: 'user-1',
+    displayName: 'Ada',
+    publicHandle: null,
+    kind: 'PROBLEM_SOLVED',
+    title: 'Two Sum',
+    linkUrl: null,
+    points: 10,
+    occurredAt: new Date(0).toISOString(),
+  };
 }
 
 function subscribe(client: TestClient, room: string): Promise<RealtimeAck> {
@@ -72,6 +88,7 @@ describe('RealtimeGateway over Socket.io', () => {
     const registry = moduleRef.get(RoomAuthorizerRegistry);
     registry.register({ kind: 'peer', canJoin: async (viewer) => PARTICIPANTS.has(viewer.userId) });
     registry.register({ kind: 'contest', canJoin: async () => true });
+    registry.register({ kind: 'group', canJoin: async () => true });
     app = moduleRef.createNestApplication();
     app.useWebSocketAdapter(new IoAdapter(app));
     await app.listen(0);
@@ -198,6 +215,41 @@ describe('RealtimeGateway over Socket.io', () => {
     );
     invitee.disconnect();
     await expect(departure).resolves.toEqual({ sessionId: SESSION_ID, userId: 'user-2', online: false });
+  });
+
+  it('stops delivering group events to a member evicted from the room', async () => {
+    const evicted = await connected('user-1');
+    const remaining = await connected('user-2');
+    await subscribe(evicted, `group:${GROUP_ID}`);
+    await subscribe(remaining, `group:${GROUP_ID}`);
+    const leaked: unknown[] = [];
+    evicted.on('group:activity', (payload) => leaked.push(payload));
+    const delivered = waitFor((resolve) => remaining.on('group:activity', resolve));
+
+    publisher.evictUserFromGroup(GROUP_ID, 'user-1');
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    publisher.toGroup(GROUP_ID, 'group:activity', { groupId: GROUP_ID, item: groupItem() });
+
+    await expect(delivered).resolves.toMatchObject({ groupId: GROUP_ID });
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(leaked).toHaveLength(0);
+  });
+
+  it('stops delivering group events to everyone once the group is evicted', async () => {
+    const first = await connected('user-1');
+    const second = await connected('user-2');
+    await subscribe(first, `group:${GROUP_ID}`);
+    await subscribe(second, `group:${GROUP_ID}`);
+    const leaked: unknown[] = [];
+    first.on('group:activity', (payload) => leaked.push(payload));
+    second.on('group:activity', (payload) => leaked.push(payload));
+
+    publisher.evictAllFromGroup(GROUP_ID);
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    publisher.toGroup(GROUP_ID, 'group:activity', { groupId: GROUP_ID, item: groupItem() });
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    expect(leaked).toHaveLength(0);
   });
 
   it('rate limits room subscriptions per socket', async () => {

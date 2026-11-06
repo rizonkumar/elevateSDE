@@ -382,13 +382,17 @@ These values are computed at read time, the same way contest standings are:
 - **Contest lifecycle broadcasts** come from a new every-minute `contests.broadcast-status` scheduled job. It publishes `contest:status` for contests that went live, ended, were finalized or were rated in the last 75 s, because contest status is derived from time rather than written by a transition.
 - **Goal notification dedupe keys** are `goal:{goalId}:{recipientId}` for both scopes. `Notification.dedupeKey` is unique across all users, so a single `goal:{goalId}` key would let only the first member be notified. A group-total goal still completes exactly once, through the atomic `completedAt` claim.
 - **Role changes** in study groups are limited to organization admins, who assign owners. Owners manage members and goals but cannot remove another owner. The last owner cannot leave; an admin can still demote or remove them.
+- **Contests entered** counts a contest only when the member has a judged submission on one of its problems inside the contest window, the same participation rule used for ratings. Registering without competing does not count. Goals are also re-checked when a contest is finalized (a `contest.finalized` event), so a participant who scored nothing, and so earned no points, can still complete a contests-entered goal.
+- **Group-added notifications** use the dedupe key `group-added:{groupId}:{recipientId}:{UTC date}`. The key is unique for ever, so a day bucket stops remove-and-re-add spam within a day while a later re-add still notifies.
+- **Group rooms are re-checked on removal.** Removing a member, leaving, or archiving a group evicts the affected sockets from the `group:{id}` room straight away, so nobody keeps receiving activity until they reconnect.
+- **Contest ratings wait for earlier contests.** `ratePending` stops before any rated contest that has ended but is not finalized yet, so ratings are always applied in chronological order.
 - **Admin adjustments** do not count towards group goals, leaderboards or the activity feed, matching how they are excluded from period point totals.
 
 ---
 
 ## Verification
 
-- `pnpm turbo run type-check lint test` passes: 12/12 tasks, 672 API tests passing (30 integration-gated skipped) and 18 api-client tests. `next build` succeeds for web.
+- `pnpm turbo run type-check lint test` passes: 12/12 tasks, 683 API tests passing (30 integration-gated skipped) and 18 api-client tests. `next build` succeeds for web.
 - **Phase A:** `/u/[handle]` was rendered against a fixture API at 1280px and 375px, in light and dark mode, for a full profile, an empty profile and a 404. The profile SQL ran against the throwaway Postgres on empty data.
 - **Phase B:** the backfill rated two contests in order against the throwaway Postgres, left out a participant who never submitted, and carried ratings from the first contest into the second. The rating history, both leaderboard scopes and standings ratings returned correct results.
 - **Phase C:** the built API ran against the throwaway Postgres and a temporary Redis. A real JWT connected over WebSocket, `notification:new` and `notification:unread-count` arrived end to end, and the API fell back to the in-memory adapter when Redis was unreachable.

@@ -31,9 +31,15 @@ export class ContestRatingService {
   ) {}
 
   async ratePending(now: Date = new Date()): Promise<number> {
-    const contests = await this.repository.findPendingContests();
+    const [contests, blockedFrom] = await Promise.all([
+      this.repository.findPendingContests(),
+      this.repository.findEarliestUnfinalizedRatedEndsAt(now),
+    ]);
     let ratedCount = 0;
     for (const contest of contests) {
+      if (blockedFrom && contest.endsAt.getTime() >= blockedFrom.getTime()) {
+        break;
+      }
       if (await this.rate(contest, now)) {
         ratedCount += 1;
       }
@@ -64,6 +70,9 @@ export class ContestRatingService {
     page: number,
     pageSize: number,
   ): Promise<RatingLeaderboardPage> {
+    if (scope.kind === 'tenant' && scope.tenantId === null) {
+      return { rows: [], total: 0 };
+    }
     return this.repository.listLeaderboard(scope, (page - 1) * pageSize, pageSize);
   }
 

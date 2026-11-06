@@ -1,6 +1,7 @@
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { StudyGroupRole } from '@prisma/client';
 import { RoomAuthorizerRegistry } from '../../../realtime/application/room-authorizer.registry';
+import { RecordingRealtimePublisher } from '../../../realtime/testing/recording-realtime.publisher';
 import { StudyGroupService } from '../../application/study-group.service';
 import { FakeStudyGroupRepository } from '../../testing/fake-study-group.repository';
 import { StudyGroupRoomAuthorizer } from './study-group-room.authorizer';
@@ -20,7 +21,7 @@ describe('StudyGroupRoomAuthorizer', () => {
     registry = new RoomAuthorizerRegistry();
     new StudyGroupRoomAuthorizer(
       registry,
-      new StudyGroupService(repository, new EventEmitter2()),
+      new StudyGroupService(repository, new EventEmitter2(), new RecordingRealtimePublisher()),
     ).onModuleInit();
   });
 

@@ -1,6 +1,11 @@
 import type { ServerToClientEventName, ServerToClientPayload } from '@elevatesde/shared-types';
 import { RealtimePublisher } from '../domain/realtime-publisher';
 
+export interface RecordedEviction {
+  groupId: string;
+  userId: string | null;
+}
+
 export type RealtimeTarget = 'user' | 'contest' | 'peer' | 'group';
 
 export interface RecordedRealtimeEvent {
@@ -12,6 +17,7 @@ export interface RecordedRealtimeEvent {
 
 export class RecordingRealtimePublisher extends RealtimePublisher {
   readonly events: RecordedRealtimeEvent[] = [];
+  readonly evictions: RecordedEviction[] = [];
 
   toUser<E extends ServerToClientEventName>(
     userId: string,
@@ -43,6 +49,14 @@ export class RecordingRealtimePublisher extends RealtimePublisher {
     payload: ServerToClientPayload<E>,
   ): void {
     this.events.push({ target: 'group', id: groupId, event, payload });
+  }
+
+  evictUserFromGroup(groupId: string, userId: string): void {
+    this.evictions.push({ groupId, userId });
+  }
+
+  evictAllFromGroup(groupId: string): void {
+    this.evictions.push({ groupId, userId: null });
   }
 
   eventsNamed(event: ServerToClientEventName): RecordedRealtimeEvent[] {

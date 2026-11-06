@@ -103,7 +103,23 @@ gatedDescribe('StudyGroupRepository (database)', () => {
         { userId: ownerId, source: PointSource.PROBLEM_SOLVED, refId: randomUUID(), delta: 20, createdAt: new Date('2027-02-01T00:00:00.000Z') },
       ],
     });
-    await prisma.contestParticipant.create({ data: { contestId, userId: memberId } });
+    await prisma.contestParticipant.createMany({
+      data: [
+        { contestId, userId: memberId },
+        { contestId, userId: ownerId },
+      ],
+    });
+    await prisma.contestProblem.create({ data: { contestId, problemId, ordinal: 1 } });
+    await prisma.submission.create({
+      data: {
+        userId: memberId,
+        problemId,
+        language: 'PYTHON',
+        sourceCode: 'pass',
+        status: 'WRONG_ANSWER',
+        createdAt: new Date('2027-03-06T10:30:00.000Z'),
+      },
+    });
   });
 
   afterEach(async () => {

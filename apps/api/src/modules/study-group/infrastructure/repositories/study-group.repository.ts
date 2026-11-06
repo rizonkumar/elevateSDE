@@ -345,12 +345,25 @@ export class StudyGroupRepository implements IStudyGroupRepository {
     }
     const inWindow = { gte: window.from, lt: window.to };
     if (metric === StudyGoalMetric.CONTESTS_ENTERED) {
-      const rows = await this.prisma.contestParticipant.groupBy({
-        by: ['userId'],
-        where: { userId: { in: [...userIds] }, contest: { endsAt: inWindow } },
-        _count: { _all: true },
-      });
-      rows.forEach((row) => totals.set(row.userId, row._count._all));
+      const rows = await this.prisma.$queryRaw<Array<{ userId: string; entered: number }>>(Prisma.sql`
+        SELECT cp."userId" AS "userId", COUNT(*)::int AS "entered"
+        FROM "ContestParticipant" cp
+        JOIN "Contest" c ON c."id" = cp."contestId"
+        WHERE cp."userId" = ANY(${[...userIds]})
+          AND c."endsAt" >= ${window.from}
+          AND c."endsAt" < ${window.to}
+          AND EXISTS (
+            SELECT 1
+            FROM "Submission" s
+            JOIN "ContestProblem" p ON p."problemId" = s."problemId" AND p."contestId" = c."id"
+            WHERE s."userId" = cp."userId"
+              AND s."status"::text NOT IN ('QUEUED', 'RUNNING')
+              AND s."createdAt" >= c."startsAt"
+              AND s."createdAt" <= c."endsAt"
+          )
+        GROUP BY cp."userId"
+      `);
+      rows.forEach((row) => totals.set(row.userId, row.entered));
       return totals;
     }
     if (metric === StudyGoalMetric.POINTS) {

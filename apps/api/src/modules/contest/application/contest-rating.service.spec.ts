@@ -43,6 +43,40 @@ describe('ContestRatingService', () => {
     expect(repository.ratings.get('u1')?.contestsRated).toBe(2);
   });
 
+  it('waits for an earlier unfinalized contest before rating later ones', async () => {
+    repository.addContest(
+      buildPendingContest({ id: 'later', endsAt: new Date('2026-10-08T19:30:00.000Z') }),
+      [
+        { userId: 'u1', rank: 2 },
+        { userId: 'u2', rank: 1 },
+      ],
+    );
+    repository.addContest(
+      buildPendingContest({ id: 'oldest', endsAt: new Date('2026-09-24T19:30:00.000Z') }),
+      [
+        { userId: 'u1', rank: 1 },
+        { userId: 'u2', rank: 2 },
+      ],
+    );
+    repository.unfinalizedRatedEndsAt = new Date('2026-10-01T19:30:00.000Z');
+
+    await expect(service.ratePending(RATED_AT)).resolves.toBe(1);
+    expect(repository.ratedOrder).toEqual(['oldest']);
+
+    repository.unfinalizedRatedEndsAt = null;
+    await expect(service.ratePending(RATED_AT)).resolves.toBe(1);
+    expect(repository.ratedOrder).toEqual(['oldest', 'later']);
+  });
+
+  it('returns an empty tenant leaderboard for users without an organization', async () => {
+    await expect(service.getLeaderboard({ kind: 'tenant', tenantId: null }, 1, 25)).resolves.toEqual(
+      { rows: [], total: 0 },
+    );
+    expect(repository.leaderboardScopes).toEqual([]);
+    await service.getLeaderboard({ kind: 'tenant', tenantId: 'tenant-1' }, 1, 25);
+    expect(repository.leaderboardScopes).toEqual([{ kind: 'tenant', tenantId: 'tenant-1' }]);
+  });
+
   it('is idempotent once a contest has been rated', async () => {
     repository.addContest(buildPendingContest(), [
       { userId: 'u1', rank: 1 },

@@ -21,4 +21,6 @@ export abstract class RealtimePublisher {
     event: E,
     payload: ServerToClientPayload<E>,
   ): void;
+  abstract evictUserFromGroup(groupId: string, userId: string): void;
+  abstract evictAllFromGroup(groupId: string): void;
 }

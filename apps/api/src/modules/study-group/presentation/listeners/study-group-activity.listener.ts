@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
+import { CONTEST_EVENTS, ContestFinalizedEvent } from '../../../contest/domain/events/contest-events';
 import { POINTS_EVENTS, PointsAwardedEvent } from '../../../leaderboard/domain/events/points-events';
 import { RealtimePublisher } from '../../../realtime/domain/realtime-publisher';
 import { StudyGroupActivityService } from '../../application/study-group-activity.service';
@@ -28,6 +29,18 @@ export class StudyGroupActivityListener {
     } catch (error) {
       this.logger.error(
         `Failed to record group activity for ${event.userId}`,
+        error instanceof Error ? error.stack : undefined,
+      );
+    }
+  }
+
+  @OnEvent(CONTEST_EVENTS.FINALIZED, { async: true })
+  async onContestFinalized(event: ContestFinalizedEvent): Promise<void> {
+    try {
+      await this.activityService.recordContestFinalized(event);
+    } catch (error) {
+      this.logger.error(
+        `Failed to evaluate group goals for contest ${event.contestId}`,
         error instanceof Error ? error.stack : undefined,
       );
     }

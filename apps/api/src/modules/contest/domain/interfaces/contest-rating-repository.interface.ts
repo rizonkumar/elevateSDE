@@ -12,6 +12,7 @@ import {
 
 export abstract class IContestRatingRepository {
   abstract findPendingContests(): Promise<PendingRatingContest[]>;
+  abstract findEarliestUnfinalizedRatedEndsAt(now: Date): Promise<Date | null>;
   abstract findRatingCandidates(contest: PendingRatingContest): Promise<RatingCandidate[]>;
   abstract rateContest(command: RateContestCommand): Promise<RatingChange[] | null>;
   abstract markRatedWithoutChanges(contestId: string, ratedAt: Date): Promise<boolean>;

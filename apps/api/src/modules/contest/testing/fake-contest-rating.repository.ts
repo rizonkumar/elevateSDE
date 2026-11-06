@@ -6,6 +6,7 @@ import {
   RatingCandidate,
   RatingHistoryEntryView,
   RatingLeaderboardPage,
+  RatingLeaderboardScope,
   StandingRatingView,
   UserRatingView,
 } from '../domain/read-models/contest-rating-view';
@@ -33,6 +34,8 @@ export class FakeContestRatingRepository implements IContestRatingRepository {
   ratings = new Map<string, UserRatingView>();
   changes = new Map<string, RatingChange[]>();
   ratedOrder: string[] = [];
+  unfinalizedRatedEndsAt: Date | null = null;
+  leaderboardScopes: RatingLeaderboardScope[] = [];
 
   addContest(contest: PendingRatingContest, candidates: RatingCandidate[] = []): void {
     this.contests.push({ ...contest, ratedAt: null });
@@ -48,6 +51,10 @@ export class FakeContestRatingRepository implements IContestRatingRepository {
       .filter((contest) => contest.ratedAt === null)
       .sort((left, right) => left.endsAt.getTime() - right.endsAt.getTime())
       .map(({ ratedAt: _ratedAt, ...contest }) => contest);
+  }
+
+  async findEarliestUnfinalizedRatedEndsAt(): Promise<Date | null> {
+    return this.unfinalizedRatedEndsAt;
   }
 
   async findRatingCandidates(contest: PendingRatingContest): Promise<RatingCandidate[]> {
@@ -90,7 +97,8 @@ export class FakeContestRatingRepository implements IContestRatingRepository {
     return [];
   }
 
-  async listLeaderboard(): Promise<RatingLeaderboardPage> {
+  async listLeaderboard(scope: RatingLeaderboardScope): Promise<RatingLeaderboardPage> {
+    this.leaderboardScopes.push(scope);
     return { rows: [], total: 0 };
   }
 

@@ -7,6 +7,7 @@ import {
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PointSource, StudyGoalMetric, StudyGroupJoinPolicy, StudyGroupRole } from '@prisma/client';
 import { NOTIFICATION_EVENTS, StudyGroupAddedEvent } from '../../notification/domain/events/notification-events';
+import { RecordingRealtimePublisher } from '../../realtime/testing/recording-realtime.publisher';
 import { FakeStudyGroupRepository } from '../testing/fake-study-group.repository';
 import { StudyGroupActor } from '../domain/policies/study-group-access';
 import { StudyGroupService } from './study-group.service';
@@ -35,6 +36,7 @@ describe('StudyGroupService', () => {
   let repository: FakeStudyGroupRepository;
   let service: StudyGroupService;
   let added: StudyGroupAddedEvent[];
+  let realtime: RecordingRealtimePublisher;
   let groupId: string;
 
   beforeEach(() => {
@@ -44,7 +46,8 @@ describe('StudyGroupService', () => {
     emitter.on(NOTIFICATION_EVENTS.STUDY_GROUP_ADDED, (event: StudyGroupAddedEvent) =>
       added.push(event),
     );
-    service = new StudyGroupService(repository, emitter);
+    realtime = new RecordingRealtimePublisher();
+    service = new StudyGroupService(repository, emitter, realtime);
     const people: Array<[string, string, string | null]> = [
       [ADMIN, 'Ada', TENANT],
       [OWNER, 'Olu', TENANT],
@@ -199,6 +202,10 @@ describe('StudyGroupService', () => {
       expect(added.map((event) => [event.recipientId, event.groupName])).toEqual([
         [OUTSIDER, 'Cohort A'],
       ]);
+      const today = new Date().toISOString().slice(0, 10);
+      expect(added.map((event) => event.dedupeKey)).toEqual([
+        `group-added:${groupId}:${OUTSIDER}:${today}`,
+      ]);
       await expect(service.addMembers(actorFor(OWNER), groupId, [FOREIGN])).rejects.toThrow(
         BadRequestException,
       );
@@ -211,6 +218,7 @@ describe('StudyGroupService', () => {
       await expect(service.leave(actorFor(OWNER), groupId)).rejects.toThrow(/at least one owner/);
       await service.updateMemberRole(actorFor(ADMIN), groupId, MEMBER, StudyGroupRole.OWNER);
       await expect(service.leave(actorFor(OWNER), groupId)).resolves.toBeUndefined();
+      expect(realtime.evictions).toEqual([{ groupId, userId: OWNER }]);
     });
 
     it('lets only tenant admins change roles, including demoting the last owner', async () => {
@@ -233,6 +241,7 @@ describe('StudyGroupService', () => {
       );
       const detail = await service.removeMember(actorFor(OWNER), groupId, MEMBER);
       expect(detail.members.map((member) => member.userId)).not.toContain(MEMBER);
+      expect(realtime.evictions).toEqual([{ groupId, userId: MEMBER }]);
     });
 
     it('searches only tenant members who are not in the group', async () => {
@@ -359,7 +368,9 @@ describe('StudyGroupService', () => {
       await expect(service.archive(actorFor(OWNER), groupId, NOW)).rejects.toThrow(
         ForbiddenException,
       );
+      expect(realtime.evictions).toEqual([]);
       await service.archive(actorFor(ADMIN), groupId, NOW);
+      expect(realtime.evictions).toEqual([{ groupId, userId: null }]);
       await expect(service.getDetail(actorFor(MEMBER), groupId)).rejects.toThrow(
         NotFoundException,
       );

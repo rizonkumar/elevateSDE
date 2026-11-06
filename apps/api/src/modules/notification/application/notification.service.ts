@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { NotificationType } from '@prisma/client';
-import { RealtimePublisher } from '../../realtime/domain/realtime-publisher';
-import { NotificationPresentationMapper } from '../presentation/mappers/notification-presentation.mapper';
+import { INotificationPush } from '../domain/interfaces/notification-push.interface';
 import { INotificationRepository } from '../domain/interfaces/notification-repository.interface';
 import { Notification, NotificationDraft } from '../domain/entities/notification';
 import {
@@ -34,7 +33,7 @@ const DEFAULT_DISABLED_TYPES: NotificationType[] = ['SUBMISSION_ACCEPTED'];
 export class NotificationService {
   constructor(
     private readonly repository: INotificationRepository,
-    private readonly realtime: RealtimePublisher,
+    private readonly push: INotificationPush,
   ) {}
 
   async notify(draft: NotificationDraft): Promise<void> {
@@ -46,10 +45,7 @@ export class NotificationService {
       return;
     }
     const unreadCount = await this.repository.countUnread(draft.userId);
-    this.realtime.toUser(draft.userId, 'notification:new', {
-      notification: NotificationPresentationMapper.toNotification(notification),
-      unreadCount,
-    });
+    this.push.pushCreated(notification, unreadCount);
   }
 
   async listForUser(userId: string): Promise<NotificationsView> {
@@ -96,7 +92,7 @@ export class NotificationService {
 
   private async publishUnreadCount(userId: string): Promise<void> {
     const unreadCount = await this.repository.countUnread(userId);
-    this.realtime.toUser(userId, 'notification:unread-count', { unreadCount });
+    this.push.pushUnreadCount(userId, unreadCount);
   }
 
   private async isEnabled(userId: string, type: NotificationType): Promise<boolean> {

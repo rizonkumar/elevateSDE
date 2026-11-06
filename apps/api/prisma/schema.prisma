@@ -810,6 +810,7 @@ model ContestParticipant {
 
   @@unique([contestId, userId])
   @@index([contestId])
+  @@index([userId])
 }
 
 model Badge {
