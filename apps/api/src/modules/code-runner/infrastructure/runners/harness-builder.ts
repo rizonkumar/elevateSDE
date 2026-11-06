@@ -70,12 +70,12 @@ function requireHarnessType(type: string, language: string): HarnessType {
 
 function stripJavaPreamble(code: string): string {
   return code
-    .replace(/^\s*package\s+[\w.]+\s*;/m, '')
+    .replace(/^[ \t]*package\s+[\w.]+\s*;/m, '')
     .replace(/\bpublic\s+(final\s+)?class\s+Solution\b/, 'class Solution');
 }
 
 function stripGoPackage(code: string): string {
-  return code.replace(/^\s*package\s+\w+\s*$/m, '');
+  return code.replace(/^[ \t]*package\s+\w+\s*$/m, '');
 }
 
 function buildJavaInvoke(spec: RunSpec): string {
@@ -138,12 +138,12 @@ export function buildHarness(spec: RunSpec): HarnessArtifacts {
   const cases: HarnessFile = { name: 'cases.json', content: buildCasesJson(spec) };
 
   if (spec.language === 'javascript') {
-    const driver = JS_DRIVER.replace(/__ELEVATE_FN__/g, spec.functionName);
+    const driver = JS_DRIVER.replaceAll('__ELEVATE_FN__', spec.functionName);
     return { files: [{ name: 'main.js', content: `${spec.userCode}\n${driver}` }, cases] };
   }
 
   if (spec.language === 'python') {
-    const driver = PY_DRIVER.replace(/__ELEVATE_FN__/g, spec.functionName);
+    const driver = PY_DRIVER.replaceAll('__ELEVATE_FN__', spec.functionName);
     return {
       files: [{ name: 'main.py', content: `${PY_PRELUDE}${spec.userCode}\n${driver}` }, cases],
     };

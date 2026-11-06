@@ -1,6 +1,6 @@
 export const JS_RESULT_SENTINEL = '###ELEVATE_RESULT###';
 
-export const JS_DRIVER = `
+export const JS_DRIVER = String.raw`
 const __elevate_fs = require('fs');
 const __elevate_sentinel = '${JS_RESULT_SENTINEL}';
 const __elevate_cases = JSON.parse(__elevate_fs.readFileSync('/sandbox/cases.json', 'utf8'));
@@ -28,6 +28,6 @@ for (const __elevate_tc of __elevate_cases) {
       peakMemoryKb: Math.round(process.memoryUsage().rss / 1024),
     };
   }
-  process.stdout.write(__elevate_sentinel + JSON.stringify(__elevate_line) + '\\n');
+  process.stdout.write(__elevate_sentinel + JSON.stringify(__elevate_line) + '\n');
 }
 `;

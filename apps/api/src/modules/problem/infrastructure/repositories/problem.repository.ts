@@ -251,16 +251,16 @@ export class ProblemRepository implements IProblemRepository {
     return statuses;
   }
 
-  async countExistingTopics(topicIds: string[]): Promise<number> {
+  countExistingTopics(topicIds: string[]): Promise<number> {
     if (topicIds.length === 0) {
-      return 0;
+      return Promise.resolve(0);
     }
     return this.prisma.topic.count({ where: { id: { in: topicIds } } });
   }
 
-  async countExistingCompanies(companyIds: string[]): Promise<number> {
+  countExistingCompanies(companyIds: string[]): Promise<number> {
     if (companyIds.length === 0) {
-      return 0;
+      return Promise.resolve(0);
     }
     return this.prisma.company.count({ where: { id: { in: companyIds } } });
   }

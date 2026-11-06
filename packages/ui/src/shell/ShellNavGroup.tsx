@@ -7,10 +7,11 @@ interface ShellNavGroupProps {
   children: React.ReactNode;
 }
 
-export function ShellNavGroup({ label, rail, isFirst, children }: ShellNavGroupProps) {
+export function ShellNavGroup({ label, rail, isFirst, children }: Readonly<ShellNavGroupProps>) {
   const generatedId = React.useId();
   const headingId = label ? generatedId : undefined;
-  const spacing = isFirst ? '' : rail ? 'mt-3' : 'mt-6';
+  const groupGap = rail ? 'mt-3' : 'mt-6';
+  const spacing = isFirst ? '' : groupGap;
 
   return (
     <div role="group" aria-labelledby={headingId} className={spacing}>

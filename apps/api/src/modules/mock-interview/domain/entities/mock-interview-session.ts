@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import {
   MOCK_INTERVIEW_DURATIONS,
   MOCK_INTERVIEW_MAX_ANSWER_LENGTH,
@@ -64,7 +64,7 @@ export interface RecordAnswerInput {
 }
 
 export class MockInterviewSession {
-  private constructor(private state: MockInterviewSessionState) {}
+  private constructor(private readonly state: MockInterviewSessionState) {}
 
   static start(input: StartMockInterviewInput): MockInterviewSession {
     if (!MOCK_INTERVIEW_DURATIONS.includes(input.config.durationMinutes)) {
@@ -162,16 +162,22 @@ export class MockInterviewSession {
     return this.state.turns;
   }
 
-  getAnsweredTurns(): Array<MockInterviewTurnState & { answer: string; dimensionScores: MockInterviewDimensionScores }> {
+  getAnsweredTurns(): Array<
+    MockInterviewTurnState & { answer: string; dimensionScores: MockInterviewDimensionScores }
+  > {
     return this.state.turns.filter(
-      (turn): turn is MockInterviewTurnState & { answer: string; dimensionScores: MockInterviewDimensionScores } =>
-        turn.answer !== null && turn.dimensionScores !== null,
+      (
+        turn,
+      ): turn is MockInterviewTurnState & {
+        answer: string;
+        dimensionScores: MockInterviewDimensionScores;
+      } => turn.answer !== null && turn.dimensionScores !== null,
     );
   }
 
   getCurrentTurn(): MockInterviewTurnState | null {
     const last = this.state.turns.at(-1);
-    return last && last.answer === null ? last : null;
+    return last?.answer === null ? last : null;
   }
 
   toState(): MockInterviewSessionState {
@@ -201,7 +207,7 @@ export class MockInterviewSession {
       throw new MockInterviewRuleError('The interview time is over');
     }
     const current = this.getCurrentTurn();
-    if (!current || current.id !== turnId) {
+    if (current?.id !== turnId) {
       throw new MockInterviewRuleError('Only the latest question can be answered');
     }
     const trimmed = answer.trim();

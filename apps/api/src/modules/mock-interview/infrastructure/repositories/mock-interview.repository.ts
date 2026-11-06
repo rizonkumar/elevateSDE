@@ -53,7 +53,7 @@ export class MockInterviewRepository implements IMockInterviewRepository {
     return task !== null;
   }
 
-  async createIfNoActive(session: MockInterviewSession): Promise<'CREATED' | 'ACTIVE_EXISTS'> {
+  createIfNoActive(session: MockInterviewSession): Promise<'CREATED' | 'ACTIVE_EXISTS'> {
     const state = session.toState();
     return this.prisma.$transaction(async (transaction) => {
       await transaction.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${ACTIVE_LOCK_PREFIX + state.userId}))`;
@@ -89,7 +89,7 @@ export class MockInterviewRepository implements IMockInterviewRepository {
     });
   }
 
-  async save(session: MockInterviewSession): Promise<'SAVED' | 'VERSION_CONFLICT'> {
+  save(session: MockInterviewSession): Promise<'SAVED' | 'VERSION_CONFLICT'> {
     const state = session.toState();
     return this.prisma.$transaction(async (transaction) => {
       const updated = await transaction.mockInterviewSession.updateMany({
@@ -110,22 +110,24 @@ export class MockInterviewRepository implements IMockInterviewRepository {
         },
       });
       if (updated.count === 0) return 'VERSION_CONFLICT';
-      for (const turn of state.turns) {
-        const values = {
-          question: turn.question,
-          askedAt: turn.askedAt,
-          answer: turn.answer,
-          answeredAt: turn.answeredAt,
-          scores: MockInterviewMapper.toScoresJson(turn.dimensionScores),
-          score: turn.score,
-          feedback: turn.feedback,
-        };
-        await transaction.mockInterviewTurn.upsert({
-          where: { sessionId_ordinal: { sessionId: state.id, ordinal: turn.ordinal } },
-          create: { id: turn.id, sessionId: state.id, ordinal: turn.ordinal, ...values },
-          update: values,
-        });
-      }
+      await Promise.all(
+        state.turns.map((turn) => {
+          const values = {
+            question: turn.question,
+            askedAt: turn.askedAt,
+            answer: turn.answer,
+            answeredAt: turn.answeredAt,
+            scores: MockInterviewMapper.toScoresJson(turn.dimensionScores),
+            score: turn.score,
+            feedback: turn.feedback,
+          };
+          return transaction.mockInterviewTurn.upsert({
+            where: { sessionId_ordinal: { sessionId: state.id, ordinal: turn.ordinal } },
+            create: { id: turn.id, sessionId: state.id, ordinal: turn.ordinal, ...values },
+            update: values,
+          });
+        }),
+      );
       return 'SAVED';
     });
   }

@@ -98,7 +98,7 @@ export function EditorPanel() {
           <ToolbarButton
             label="Copy code"
             onClick={() => {
-              handleCopy();
+              void handleCopy();
             }}
           >
             {copied ? (

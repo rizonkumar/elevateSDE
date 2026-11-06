@@ -14,7 +14,7 @@ interface SelectProps {
   className?: string;
 }
 
-export function Select({ value, options, onChange, label, disabled, className = '' }: SelectProps) {
+export function Select({ value, options, onChange, label, disabled, className = '' }: Readonly<SelectProps>) {
   const [open, setOpen] = React.useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
 
@@ -55,7 +55,7 @@ export function Select({ value, options, onChange, label, disabled, className = 
           className="flex h-10 items-center justify-between gap-2 w-full text-sm font-medium bg-(--color-bg) border border-(--color-border) rounded-(--radius-sm) px-3 text-(--color-text-primary) focus:outline-none focus:border-(--color-accent) focus:shadow-[0_0_0_2px_var(--color-bg),0_0_0_4px_var(--color-accent)] transition disabled:bg-(--color-badge-bg) disabled:text-(--color-text-disabled) disabled:cursor-not-allowed cursor-pointer"
         >
           <span className="truncate">{selected?.label ?? 'Select'}</span>
-          <svg
+          <svg aria-hidden="true"
             viewBox="0 0 20 20"
             fill="none"
             className={`w-4 h-4 shrink-0 text-(--color-text-muted) transition-transform ${open ? 'rotate-180' : ''}`}
@@ -93,7 +93,7 @@ export function Select({ value, options, onChange, label, disabled, className = 
                 >
                   <span className="truncate">{option.label}</span>
                   {active && (
-                    <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4 shrink-0">
+                    <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="w-4 h-4 shrink-0">
                       <path
                         d="M5 10.5l3 3 7-7"
                         stroke="currentColor"

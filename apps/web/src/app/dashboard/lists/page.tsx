@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { Bookmark, Check, ListChecks, Pencil, Plus, Trash2, X } from 'lucide-react';
 import { Badge, Button, ConfirmDialog, Input, Modal } from '@elevatesde/ui';
-import type { ProblemSummaryDto } from '@elevatesde/shared-types';
+import type { ProblemCollectionDto, ProblemSummaryDto } from '@elevatesde/shared-types';
 import { PageContainer } from '@/components/dashboard/PageContainer';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { useProblemSocialStore } from '@/store/problem-social.store';
@@ -50,6 +50,80 @@ function SidebarEntry({
       </span>
       {badge}
     </button>
+  );
+}
+
+function SelectedListView({
+  list,
+  renaming,
+  renameNode,
+  solvedSet,
+  problems,
+  onStartRename,
+  onDelete,
+  onRemove,
+  onReorder,
+}: Readonly<{
+  list: ProblemCollectionDto;
+  renaming: boolean;
+  renameNode: React.ReactNode;
+  solvedSet: Set<string>;
+  problems: ProblemSummaryDto[];
+  onStartRename: () => void;
+  onDelete: () => void;
+  onRemove: (problemId: string) => void;
+  onReorder: (orderedProblemIds: string[]) => void;
+}>) {
+  return (
+    <>
+      <ListOverviewCard
+        icon={ListChecks}
+        titleNode={
+          renaming ? (
+            renameNode
+          ) : (
+            <div className="flex min-w-0 items-center gap-2.5">
+              <h2 className="m-0 truncate font-display text-xl font-semibold tracking-tight text-(--color-text-primary)">
+                {list.name}
+              </h2>
+              {list.isPublic && <Badge variant="accent">Public</Badge>}
+            </div>
+          )
+        }
+        actions={
+          renaming ? undefined : (
+            <>
+              <button
+                type="button"
+                onClick={onStartRename}
+                aria-label="Rename list"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-(--color-border-subtle) text-(--color-text-muted) transition-colors hover:border-(--color-accent) hover:text-(--color-accent) cursor-pointer"
+              >
+                <Pencil className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={onDelete}
+                aria-label="Delete list"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-(--color-border-subtle) text-(--color-text-muted) transition-colors hover:border-(--color-danger) hover:text-(--color-danger) cursor-pointer"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </>
+          )
+        }
+        problems={problems}
+        solvedSet={solvedSet}
+      />
+      <QuestionsPanel
+        problems={problems}
+        solvedSet={solvedSet}
+        onRemove={onRemove}
+        emptyMessage="This list is empty. Open a problem and use “Add to list”."
+        reorderable
+        onReorder={onReorder}
+      />
+    </>
   );
 }
 
@@ -148,6 +222,82 @@ export default function ListsPage() {
     </div>
   );
 
+  let listEntries: React.ReactNode;
+  if (isLoading && lists.length === 0) {
+    listEntries = (
+      <p className="m-0 px-1 text-sm text-(--color-text-muted)">Loading your lists…</p>
+    );
+  } else if (lists.length === 0) {
+    listEntries = (
+      <p className="m-0 px-1 text-sm text-(--color-text-muted)">
+        No lists yet. Create one, then add problems from any problem page.
+      </p>
+    );
+  } else {
+    listEntries = (
+      lists.map((list) => (
+        <SidebarEntry
+          key={list.id}
+          label={list.name}
+          count={list.itemCount}
+          icon={ListChecks}
+          active={list.id === selectedId}
+          onSelect={() => setSelectedId(list.id)}
+          badge={list.isPublic ? <Badge variant="accent">Public</Badge> : undefined}
+        />
+      ))
+    );
+  }
+
+  let detail: React.ReactNode;
+  if (isBookmarksView) {
+    detail = (
+      <>
+        <ListOverviewCard
+          icon={Bookmark}
+          titleNode={
+            <h2 className="m-0 truncate font-display text-xl font-semibold tracking-tight text-(--color-text-primary)">
+              Bookmarked
+            </h2>
+          }
+          problems={bookmarkProblems}
+          solvedSet={solvedSet}
+        />
+        <QuestionsPanel
+          problems={bookmarkProblems}
+          solvedSet={solvedSet}
+          onRemove={(problemId) => toggleBookmark(problemId)}
+          emptyMessage="No bookmarks yet. Open a problem and tap the bookmark star."
+        />
+      </>
+    );
+  } else if (selected) {
+    detail = (
+      <SelectedListView
+        list={selected}
+        renaming={renaming}
+        renameNode={renameNode}
+        solvedSet={solvedSet}
+        problems={listProblems}
+        onStartRename={() => {
+          setRenameValue(selected.name);
+          setRenaming(true);
+        }}
+        onDelete={() => setConfirmDelete(true)}
+        onRemove={(problemId) => removeProblemFromList(selected.id, problemId)}
+        onReorder={(orderedProblemIds) => reorderList(selected.id, orderedProblemIds)}
+      />
+    );
+  } else {
+    detail = (
+      <div className="rounded-md border border-dashed border-(--color-border-subtle) bg-(--color-surface) px-6 py-16 text-center">
+        <p className="m-0 text-sm text-(--color-text-muted)">
+          {hasLoaded ? 'Select a list to view its problems.' : 'Loading…'}
+        </p>
+      </div>
+    );
+  }
+
   return (
     <PageContainer>
       <div className="flex flex-col gap-6 sm:gap-8">
@@ -178,107 +328,11 @@ export default function ListsPage() {
               onSelect={() => setSelectedId(BOOKMARKS_VIEW)}
             />
             <div className="my-1 h-px bg-(--color-border-subtle)" />
-            {isLoading && lists.length === 0 ? (
-              <p className="m-0 px-1 text-sm text-(--color-text-muted)">Loading your lists…</p>
-            ) : lists.length === 0 ? (
-              <p className="m-0 px-1 text-sm text-(--color-text-muted)">
-                No lists yet. Create one, then add problems from any problem page.
-              </p>
-            ) : (
-              lists.map((list) => (
-                <SidebarEntry
-                  key={list.id}
-                  label={list.name}
-                  count={list.itemCount}
-                  icon={ListChecks}
-                  active={list.id === selectedId}
-                  onSelect={() => setSelectedId(list.id)}
-                  badge={list.isPublic ? <Badge variant="accent">Public</Badge> : undefined}
-                />
-              ))
-            )}
+            {listEntries}
           </aside>
 
           <section className="flex min-w-0 flex-col gap-5">
-            {isBookmarksView ? (
-              <>
-                <ListOverviewCard
-                  icon={Bookmark}
-                  titleNode={
-                    <h2 className="m-0 truncate font-display text-xl font-semibold tracking-tight text-(--color-text-primary)">
-                      Bookmarked
-                    </h2>
-                  }
-                  problems={bookmarkProblems}
-                  solvedSet={solvedSet}
-                />
-                <QuestionsPanel
-                  problems={bookmarkProblems}
-                  solvedSet={solvedSet}
-                  onRemove={(problemId) => toggleBookmark(problemId)}
-                  emptyMessage="No bookmarks yet. Open a problem and tap the bookmark star."
-                />
-              </>
-            ) : selected ? (
-              <>
-                <ListOverviewCard
-                  icon={ListChecks}
-                  titleNode={
-                    renaming ? (
-                      renameNode
-                    ) : (
-                      <div className="flex min-w-0 items-center gap-2.5">
-                        <h2 className="m-0 truncate font-display text-xl font-semibold tracking-tight text-(--color-text-primary)">
-                          {selected.name}
-                        </h2>
-                        {selected.isPublic && <Badge variant="accent">Public</Badge>}
-                      </div>
-                    )
-                  }
-                  actions={
-                    renaming ? undefined : (
-                      <>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setRenameValue(selected.name);
-                            setRenaming(true);
-                          }}
-                          aria-label="Rename list"
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-(--color-border-subtle) text-(--color-text-muted) transition-colors hover:border-(--color-accent) hover:text-(--color-accent) cursor-pointer"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setConfirmDelete(true)}
-                          aria-label="Delete list"
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-(--color-border-subtle) text-(--color-text-muted) transition-colors hover:border-(--color-danger) hover:text-(--color-danger) cursor-pointer"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </>
-                    )
-                  }
-                  problems={listProblems}
-                  solvedSet={solvedSet}
-                />
-                <QuestionsPanel
-                  problems={listProblems}
-                  solvedSet={solvedSet}
-                  onRemove={(problemId) => removeProblemFromList(selected.id, problemId)}
-                  emptyMessage="This list is empty. Open a problem and use “Add to list”."
-                  reorderable
-                  onReorder={(orderedProblemIds) => reorderList(selected.id, orderedProblemIds)}
-                />
-              </>
-            ) : (
-              <div className="rounded-md border border-dashed border-(--color-border-subtle) bg-(--color-surface) px-6 py-16 text-center">
-                <p className="m-0 text-sm text-(--color-text-muted)">
-                  {hasLoaded ? 'Select a list to view its problems.' : 'Loading…'}
-                </p>
-              </div>
-            )}
+            {detail}
           </section>
         </div>
       </div>

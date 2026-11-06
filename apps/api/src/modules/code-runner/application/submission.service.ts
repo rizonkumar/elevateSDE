@@ -82,7 +82,7 @@ export class SubmissionService {
 
   async getForUser(submissionId: string, userId: string): Promise<Submission | null> {
     const submission = await this.submissionRepository.findById(submissionId);
-    if (!submission || submission.getUserId() !== userId) return null;
+    if (submission?.getUserId() !== userId) return null;
     return submission;
   }
 
@@ -94,7 +94,7 @@ export class SubmissionService {
   ): Promise<SubmissionPage> {
     if (cursor) {
       const anchor = await this.getForUser(cursor, userId);
-      if (!anchor || anchor.getProblemId() !== problemId) {
+      if (anchor?.getProblemId() !== problemId) {
         return { items: [], nextCursor: null };
       }
     }

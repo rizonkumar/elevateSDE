@@ -71,7 +71,7 @@ export default function LoginPage() {
         context: 'ADMIN',
       });
       const result = response.data;
-      if (result.status !== 'AUTHENTICATED' || !result.auth || result.auth.user.role !== 'ADMIN') {
+      if (result.status !== 'AUTHENTICATED' || result.auth?.user.role !== 'ADMIN') {
         clearAuth();
         addToast('Access Denied: Administrative permissions required.', 'error');
         return;

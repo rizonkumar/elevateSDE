@@ -91,6 +91,64 @@ export function QuestionsPanel({
     );
   }
 
+  let content: React.ReactNode;
+  if (canDrag) {
+    content = (
+      <Reorder.Group
+        axis="y"
+        values={order}
+        onReorder={setOrder}
+        className="m-0 flex list-none flex-col gap-2 p-0"
+      >
+        {order.map((problem) => (
+          <Reorder.Item
+            key={problem.id}
+            value={problem}
+            onDragEnd={() => onReorder?.(order.map((item) => item.id))}
+          >
+            <ProblemRow
+              problem={problem}
+              solved={solvedSet.has(problem.id)}
+              onRemove={() => onRemove(problem.id)}
+              showHandle
+              showStatus={anySolved}
+            />
+          </Reorder.Item>
+        ))}
+      </Reorder.Group>
+    );
+  } else if (filtered.length === 0) {
+    content = (
+      <div className="rounded-(--radius-md) border border-dashed border-(--color-border-subtle) px-6 py-10 text-center">
+        <p className="m-0 text-sm text-(--color-text-muted)">No questions match your filters.</p>
+      </div>
+    );
+  } else {
+    content = (
+      <>
+        <ul className="m-0 flex list-none flex-col gap-2 p-0">
+          {filtered.slice(0, visible).map((problem) => (
+            <li key={problem.id}>
+              <ProblemRow
+                problem={problem}
+                solved={solvedSet.has(problem.id)}
+                onRemove={() => onRemove(problem.id)}
+                showStatus={anySolved}
+              />
+            </li>
+          ))}
+        </ul>
+        {visible < filtered.length && (
+          <div className="flex justify-center">
+            <Button variant="secondary" onClick={() => setVisible((count) => count + PAGE)}>
+              Load more
+            </Button>
+          </div>
+        )}
+      </>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-3 md:flex-row md:items-center">
@@ -122,56 +180,7 @@ export function QuestionsPanel({
         {filtered.length} of {problems.length} {problems.length === 1 ? 'question' : 'questions'}
       </p>
 
-      {canDrag ? (
-        <Reorder.Group
-          axis="y"
-          values={order}
-          onReorder={setOrder}
-          className="m-0 flex list-none flex-col gap-2 p-0"
-        >
-          {order.map((problem) => (
-            <Reorder.Item
-              key={problem.id}
-              value={problem}
-              onDragEnd={() => onReorder?.(order.map((item) => item.id))}
-            >
-              <ProblemRow
-                problem={problem}
-                solved={solvedSet.has(problem.id)}
-                onRemove={() => onRemove(problem.id)}
-                showHandle
-                showStatus={anySolved}
-              />
-            </Reorder.Item>
-          ))}
-        </Reorder.Group>
-      ) : filtered.length === 0 ? (
-        <div className="rounded-(--radius-md) border border-dashed border-(--color-border-subtle) px-6 py-10 text-center">
-          <p className="m-0 text-sm text-(--color-text-muted)">No questions match your filters.</p>
-        </div>
-      ) : (
-        <>
-          <ul className="m-0 flex list-none flex-col gap-2 p-0">
-            {filtered.slice(0, visible).map((problem) => (
-              <li key={problem.id}>
-                <ProblemRow
-                  problem={problem}
-                  solved={solvedSet.has(problem.id)}
-                  onRemove={() => onRemove(problem.id)}
-                  showStatus={anySolved}
-                />
-              </li>
-            ))}
-          </ul>
-          {visible < filtered.length && (
-            <div className="flex justify-center">
-              <Button variant="secondary" onClick={() => setVisible((count) => count + PAGE)}>
-                Load more
-              </Button>
-            </div>
-          )}
-        </>
-      )}
+      {content}
     </div>
   );
 }

@@ -6,7 +6,7 @@ interface AuthLayoutProps {
   children: React.ReactNode;
 }
 
-export function AuthLayout({ children }: AuthLayoutProps) {
+export function AuthLayout({ children }: Readonly<AuthLayoutProps>) {
   return (
     <div className="min-h-screen grid lg:grid-cols-2 bg-(--color-bg) transition-colors duration-200">
       <aside className="hidden lg:flex flex-col justify-between p-12 xl:p-16 bg-(--color-bg-soft) border-r border-(--color-border-subtle)">

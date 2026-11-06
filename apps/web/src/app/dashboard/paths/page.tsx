@@ -80,6 +80,33 @@ export default function LearningPathsPage() {
 
   const filtered = level ? paths.filter((path) => path.level === level) : paths;
 
+  let content: React.ReactNode;
+  if (isLoading && paths.length === 0) {
+    content = (
+      <p className="text-sm text-(--color-text-muted)">Loading learning paths…</p>
+    );
+  } else if (filtered.length === 0) {
+    content = (
+      <div className="flex flex-col items-center gap-2 py-16 text-center">
+        <span className="inline-flex h-11 w-11 items-center justify-center rounded-(--radius-full) bg-(--color-accent-soft) text-(--color-accent)">
+          <Route className="h-5 w-5" />
+        </span>
+        <h2 className="m-0 font-display text-lg font-semibold">No paths available</h2>
+        <p className="m-0 max-w-sm text-sm text-(--color-text-muted)">
+          Prep tracks will appear here once they are published.
+        </p>
+      </div>
+    );
+  } else {
+    content = (
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        {filtered.map((path) => (
+          <PathCard key={path.id} path={path} />
+        ))}
+      </div>
+    );
+  }
+
   return (
     <PageContainer>
       <div className="flex flex-col gap-6 sm:gap-8">
@@ -93,25 +120,7 @@ export default function LearningPathsPage() {
           <Select value={level} options={LEVEL_OPTIONS} onChange={setLevel} className="w-48" />
         </div>
 
-        {isLoading && paths.length === 0 ? (
-          <p className="text-sm text-(--color-text-muted)">Loading learning paths…</p>
-        ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 py-16 text-center">
-            <span className="inline-flex h-11 w-11 items-center justify-center rounded-(--radius-full) bg-(--color-accent-soft) text-(--color-accent)">
-              <Route className="h-5 w-5" />
-            </span>
-            <h2 className="m-0 font-display text-lg font-semibold">No paths available</h2>
-            <p className="m-0 max-w-sm text-sm text-(--color-text-muted)">
-              Prep tracks will appear here once they are published.
-            </p>
-          </div>
-        ) : (
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {filtered.map((path) => (
-              <PathCard key={path.id} path={path} />
-            ))}
-          </div>
-        )}
+        {content}
       </div>
     </PageContainer>
   );

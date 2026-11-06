@@ -29,7 +29,7 @@ export function ShellSidebar({
   collapseStorageKey,
   open,
   onClose,
-}: ShellSidebarProps) {
+}: Readonly<ShellSidebarProps>) {
   const [collapsed, setCollapsed] = React.useState(false);
   const drawerRef = React.useRef<HTMLElement>(null);
   const closeButtonRef = React.useRef<HTMLButtonElement>(null);
@@ -61,7 +61,7 @@ export function ShellSidebar({
         drawerRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
       );
       const first = focusable[0];
-      const last = focusable[focusable.length - 1];
+      const last = focusable.at(-1);
       if (!first || !last) return;
       if (event.shiftKey && document.activeElement === first) {
         event.preventDefault();

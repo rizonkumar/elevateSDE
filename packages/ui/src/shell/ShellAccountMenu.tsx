@@ -20,7 +20,7 @@ export function ShellAccountMenu({
   initial,
   roleLabel,
   children,
-}: ShellAccountMenuProps) {
+}: Readonly<ShellAccountMenuProps>) {
   const [open, setOpen] = React.useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
   const triggerRef = React.useRef<HTMLButtonElement>(null);
@@ -50,7 +50,7 @@ export function ShellAccountMenu({
       const list = items();
       if (list.length === 0) return;
       event.preventDefault();
-      const currentIndex = list.findIndex((item) => item === document.activeElement);
+      const currentIndex = list.indexOf(document.activeElement as HTMLElement);
       const delta = event.key === 'ArrowDown' ? 1 : -1;
       const nextIndex = (currentIndex + delta + list.length) % list.length;
       list[nextIndex]?.focus();
@@ -115,10 +115,10 @@ export function ShellAccountMenu({
 }
 
 export function ShellMenuSeparator() {
-  return <div role="separator" className="h-px bg-(--color-border-subtle)" />;
+  return <hr className="m-0 h-px border-0 bg-(--color-border-subtle)" />;
 }
 
-export function ShellMenuSection({ children }: { children: React.ReactNode }) {
+export function ShellMenuSection({ children }: Readonly<{ children: React.ReactNode }>) {
   return <div className="flex flex-col p-1">{children}</div>;
 }
 
@@ -140,7 +140,7 @@ export function ShellMenuItem({
   onSelect,
   tone = 'default',
   LinkComponent,
-}: ShellMenuItemProps) {
+}: Readonly<ShellMenuItemProps>) {
   const close = React.useContext(MenuCloseContext);
   const className = `flex h-9 w-full items-center gap-2.5 rounded-(--radius-sm) px-2.5 text-left text-sm font-medium transition-colors cursor-pointer focus:outline-none ${
     tone === 'danger'

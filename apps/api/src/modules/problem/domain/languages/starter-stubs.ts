@@ -12,7 +12,7 @@ export interface TypedSignature {
   returnType: HarnessType;
 }
 
-const IDENTIFIER = /^[A-Za-z_][A-Za-z0-9_]*$/;
+const IDENTIFIER = /^[A-Za-z_]\w*$/;
 const RESERVED = new Set([
   'abstract',
   'boolean',

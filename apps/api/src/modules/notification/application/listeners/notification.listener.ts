@@ -28,16 +28,18 @@ export class NotificationListener {
 
   @OnEvent(NOTIFICATION_EVENTS.ACCOUNT_PENDING_APPROVAL)
   async onAccountPendingApproval(event: AccountPendingApprovalEvent): Promise<void> {
-    for (const recipientId of event.recipientIds) {
-      await this.safeNotify({
-        userId: recipientId,
-        type: 'SYSTEM',
-        title: 'New account awaiting approval',
-        body: `${event.email} signed up and is waiting for your approval.`,
-        linkUrl: '/admin/users?tab=pending',
-        dedupeKey: `account-pending:${event.pendingUserId}:${recipientId}`,
-      });
-    }
+    await Promise.all(
+      event.recipientIds.map((recipientId) =>
+        this.safeNotify({
+          userId: recipientId,
+          type: 'SYSTEM',
+          title: 'New account awaiting approval',
+          body: `${event.email} signed up and is waiting for your approval.`,
+          linkUrl: '/admin/users?tab=pending',
+          dedupeKey: `account-pending:${event.pendingUserId}:${recipientId}`,
+        }),
+      ),
+    );
   }
 
   @OnEvent(NOTIFICATION_EVENTS.BADGE_AWARDED)

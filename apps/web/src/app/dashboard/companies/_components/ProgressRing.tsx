@@ -19,7 +19,7 @@ export function ProgressRing({
 
   return (
     <div className={`relative shrink-0 ${className}`} role="img" aria-label={`${percent}% solved`}>
-      <svg viewBox={`0 0 ${VIEWBOX} ${VIEWBOX}`} className="h-full w-full -rotate-90">
+      <svg viewBox={`0 0 ${VIEWBOX} ${VIEWBOX}`} aria-hidden="true" className="h-full w-full -rotate-90">
         <circle
           cx={VIEWBOX / 2}
           cy={VIEWBOX / 2}

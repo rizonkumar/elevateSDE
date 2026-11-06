@@ -58,6 +58,43 @@ export function AddToListMenu({ problemId }: Readonly<AddToListMenuProps>) {
     void submitNewList();
   };
 
+  let content: React.ReactNode;
+  if (isLoadingLists && lists.length === 0) {
+    content = (
+      <div className="flex items-center gap-2 px-2 py-2 text-sm text-(--color-text-muted)">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        Loading…
+      </div>
+    );
+  } else if (lists.length === 0) {
+    content = (
+      <p className="m-0 px-2 py-2 text-sm text-(--color-text-muted)">
+        No lists yet. Create one below.
+      </p>
+    );
+  } else {
+    content = (
+      lists.map((list) => {
+        const added = isInList(list);
+        return (
+          <button
+            key={list.id}
+            type="button"
+            onClick={() =>
+              added
+                ? removeProblemFromList(list.id, problemId)
+                : addProblemToList(list.id, problemId)
+            }
+            className="flex w-full items-center justify-between gap-2 rounded-(--radius-sm) px-2 py-2 text-left text-sm text-(--color-text-primary) transition-colors hover:bg-(--color-badge-bg) cursor-pointer"
+          >
+            <span className="truncate">{list.name}</span>
+            {added && <Check className="h-4 w-4 shrink-0 text-(--color-accent)" />}
+          </button>
+        );
+      })
+    );
+  }
+
   return (
     <div ref={containerRef} className="relative">
       <button
@@ -78,35 +115,7 @@ export function AddToListMenu({ problemId }: Readonly<AddToListMenuProps>) {
             Add to list
           </p>
           <div className="max-h-52 overflow-y-auto">
-            {isLoadingLists && lists.length === 0 ? (
-              <div className="flex items-center gap-2 px-2 py-2 text-sm text-(--color-text-muted)">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Loading…
-              </div>
-            ) : lists.length === 0 ? (
-              <p className="m-0 px-2 py-2 text-sm text-(--color-text-muted)">
-                No lists yet. Create one below.
-              </p>
-            ) : (
-              lists.map((list) => {
-                const added = isInList(list);
-                return (
-                  <button
-                    key={list.id}
-                    type="button"
-                    onClick={() =>
-                      added
-                        ? removeProblemFromList(list.id, problemId)
-                        : addProblemToList(list.id, problemId)
-                    }
-                    className="flex w-full items-center justify-between gap-2 rounded-(--radius-sm) px-2 py-2 text-left text-sm text-(--color-text-primary) transition-colors hover:bg-(--color-badge-bg) cursor-pointer"
-                  >
-                    <span className="truncate">{list.name}</span>
-                    {added && <Check className="h-4 w-4 shrink-0 text-(--color-accent)" />}
-                  </button>
-                );
-              })
-            )}
+            {content}
           </div>
           <form
             onSubmit={handleCreate}

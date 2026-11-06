@@ -21,11 +21,12 @@ export class ContestFinalizationService {
   async finalizeEnded(now: Date = new Date()): Promise<number> {
     const contestIds = await this.repository.findFinalizableContestIds(finalizationCutoff(now));
     let finalizedCount = 0;
-    for (const contestId of contestIds) {
+    await contestIds.reduce(async (previous, contestId) => {
+      await previous;
       if (await this.finalize(contestId, now)) {
         finalizedCount += 1;
       }
-    }
+    }, Promise.resolve());
     return finalizedCount;
   }
 

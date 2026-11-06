@@ -19,6 +19,13 @@ interface ScheduleModalProps {
   onClose: () => void;
 }
 
+const SESSION_STATUS_BADGE: Partial<Record<PeerPracticeSessionDto['status'], 'success' | 'danger'>> = {
+  ACCEPTED: 'success',
+  COMPLETED: 'success',
+  DECLINED: 'danger',
+  CANCELLED: 'danger',
+};
+
 function defaultStart(): string {
   const start = new Date();
   start.setDate(start.getDate() + 2);
@@ -26,7 +33,7 @@ function defaultStart(): string {
   return start.toISOString();
 }
 
-function ScheduleModal({ plan, session, open, onClose }: ScheduleModalProps) {
+function ScheduleModal({ plan, session, open, onClose }: Readonly<ScheduleModalProps>) {
   const createPeerSession = useInterviewReadinessStore((state) => state.createPeerSession);
   const reschedulePeerSession = useInterviewReadinessStore((state) => state.reschedulePeerSession);
   const isSaving = useInterviewReadinessStore((state) => state.isSaving);
@@ -61,6 +68,13 @@ function ScheduleModal({ plan, session, open, onClose }: ScheduleModalProps) {
     if (saved) onClose();
   };
 
+  let saveButtonLabel = 'Send invitation';
+  if (isSaving) {
+    saveButtonLabel = 'Saving…';
+  } else if (session) {
+    saveButtonLabel = 'Send updated time';
+  }
+
   return (
     <Modal
       open={open}
@@ -94,7 +108,7 @@ function ScheduleModal({ plan, session, open, onClose }: ScheduleModalProps) {
         <div className="flex justify-end gap-2">
           <Button type="button" variant="tertiary" onClick={onClose}>Cancel</Button>
           <Button type="button" onClick={() => void save()} disabled={isSaving || !startsAt || !meetingUrl || (!session && !email)}>
-            {isSaving ? 'Saving…' : session ? 'Send updated time' : 'Send invitation'}
+            {saveButtonLabel}
           </Button>
         </div>
       </div>
@@ -108,7 +122,7 @@ interface ScorecardModalProps {
   onClose: () => void;
 }
 
-export function ScorecardModal({ session, open, onClose }: ScorecardModalProps) {
+export function ScorecardModal({ session, open, onClose }: Readonly<ScorecardModalProps>) {
   const submit = useInterviewReadinessStore((state) => state.submitPeerScorecard);
   const [scores, setScores] = React.useState({ communication: 80, problemSolving: 80, technicalDepth: 80, structure: 80 });
   const [strengths, setStrengths] = React.useState('');
@@ -163,12 +177,12 @@ export function PeerSessionCard({
   currentUserId,
   onReschedule,
   onScorecard,
-}: {
+}: Readonly<{
   session: PeerPracticeSessionDto;
   currentUserId: string | undefined;
   onReschedule?: () => void;
   onScorecard: () => void;
-}) {
+}>) {
   const updateStatus = useInterviewReadinessStore((state) => state.updatePeerSessionStatus);
   const organizer = session.organizer.id === currentUserId;
   const other = organizer ? session.invitee : session.organizer;
@@ -180,7 +194,7 @@ export function PeerSessionCard({
           <div className="text-sm font-semibold text-(--color-text-primary)">{other.displayName}</div>
           <div className="mt-1 text-xs text-(--color-text-muted)">{new Date(session.startsAt).toLocaleString(undefined, { timeZone: session.timeZone })} · {session.durationMinutes} min</div>
         </div>
-        <Badge variant={session.status === 'ACCEPTED' || session.status === 'COMPLETED' ? 'success' : session.status === 'DECLINED' || session.status === 'CANCELLED' ? 'danger' : 'neutral'}>
+        <Badge variant={SESSION_STATUS_BADGE[session.status] ?? 'neutral'}>
           {session.status.toLowerCase().replaceAll('_', ' ')}
         </Badge>
       </div>
@@ -209,7 +223,7 @@ export function PeerSessionCard({
   );
 }
 
-export function PeerPracticePanel({ plan }: { plan: InterviewPreparationPlanDto }) {
+export function PeerPracticePanel({ plan }: Readonly<{ plan: InterviewPreparationPlanDto }>) {
   const userId = useAuthStore((state) => state.user?.id);
   const [scheduleOpen, setScheduleOpen] = React.useState(false);
   const [editingSession, setEditingSession] = React.useState<PeerPracticeSessionDto | null>(null);

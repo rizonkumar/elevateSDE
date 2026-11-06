@@ -23,7 +23,7 @@ export function ConfirmDialog({
   loading = false,
   onConfirm,
   onClose,
-}: ConfirmDialogProps) {
+}: Readonly<ConfirmDialogProps>) {
   return (
     <Modal open={open} onClose={onClose} title={title} description={description}>
       <div className="flex items-center justify-end gap-2">

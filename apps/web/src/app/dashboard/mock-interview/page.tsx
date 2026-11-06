@@ -9,7 +9,7 @@ function firstValue(value: string | string[] | undefined): string | null {
   return value ?? null;
 }
 
-export default async function MockInterviewPage({ searchParams }: MockInterviewPageProps) {
+export default async function MockInterviewPage({ searchParams }: Readonly<MockInterviewPageProps>) {
   const params = await searchParams;
   return (
     <MockInterviewWorkspace

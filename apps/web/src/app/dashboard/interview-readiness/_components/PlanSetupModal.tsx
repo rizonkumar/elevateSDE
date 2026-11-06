@@ -51,7 +51,7 @@ export function PlanSetupModal({
   onClose,
   applications,
   initialApplicationId,
-}: PlanSetupModalProps) {
+}: Readonly<PlanSetupModalProps>) {
   const router = useRouter();
   const templates = useInterviewReadinessStore((state) => state.templates);
   const isSaving = useInterviewReadinessStore((state) => state.isSaving);

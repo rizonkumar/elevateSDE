@@ -59,6 +59,10 @@ export default function DailyChallengesPage() {
     [problemOptions],
   );
 
+  const isInitialLoad = loading && schedule.length === 0;
+  const isEmpty = !isInitialLoad && schedule.length === 0;
+  const hasSchedule = schedule.length > 0;
+
   const handleSave = async () => {
     if (!date || !problemId) {
       return;
@@ -79,20 +83,24 @@ export default function DailyChallengesPage() {
           </Button>
         </div>
 
-        {loading && schedule.length === 0 ? (
+        {isInitialLoad && (
           <div className="flex items-center justify-center min-h-[300px]">
             <span className="text-sm text-(--color-text-muted) animate-pulse">
               Loading schedule...
             </span>
           </div>
-        ) : schedule.length === 0 ? (
+        )}
+
+        {isEmpty && (
           <div className="flex flex-col items-center gap-2 py-16 text-center">
             <p className="m-0 text-sm font-medium">No daily challenges scheduled</p>
             <p className="m-0 max-w-sm text-sm text-(--color-text-muted)">
               Schedule a published problem for a date to start the daily challenge.
             </p>
           </div>
-        ) : (
+        )}
+
+        {hasSchedule && (
           <div className="overflow-x-auto rounded-md border border-(--color-border-subtle) bg-(--color-surface)">
             <table className="w-full min-w-[640px] text-sm">
               <thead>

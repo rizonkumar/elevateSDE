@@ -18,12 +18,20 @@ import { ProblemProgressStatus } from '@elevatesde/shared-types';
 
 const PROGRESS_STATUSES: ProblemProgressStatus[] = ['SOLVED', 'ATTEMPTED', 'TODO'];
 
+function scalarToString(value: unknown): string {
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') {
+    return String(value);
+  }
+  return '';
+}
+
 function toStringList(value: unknown): string[] | undefined {
   if (value === undefined || value === null || value === '') {
     return undefined;
   }
-  const raw = Array.isArray(value) ? value : String(value).split(',');
-  return raw.map((item) => String(item).trim()).filter((item) => item.length > 0);
+  const raw: unknown[] = Array.isArray(value) ? value : scalarToString(value).split(',');
+  return raw.map((item) => scalarToString(item).trim()).filter((item) => item.length > 0);
 }
 
 export class ListProblemsQueryDto {

@@ -186,7 +186,7 @@ export const useMockInterviewStore = create<MockInterviewState>((set, get) => {
     if (session.status === 'ACTIVE') {
       startTimer(session.deadlineAt);
       const current = session.turns.at(-1);
-      if (current && current.answer === null && current.id !== previousQuestionId) {
+      if (current?.answer === null && current.id !== previousQuestionId) {
         announceQuestion(current.question);
       }
       return;
@@ -339,7 +339,7 @@ export const useMockInterviewStore = create<MockInterviewState>((set, get) => {
       const trimmed = text.trim();
       const { session, status, isThinking } = get();
       const current = session?.turns.at(-1);
-      if (!session || status !== 'ACTIVE' || isThinking || !current || current.answer !== null) return;
+      if (!session || status !== 'ACTIVE' || isThinking || current?.answer !== null) return;
       if (trimmed.length === 0) return;
       pendingAnswer = {
         id: `pending-${current.id}`,

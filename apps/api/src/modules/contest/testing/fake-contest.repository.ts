@@ -53,77 +53,88 @@ export class FakeContestRepository implements IContestRepository {
   updatedContests: Contest[] = [];
   createdContests: Contest[] = [];
 
-  async list(): Promise<ContestSummaryView[]> {
-    return [];
+  list(): Promise<ContestSummaryView[]> {
+    return Promise.resolve([]);
   }
-  async listVisible(): Promise<ContestSummaryView[]> {
-    return this.detail ? [this.detail] : [];
+  listVisible(): Promise<ContestSummaryView[]> {
+    return Promise.resolve(this.detail ? [this.detail] : []);
   }
-  async findDetail(id: string): Promise<ContestDetailView | null> {
-    return this.detail?.id === id ? this.detail : null;
+  findDetail(id: string): Promise<ContestDetailView | null> {
+    return Promise.resolve(this.detail?.id === id ? this.detail : null);
   }
-  async findById(id: string): Promise<Contest | null> {
-    return this.contest?.getId() === id ? this.contest : null;
+  findById(id: string): Promise<Contest | null> {
+    return Promise.resolve(this.contest?.getId() === id ? this.contest : null);
   }
-  async findIdBySlug(slug: string): Promise<string | null> {
-    return this.detail?.slug === slug ? this.detail.id : null;
+  findIdBySlug(slug: string): Promise<string | null> {
+    return Promise.resolve(this.detail?.slug === slug ? this.detail.id : null);
   }
-  async findPublishedProblems(): Promise<PublishedProblemRef[]> {
-    return [];
+  findPublishedProblems(): Promise<PublishedProblemRef[]> {
+    return Promise.resolve([]);
   }
-  async countProblems(): Promise<number> {
-    return this.detail?.problemCount ?? 0;
+  countProblems(): Promise<number> {
+    return Promise.resolve(this.detail?.problemCount ?? 0);
   }
-  async create(contest: Contest): Promise<void> {
+  create(contest: Contest): Promise<void> {
     this.createdContests.push(contest);
     this.detail = buildContestDetail({ id: contest.getId(), isRated: contest.isRated() });
+    return Promise.resolve();
   }
-  async update(contest: Contest): Promise<void> {
+  update(contest: Contest): Promise<void> {
     this.updatedContests.push(contest);
     this.contest = contest;
+    return Promise.resolve();
   }
-  async setProblems(): Promise<void> {}
-  async remove(): Promise<void> {}
-  async countParticipants(): Promise<Map<string, number>> {
-    return this.participantCounts;
+  setProblems(): Promise<void> {
+    return Promise.resolve();
   }
-  async findRegisteredContestIds(): Promise<string[]> {
-    return this.registeredContestIds;
+  remove(): Promise<void> {
+    return Promise.resolve();
   }
-  async addParticipant(contestId: string, userId: string): Promise<void> {
+  countParticipants(): Promise<Map<string, number>> {
+    return Promise.resolve(this.participantCounts);
+  }
+  findRegisteredContestIds(): Promise<string[]> {
+    return Promise.resolve(this.registeredContestIds);
+  }
+  addParticipant(contestId: string, userId: string): Promise<void> {
     this.addParticipantCalls.push({ contestId, userId });
+    return Promise.resolve();
   }
-  async listParticipants(): Promise<ContestParticipantView[]> {
-    return this.participants;
+  listParticipants(): Promise<ContestParticipantView[]> {
+    return Promise.resolve(this.participants);
   }
-  async findFirstAcceptedInWindow(): Promise<AcceptedSubmissionView[]> {
-    return this.accepted;
+  findFirstAcceptedInWindow(): Promise<AcceptedSubmissionView[]> {
+    return Promise.resolve(this.accepted);
   }
-  async findFinalizableContestIds(endedBefore: Date): Promise<string[]> {
+  findFinalizableContestIds(endedBefore: Date): Promise<string[]> {
     this.finalizableEndedBefore = endedBefore;
-    return this.finalizableContestIds.filter((id) => !this.finalizedContests.has(id));
+    return Promise.resolve(
+      this.finalizableContestIds.filter((id) => !this.finalizedContests.has(id)),
+    );
   }
-  async hasPendingSubmissionsInWindow(): Promise<boolean> {
-    return this.pendingSubmissions;
+  hasPendingSubmissionsInWindow(): Promise<boolean> {
+    return Promise.resolve(this.pendingSubmissions);
   }
-  async findLiveContestIdsForEntry(userId: string, problemId: string): Promise<string[]> {
-    return this.liveEntries
-      .filter((entry) => entry.userId === userId && entry.problemId === problemId)
-      .map((entry) => entry.contestId);
+  findLiveContestIdsForEntry(userId: string, problemId: string): Promise<string[]> {
+    return Promise.resolve(
+      this.liveEntries
+        .filter((entry) => entry.userId === userId && entry.problemId === problemId)
+        .map((entry) => entry.contestId),
+    );
   }
-  async findLifecycleChanges(after: Date, upTo: Date): Promise<ContestLifecycleView[]> {
+  findLifecycleChanges(after: Date, upTo: Date): Promise<ContestLifecycleView[]> {
     this.lifecycleQueries.push({ after, upTo });
-    return this.lifecycle;
+    return Promise.resolve(this.lifecycle);
   }
-  async saveFinalResults(
+  saveFinalResults(
     contestId: string,
     results: ContestFinalResult[],
     finalizedAt: Date,
   ): Promise<boolean> {
     if (this.finalizedContests.has(contestId)) {
-      return false;
+      return Promise.resolve(false);
     }
     this.finalizedContests.set(contestId, { results, finalizedAt });
-    return true;
+    return Promise.resolve(true);
   }
 }

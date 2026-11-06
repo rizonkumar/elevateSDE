@@ -2,7 +2,7 @@ interface IconProps {
   className?: string;
 }
 
-export function ArrowUpRightIcon({ className }: IconProps) {
+export function ArrowUpRightIcon({ className }: Readonly<IconProps>) {
   return (
     <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" className={className}>
       <path
@@ -16,7 +16,7 @@ export function ArrowUpRightIcon({ className }: IconProps) {
   );
 }
 
-export function SearchIcon({ className }: IconProps) {
+export function SearchIcon({ className }: Readonly<IconProps>) {
   return (
     <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" className={className}>
       <circle cx="7" cy="7" r="4.5" stroke="currentColor" strokeWidth="1.5" />
@@ -25,7 +25,7 @@ export function SearchIcon({ className }: IconProps) {
   );
 }
 
-export function MenuIcon({ className }: IconProps) {
+export function MenuIcon({ className }: Readonly<IconProps>) {
   return (
     <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" className={className}>
       <path
@@ -38,7 +38,7 @@ export function MenuIcon({ className }: IconProps) {
   );
 }
 
-export function CloseIcon({ className }: IconProps) {
+export function CloseIcon({ className }: Readonly<IconProps>) {
   return (
     <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" className={className}>
       <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -46,7 +46,7 @@ export function CloseIcon({ className }: IconProps) {
   );
 }
 
-export function PanelCollapseIcon({ className }: IconProps) {
+export function PanelCollapseIcon({ className }: Readonly<IconProps>) {
   return (
     <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" className={className}>
       <rect x="2" y="2.5" width="12" height="11" rx="2" stroke="currentColor" strokeWidth="1.5" />
@@ -61,7 +61,7 @@ export function PanelCollapseIcon({ className }: IconProps) {
   );
 }
 
-export function PanelExpandIcon({ className }: IconProps) {
+export function PanelExpandIcon({ className }: Readonly<IconProps>) {
   return (
     <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" className={className}>
       <rect x="2" y="2.5" width="12" height="11" rx="2" stroke="currentColor" strokeWidth="1.5" />
@@ -76,7 +76,7 @@ export function PanelExpandIcon({ className }: IconProps) {
   );
 }
 
-export function ChevronDownIcon({ className }: IconProps) {
+export function ChevronDownIcon({ className }: Readonly<IconProps>) {
   return (
     <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" className={className}>
       <path
@@ -90,7 +90,7 @@ export function ChevronDownIcon({ className }: IconProps) {
   );
 }
 
-export function EnterIcon({ className }: IconProps) {
+export function EnterIcon({ className }: Readonly<IconProps>) {
   return (
     <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" className={className}>
       <path
@@ -104,7 +104,7 @@ export function EnterIcon({ className }: IconProps) {
   );
 }
 
-export function SunIcon({ className }: IconProps) {
+export function SunIcon({ className }: Readonly<IconProps>) {
   return (
     <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" className={className}>
       <circle cx="8" cy="8" r="2.75" stroke="currentColor" strokeWidth="1.5" />
@@ -118,7 +118,7 @@ export function SunIcon({ className }: IconProps) {
   );
 }
 
-export function MoonIcon({ className }: IconProps) {
+export function MoonIcon({ className }: Readonly<IconProps>) {
   return (
     <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" className={className}>
       <path
@@ -131,7 +131,7 @@ export function MoonIcon({ className }: IconProps) {
   );
 }
 
-export function MonitorIcon({ className }: IconProps) {
+export function MonitorIcon({ className }: Readonly<IconProps>) {
   return (
     <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" className={className}>
       <rect

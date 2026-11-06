@@ -23,10 +23,7 @@ import {
   IMockInterviewer,
   MockInterviewSummaryRequest,
 } from '../domain/interfaces/mock-interviewer.interface';
-import {
-  computeCompetencies,
-  computeOverallScore,
-} from '../domain/scoring/mock-interview-scoring';
+import { computeCompetencies, computeOverallScore } from '../domain/scoring/mock-interview-scoring';
 
 const DEFAULT_DAILY_LIMIT = 10;
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -152,8 +149,9 @@ export class MockInterviewService {
 
   async end(userId: string, sessionId: string): Promise<MockInterviewSession> {
     const session = await this.findOwned(userId, sessionId);
-    if (session.getStatus() !== 'ACTIVE') return session;
-    await this.concludeAndPersist(session, new Date());
+    if (session.getStatus() === 'ACTIVE') {
+      await this.concludeAndPersist(session, new Date());
+    }
     return session;
   }
 
@@ -174,7 +172,7 @@ export class MockInterviewService {
 
   async finalize(sessionId: string): Promise<void> {
     const session = await this.repository.findById(sessionId);
-    if (!session || session.getStatus() !== 'SCORING') return;
+    if (session?.getStatus() !== 'SCORING') return;
     const request = this.summaryRequest(session);
     if (!request) {
       session.fail(SCORING_FAILURE_MESSAGE);
@@ -187,16 +185,20 @@ export class MockInterviewService {
 
   async finalizeDeterministically(sessionId: string): Promise<void> {
     const session = await this.repository.findById(sessionId);
-    if (!session || session.getStatus() !== 'SCORING') return;
+    if (session?.getStatus() !== 'SCORING') return;
     const request = this.summaryRequest(session);
     try {
       if (!request) throw new Error('No answered turns to score');
-      await this.completeWith(session, request, this.interviewer.summarizeDeterministically(request));
+      await this.completeWith(
+        session,
+        request,
+        this.interviewer.summarizeDeterministically(request),
+      );
     } catch (error) {
       const reason = error instanceof Error ? error.message : 'unknown error';
       this.logger.error(`Deterministic scoring failed for ${sessionId}: ${reason}`);
       const latest = await this.repository.findById(sessionId);
-      if (!latest || latest.getStatus() !== 'SCORING') return;
+      if (latest?.getStatus() !== 'SCORING') return;
       latest.fail(SCORING_FAILURE_MESSAGE);
       await this.repository.save(latest);
     }
@@ -207,27 +209,27 @@ export class MockInterviewService {
       new Date(now.getTime() - ABANDON_AFTER_DEADLINE_MS),
       SWEEP_BATCH_SIZE,
     );
-    let affected = 0;
-    for (const id of overdue) {
-      const session = await this.repository.findById(id);
-      if (!session || session.getStatus() !== 'ACTIVE') continue;
-      try {
-        await this.concludeAndPersist(session, now);
-        affected += 1;
-      } catch (error) {
-        const reason = error instanceof Error ? error.message : 'unknown error';
-        this.logger.warn(`Could not conclude overdue mock interview ${id}: ${reason}`);
-      }
-    }
+    const concluded = await Promise.all(overdue.map((id) => this.concludeOverdue(id, now)));
     const stale = await this.repository.findStaleScoringIds(
       new Date(now.getTime() - RESCORE_AFTER_MS),
       SWEEP_BATCH_SIZE,
     );
-    for (const id of stale) {
-      await this.scoringQueue.enqueue({ sessionId: id });
-      affected += 1;
-    }
+    await Promise.all(stale.map((id) => this.scoringQueue.enqueue({ sessionId: id })));
+    const affected = concluded.reduce((total, count) => total + count, 0) + stale.length;
     return affected;
+  }
+
+  private async concludeOverdue(id: string, now: Date): Promise<number> {
+    const session = await this.repository.findById(id);
+    if (session?.getStatus() !== 'ACTIVE') return 0;
+    try {
+      await this.concludeAndPersist(session, now);
+      return 1;
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : 'unknown error';
+      this.logger.warn(`Could not conclude overdue mock interview ${id}: ${reason}`);
+      return 0;
+    }
   }
 
   private summaryRequest(session: MockInterviewSession): MockInterviewSummaryRequest | null {
@@ -279,7 +281,7 @@ export class MockInterviewService {
     session: MockInterviewSession | null,
     now: Date,
   ): Promise<boolean> {
-    if (!session || session.getStatus() !== 'ACTIVE' || !session.isExpired(now)) return false;
+    if (session?.getStatus() !== 'ACTIVE' || !session.isExpired(now)) return false;
     await this.concludeAndPersist(session, now);
     return true;
   }
@@ -295,7 +297,9 @@ export class MockInterviewService {
       await this.scoringQueue.enqueue({ sessionId });
     } catch (error) {
       const reason = error instanceof Error ? error.message : 'unknown error';
-      this.logger.error(`Failed to enqueue scoring for ${sessionId}; the sweep will retry: ${reason}`);
+      this.logger.error(
+        `Failed to enqueue scoring for ${sessionId}; the sweep will retry: ${reason}`,
+      );
     }
   }
 

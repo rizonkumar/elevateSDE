@@ -62,7 +62,7 @@ export class DailyChallengeService {
   async registerCompletion(userId: string, problemId: string, submissionId: string): Promise<void> {
     const today = startOfUtcDay(new Date());
     const scheduled = await this.repository.findScheduledForDate(today, GLOBAL_SCOPE);
-    if (!scheduled || scheduled.problemId !== problemId) {
+    if (scheduled?.problemId !== problemId) {
       return;
     }
     await this.pointsService.awardDailyChallenge(userId, scheduled.id);

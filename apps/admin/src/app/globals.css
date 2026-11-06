@@ -183,7 +183,3 @@ body {
 .btn-secondary:hover {
   background: var(--color-badge-bg);
 }
-
-.input-with-icon {
-  padding-left: 2.5rem !important;
-}

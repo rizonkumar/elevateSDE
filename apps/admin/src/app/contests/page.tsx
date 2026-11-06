@@ -29,6 +29,10 @@ export default function ContestsPage() {
   const cancelDelete = useContestsStore((state) => state.cancelDelete);
   const confirmDelete = useContestsStore((state) => state.confirmDelete);
 
+  const isInitialLoad = loading && contests.length === 0;
+  const isEmpty = !isInitialLoad && contests.length === 0;
+  const hasContests = contests.length > 0;
+
   React.useEffect(() => {
     void loadContests();
     void loadProblemOptions();
@@ -47,13 +51,15 @@ export default function ContestsPage() {
           </Button>
         </div>
 
-        {loading && contests.length === 0 ? (
+        {isInitialLoad && (
           <div className="flex min-h-[300px] items-center justify-center">
             <span className="animate-pulse text-sm text-(--color-text-muted)">
               Loading contests...
             </span>
           </div>
-        ) : contests.length === 0 ? (
+        )}
+
+        {isEmpty && (
           <div className="flex flex-col items-center gap-2 py-16 text-center">
             <p className="m-0 text-sm font-medium">No contests yet</p>
             <p className="m-0 max-w-sm text-sm text-(--color-text-muted)">
@@ -61,7 +67,9 @@ export default function ContestsPage() {
               schedule is ready.
             </p>
           </div>
-        ) : (
+        )}
+
+        {hasContests && (
           <ContestDirectory
             contests={contests}
             publishingId={publishingId}

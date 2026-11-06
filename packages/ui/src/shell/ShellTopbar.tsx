@@ -11,7 +11,7 @@ interface ShellTopbarProps {
   actions: React.ReactNode;
 }
 
-export function ShellTopbar({ breadcrumb, onOpenSidebar, actions }: ShellTopbarProps) {
+export function ShellTopbar({ breadcrumb, onOpenSidebar, actions }: Readonly<ShellTopbarProps>) {
   return (
     <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-(--color-border-subtle) bg-(--color-bg) px-4 sm:px-6">
       <button

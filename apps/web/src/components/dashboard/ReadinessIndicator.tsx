@@ -19,7 +19,7 @@ export function ReadinessIndicator({
   status,
   confidence,
   size = 'sm',
-}: ReadinessIndicatorProps) {
+}: Readonly<ReadinessIndicatorProps>) {
   const diameter = size === 'lg' ? 120 : 72;
   const stroke = size === 'lg' ? 9 : 6;
   const radius = (diameter - stroke) / 2;

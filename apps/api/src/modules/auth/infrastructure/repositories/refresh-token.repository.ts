@@ -47,7 +47,7 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
     return record?.familyId ?? null;
   }
 
-  async rotate(storedId: string, successor: NewRefreshToken, rotatedAt: Date): Promise<boolean> {
+  rotate(storedId: string, successor: NewRefreshToken, rotatedAt: Date): Promise<boolean> {
     return this.prisma.$transaction(async (transaction) => {
       await lockRefreshFamily(transaction, successor.familyId);
       const successorId = randomUUID();

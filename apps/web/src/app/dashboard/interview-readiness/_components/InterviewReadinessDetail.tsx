@@ -69,7 +69,7 @@ function countdown(targetAt: string): { days: number; hours: number } {
   };
 }
 
-function EvidencePanel({ readiness }: { readiness: InterviewRoundReadinessDto | null }) {
+function EvidencePanel({ readiness }: Readonly<{ readiness: InterviewRoundReadinessDto | null }>) {
   if (!readiness) {
     return (
       <div className="rounded-(--radius-md) border border-dashed border-(--color-border) p-5 text-sm text-(--color-text-muted)">
@@ -105,7 +105,7 @@ function EvidencePanel({ readiness }: { readiness: InterviewRoundReadinessDto | 
   );
 }
 
-function RoundWorkspace({ round }: { round: PreparationRoundDto }) {
+function RoundWorkspace({ round }: Readonly<{ round: PreparationRoundDto }>) {
   const setTaskCompletion = useInterviewReadinessStore((state) => state.setTaskCompletion);
   const readiness = round.readiness;
   return (
@@ -210,15 +210,21 @@ function RoundWorkspace({ round }: { round: PreparationRoundDto }) {
 function ReadinessNarrative({
   planId,
   snapshot,
-}: {
+}: Readonly<{
   planId: string;
   snapshot: InterviewPreparationPlanDto['snapshots'][number] | undefined;
-}) {
+}>) {
   const generate = useInterviewReadinessStore((state) => state.generateExplanation);
   const isSaving = useInterviewReadinessStore((state) => state.isSaving);
   const [result, setResult] = React.useState<AiReadinessExplanationDto | null>(null);
   if (!snapshot) return null;
   const explanation = result?.explanation ?? snapshot.aiExplanation;
+  let explainButtonLabel = 'Explain readiness';
+  if (isSaving) {
+    explainButtonLabel = 'Generating…';
+  } else if (explanation) {
+    explainButtonLabel = 'Regenerate';
+  }
   const recommendations = result?.recommendations ?? snapshot.deterministicRecommendations;
   return (
     <section className="rounded-(--radius-lg) border border-(--color-accent)/25 bg-(--color-accent-soft) p-5 sm:p-6">
@@ -235,7 +241,7 @@ function ReadinessNarrative({
           disabled={isSaving}
           onClick={async () => setResult(await generate(planId, snapshot.id))}
         >
-          {isSaving ? 'Generating…' : explanation ? 'Regenerate' : 'Explain readiness'}
+          {explainButtonLabel}
         </Button>
       </div>
       {explanation && <p className="mb-0 mt-4 text-sm leading-6 text-(--color-text-primary)">{explanation}</p>}
@@ -251,7 +257,7 @@ function ReadinessNarrative({
   );
 }
 
-export function InterviewReadinessDetail({ planId }: InterviewReadinessDetailProps) {
+export function InterviewReadinessDetail({ planId }: Readonly<InterviewReadinessDetailProps>) {
   const { plan, isLoading, error, loadPlan, refreshSnapshot, clearPlan } = useInterviewReadinessStore();
   const [activeRoundId, setActiveRoundId] = React.useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = React.useState(false);
@@ -263,7 +269,7 @@ export function InterviewReadinessDetail({ planId }: InterviewReadinessDetailPro
   }, [clearPlan, loadPlan, planId]);
 
   React.useEffect(() => {
-    if (!plan || plan.id !== planId) return;
+    if (plan?.id !== planId) return;
     setActiveRoundId((current) => current ?? plan.rounds[0]?.id ?? null);
     if (plan.snapshots.length === 0 && !initialRefresh.current) {
       initialRefresh.current = true;
@@ -271,7 +277,7 @@ export function InterviewReadinessDetail({ planId }: InterviewReadinessDetailPro
     }
   }, [plan, planId, refreshSnapshot]);
 
-  if (isLoading || !plan || plan.id !== planId) {
+  if (isLoading || plan?.id !== planId) {
     if (error) {
       return (
         <PageContainer>

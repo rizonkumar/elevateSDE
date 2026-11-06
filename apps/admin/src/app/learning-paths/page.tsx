@@ -36,6 +36,10 @@ export default function LearningPathsPage() {
     void loadPaths();
   }, [loadPaths]);
 
+  const isInitialLoad = loading && paths.length === 0;
+  const isEmpty = !isInitialLoad && paths.length === 0;
+  const hasPaths = paths.length > 0;
+
   const handleSave = async (values: LearningPathFormValues) => {
     const createdId = await savePath(values);
     if (createdId) {
@@ -57,13 +61,15 @@ export default function LearningPathsPage() {
           </Button>
         </div>
 
-        {loading && paths.length === 0 ? (
+        {isInitialLoad && (
           <div className="flex min-h-[300px] items-center justify-center">
             <span className="animate-pulse text-sm text-(--color-text-muted)">
               Loading learning paths...
             </span>
           </div>
-        ) : paths.length === 0 ? (
+        )}
+
+        {isEmpty && (
           <div className="flex flex-col items-center gap-2 py-16 text-center">
             <p className="m-0 text-sm font-medium">No learning paths yet</p>
             <p className="m-0 max-w-sm text-sm text-(--color-text-muted)">
@@ -71,7 +77,9 @@ export default function LearningPathsPage() {
               ready.
             </p>
           </div>
-        ) : (
+        )}
+
+        {hasPaths && (
           <LearningPathDirectory
             paths={paths}
             publishingId={publishingId}

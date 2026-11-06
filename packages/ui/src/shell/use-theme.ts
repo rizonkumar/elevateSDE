@@ -33,7 +33,7 @@ function computeSnapshot(preference: ThemePreference): ThemeSnapshot {
 
 function emit(next: ThemeSnapshot) {
   snapshot = next;
-  document.documentElement.setAttribute('data-theme', next.resolved);
+  document.documentElement.dataset.theme = next.resolved;
   listeners.forEach((listener) => listener());
 }
 

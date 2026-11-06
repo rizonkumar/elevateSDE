@@ -5,6 +5,7 @@ import { RegisterDto } from './dtos/register.dto';
 import { LoginDto } from './dtos/login.dto';
 import { AuthResponseDto, RegistrationResultDto } from '@elevatesde/shared-types';
 import * as bcrypt from 'bcrypt';
+import { randomBytes } from 'node:crypto';
 import { UserRole } from '@prisma/client';
 import { TokenService } from './application/token.service';
 import {
@@ -65,7 +66,7 @@ export class AuthService {
     const user = await this.usersService.findByEmail(dto.email.trim());
     const passwordHash = user?.getPasswordHash() ?? null;
     if (!user || !passwordHash) {
-      await bcrypt.compare(dto.password, TIMING_SAFE_DUMMY_HASH);
+      await bcrypt.compare(dto.password, await getTimingSafeDummyHash());
       throw invalidCredentials();
     }
 
@@ -136,7 +137,12 @@ export class AuthService {
   }
 }
 
-const TIMING_SAFE_DUMMY_HASH = '$2b$12$lEHOHk0sbjUEEQ.hx52zdOGHVHpvjn031m3rXIne.zbUp.OtCX9uO';
+let timingSafeDummyHash: Promise<string> | null = null;
+
+function getTimingSafeDummyHash(): Promise<string> {
+  timingSafeDummyHash ??= hashPassword(randomBytes(24).toString('hex'));
+  return timingSafeDummyHash;
+}
 
 export const INVALID_CREDENTIALS_MESSAGE =
   'Invalid email or password. If you signed up with Google, use Continue with Google.';

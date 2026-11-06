@@ -4,7 +4,7 @@ interface BrandMarkProps {
   compact: boolean;
 }
 
-export function BrandMark({ compact }: BrandMarkProps) {
+export function BrandMark({ compact }: Readonly<BrandMarkProps>) {
   return (
     <Link
       href="/dashboard"

@@ -6,7 +6,7 @@ interface BadgeChipProps {
   badge: UserBadgeDto;
 }
 
-export function BadgeChip({ badge }: BadgeChipProps) {
+export function BadgeChip({ badge }: Readonly<BadgeChipProps>) {
   const Icon = resolveBadgeIcon(badge.icon);
   return (
     <div

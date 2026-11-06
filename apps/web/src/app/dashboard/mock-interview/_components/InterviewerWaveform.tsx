@@ -10,10 +10,11 @@ interface InterviewerWaveformProps {
 }
 
 const BAR_COUNT = 28;
-const MULTIPLIERS = Array.from(
-  { length: BAR_COUNT },
-  (_, index) => 0.4 + 0.6 * Math.abs(Math.sin(index * 1.7)),
-);
+const WAVEFORM_BARS = Array.from({ length: BAR_COUNT }, (_, index) => ({
+  id: `waveform-bar-${index}`,
+  index,
+  multiplier: 0.4 + 0.6 * Math.abs(Math.sin(index * 1.7)),
+}));
 
 export function InterviewerWaveform({
   micLevel,
@@ -27,7 +28,7 @@ export function InterviewerWaveform({
       aria-hidden
       className="flex h-28 w-full items-center justify-center gap-1 sm:h-32 sm:gap-1.5"
     >
-      {MULTIPLIERS.map((multiplier, index) => {
+      {WAVEFORM_BARS.map(({ id, multiplier, index }) => {
         let animate: Target;
         let transition: Transition;
 
@@ -50,7 +51,7 @@ export function InterviewerWaveform({
 
         return (
           <motion.span
-            key={`waveform-bar-${index}`}
+            key={id}
             className="w-1 rounded-full bg-(--color-accent) sm:w-1.5"
             style={{ height: 14 }}
             animate={animate}

@@ -27,7 +27,7 @@ export class User {
     googleId: string | null = null,
     status: AccountStatus = AccountStatus.PENDING_APPROVAL,
   ): User {
-    if (!email || !email.includes('@')) {
+    if (!email?.includes('@')) {
       throw new Error('Invalid email address');
     }
     if (!passwordHash && !googleId) {

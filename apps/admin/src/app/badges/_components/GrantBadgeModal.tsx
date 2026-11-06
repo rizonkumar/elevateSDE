@@ -7,7 +7,7 @@ import { Select } from '../../../components/ui';
 import { useBadgesStore } from '../../../store/badges.store';
 
 function userLabel(user: UserDto): string {
-  const name = [user.firstName, user.lastName].filter((part) => part && part.trim()).join(' ');
+  const name = [user.firstName, user.lastName].filter((part) => part?.trim()).join(' ');
   return name.length > 0 ? `${name} · ${user.email}` : user.email;
 }
 

@@ -38,7 +38,7 @@ export default function TenantsPage() {
         setLoading(false);
       }
     }
-    loadTenants();
+    void loadTenants();
   }, [addToast]);
 
   return (

@@ -99,11 +99,11 @@ export class LearningPathRepository implements ILearningPathRepository {
     await this.prisma.learningPath.delete({ where: { id } });
   }
 
-  async countModules(pathId: string): Promise<number> {
+  countModules(pathId: string): Promise<number> {
     return this.prisma.learningPathModule.count({ where: { pathId } });
   }
 
-  async countItems(pathId: string): Promise<number> {
+  countItems(pathId: string): Promise<number> {
     return this.prisma.learningPathItem.count({ where: { module: { pathId } } });
   }
 

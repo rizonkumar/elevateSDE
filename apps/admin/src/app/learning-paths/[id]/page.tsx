@@ -63,17 +63,21 @@ export default function LearningPathBuilderPage() {
           Back to learning paths
         </Link>
 
-        {activeLoading && !active ? (
+        {activeLoading && !active && (
           <div className="flex min-h-[300px] items-center justify-center">
             <span className="animate-pulse text-sm text-(--color-text-muted)">
               Loading builder...
             </span>
           </div>
-        ) : !active ? (
+        )}
+
+        {!activeLoading && !active && (
           <div className="flex flex-col items-center gap-2 py-16 text-center">
             <p className="m-0 text-sm font-medium">Learning path not found</p>
           </div>
-        ) : (
+        )}
+
+        {active && (
           <>
             <div className="flex flex-col gap-3 rounded-md border border-(--color-border-subtle) bg-(--color-surface) p-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex flex-col gap-1">

@@ -31,7 +31,7 @@ export default function AuditLogsPage() {
         setLoading(false);
       }
     }
-    loadAuditLogs();
+    void loadAuditLogs();
   }, [addToast]);
 
   return (

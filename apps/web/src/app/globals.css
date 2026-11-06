@@ -316,7 +316,11 @@ a:hover {
   background: transparent;
   cursor: pointer;
   text-decoration: none;
-  transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+  transition:
+    background-color 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.1),
+    border-color 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.1),
+    color 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.1),
+    opacity 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.1);
 }
 
 .btn-primary {
@@ -345,7 +349,10 @@ a:hover {
   background: var(--color-surface);
   padding: 1.25rem 1.4rem;
   box-shadow: var(--shadow-card);
-  transition: all 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .card-header {
@@ -405,8 +412,4 @@ a:hover {
   font-size: 0.8rem;
   font-weight: 500;
   color: var(--color-text-muted);
-}
-
-.input-with-icon {
-  padding-left: 2.5rem !important;
 }

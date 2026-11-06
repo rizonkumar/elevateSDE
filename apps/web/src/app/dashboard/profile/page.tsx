@@ -33,7 +33,7 @@ function initials(user: UserDto): string {
 }
 
 function displayName(user: UserDto): string {
-  const name = [user.firstName, user.lastName].filter((part) => part && part.trim()).join(' ');
+  const name = [user.firstName, user.lastName].filter((part) => part?.trim()).join(' ');
   return name.length > 0 ? name : user.email;
 }
 

@@ -11,7 +11,7 @@ interface DashboardTopbarProps {
   onOpenSidebar: () => void;
 }
 
-export function DashboardTopbar({ onOpenSidebar }: DashboardTopbarProps) {
+export function DashboardTopbar({ onOpenSidebar }: Readonly<DashboardTopbarProps>) {
   const pathname = usePathname();
   const role = useSessionRole();
   const hasTenant = useSessionHasTenant();

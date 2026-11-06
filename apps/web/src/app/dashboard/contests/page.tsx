@@ -88,6 +88,31 @@ export default function ContestsPage() {
 
   const visible = contests.filter((contest) => contest.status === TAB_STATUS[tab]);
 
+  let content: React.ReactNode;
+  if (isLoading && contests.length === 0) {
+    content = (
+      <p className="text-sm text-(--color-text-muted)">Loading contests…</p>
+    );
+  } else if (visible.length === 0) {
+    content = (
+      <div className="flex flex-col items-center gap-2 py-16 text-center">
+        <span className="inline-flex h-11 w-11 items-center justify-center rounded-(--radius-full) bg-(--color-accent-soft) text-(--color-accent)">
+          <Swords className="h-5 w-5" />
+        </span>
+        <h2 className="m-0 font-display text-lg font-semibold">Nothing here yet</h2>
+        <p className="m-0 max-w-sm text-sm text-(--color-text-muted)">{EMPTY_MESSAGE[tab]}</p>
+      </div>
+    );
+  } else {
+    content = (
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        {visible.map((contest) => (
+          <ContestCard key={contest.id} contest={contest} />
+        ))}
+      </div>
+    );
+  }
+
   return (
     <PageContainer>
       <div className="flex flex-col gap-6 sm:gap-8">
@@ -101,23 +126,7 @@ export default function ContestsPage() {
 
         <Tabs items={tabs} value={tab} onChange={(id) => setTab(id as ContestTab)} />
 
-        {isLoading && contests.length === 0 ? (
-          <p className="text-sm text-(--color-text-muted)">Loading contests…</p>
-        ) : visible.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 py-16 text-center">
-            <span className="inline-flex h-11 w-11 items-center justify-center rounded-(--radius-full) bg-(--color-accent-soft) text-(--color-accent)">
-              <Swords className="h-5 w-5" />
-            </span>
-            <h2 className="m-0 font-display text-lg font-semibold">Nothing here yet</h2>
-            <p className="m-0 max-w-sm text-sm text-(--color-text-muted)">{EMPTY_MESSAGE[tab]}</p>
-          </div>
-        ) : (
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {visible.map((contest) => (
-              <ContestCard key={contest.id} contest={contest} />
-            ))}
-          </div>
-        )}
+        {content}
       </div>
     </PageContainer>
   );

@@ -7,7 +7,7 @@ import { scoreResumeText } from '../../domain/scoring/resume-scoring';
 
 @Injectable()
 export class HeuristicResumeAnalyzer implements IResumeAnalyzer {
-  async analyze(text: string): Promise<ResumeScoreResult> {
-    return scoreResumeText(text);
+  analyze(text: string): Promise<ResumeScoreResult> {
+    return Promise.resolve(scoreResumeText(text));
   }
 }

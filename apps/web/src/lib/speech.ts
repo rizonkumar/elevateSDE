@@ -48,7 +48,7 @@ interface LegacyWindow extends Window {
 }
 
 function getRecognitionConstructor(): SpeechRecognitionConstructor | null {
-  if (typeof globalThis.window === 'undefined') return null;
+  if (globalThis.window === undefined) return null;
   const speechWindow = globalThis.window as unknown as SpeechWindow;
   return speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition ?? null;
 }

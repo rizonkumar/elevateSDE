@@ -3,6 +3,7 @@ import {
   LearningPathDetailData,
   LearningPathDetailView,
   LearningPathSummaryData,
+  PathProgress,
 } from '../../domain/read-models/learning-path-view';
 import {
   AdminLearningPathDetailResponseDto,
@@ -17,7 +18,6 @@ import {
   LearningPathResponseDto,
   PathProgressResponseDto,
 } from '../dtos/learning-path-response.dto';
-import { PathProgress } from '../../domain/read-models/learning-path-view';
 
 export class LearningPathPresentationMapper {
   static toAdminSummary(data: LearningPathSummaryData): AdminLearningPathSummaryResponseDto {

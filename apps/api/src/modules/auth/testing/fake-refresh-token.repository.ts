@@ -19,53 +19,60 @@ export class FakeRefreshTokenRepository implements IRefreshTokenRepository {
   storedUser: User = TEST_USER;
   private sequence = 0;
 
-  async create(token: NewRefreshToken): Promise<void> {
+  create(token: NewRefreshToken): Promise<void> {
     this.insert(token);
+    return Promise.resolve();
   }
 
-  async findByToken(token: string): Promise<StoredRefreshToken | null> {
+  findByToken(token: string): Promise<StoredRefreshToken | null> {
     const row = this.rows.find((candidate) => candidate.token === token);
-    return row
-      ? {
-          id: row.id,
-          familyId: row.familyId,
-          expiresAt: row.expiresAt,
-          rotatedAt: row.rotatedAt,
-          user: this.storedUser,
-        }
-      : null;
+    return Promise.resolve(
+      row
+        ? {
+            id: row.id,
+            familyId: row.familyId,
+            expiresAt: row.expiresAt,
+            rotatedAt: row.rotatedAt,
+            user: this.storedUser,
+          }
+        : null,
+    );
   }
 
-  async findFamilyId(token: string): Promise<string | null> {
-    return this.rows.find((row) => row.token === token)?.familyId ?? null;
+  findFamilyId(token: string): Promise<string | null> {
+    return Promise.resolve(this.rows.find((row) => row.token === token)?.familyId ?? null);
   }
 
-  async rotate(storedId: string, successor: NewRefreshToken, rotatedAt: Date): Promise<boolean> {
+  rotate(storedId: string, successor: NewRefreshToken, rotatedAt: Date): Promise<boolean> {
     const row = this.byId(storedId);
-    if (!row || row.rotatedAt !== null || row.familyId !== successor.familyId) {
-      return false;
+    if (row?.rotatedAt !== null || row.familyId !== successor.familyId) {
+      return Promise.resolve(false);
     }
     row.rotatedAt = rotatedAt;
     row.replacedById = this.insert(successor).id;
-    return true;
+    return Promise.resolve(true);
   }
 
-  async findRotation(storedId: string): Promise<RefreshTokenRotation | null> {
+  findRotation(storedId: string): Promise<RefreshTokenRotation | null> {
     const row = this.byId(storedId);
     if (!row?.rotatedAt) {
-      return null;
+      return Promise.resolve(null);
     }
-    return { rotatedAt: row.rotatedAt, liveSuccessor: this.liveSuccessor(row.replacedById) };
+    return Promise.resolve({
+      rotatedAt: row.rotatedAt,
+      liveSuccessor: this.liveSuccessor(row.replacedById),
+    });
   }
 
-  async revokeFamily(familyId: string): Promise<void> {
+  revokeFamily(familyId: string): Promise<void> {
     this.rows = this.rows.filter((row) => row.familyId !== familyId);
+    return Promise.resolve();
   }
 
-  async deleteExpired(now: Date): Promise<number> {
+  deleteExpired(now: Date): Promise<number> {
     const before = this.rows.length;
     this.rows = this.rows.filter((row) => row.expiresAt > now);
-    return before - this.rows.length;
+    return Promise.resolve(before - this.rows.length);
   }
 
   tokensInFamily(familyId: string): string[] {

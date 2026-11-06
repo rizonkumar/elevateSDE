@@ -472,67 +472,69 @@ export async function seedRunnableProblems(prisma: PrismaClient): Promise<number
     where: { slug: { startsWith: 'rp-' }, NOT: { slug: { in: slugs } } },
   });
 
-  for (const problem of problems) {
-    const harness = {
-      paramTypes: problem.paramTypes,
-      returnType: problem.returnType,
-      cpp: { signature: problem.cppSignature },
-    } as unknown as Prisma.InputJsonValue;
-    const examples = problem.testCases
-      .filter((testCase) => !testCase.isHidden)
-      .slice(0, 2)
-      .map((testCase) => ({
-        input: testCase.input,
-        output: testCase.expectedOutput,
-        explanation: null,
-      })) as unknown as Prisma.InputJsonValue;
-    const starterCode = problem.starterCode as unknown as Prisma.InputJsonValue;
+  await Promise.all(
+    problems.map(async (problem) => {
+      const harness = {
+        paramTypes: problem.paramTypes,
+        returnType: problem.returnType,
+        cpp: { signature: problem.cppSignature },
+      } as unknown as Prisma.InputJsonValue;
+      const examples = problem.testCases
+        .filter((testCase) => !testCase.isHidden)
+        .slice(0, 2)
+        .map((testCase) => ({
+          input: testCase.input,
+          output: testCase.expectedOutput,
+          explanation: null,
+        })) as unknown as Prisma.InputJsonValue;
+      const starterCode = problem.starterCode as unknown as Prisma.InputJsonValue;
 
-    const record = await prisma.problem.upsert({
-      where: { slug: problem.slug },
-      update: {
-        title: problem.title,
-        difficulty: problem.difficulty,
-        description: problem.description,
-        constraints: problem.constraints,
-        tags: problem.tags,
-        starterCode,
-        examples,
-        functionName: problem.functionName,
-        harness,
-        comparisonMode: 'EXACT',
-        timeLimitMinutes: problem.timeLimitMinutes,
-        isPublished: true,
-      },
-      create: {
-        slug: problem.slug,
-        title: problem.title,
-        difficulty: problem.difficulty,
-        description: problem.description,
-        constraints: problem.constraints,
-        tags: problem.tags,
-        starterCode,
-        examples,
-        functionName: problem.functionName,
-        harness,
-        referenceSolution: {},
-        comparisonMode: 'EXACT',
-        timeLimitMinutes: problem.timeLimitMinutes,
-        isPublished: true,
-      },
-    });
+      const record = await prisma.problem.upsert({
+        where: { slug: problem.slug },
+        update: {
+          title: problem.title,
+          difficulty: problem.difficulty,
+          description: problem.description,
+          constraints: problem.constraints,
+          tags: problem.tags,
+          starterCode,
+          examples,
+          functionName: problem.functionName,
+          harness,
+          comparisonMode: 'EXACT',
+          timeLimitMinutes: problem.timeLimitMinutes,
+          isPublished: true,
+        },
+        create: {
+          slug: problem.slug,
+          title: problem.title,
+          difficulty: problem.difficulty,
+          description: problem.description,
+          constraints: problem.constraints,
+          tags: problem.tags,
+          starterCode,
+          examples,
+          functionName: problem.functionName,
+          harness,
+          referenceSolution: {},
+          comparisonMode: 'EXACT',
+          timeLimitMinutes: problem.timeLimitMinutes,
+          isPublished: true,
+        },
+      });
 
-    await prisma.problemTestCase.deleteMany({ where: { problemId: record.id } });
-    await prisma.problemTestCase.createMany({
-      data: problem.testCases.map((testCase, index) => ({
-        problemId: record.id,
-        ordinal: index,
-        input: testCase.input,
-        expectedOutput: testCase.expectedOutput,
-        isHidden: testCase.isHidden,
-      })),
-    });
-  }
+      await prisma.problemTestCase.deleteMany({ where: { problemId: record.id } });
+      await prisma.problemTestCase.createMany({
+        data: problem.testCases.map((testCase, index) => ({
+          problemId: record.id,
+          ordinal: index,
+          input: testCase.input,
+          expectedOutput: testCase.expectedOutput,
+          isHidden: testCase.isHidden,
+        })),
+      });
+    }),
+  );
 
   return problems.length;
 }

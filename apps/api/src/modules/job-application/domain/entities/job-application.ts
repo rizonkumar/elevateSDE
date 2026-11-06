@@ -9,6 +9,10 @@ export interface JobApplicationDetails {
   interviewDate: Date | null;
 }
 
+function valueOrCurrent<T>(update: T | undefined, current: T): T {
+  return update === undefined ? current : update;
+}
+
 export class JobApplication {
   private constructor(
     private readonly id: string,
@@ -87,9 +91,9 @@ export class JobApplication {
       details.company ?? this.company,
       details.role ?? this.role,
       details.status ?? this.status,
-      details.salaryRange !== undefined ? details.salaryRange : this.salaryRange,
-      details.jobDescriptionUrl !== undefined ? details.jobDescriptionUrl : this.jobDescriptionUrl,
-      details.interviewDate !== undefined ? details.interviewDate : this.interviewDate,
+      valueOrCurrent(details.salaryRange, this.salaryRange),
+      valueOrCurrent(details.jobDescriptionUrl, this.jobDescriptionUrl),
+      valueOrCurrent(details.interviewDate, this.interviewDate),
       this.boardPosition,
       this.createdAt,
       new Date(),

@@ -39,7 +39,7 @@ function matches(item: CommandItem, section: CommandSection, terms: string[]): b
   return terms.every((term) => haystack.includes(term));
 }
 
-export function CommandPalette({ sections }: CommandPaletteProps) {
+export function CommandPalette({ sections }: Readonly<CommandPaletteProps>) {
   useCommandPaletteHotkey();
   const { open } = useCommandPalette();
   const [query, setQuery] = React.useState('');
@@ -179,10 +179,17 @@ export function CommandPalette({ sections }: CommandPaletteProps) {
                       key={command.item.id}
                       id={optionId(command.index)}
                       role="option"
+                      tabIndex={-1}
                       aria-selected={active}
                       data-index={command.index}
                       onMouseMove={() => setActiveIndex(command.index)}
                       onClick={() => run(command)}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault();
+                          run(command);
+                        }
+                      }}
                       className={`flex h-10 cursor-pointer items-center gap-3 rounded-(--radius-sm) px-2.5 text-sm ${
                         active
                           ? 'bg-(--color-badge-bg) text-(--color-text-primary)'
@@ -223,19 +230,19 @@ export function CommandPalette({ sections }: CommandPaletteProps) {
             <kbd className="rounded-[4px] border border-(--color-border-subtle) px-1 font-sans">
               ↓
             </kbd>
-            Navigate
+            <span>Navigate</span>
           </span>
           <span className="flex items-center gap-1.5">
             <kbd className="rounded-[4px] border border-(--color-border-subtle) px-1 font-sans">
               ↵
             </kbd>
-            Open
+            <span>Open</span>
           </span>
           <span className="flex items-center gap-1.5">
             <kbd className="rounded-[4px] border border-(--color-border-subtle) px-1 font-sans">
               Esc
             </kbd>
-            Close
+            <span>Close</span>
           </span>
         </div>
       </div>

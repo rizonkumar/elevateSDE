@@ -8,7 +8,7 @@ interface StreakCelebrationModalProps {
   onClose: () => void;
 }
 
-export function StreakCelebrationModal({ open, streak, onClose }: StreakCelebrationModalProps) {
+export function StreakCelebrationModal({ open, streak, onClose }: Readonly<StreakCelebrationModalProps>) {
   return (
     <Modal open={open} onClose={onClose} title="Daily Coding Challenge Completed!">
       <div className="flex flex-col items-center gap-5 py-2 text-center">

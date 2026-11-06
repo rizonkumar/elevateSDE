@@ -21,7 +21,7 @@ export class ProblemAssistanceRepository implements IProblemAssistanceRepository
     return record ? ProblemAssistanceMapper.toDomain(record) : null;
   }
 
-  async countHints(problemId: string): Promise<number> {
+  countHints(problemId: string): Promise<number> {
     return this.prisma.problemHint.count({ where: { problemId } });
   }
 

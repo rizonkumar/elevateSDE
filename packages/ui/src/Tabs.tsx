@@ -17,7 +17,7 @@ interface TabsProps {
   className?: string;
 }
 
-export function Tabs({ items, value, onChange, variant = 'pill', className = '' }: TabsProps) {
+export function Tabs({ items, value, onChange, variant = 'pill', className = '' }: Readonly<TabsProps>) {
   const isPlain = variant === 'plain';
 
   return (

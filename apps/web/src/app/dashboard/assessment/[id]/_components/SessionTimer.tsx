@@ -12,7 +12,7 @@ function format(totalSeconds: number): string {
   return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 }
 
-export function SessionTimer({ remainingSeconds }: SessionTimerProps) {
+export function SessionTimer({ remainingSeconds }: Readonly<SessionTimerProps>) {
   const danger = remainingSeconds > 0 && remainingSeconds <= 60;
   const expired = remainingSeconds === 0;
 

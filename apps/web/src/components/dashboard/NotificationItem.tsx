@@ -54,7 +54,7 @@ interface NotificationItemProps {
   onSelect?: () => void;
 }
 
-export function NotificationItem({ notification, onSelect }: NotificationItemProps) {
+export function NotificationItem({ notification, onSelect }: Readonly<NotificationItemProps>) {
   const router = useRouter();
   const markRead = useNotificationsStore((state) => state.markRead);
   const meta = TYPE_META[notification.type];

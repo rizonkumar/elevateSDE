@@ -20,7 +20,7 @@ interface Stat {
   tone: string;
 }
 
-export function AnalysisOverview({ analysis, isAnalyzing, onFile }: AnalysisOverviewProps) {
+export function AnalysisOverview({ analysis, isAnalyzing, onFile }: Readonly<AnalysisOverviewProps>) {
   const score = analysis.atsScore ?? 0;
   const band = scoreBand(score);
   const needsWork = analysis.structureFeedback.filter((item) => item.severity !== 'good').length;

@@ -47,7 +47,7 @@ export class DailyChallengeRepository implements IDailyChallengeRepository {
     };
   }
 
-  async findScheduledForDate(
+  findScheduledForDate(
     challengeDate: Date,
     tenantId: string | null,
   ): Promise<ScheduledChallengeRef | null> {
@@ -151,7 +151,7 @@ export class DailyChallengeRepository implements IDailyChallengeRepository {
     return DailyChallengeMapper.toDomain(record);
   }
 
-  async findPublishedProblem(problemId: string): Promise<PublishedProblemRef | null> {
+  findPublishedProblem(problemId: string): Promise<PublishedProblemRef | null> {
     return this.prisma.problem.findFirst({
       where: { id: problemId, isPublished: true },
       select: { id: true, title: true, difficulty: true },

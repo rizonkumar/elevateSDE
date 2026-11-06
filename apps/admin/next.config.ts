@@ -9,8 +9,8 @@ const securityHeaders = buildSecurityHeaders({
 const nextConfig: NextConfig = {
   basePath: '/admin',
   poweredByHeader: false,
-  async headers() {
-    return [{ source: '/:path*', headers: securityHeaders }];
+  headers() {
+    return Promise.resolve([{ source: '/:path*', headers: securityHeaders }]);
   },
 };
 

@@ -100,14 +100,14 @@ export class ContestRepository implements IContestRepository {
     return record?.id ?? null;
   }
 
-  async findPublishedProblems(problemIds: string[]): Promise<PublishedProblemRef[]> {
+  findPublishedProblems(problemIds: string[]): Promise<PublishedProblemRef[]> {
     return this.prisma.problem.findMany({
       where: { id: { in: problemIds }, isPublished: true },
       select: { id: true, title: true, difficulty: true },
     });
   }
 
-  async countProblems(contestId: string): Promise<number> {
+  countProblems(contestId: string): Promise<number> {
     return this.prisma.contestProblem.count({ where: { contestId } });
   }
 
@@ -266,16 +266,18 @@ export class ContestRepository implements IContestRepository {
         if (claimed.count === 0) {
           return false;
         }
-        for (const result of results) {
-          await transaction.contestParticipant.update({
-            where: { contestId_userId: { contestId, userId: result.userId } },
-            data: {
-              finalRank: result.rank,
-              finalScore: result.score,
-              finalPenaltySeconds: result.penaltySeconds,
-            },
-          });
-        }
+        await Promise.all(
+          results.map((result) =>
+            transaction.contestParticipant.update({
+              where: { contestId_userId: { contestId, userId: result.userId } },
+              data: {
+                finalRank: result.rank,
+                finalScore: result.score,
+                finalPenaltySeconds: result.penaltySeconds,
+              },
+            }),
+          ),
+        );
         return true;
       },
       { timeout: FINAL_RESULTS_TRANSACTION_TIMEOUT_MS },

@@ -66,17 +66,18 @@ export default function LearningPathDetailPage() {
     );
   }
 
-  const primaryAction = active.enrolled
-    ? active.resumeProblemId
-      ? {
-          label: 'Resume where you left off',
-          onClick: () => router.push(`/dashboard/assessment/${active.resumeProblemId}`),
-        }
-      : null
-    : {
-        label: enrollingId === active.id ? 'Enrolling…' : 'Enroll',
-        onClick: () => void enroll(active.id, slug),
-      };
+  let primaryAction: { label: string; onClick: () => void } | null = null;
+  if (!active.enrolled) {
+    primaryAction = {
+      label: enrollingId === active.id ? 'Enrolling…' : 'Enroll',
+      onClick: () => void enroll(active.id, slug),
+    };
+  } else if (active.resumeProblemId) {
+    primaryAction = {
+      label: 'Resume where you left off',
+      onClick: () => router.push(`/dashboard/assessment/${active.resumeProblemId}`),
+    };
+  }
 
   return (
     <PageContainer>
