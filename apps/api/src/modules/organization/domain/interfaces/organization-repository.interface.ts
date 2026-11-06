@@ -5,6 +5,11 @@ export interface TenantRecord {
   name: string;
   subscriptionPlan: string;
   seatLimit: number;
+  allowPublicProfiles: boolean;
+}
+
+export interface OrgSettingsRecord {
+  allowPublicProfiles: boolean;
 }
 
 export interface OrgMemberRecord {
@@ -28,4 +33,5 @@ export abstract class IOrganizationRepository {
   abstract isActiveMemberEmail(tenantId: string, email: string): Promise<boolean>;
   abstract save(invitation: Invitation): Promise<Invitation>;
   abstract attachUserToTenant(userId: string, tenantId: string): Promise<void>;
+  abstract updateSettings(tenantId: string, settings: OrgSettingsRecord): Promise<void>;
 }

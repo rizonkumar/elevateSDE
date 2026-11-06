@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   AssessmentDifficulty,
   ContestDetailDto,
@@ -80,6 +80,9 @@ export class ContestStandingRowResponseDto implements ContestStandingRowDto {
 
   @ApiProperty({ example: 'Ada Lovelace' })
   name!: string;
+
+  @ApiPropertyOptional({ example: 'ada', nullable: true })
+  publicHandle!: string | null;
 
   @ApiProperty({ example: 2 })
   solvedCount!: number;

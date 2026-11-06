@@ -802,6 +802,7 @@ export interface LeaderboardEntryDto {
   userId: string;
   name: string;
   headline: string | null;
+  publicHandle: string | null;
   points: number;
   assessmentsCompleted: number;
   badges: string[];
@@ -976,6 +977,7 @@ export interface ContestStandingRowDto {
   rank: number;
   userId: string;
   name: string;
+  publicHandle: string | null;
   solvedCount: number;
   score: number;
   penaltySeconds: number;
@@ -1031,6 +1033,7 @@ export interface OrgOverviewDto {
   members: OrgMemberDto[];
   teamPerformance: OrgPerformancePointDto[];
   invitations: InvitationDto[];
+  settings: OrgSettingsDto;
 }
 
 export interface InviteCreatedDto extends InvitationDto {
@@ -1106,6 +1109,9 @@ export type NotificationType =
   | 'PEER_SESSION_CHANGED'
   | 'SCORECARD_REQUEST'
   | 'CODE_REVIEW_READY'
+  | 'CONTEST_RATING_UPDATED'
+  | 'STUDY_GROUP_ADDED'
+  | 'STUDY_GOAL_COMPLETED'
   | 'SYSTEM';
 
 export interface NotificationDto {
@@ -1669,4 +1675,115 @@ export interface AiReadinessExplanationDto {
 export interface UpdatePeerPracticeStatusDto {
   status: Exclude<PeerPracticeStatus, 'PENDING'>;
   version: number;
+}
+
+export type ProfileVisibility = 'PRIVATE' | 'PUBLIC';
+
+export type HandleUnavailableReason = 'TAKEN' | 'RESERVED' | 'INVALID';
+
+export interface HandleAvailabilityDto {
+  handle: string;
+  available: boolean;
+  reason: HandleUnavailableReason | null;
+}
+
+export interface PublicProfileSettingsDto {
+  handle: string | null;
+  bio: string | null;
+  location: string | null;
+  githubUrl: string | null;
+  linkedinUrl: string | null;
+  websiteUrl: string | null;
+  profileVisibility: ProfileVisibility;
+  showOrganization: boolean;
+  organizationName: string | null;
+  organizationAllowsPublicProfiles: boolean;
+  isPublic: boolean;
+}
+
+export interface UpdatePublicProfileRequest {
+  handle?: string | null;
+  bio?: string | null;
+  location?: string | null;
+  githubUrl?: string | null;
+  linkedinUrl?: string | null;
+  websiteUrl?: string | null;
+  profileVisibility?: ProfileVisibility;
+  showOrganization?: boolean;
+}
+
+export interface PublicProfileLinksDto {
+  github: string | null;
+  linkedin: string | null;
+  website: string | null;
+}
+
+export interface PublicProfileDifficultyCountDto {
+  solved: number;
+  total: number;
+}
+
+export interface PublicProfileSolvedDto {
+  solved: number;
+  total: number;
+  byDifficulty: Record<AssessmentDifficulty, PublicProfileDifficultyCountDto>;
+}
+
+export interface PublicProfileTopicDto {
+  slug: string;
+  name: string;
+  solved: number;
+}
+
+export interface PublicProfileBadgeDto {
+  key: string;
+  name: string;
+  description: string;
+  icon: string;
+  awardedAt: string;
+}
+
+export interface PublicProfileRecentSolveDto {
+  slug: string;
+  title: string;
+  difficulty: AssessmentDifficulty;
+  solvedAt: string;
+}
+
+export interface PublicProfileStreakDto {
+  current: number;
+  longest: number;
+}
+
+export interface PublicProfileRatingDto {
+  rating: number;
+  peakRating: number;
+  contestsRated: number;
+}
+
+export interface PublicProfileDto {
+  handle: string;
+  displayName: string;
+  headline: string | null;
+  bio: string | null;
+  location: string | null;
+  links: PublicProfileLinksDto;
+  organizationName: string | null;
+  joinedAt: string;
+  points: number;
+  streak: PublicProfileStreakDto;
+  solved: PublicProfileSolvedDto;
+  topTopics: PublicProfileTopicDto[];
+  badges: PublicProfileBadgeDto[];
+  heatmap: SubmissionHeatmapCellDto[];
+  recentSolves: PublicProfileRecentSolveDto[];
+  rating: PublicProfileRatingDto | null;
+}
+
+export interface OrgSettingsDto {
+  allowPublicProfiles: boolean;
+}
+
+export interface UpdateOrgSettingsRequest {
+  allowPublicProfiles: boolean;
 }

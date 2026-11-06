@@ -6,6 +6,7 @@ import { Badge } from '@elevatesde/ui';
 import type { LeaderboardEntryDto } from '@elevatesde/shared-types';
 import { AuthorAvatar } from '@/components/dashboard/AuthorAvatar';
 import { RankBadge } from '@/components/dashboard/leaderboard/RankBadge';
+import { ProfileNameLink } from '@/components/public-profile/ProfileNameLink';
 
 interface LeaderboardPodiumProps {
   entries: LeaderboardEntryDto[];
@@ -38,9 +39,11 @@ export function LeaderboardPodium({ entries }: Readonly<LeaderboardPodiumProps>)
             </div>
             <div className="flex items-center gap-2">
               <RankBadge rank={entry.rank} />
-              <span className="text-sm font-semibold text-(--color-text-primary)">
-                {entry.name}
-              </span>
+              <ProfileNameLink
+                name={entry.name}
+                publicHandle={entry.publicHandle}
+                className="text-sm font-semibold text-(--color-text-primary)"
+              />
             </div>
             {entry.headline && (
               <span className="text-xs text-(--color-text-muted)">{entry.headline}</span>

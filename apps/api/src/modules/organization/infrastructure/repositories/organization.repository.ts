@@ -3,6 +3,7 @@ import { InvitationStatus } from '@prisma/client';
 import {
   IOrganizationRepository,
   OrgMemberRecord,
+  OrgSettingsRecord,
   TenantRecord,
 } from '../../domain/interfaces/organization-repository.interface';
 import { Invitation } from '../../domain/entities/invitation';
@@ -16,9 +17,22 @@ export class OrganizationRepository implements IOrganizationRepository {
   async getTenant(tenantId: string): Promise<TenantRecord | null> {
     const tenant = await this.prisma.tenant.findUnique({
       where: { id: tenantId },
-      select: { id: true, name: true, subscriptionPlan: true, seatLimit: true },
+      select: {
+        id: true,
+        name: true,
+        subscriptionPlan: true,
+        seatLimit: true,
+        allowPublicProfiles: true,
+      },
     });
     return tenant;
+  }
+
+  async updateSettings(tenantId: string, settings: OrgSettingsRecord): Promise<void> {
+    await this.prisma.tenant.update({
+      where: { id: tenantId },
+      data: { allowPublicProfiles: settings.allowPublicProfiles },
+    });
   }
 
   async listMembers(tenantId: string): Promise<OrgMemberRecord[]> {

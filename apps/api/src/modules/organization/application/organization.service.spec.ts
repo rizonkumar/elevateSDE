@@ -4,6 +4,7 @@ import { OrganizationService } from './organization.service';
 import {
   IOrganizationRepository,
   OrgMemberRecord,
+  OrgSettingsRecord,
   TenantRecord,
 } from '../domain/interfaces/organization-repository.interface';
 import { Invitation } from '../domain/entities/invitation';
@@ -17,6 +18,7 @@ class FakeOrganizationRepository implements IOrganizationRepository {
     name: 'Acme Corp',
     subscriptionPlan: 'TEAM',
     seatLimit: 3,
+    allowPublicProfiles: true,
   };
   members: OrgMemberRecord[] = [];
   invitations: Invitation[] = [];
@@ -66,6 +68,12 @@ class FakeOrganizationRepository implements IOrganizationRepository {
 
   async attachUserToTenant(userId: string, tenantId: string): Promise<void> {
     this.attached.push({ userId, tenantId });
+  }
+
+  async updateSettings(tenantId: string, settings: OrgSettingsRecord): Promise<void> {
+    if (this.tenant?.id === tenantId) {
+      this.tenant = { ...this.tenant, ...settings };
+    }
   }
 }
 
@@ -175,7 +183,11 @@ describe('OrganizationService', () => {
     it('rejects acceptance from a mismatched email', async () => {
       const invitation = await service.invite(TENANT_ID, ADMIN_ID, 'join@acme.dev');
       await expect(
-        service.accept(invitation.getToken(), { id: 'user-9', email: 'someone@else.dev', tenantId: null }),
+        service.accept(invitation.getToken(), {
+          id: 'user-9',
+          email: 'someone@else.dev',
+          tenantId: null,
+        }),
       ).rejects.toBeInstanceOf(ForbiddenException);
     });
 
@@ -216,11 +228,33 @@ describe('OrganizationService', () => {
 
     it('rejects an already accepted invitation', async () => {
       const invitation = await service.invite(TENANT_ID, ADMIN_ID, 'join@acme.dev');
-      await service.accept(invitation.getToken(), { id: 'user-9', email: 'join@acme.dev', tenantId: null });
+      await service.accept(invitation.getToken(), {
+        id: 'user-9',
+        email: 'join@acme.dev',
+        tenantId: null,
+      });
 
       await expect(
-        service.accept(invitation.getToken(), { id: 'user-9', email: 'join@acme.dev', tenantId: null }),
+        service.accept(invitation.getToken(), {
+          id: 'user-9',
+          email: 'join@acme.dev',
+          tenantId: null,
+        }),
       ).rejects.toBeInstanceOf(ConflictException);
+    });
+  });
+
+  describe('updateSettings', () => {
+    it('stores the public profile setting and reports it in the overview', async () => {
+      await service.updateSettings(TENANT_ID, { allowPublicProfiles: false });
+      const overview = await service.getOverview(TENANT_ID);
+      expect(overview.settings).toEqual({ allowPublicProfiles: false });
+    });
+
+    it('rejects unknown tenants', async () => {
+      await expect(
+        service.updateSettings('missing', { allowPublicProfiles: false }),
+      ).rejects.toBeInstanceOf(NotFoundException);
     });
   });
 });

@@ -9,6 +9,7 @@ import type { ContestStandingRowDto } from '@elevatesde/shared-types';
 import { PageContainer } from '@/components/dashboard/PageContainer';
 import { AuthorAvatar } from '@/components/dashboard/AuthorAvatar';
 import { RankBadge } from '@/components/dashboard/leaderboard/RankBadge';
+import { ProfileNameLink } from '@/components/public-profile/ProfileNameLink';
 import { useContestsStore } from '@/store/contests.store';
 import { formatPenalty } from '@/lib/contest-time';
 import { ContestStatusBadge } from '../../_components/ContestStatusBadge';
@@ -20,7 +21,11 @@ function MemberCell({ row }: Readonly<{ row: ContestStandingRowDto }>) {
     <div className="flex items-center gap-3">
       <AuthorAvatar name={row.name} size="md" />
       <div className="flex min-w-0 items-center gap-2">
-        <span className="truncate font-semibold text-(--color-text-primary)">{row.name}</span>
+        <ProfileNameLink
+          name={row.name}
+          publicHandle={row.publicHandle}
+          className="truncate font-semibold text-(--color-text-primary)"
+        />
         {row.isCurrentUser && <Badge variant="accent">You</Badge>}
       </div>
     </div>

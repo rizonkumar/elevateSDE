@@ -9,6 +9,7 @@ import { PageContainer } from '@/components/dashboard/PageContainer';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { ContributionHeatmap } from '@/components/dashboard/profile/ContributionHeatmap';
 import { ProfileAchievements } from '@/components/dashboard/profile/ProfileAchievements';
+import { PublicProfileSettingsCard } from '@/components/dashboard/profile/PublicProfileSettingsCard';
 import { useProfileStore } from '@/store/profile.store';
 
 const DIFFICULTIES: { key: AssessmentDifficulty; label: string; tone: string }[] = [
@@ -106,6 +107,8 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
+
+        <PublicProfileSettingsCard />
 
         <ProfileAchievements />
 

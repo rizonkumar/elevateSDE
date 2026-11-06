@@ -14,6 +14,7 @@ const VIEW = (userId: string): LeaderboardEntryView => ({
   firstName: 'Ada',
   lastName: 'Lovelace',
   headline: null,
+  publicHandle: null,
   points: 10,
   assessmentsCompleted: 1,
   badges: [],

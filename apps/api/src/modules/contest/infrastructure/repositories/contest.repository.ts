@@ -1,3 +1,4 @@
+import { PUBLIC_HANDLE_SELECT, resolvePublicHandle } from '../../../../common/public-handle';
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { ContestStatus, Prisma, SubmissionStatus } from '@prisma/client';
@@ -163,12 +164,13 @@ export class ContestRepository implements IContestRepository {
   async listParticipants(contestId: string): Promise<ContestParticipantView[]> {
     const rows = await this.prisma.contestParticipant.findMany({
       where: { contestId },
-      include: { user: { select: { firstName: true, lastName: true } } },
+      include: { user: { select: { firstName: true, lastName: true, ...PUBLIC_HANDLE_SELECT } } },
     });
     return rows.map((row) => ({
       userId: row.userId,
       firstName: row.user.firstName,
       lastName: row.user.lastName,
+      publicHandle: resolvePublicHandle(row.user),
     }));
   }
 

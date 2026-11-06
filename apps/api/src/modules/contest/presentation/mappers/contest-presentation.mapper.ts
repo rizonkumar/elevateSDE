@@ -95,6 +95,7 @@ export class ContestPresentationMapper {
     dto.rank = view.rank;
     dto.userId = view.userId;
     dto.name = buildDisplayName(view.firstName, view.lastName);
+    dto.publicHandle = view.publicHandle;
     dto.solvedCount = view.solvedCount;
     dto.score = view.score;
     dto.penaltySeconds = view.penaltySeconds;

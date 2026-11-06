@@ -66,9 +66,9 @@ describe('ContestParticipationService', () => {
   describe('standings', () => {
     beforeEach(() => {
       repository.participants = [
-        { userId: 'u1', firstName: 'Ada', lastName: 'Lovelace' },
-        { userId: 'u2', firstName: 'Alan', lastName: 'Turing' },
-        { userId: 'u3', firstName: null, lastName: null },
+        { userId: 'u1', firstName: 'Ada', lastName: 'Lovelace', publicHandle: null },
+        { userId: 'u2', firstName: 'Alan', lastName: 'Turing', publicHandle: null },
+        { userId: 'u3', firstName: null, lastName: null, publicHandle: null },
       ];
     });
 

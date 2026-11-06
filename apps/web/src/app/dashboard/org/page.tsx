@@ -16,12 +16,13 @@ import {
   Tooltip,
   type TooltipContentProps,
 } from 'recharts';
-import { Mail, Users, TrendingUp, Copy, Check } from 'lucide-react';
+import { Mail, Users, TrendingUp, Copy, Check, ShieldCheck } from 'lucide-react';
 import { Button, Input } from '@elevatesde/ui';
 import { useAuthStore } from '@/store/auth.store';
 import { useToastStore } from '@/store/toast.store';
 import { useOrgDashboardStore } from '@/store/org-dashboard.store';
 import { PageContainer } from '@/components/dashboard/PageContainer';
+import { SwitchField } from '@/components/dashboard/SwitchField';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -56,6 +57,9 @@ export default function OrgDashboardPage() {
     inviteMember,
     lastInviteUrl,
     clearInviteUrl,
+    settings,
+    isSavingSettings,
+    setAllowPublicProfiles,
   } = useOrgDashboardStore();
 
   const [mounted, setMounted] = React.useState(false);
@@ -331,6 +335,22 @@ export default function OrgDashboardPage() {
                 ))}
               </div>
             </div>
+          </div>
+        </motion.section>
+
+        <motion.section variants={itemVariants}>
+          <div className="card">
+            <div className="flex items-center gap-2 mb-4">
+              <ShieldCheck className="w-4 h-4 text-(--color-accent)" />
+              <h2 className="text-sm font-semibold text-(--color-text-primary)">Privacy</h2>
+            </div>
+            <SwitchField
+              label="Allow public profiles"
+              description="Members can publish a shareable /u/handle page with their practice stats. Turning this off hides every member profile immediately."
+              checked={settings.allowPublicProfiles}
+              disabled={isSavingSettings}
+              onChange={(value) => void setAllowPublicProfiles(value)}
+            />
           </div>
         </motion.section>
       </motion.div>

@@ -5,6 +5,7 @@ import {
   OrgMemberStatus,
   OrgOverviewDto,
   OrgPerformancePointDto,
+  OrgSettingsDto,
   SeatUsageDto,
 } from '@elevatesde/shared-types';
 import { InvitationResponseDto } from './invitation-response.dto';
@@ -47,6 +48,11 @@ export class OrgPerformancePointResponseDto implements OrgPerformancePointDto {
   score!: number;
 }
 
+export class OrgSettingsResponseDto implements OrgSettingsDto {
+  @ApiProperty({ example: true })
+  allowPublicProfiles!: boolean;
+}
+
 export class OrgOverviewResponseDto implements OrgOverviewDto {
   @ApiProperty({ type: OrgCompanyResponseDto })
   company!: OrgCompanyResponseDto;
@@ -62,4 +68,7 @@ export class OrgOverviewResponseDto implements OrgOverviewDto {
 
   @ApiProperty({ type: [InvitationResponseDto] })
   invitations!: InvitationResponseDto[];
+
+  @ApiProperty({ type: OrgSettingsResponseDto })
+  settings!: OrgSettingsResponseDto;
 }

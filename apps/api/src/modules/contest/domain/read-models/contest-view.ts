@@ -44,6 +44,7 @@ export interface ContestParticipantView {
   userId: string;
   firstName: string | null;
   lastName: string | null;
+  publicHandle: string | null;
 }
 
 export interface AcceptedSubmissionView {
@@ -57,6 +58,7 @@ export interface ContestStandingRowView {
   userId: string;
   firstName: string | null;
   lastName: string | null;
+  publicHandle: string | null;
   solvedCount: number;
   score: number;
   penaltySeconds: number;

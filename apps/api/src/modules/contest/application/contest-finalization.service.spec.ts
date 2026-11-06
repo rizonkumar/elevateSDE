@@ -19,8 +19,8 @@ describe('ContestFinalizationService', () => {
     repository.detail = buildContestDetail({ endsAt: CONTEST_ENDS_AT });
     repository.finalizableContestIds = ['contest-1'];
     repository.participants = [
-      { userId: 'u1', firstName: 'Ada', lastName: 'Lovelace' },
-      { userId: 'u2', firstName: 'Alan', lastName: 'Turing' },
+      { userId: 'u1', firstName: 'Ada', lastName: 'Lovelace', publicHandle: null },
+      { userId: 'u2', firstName: 'Alan', lastName: 'Turing', publicHandle: null },
     ];
     repository.accepted = [
       { userId: 'u2', problemId: 'p1', firstAcceptedAt: new Date('2026-07-19T18:10:00.000Z') },

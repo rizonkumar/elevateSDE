@@ -72,6 +72,7 @@ export class ContestParticipationService {
       userId: participant.userId,
       firstName: participant.firstName,
       lastName: participant.lastName,
+      publicHandle: participant.publicHandle,
       isCurrentUser: participant.userId === userId,
       ...totals,
     }));

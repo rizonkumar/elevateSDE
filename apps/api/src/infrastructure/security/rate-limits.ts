@@ -15,3 +15,4 @@ export const CodeExecutionRateLimit = () => perMinute(10);
 export const AiRateLimit = () => perMinute(20);
 export const UploadRateLimit = () => perMinute(5);
 export const InvitationRateLimit = () => perMinute(20);
+export const PublicProfileRateLimit = () => perMinute(60);
