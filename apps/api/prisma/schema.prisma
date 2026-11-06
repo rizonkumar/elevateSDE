@@ -94,7 +94,37 @@ enum NotificationType {
   PEER_SESSION_CHANGED
   SCORECARD_REQUEST
   CODE_REVIEW_READY
+  CONTEST_RATING_UPDATED
+  STUDY_GROUP_ADDED
+  STUDY_GOAL_COMPLETED
   SYSTEM
+}
+
+enum ProfileVisibility {
+  PRIVATE
+  PUBLIC
+}
+
+enum StudyGroupRole {
+  OWNER
+  MEMBER
+}
+
+enum StudyGroupJoinPolicy {
+  OPEN
+  INVITE_ONLY
+}
+
+enum StudyGoalMetric {
+  PROBLEMS_SOLVED
+  POINTS
+  DAILY_CHALLENGES
+  CONTESTS_ENTERED
+}
+
+enum StudyGoalScope {
+  GROUP_TOTAL
+  EACH_MEMBER
 }
 
 enum ContestStatus {
@@ -236,15 +266,17 @@ enum PeerPracticeStatus {
 }
 
 model Tenant {
-  id               String       @id @default(uuid())
-  name             String
-  stripeCustomerId String?
-  subscriptionPlan String       @default("FREE")
-  seatLimit        Int          @default(5)
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
-  users            User[]
-  invitations      Invitation[]
+  id                  String       @id @default(uuid())
+  name                String
+  stripeCustomerId    String?
+  subscriptionPlan    String       @default("FREE")
+  seatLimit           Int          @default(5)
+  allowPublicProfiles Boolean      @default(true)
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+  users               User[]
+  invitations         Invitation[]
+  studyGroups         StudyGroup[]
 }
 
 model User {
@@ -256,6 +288,14 @@ model User {
   firstName                     String?
   lastName                      String?
   headline                      String?
+  handle                        String?                        @unique
+  bio                           String?
+  location                      String?
+  githubUrl                     String?
+  linkedinUrl                   String?
+  websiteUrl                    String?
+  profileVisibility             ProfileVisibility              @default(PRIVATE)
+  showOrganization              Boolean                        @default(false)
   role                          UserRole                       @default(USER)
   status                        AccountStatus                  @default(ACTIVE)
   reviewedAt                    DateTime?
@@ -300,6 +340,10 @@ model User {
   mockInterviewSessions         MockInterviewSession[]
   problemAssistances            ProblemAssistance[]
   submissionReviews             SubmissionReview[]
+  rating                        UserRating?
+  contestRatingChanges          ContestRatingChange[]
+  studyGroupMemberships         StudyGroupMember[]
+  createdStudyGroups            StudyGroup[]                   @relation("StudyGroupCreator")
 
   @@index([status, createdAt])
 }
@@ -687,22 +731,57 @@ model DailyChallengeCompletion {
 }
 
 model Contest {
-  id           String               @id @default(uuid())
-  slug         String               @unique
-  title        String
-  description  String
-  startsAt     DateTime
-  endsAt       DateTime
-  status       ContestStatus        @default(DRAFT)
-  tenantId     String?
-  createdAt    DateTime             @default(now())
-  finalizedAt  DateTime?
-  updatedAt    DateTime             @updatedAt
-  problems     ContestProblem[]
-  participants ContestParticipant[]
+  id            String                @id @default(uuid())
+  slug          String                @unique
+  title         String
+  description   String
+  startsAt      DateTime
+  endsAt        DateTime
+  status        ContestStatus         @default(DRAFT)
+  tenantId      String?
+  createdAt     DateTime              @default(now())
+  finalizedAt   DateTime?
+  isRated       Boolean               @default(true)
+  ratedAt       DateTime?
+  updatedAt     DateTime              @updatedAt
+  problems      ContestProblem[]
+  participants  ContestParticipant[]
+  ratingChanges ContestRatingChange[]
 
   @@index([status, startsAt])
   @@index([finalizedAt, endsAt])
+  @@index([ratedAt, endsAt])
+}
+
+model UserRating {
+  userId        String    @id
+  rating        Int       @default(1500)
+  peakRating    Int       @default(1500)
+  contestsRated Int       @default(0)
+  lastRatedAt   DateTime?
+  updatedAt     DateTime  @updatedAt
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([rating(sort: Desc)])
+}
+
+model ContestRatingChange {
+  id          String   @id @default(uuid())
+  contestId   String
+  userId      String
+  tenantId    String?
+  rank        Int
+  oldRating   Int
+  newRating   Int
+  delta       Int
+  performance Int
+  createdAt   DateTime @default(now())
+  contest     Contest  @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([contestId, userId])
+  @@index([userId, createdAt])
+  @@index([tenantId])
 }
 
 model ContestProblem {
@@ -1162,4 +1241,56 @@ model MockInterviewTurn {
   session    MockInterviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   @@unique([sessionId, ordinal])
+}
+
+model StudyGroup {
+  id          String               @id @default(uuid())
+  tenantId    String
+  name        String
+  description String?
+  joinPolicy  StudyGroupJoinPolicy @default(INVITE_ONLY)
+  createdById String?
+  archivedAt  DateTime?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  tenant      Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdBy   User?                @relation("StudyGroupCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  members     StudyGroupMember[]
+  goals       StudyGroupGoal[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId, archivedAt])
+}
+
+model StudyGroupMember {
+  id       String         @id @default(uuid())
+  groupId  String
+  userId   String
+  tenantId String
+  role     StudyGroupRole @default(MEMBER)
+  joinedAt DateTime       @default(now())
+  group    StudyGroup     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+  @@index([userId])
+  @@index([tenantId])
+}
+
+model StudyGroupGoal {
+  id          String          @id @default(uuid())
+  groupId     String
+  tenantId    String
+  title       String
+  metric      StudyGoalMetric
+  scope       StudyGoalScope
+  target      Int
+  startsAt    DateTime
+  endsAt      DateTime
+  completedAt DateTime?
+  createdAt   DateTime        @default(now())
+  group       StudyGroup      @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@index([groupId, endsAt])
+  @@index([tenantId])
 }
