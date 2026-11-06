@@ -3,19 +3,19 @@ import { JobApplication as PrismaJobApplication } from '@prisma/client';
 
 export class JobApplicationMapper {
   static toDomain(record: PrismaJobApplication): JobApplication {
-    return JobApplication.reconstitute(
-      record.id,
-      record.userId,
-      record.company,
-      record.role,
-      record.status,
-      record.salaryRange,
-      record.jobDescriptionUrl,
-      record.interviewDate,
-      record.boardPosition,
-      record.createdAt,
-      record.updatedAt,
-    );
+    return JobApplication.reconstitute({
+      id: record.id,
+      userId: record.userId,
+      company: record.company,
+      role: record.role,
+      status: record.status,
+      salaryRange: record.salaryRange,
+      jobDescriptionUrl: record.jobDescriptionUrl,
+      interviewDate: record.interviewDate,
+      boardPosition: record.boardPosition,
+      createdAt: record.createdAt,
+      updatedAt: record.updatedAt,
+    });
   }
 
   static toPersistence(

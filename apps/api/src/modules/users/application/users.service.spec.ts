@@ -5,19 +5,17 @@ import { IUsersRepository } from '../domain/interfaces/users-repository.interfac
 import { User } from '../domain/entities/user';
 
 function user(email: string, role: UserRole = UserRole.USER): User {
-  return User.reconstitute(
-    'target',
+  return User.reconstitute({
+    id: 'target',
     email,
-    'hash',
+    passwordHash: 'hash',
     role,
-    null,
-    new Date('2026-10-01T00:00:00.000Z'),
-    null,
-    null,
-    null,
-    null,
-    AccountStatus.ACTIVE,
-  );
+    tenantId: null,
+    createdAt: new Date('2026-10-01T00:00:00.000Z'),
+    firstName: null,
+    lastName: null,
+    status: AccountStatus.ACTIVE,
+  });
 }
 
 describe('UsersService.updateRole', () => {

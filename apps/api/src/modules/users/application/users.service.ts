@@ -40,17 +40,16 @@ export class UsersService {
     lastName?: string;
   }): Promise<User> {
     const id = randomUUID();
-    const user = User.create(
+    const user = User.create({
       id,
-      data.email,
-      data.passwordHash ?? null,
-      data.role,
-      data.tenantId || null,
-      data.firstName ?? null,
-      data.lastName ?? null,
-      null,
-      data.googleId ?? null,
-    );
+      email: data.email,
+      passwordHash: data.passwordHash ?? null,
+      role: data.role,
+      tenantId: data.tenantId || null,
+      firstName: data.firstName ?? null,
+      lastName: data.lastName ?? null,
+      googleId: data.googleId ?? null,
+    });
     return this.usersRepository.save(user);
   }
 

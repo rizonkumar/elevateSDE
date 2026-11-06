@@ -1,5 +1,32 @@
 import { AccountStatus, UserRole } from '@prisma/client';
 
+export interface NewUserProps {
+  id: string;
+  email: string;
+  passwordHash: string | null;
+  role: UserRole;
+  tenantId?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  headline?: string | null;
+  googleId?: string | null;
+  status?: AccountStatus;
+}
+
+export interface UserSnapshot {
+  id: string;
+  email: string;
+  passwordHash: string | null;
+  role: UserRole;
+  tenantId: string | null;
+  createdAt: Date;
+  firstName: string | null;
+  lastName: string | null;
+  headline?: string | null;
+  googleId?: string | null;
+  status?: AccountStatus;
+}
+
 export class User {
   private constructor(
     private readonly id: string,
@@ -15,18 +42,9 @@ export class User {
     private readonly status: AccountStatus,
   ) {}
 
-  static create(
-    id: string,
-    email: string,
-    passwordHash: string | null,
-    role: UserRole,
-    tenantId: string | null = null,
-    firstName: string | null = null,
-    lastName: string | null = null,
-    headline: string | null = null,
-    googleId: string | null = null,
-    status: AccountStatus = AccountStatus.PENDING_APPROVAL,
-  ): User {
+  static create(props: NewUserProps): User {
+    const { id, email, passwordHash, role } = props;
+    const googleId = props.googleId ?? null;
     if (!email?.includes('@')) {
       throw new Error('Invalid email address');
     }
@@ -35,44 +53,32 @@ export class User {
     }
     return new User(
       id,
-      tenantId,
+      props.tenantId ?? null,
       email,
       passwordHash,
       googleId,
       role,
-      firstName,
-      lastName,
-      headline,
+      props.firstName ?? null,
+      props.lastName ?? null,
+      props.headline ?? null,
       new Date(),
-      status,
+      props.status ?? AccountStatus.PENDING_APPROVAL,
     );
   }
 
-  static reconstitute(
-    id: string,
-    email: string,
-    passwordHash: string | null,
-    role: UserRole,
-    tenantId: string | null,
-    createdAt: Date,
-    firstName: string | null,
-    lastName: string | null,
-    headline: string | null = null,
-    googleId: string | null = null,
-    status: AccountStatus = AccountStatus.ACTIVE,
-  ): User {
+  static reconstitute(props: UserSnapshot): User {
     return new User(
-      id,
-      tenantId,
-      email,
-      passwordHash,
-      googleId,
-      role,
-      firstName,
-      lastName,
-      headline,
-      createdAt,
-      status,
+      props.id,
+      props.tenantId,
+      props.email,
+      props.passwordHash,
+      props.googleId ?? null,
+      props.role,
+      props.firstName,
+      props.lastName,
+      props.headline ?? null,
+      props.createdAt,
+      props.status ?? AccountStatus.ACTIVE,
     );
   }
 
